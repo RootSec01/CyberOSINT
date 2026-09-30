@@ -1,0 +1,30 @@
+[
+  {
+    "indicator": "45.33.32.156",
+    "source": "abuseipdb",
+    "threat": "Brute-force activity",
+    "confidence": 92,
+    "description": "IP reported for repeated SSH brute-force attempts across several honeypots."
+  },
+  {
+    "indicator": "93.184.216.34",
+    "source": "otx",
+    "threat": "Malware C2",
+    "confidence": 85,
+    "description": "Listed in AlienVault OTX pulse associated with known malware C2 infrastructure."
+  },
+  {
+    "indicator": "example.com",
+    "source": "urlhaus",
+    "threat": "Malicious URL",
+    "confidence": 88,
+    "description": "Detected hosting suspicious JavaScript injection payloads."
+  },
+  {
+    "indicator": "216.198.79.1",
+    "source": "cis_ir",
+    "threat": "Critical infrastructure scanner",
+    "confidence": 96,
+    "description": "Observed scanning UAE infrastructure on multiple dates."
+  }
+]

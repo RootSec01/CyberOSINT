@@ -1,0 +1,33 @@
+# --- Secrets (never commit) ---
+.env
+*.env
+!.env.example
+.envrc
+secrets*.json
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Local data & scan output ---
+*.db
+*.sqlite3
+evidence/
+
+# --- Frontend build ---
+node_modules/
+dashboard/node_modules/
+dashboard/dist/
+dist/
+
+# --- Backups ---
+*.bak
+backup-*/
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+.DS_Store

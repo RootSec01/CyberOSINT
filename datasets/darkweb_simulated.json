@@ -1,0 +1,23 @@
+[
+  {
+    "indicator": "93.184.216.34",
+    "source": "darkweb_forum",
+    "context": "Credential sale",
+    "description": "Post claims partial credentials associated with the host were leaked in a marketplace dump.",
+    "confidence": 78
+  },
+  {
+    "indicator": "45.33.32.156",
+    "source": "ransom_group_dump",
+    "context": "Reconnaissance targeting",
+    "description": "Mentioned in a leaked chat log where a ransomware group discussed scanning this IP block.",
+    "confidence": 82
+  },
+  {
+    "indicator": "example.com",
+    "source": "darkweb_market",
+    "context": "Exploit discussion",
+    "description": "Listed in a discussion thread about outdated CMS plugins vulnerable to SQLi.",
+    "confidence": 74
+  }
+]

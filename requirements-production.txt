@@ -1,0 +1,2 @@
+# Install alongside the project's existing requirements.txt for PostgreSQL support.
+psycopg[binary]>=3.2,<4

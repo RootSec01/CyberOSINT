@@ -1,0 +1,1070 @@
+{
+  "schema_version": "benchmark-results-v1",
+  "split": "development",
+  "scope": "Synthetic MCP declaration labels; no exploit, authentication bypass, or credential validity verified",
+  "runtime": {
+    "python": "3.12.14",
+    "implementation": "CPython"
+  },
+  "corpus_sha256": {
+    "development.json": "edc50e4048533e13ed4609fdda74a601472b95b1781cd399bdb1963aedf7395d"
+  },
+  "detector_code_sha256": {
+    "benchmark_runner.py": "4b2558ef9f442fae151bda19a93292b08965a9f8dcd128b5cc5baa851d9e66c2",
+    "mcp_detectors.py": "20516f253df0f7a8237e6804c7dc537c7ac000c73b67f0d4546e2833db97aa75",
+    "safe_proof.py": "7831625013fcd74bdca2c1edadcd5dbe27cfab4ce2e2a6d641badb7fac05619f",
+    "secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
+  },
+  "cases_total": 60,
+  "cases_scored": 50,
+  "cases_excluded_ambiguous": 10,
+  "micro": {
+    "tp": 40,
+    "fp": 3,
+    "tn": 256,
+    "fn": 1,
+    "precision": 0.9302325581395349,
+    "recall": 0.975609756097561,
+    "f1": 0.9523809523809524
+  },
+  "by_category": {
+    "rce": {
+      "tp": 8,
+      "fp": 0,
+      "tn": 42,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "auth_bypass": {
+      "tp": 12,
+      "fp": 0,
+      "tn": 38,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "path_traversal": {
+      "tp": 4,
+      "fp": 0,
+      "tn": 46,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "secrets_leakage": {
+      "tp": 6,
+      "fp": 1,
+      "tn": 43,
+      "fn": 0,
+      "precision": 0.8571428571428571,
+      "recall": 1.0,
+      "f1": 0.923076923076923
+    },
+    "prompt_injection": {
+      "tp": 5,
+      "fp": 0,
+      "tn": 45,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "tool_poisoning": {
+      "tp": 5,
+      "fp": 2,
+      "tn": 42,
+      "fn": 1,
+      "precision": 0.7142857142857143,
+      "recall": 0.8333333333333334,
+      "f1": 0.7692307692307692
+    }
+  },
+  "errors": [
+    {
+      "id": "D-C15",
+      "split": "development",
+      "group": "sensitive",
+      "false_positive": [
+        "tool_poisoning"
+      ],
+      "false_negative": []
+    },
+    {
+      "id": "D-C16",
+      "split": "development",
+      "group": "sensitive",
+      "false_positive": [
+        "tool_poisoning"
+      ],
+      "false_negative": []
+    },
+    {
+      "id": "D-M01",
+      "split": "development",
+      "group": "malicious_metadata",
+      "false_positive": [
+        "secrets_leakage"
+      ],
+      "false_negative": []
+    },
+    {
+      "id": "D-M05",
+      "split": "development",
+      "group": "malicious_metadata",
+      "false_positive": [],
+      "false_negative": [
+        "tool_poisoning"
+      ]
+    }
+  ],
+  "excluded_cases": [
+    {
+      "id": "D-A01",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": []
+    },
+    {
+      "id": "D-A02",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": []
+    },
+    {
+      "id": "D-A03",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": []
+    },
+    {
+      "id": "D-A04",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ]
+    },
+    {
+      "id": "D-A05",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": []
+    },
+    {
+      "id": "D-A06",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": [
+        "secrets_leakage"
+      ]
+    },
+    {
+      "id": "D-A07",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": [
+        "rce"
+      ]
+    },
+    {
+      "id": "D-A08",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": []
+    },
+    {
+      "id": "D-A09",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": []
+    },
+    {
+      "id": "D-A10",
+      "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ]
+    }
+  ],
+  "case_results": [
+    {
+      "id": "D-S01",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S02",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S03",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S04",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S05",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S06",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S07",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S08",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S09",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S10",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S11",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S12",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S13",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S14",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S15",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S16",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S17",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S18",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S19",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-S20",
+      "split": "development",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-C01",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "rce"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "rce"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C02",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "rce"
+      ],
+      "predicted": [
+        "rce"
+      ],
+      "evidence_levels": {
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C03",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "rce"
+      ],
+      "predicted": [
+        "rce"
+      ],
+      "evidence_levels": {
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C04",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "rce"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "rce"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C05",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "rce"
+      ],
+      "predicted": [
+        "rce"
+      ],
+      "evidence_levels": {
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C06",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "rce"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "rce"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C07",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "rce"
+      ],
+      "predicted": [
+        "rce"
+      ],
+      "evidence_levels": {
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C08",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "rce"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "rce"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C09",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "path_traversal"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "path_traversal"
+      ],
+      "evidence_levels": {
+        "path_traversal": [
+          "INFERRED"
+        ],
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C10",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "path_traversal"
+      ],
+      "predicted": [
+        "path_traversal"
+      ],
+      "evidence_levels": {
+        "path_traversal": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-C11",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "path_traversal"
+      ],
+      "predicted": [
+        "path_traversal"
+      ],
+      "evidence_levels": {
+        "path_traversal": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-C12",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "path_traversal"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "path_traversal"
+      ],
+      "evidence_levels": {
+        "path_traversal": [
+          "INFERRED"
+        ],
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C13",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "secrets_leakage"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "secrets_leakage"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-C14",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "secrets_leakage"
+      ],
+      "predicted": [
+        "secrets_leakage"
+      ],
+      "evidence_levels": {
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-C15",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "secrets_leakage"
+      ],
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-C16",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "secrets_leakage"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ],
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-C17",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass"
+      ],
+      "predicted": [
+        "auth_bypass"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C18",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass"
+      ],
+      "predicted": [
+        "auth_bypass"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C19",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass"
+      ],
+      "predicted": [
+        "auth_bypass"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-C20",
+      "split": "development",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass"
+      ],
+      "predicted": [
+        "auth_bypass"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-A01",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-A02",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-A03",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-A04",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-A05",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-A06",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [
+        "secrets_leakage"
+      ],
+      "evidence_levels": {
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-A07",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [
+        "rce"
+      ],
+      "evidence_levels": {
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-A08",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-A09",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "D-A10",
+      "split": "development",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-M01",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "prompt_injection"
+      ],
+      "predicted": [
+        "prompt_injection",
+        "secrets_leakage"
+      ],
+      "evidence_levels": {
+        "secrets_leakage": [
+          "INFERRED"
+        ],
+        "prompt_injection": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M02",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "prompt_injection"
+      ],
+      "predicted": [
+        "prompt_injection"
+      ],
+      "evidence_levels": {
+        "prompt_injection": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M03",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "prompt_injection"
+      ],
+      "predicted": [
+        "prompt_injection"
+      ],
+      "evidence_levels": {
+        "prompt_injection": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M04",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "prompt_injection"
+      ],
+      "predicted": [
+        "prompt_injection"
+      ],
+      "evidence_levels": {
+        "prompt_injection": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M05",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "prompt_injection",
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "prompt_injection"
+      ],
+      "evidence_levels": {
+        "prompt_injection": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M06",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M07",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M08",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "D-M09",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ],
+        "secrets_leakage": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "D-M10",
+      "split": "development",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "secrets_leakage",
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "INFERRED"
+        ],
+        "secrets_leakage": [
+          "OBSERVED"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Fixtures were created synthetically and labelled by one author.",
+    "Holdout is separate but drawn from the same synthetic design; not independent field validation.",
+    "Categories describe advertised declarations and metadata, not confirmed vulnerabilities.",
+    "Ambiguous cases are reported separately and excluded from binary metrics.",
+    "Undefined precision/recall/F1 is null, not zero or 100%."
+  ]
+}

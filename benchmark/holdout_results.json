@@ -1,0 +1,282 @@
+{
+  "schema_version": "benchmark-results-v1",
+  "split": "holdout",
+  "scope": "Synthetic MCP declaration labels; no exploit, authentication bypass, or credential validity verified",
+  "runtime": {
+    "python": "3.12.14",
+    "implementation": "CPython"
+  },
+  "corpus_sha256": {
+    "holdout.json": "f9d53dbaa3b5309042b076114e3a618b255b5b65164a9147d71ed0cd2a3d0288"
+  },
+  "detector_code_sha256": {
+    "benchmark_runner.py": "4b2558ef9f442fae151bda19a93292b08965a9f8dcd128b5cc5baa851d9e66c2",
+    "mcp_detectors.py": "20516f253df0f7a8237e6804c7dc537c7ac000c73b67f0d4546e2833db97aa75",
+    "safe_proof.py": "7831625013fcd74bdca2c1edadcd5dbe27cfab4ce2e2a6d641badb7fac05619f",
+    "secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
+  },
+  "cases_total": 12,
+  "cases_scored": 10,
+  "cases_excluded_ambiguous": 2,
+  "micro": {
+    "tp": 8,
+    "fp": 0,
+    "tn": 52,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "by_category": {
+    "rce": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 9,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "auth_bypass": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 7,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "path_traversal": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 9,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "secrets_leakage": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 9,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "prompt_injection": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 9,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "tool_poisoning": {
+      "tp": 1,
+      "fp": 0,
+      "tn": 9,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "errors": [],
+  "excluded_cases": [
+    {
+      "id": "H-A01",
+      "reason": "Ambiguous identifier wording; excluded from scored labels.",
+      "predicted": [
+        "secrets_leakage"
+      ]
+    },
+    {
+      "id": "H-A02",
+      "reason": "Unknown backend behavior; excluded from scored labels.",
+      "predicted": []
+    }
+  ],
+  "case_results": [
+    {
+      "id": "H-S01",
+      "split": "holdout",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "H-S02",
+      "split": "holdout",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "H-S03",
+      "split": "holdout",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "H-S04",
+      "split": "holdout",
+      "group": "safe",
+      "scored": true,
+      "expected": [],
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "H-C01",
+      "split": "holdout",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "rce"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "rce"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "rce": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "H-C02",
+      "split": "holdout",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "path_traversal"
+      ],
+      "predicted": [
+        "path_traversal"
+      ],
+      "evidence_levels": {
+        "path_traversal": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "H-C03",
+      "split": "holdout",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass",
+        "secrets_leakage"
+      ],
+      "predicted": [
+        "auth_bypass",
+        "secrets_leakage"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "H-C04",
+      "split": "holdout",
+      "group": "sensitive",
+      "scored": true,
+      "expected": [
+        "auth_bypass"
+      ],
+      "predicted": [
+        "auth_bypass"
+      ],
+      "evidence_levels": {
+        "auth_bypass": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "H-A01",
+      "split": "holdout",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [
+        "secrets_leakage"
+      ],
+      "evidence_levels": {
+        "secrets_leakage": [
+          "INFERRED"
+        ]
+      }
+    },
+    {
+      "id": "H-A02",
+      "split": "holdout",
+      "group": "ambiguous",
+      "scored": false,
+      "expected": null,
+      "predicted": [],
+      "evidence_levels": {}
+    },
+    {
+      "id": "H-M01",
+      "split": "holdout",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "prompt_injection"
+      ],
+      "predicted": [
+        "prompt_injection"
+      ],
+      "evidence_levels": {
+        "prompt_injection": [
+          "OBSERVED"
+        ]
+      }
+    },
+    {
+      "id": "H-M02",
+      "split": "holdout",
+      "group": "malicious_metadata",
+      "scored": true,
+      "expected": [
+        "tool_poisoning"
+      ],
+      "predicted": [
+        "tool_poisoning"
+      ],
+      "evidence_levels": {
+        "tool_poisoning": [
+          "OBSERVED"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Fixtures were created synthetically and labelled by one author.",
+    "Holdout is separate but drawn from the same synthetic design; not independent field validation.",
+    "Categories describe advertised declarations and metadata, not confirmed vulnerabilities.",
+    "Ambiguous cases are reported separately and excluded from binary metrics.",
+    "Undefined precision/recall/F1 is null, not zero or 100%."
+  ]
+}

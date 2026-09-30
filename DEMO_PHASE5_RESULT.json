@@ -1,0 +1,80 @@
+{
+  "mode": "isolated_loopback_demo",
+  "stages": [
+    {
+      "stage": "baseline",
+      "profile": "safe",
+      "severity": "Medium",
+      "dangerous_tools": 0,
+      "finding_categories": [],
+      "drift_available": false,
+      "drift_tones": [],
+      "drift_summary": null,
+      "alerts_total": 0,
+      "alerts_unread": 0
+    },
+    {
+      "stage": "exposure",
+      "profile": "dangerous",
+      "severity": "Critical",
+      "dangerous_tools": 3,
+      "finding_categories": [
+        "auth_bypass",
+        "path_traversal",
+        "rce"
+      ],
+      "drift_available": true,
+      "drift_tones": [
+        "crit",
+        "info",
+        "warn"
+      ],
+      "drift_summary": "3 new dangerous tool(s), 1 severity change, 4 tool_added, 1 tool_removed, 1 manifest fingerprint change",
+      "alerts_total": 1,
+      "alerts_unread": 1
+    },
+    {
+      "stage": "remediation_rescan",
+      "profile": "safe",
+      "severity": "Medium",
+      "dangerous_tools": 0,
+      "finding_categories": [],
+      "drift_available": true,
+      "drift_tones": [
+        "good",
+        "info",
+        "warn"
+      ],
+      "drift_summary": "3 dangerous tool(s) removed, 1 severity change, 1 tool_added, 4 tool_removed, 1 manifest fingerprint change",
+      "alerts_total": 1,
+      "alerts_unread": 1
+    }
+  ],
+  "database": {
+    "users": 1,
+    "assets": 1,
+    "runs": 3,
+    "alerts": 1
+  },
+  "final_alerts_unread": 0,
+  "historical_alert_retained": true,
+  "api_routes": [
+    "POST /api/login",
+    "POST /api/assets",
+    "POST /api/assets/{id}/scan",
+    "GET /api/assets/{id}/drift",
+    "GET /api/alerts",
+    "POST /api/alerts/{id}/ack",
+    "GET /api/assets",
+    "GET /api/runs"
+  ],
+  "ui_routes": [
+    "/assets",
+    "/"
+  ],
+  "limitations": [
+    "The lab server is synthetic and binds to 127.0.0.1.",
+    "The remediation removes declared dangerous tools; anonymous enumeration remains.",
+    "The UI is served only when --serve is used after building dashboard/dist."
+  ]
+}
