@@ -1,6 +1,29 @@
-# CyberOSINT
+<p align="center">
+  <img src="docs/images/logo.png" alt="CyberOSINT logo" width="150">
+</p>
 
-**Discover, verify and monitor exposed MCP servers — without invoking a single dangerous tool.**
+<h1 align="center">CyberOSINT</h1>
+
+<p align="center">
+  <strong>Discover, verify and monitor exposed MCP servers — without invoking a single dangerous tool.</strong>
+</p>
+
+<p align="center">
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#results">Results</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#safety-and-scope">Safety</a>
+</p>
+
+<p align="center">
+  <img alt="Python: 3.13" src="https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white"> <img alt="FastAPI: 0.121" src="https://img.shields.io/badge/FastAPI-0.121-009688?style=flat&logo=fastapi&logoColor=white"> <img alt="React: 18" src="https://img.shields.io/badge/React-18-087EA4?style=flat&logo=react&logoColor=white"> <img alt="Vite: 5" src="https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite&logoColor=white"> <img alt="Tailwind CSS: 3" src="https://img.shields.io/badge/Tailwind%20CSS-3-06B6D4?style=flat&logo=tailwindcss&logoColor=white"> <img alt="SQLAlchemy: 2.0" src="https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white">
+  <br>
+  <img alt="PostgreSQL: Production" src="https://img.shields.io/badge/PostgreSQL-Production-4169E1?style=flat&logo=postgresql&logoColor=white"> <img alt="SQLite: Local Dev" src="https://img.shields.io/badge/SQLite-Local%20Dev-003B57?style=flat&logo=sqlite&logoColor=white"> <img alt="MCP spec: 2026-07-28" src="https://img.shields.io/badge/MCP%20spec-2026--07--28-0F151E?style=flat"> <img alt="MITRE ATT&amp;CK: Mapped" src="https://img.shields.io/badge/MITRE%20ATT%26CK-Mapped-B91C1C?style=flat"> <img alt="Tests: 246 passing" src="https://img.shields.io/badge/Tests-246%20passing-2EA043?style=flat&logo=pytest&logoColor=white"> <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-6E7781?style=flat">
+  <br>
+  <img alt="AI Copilot: Offline-first" src="https://img.shields.io/badge/AI%20Copilot-Offline--first-1F9E86?style=flat"> <img alt="Status: Working Prototype | Actively Developed" src="https://img.shields.io/badge/Status-Working%20Prototype%20%7C%20Actively%20Developed-38E8C4?style=flat">
+</p>
+
+---
 
 CyberOSINT is an exposure-management platform for the agentic attack surface. It finds Model Context
 Protocol (MCP) servers, negotiates the real protocol with them, grades what each one advertises as
@@ -34,6 +57,15 @@ can do, or when that silently changes.
 4. **Safe Proof** — every step is graded by evidence level; the only call ever made is to a read-only canary tool on a loopback lab server.
 5. **Monitor** — re-scans, typed drift between the last two scans, a versioned manifest fingerprint, and alerts on escalation only.
 6. **Explain** — evidence-grounded Copilot: Offline by default; Redacted (identifiers stripped before any hosted-model call) or Local-LLM modes.
+
+```mermaid
+flowchart LR
+  A[Discover<br/>Shodan · Censys · CT] --> B[Negotiate<br/>server/discover · initialize]
+  B --> C[Classify & detect<br/>6 passive detectors]
+  C --> D[Safe Proof<br/>OBSERVED · DEMONSTRATED · INFERRED]
+  D --> E[Monitor<br/>drift · manifest fingerprint · alerts]
+  E --> F[Explain<br/>evidence-grounded Copilot]
+```
 
 ### Evidence levels
 
