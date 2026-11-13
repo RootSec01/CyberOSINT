@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Topbar from "../components/Topbar.jsx";
-import { listAssets, createAsset, deleteAsset, toggleAsset, scanAssetNow, getDrift, askCopilot } from "../lib/api.js";
+import { listAssets, createAsset, deleteAsset, toggleAsset, scanAssetNow, getDrift, getExposures, askCopilot } from "../lib/api.js";
+import ExposureLifecycleCard from "../components/ExposureLifecycle.jsx";
 
 const KIND_TONE = {
   domain: "text-low border-alert-low/30",
@@ -237,6 +238,9 @@ function Assets() {
   const [driftOpen, setDriftOpen] = useState(null);
   const [driftData, setDriftData] = useState(null);
   const [driftBusy, setDriftBusy] = useState(false);
+  const [lifecycleOpen, setLifecycleOpen] = useState(null);
+  const [lifecycleData, setLifecycleData] = useState(null);
+  const [lifecycleBusy, setLifecycleBusy] = useState(false);
   const [searchParams] = useSearchParams();
   const [copilotOpen, setCopilotOpen] = useState(null);
 
@@ -274,6 +278,8 @@ function Assets() {
       if (r && r.error) throw new Error(r.error);
       await refresh();
       if (driftOpen === a.id) setDriftData(await getDrift(a.id));
+      // The scan just moved exposures between states; show the new truth.
+      if (lifecycleOpen === a.id) setLifecycleData(await getExposures(a.id));
       window.dispatchEvent(new Event("alerts:updated"));
     } catch (err) { setError(err.message || "Scan failed"); }
     finally { setScanningId(null); }
@@ -286,6 +292,15 @@ function Assets() {
     } catch (err) {
       setDriftData({ available: false, reason: err.message || "Could not load drift" });
     } finally { setDriftBusy(false); }
+  }
+  async function showLifecycle(a) {
+    if (lifecycleOpen === a.id) { setLifecycleOpen(null); setLifecycleData(null); return; }
+    setLifecycleOpen(a.id); setLifecycleData(null); setLifecycleBusy(true);
+    try {
+      setLifecycleData(await getExposures(a.id));
+    } catch (err) {
+      setLifecycleData({ error: err.message || "Could not load exposure history" });
+    } finally { setLifecycleBusy(false); }
   }
 
   return (
@@ -358,6 +373,10 @@ function Assets() {
                         className={`text-[11px] px-2.5 py-1 rounded-md border transition-colors ${driftOpen === a.id ? "border-signal/50 text-signal bg-signal/10" : "border-edge text-mist-200 hover:text-mist-100 hover:bg-ink-600/50"}`}>
                         {driftBusy && driftOpen === a.id ? "…" : "Changes"}
                       </button>
+                      <button onClick={() => showLifecycle(a)}
+                        className={`text-[11px] px-2.5 py-1 rounded-md border transition-colors ${lifecycleOpen === a.id ? "border-signal/50 text-signal bg-signal/10" : "border-edge text-mist-200 hover:text-mist-100 hover:bg-ink-600/50"}`}>
+                        {lifecycleBusy && lifecycleOpen === a.id ? "…" : "Lifecycle"}
+                      </button>
                       <button onClick={() => setCopilotOpen(copilotOpen === a.id ? null : a.id)}
                         className={`text-[11px] px-2.5 py-1 rounded-md border transition-colors ${copilotOpen === a.id ? "border-signal/50 text-signal bg-signal/10" : "border-edge text-mist-200 hover:text-mist-100 hover:bg-ink-600/50"}`}>
                         🤖 Copilot
@@ -370,6 +389,9 @@ function Assets() {
                   </div>
                   {driftOpen === a.id && driftData && (
                     <DriftCard data={driftData} asset={a} />
+                  )}
+                  {lifecycleOpen === a.id && (
+                    <ExposureLifecycleCard data={lifecycleData} />
                   )}
                   {copilotOpen === a.id && <CopilotPanel assetId={a.id} />}
                 </div>
