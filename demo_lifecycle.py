@@ -9,9 +9,27 @@ import argparse
 import json
 import os
 import socket
+import sys
 import tempfile
 import threading
 from pathlib import Path
+
+
+def _utf8_console() -> None:
+    """Print UTF-8 whatever the console's codepage is.
+
+    This script prints box drawings and arrows. A Windows console defaults to a
+    legacy codepage (cp1252) that cannot encode them, and the UnicodeEncodeError
+    killed the demo before it reached the summary.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, 'reconfigure', None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding='utf-8', errors='replace')
+        except (ValueError, OSError):
+            pass
 
 
 def _safe_environment(directory: str) -> None:
@@ -38,7 +56,10 @@ def _free_port() -> int:
 
 def run_lifecycle(*, serve: bool = False, port: int = 8000) -> dict:
     """Execute real local MCP negotiation, HTTP routes, persistence, drift and alert."""
-    with tempfile.TemporaryDirectory(prefix='cyberosint-demo-') as tmp:
+    # ignore_cleanup_errors: on Windows a crash mid-run can leave the SQLite
+    # file open, and a failed cleanup must not mask the original error.
+    with tempfile.TemporaryDirectory(prefix='cyberosint-demo-',
+                                     ignore_cleanup_errors=True) as tmp:
         _safe_environment(tmp)
         # Imports occur only after selecting the isolated DB and lab environment.
         import db
@@ -143,10 +164,14 @@ def run_lifecycle(*, serve: bool = False, port: int = 8000) -> dict:
             print(f'Demo UI: http://127.0.0.1:{port}/  username demo_operator  password demo-local-only-12345',flush=True)
             print(f'Asset ID: {asset_id}. Open /assets → Changes; inspect the alert bell and unread count.',flush=True)
             uvicorn.run(main.app,host='127.0.0.1',port=port,log_level='warning')
+        # Windows cannot delete a file that is still open, and the engine holds
+        # the SQLite handle until its pool is disposed.
+        db.engine.dispose()
         return summary
 
 
 def main() -> None:
+    _utf8_console()
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--serve',action='store_true',help='Keep isolated API and UI running on loopback')
     parser.add_argument('--port',type=int,default=8000)

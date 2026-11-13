@@ -24,7 +24,14 @@ HOLDOUT = {'safe': 4, 'sensitive': 4, 'ambiguous': 2, 'malicious_metadata': 2}
 
 
 def sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    """SHA-256 of a text file, with line endings normalised to LF.
+
+    The corpus and the detector sources are text. A checkout on Windows (git's
+    ``core.autocrlf``) rewrites them with CRLF, so a byte-wise digest would
+    describe the checkout rather than the content, and these published
+    integrity hashes could not be reproduced on another platform.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
 
 
 def _load(split: str) -> tuple[list[dict], dict[str, str]]:
