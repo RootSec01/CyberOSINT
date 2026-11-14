@@ -6,9 +6,11 @@ Live UI: python3 -m lab.lifecycle --serve --port 8000 (Ctrl+C to stop)
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import socket
+import sys
 import tempfile
 import threading
 from pathlib import Path
@@ -30,6 +32,29 @@ def _safe_environment(directory: str) -> None:
     })
 
 
+@contextlib.contextmanager
+def _scratch_dir(prefix: str):
+    """Temporary directory whose SQLite database is released before removal.
+
+    Windows refuses to delete a file that is still open, and the demo's engine
+    keeps a pooled connection to the database inside this directory.
+    """
+    with tempfile.TemporaryDirectory(prefix=prefix) as directory:
+        try:
+            yield directory
+        finally:
+            db = sys.modules.get("raqeeb.db")
+            if db is not None:
+                db.engine.dispose()
+
+
+def _utf8_console() -> None:
+    """Print status symbols on consoles that default to a legacy code page (Windows)."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def _free_port() -> int:
     with socket.socket() as sock:
         sock.bind(('127.0.0.1', 0))
@@ -38,7 +63,7 @@ def _free_port() -> int:
 
 def run_lifecycle(*, serve: bool = False, port: int = 8000) -> dict:
     """Execute real local MCP negotiation, HTTP routes, persistence, drift and alert."""
-    with tempfile.TemporaryDirectory(prefix='raqeeb-demo-') as tmp:
+    with _scratch_dir('raqeeb-demo-') as tmp:
         _safe_environment(tmp)
         # Imports occur only after selecting the isolated DB and lab environment.
         from raqeeb import db
@@ -148,6 +173,7 @@ def run_lifecycle(*, serve: bool = False, port: int = 8000) -> dict:
 
 
 def main() -> None:
+    _utf8_console()
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--serve',action='store_true',help='Keep isolated API and UI running on loopback')
     parser.add_argument('--port',type=int,default=8000)

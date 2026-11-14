@@ -79,7 +79,10 @@ class Session:
 
     def close(self) -> None:
         try:
-            os.killpg(self.process.pid, signal.SIGKILL)
+            if hasattr(os, "killpg"):
+                os.killpg(self.process.pid, signal.SIGKILL)
+            else:  # Windows: no process groups from start_new_session
+                self.process.kill()
         except ProcessLookupError:
             pass
         self.process.wait()
