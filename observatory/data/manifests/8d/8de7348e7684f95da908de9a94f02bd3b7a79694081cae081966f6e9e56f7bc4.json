@@ -1,0 +1,118 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Lint an email"
+  },
+  "description": "Check emailmd markdown for deliverability, accessibility, and readability problems without rendering it: missing alt text, http:// links, Gmail's 102KB clip limit, generic link text, spam-trigger phrases, and more. Fix warnings before sending; suggestions are sometimes intentional (e.g. transactional emails without an unsubscribe link).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "markdown": {
+     "description": "The emailmd markdown document, optionally starting with YAML frontmatter.",
+     "maxLength": 262144,
+     "type": "string"
+    },
+    "partials": {
+     "additionalProperties": {
+      "maxLength": 262144,
+      "type": "string"
+     },
+     "description": "Named markdown partials spliced in wherever the document says \"::: include <name>\".",
+     "propertyNames": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "markdown"
+   ],
+   "type": "object"
+  },
+  "name": "lint",
+  "output_schema": {},
+  "title": "Lint an email"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read emailmd docs"
+  },
+  "description": "Fetch emailmd documentation from emailmd.dev. Call with no arguments for the index of all pages; pass page to read one (e.g. 'buttons', 'frontmatter', 'theme', 'directives/hero'). Read the relevant page before using syntax you are not sure about.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "page": {
+     "description": "Docs page path, e.g. 'buttons' or 'directives/hero'. Omit for the index.",
+     "maxLength": 200,
+     "pattern": "^[a-z0-9][a-z0-9/-]*$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "read_docs",
+  "output_schema": {},
+  "title": "Read emailmd docs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Render an email"
+  },
+  "description": "Render emailmd markdown into email-safe HTML. Returns html (the complete email document), text (the plain-text MIME part), meta (frontmatter), warnings (non-fatal repairs made while rendering; aim for none), htmlBytes, and previewUrl (a live browser preview of this exact document to share with the user).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "markdown": {
+     "description": "The emailmd markdown document, optionally starting with YAML frontmatter.",
+     "maxLength": 262144,
+     "type": "string"
+    },
+    "minify": {
+     "description": "Minify the HTML. Recommended for sending; helps stay under Gmail's 102KB clip limit.",
+     "type": "boolean"
+    },
+    "partials": {
+     "additionalProperties": {
+      "maxLength": 262144,
+      "type": "string"
+     },
+     "description": "Named markdown partials spliced in wherever the document says \"::: include <name>\".",
+     "propertyNames": {
+      "maxLength": 200,
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "markdown"
+   ],
+   "type": "object"
+  },
+  "name": "render",
+  "output_schema": {},
+  "title": "Render an email"
+ }
+]

@@ -1,0 +1,37 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check an MCP server"
+  },
+  "description": "Pre-flight security verdict for an MCP server invocation. Judges BOTH server-level reputation AND the server's dependency graph (npm/pypi) against the DugganUSA threat-intel corpus (1.13M+ IOCs, Shai-Hulud + typosquat + LOLBin families). Returns BLOCK / ADVISORY / REVIEW / ALLOW with severity, evidence, dep-graph summary, and HMAC-signed response. REVIEW means we hold NO RECORD of this server -- not that it is safe. A brand-new attacker-published server also looks like this, so REVIEW calls for a look, not a pass. ALLOW is only returned when we actually resolved the server and scanned its dependency graph; known_to_us and dep_graph.scanned confirm it. Suited to a pre-flight check before a tool on another MCP server is used, especially one from outside the official MCP Registry.",
+  "input_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "server": {
+     "description": "REQUIRED. The server to judge: its exact MCP Registry name (io.github.owner/server-name, optionally @version). A bare name (server-name) is judged as typed, never mapped to a registry server, and the matching full names come back in input.did_you_mean. Also resolved, only when the identity is provable: a registry URL (https://registry.modelcontextprotocol.io/v0/servers/<name>) and a GitHub repo (\"owner/repo\" or https://github.com/owner/repo) published by that owner as exactly one registry server. Package names (npm/PyPI), images and Smithery ids are recorded but judged as given (usually REVIEW): their name does not prove which code runs. Refused: commands, shell metacharacters, non-ASCII, local paths, endpoint URLs. No substring or fuzzy matching: anything we cannot resolve to exactly one server returns REVIEW, never a guess.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "tool": {
+     "description": "Optional name of the specific tool being invoked",
+     "type": "string"
+    },
+    "version": {
+     "description": "Optional version of the MCP server (semver). A version inside `server` (name@1.2.3) is used when this is empty.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "server"
+   ],
+   "type": "object"
+  },
+  "name": "check_mcp_server",
+  "output_schema": {},
+  "title": "Check an MCP server"
+ }
+]

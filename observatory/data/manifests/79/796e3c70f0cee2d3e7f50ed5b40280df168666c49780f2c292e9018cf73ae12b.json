@@ -1,0 +1,3164 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Free 0-100 score of how easily AI assistants and agents can read, quote and contact a public business website: AI crawler rules, llms.txt, schema.org business/offer data, agent catalog, MCP card, sitemap, meta, contact. Not a Google ranking score.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "agent_readiness_score",
+  "output_schema": {},
+  "title": "Agent-Readiness Score (free)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Generate robots.txt AI-crawler rules, llms.txt, schema.org JSON-LD and /.well-known/agent-catalog.json from facts the business supplies. services: one per line as \"Name|Price\". Uses only supplied facts.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "areaServed": {
+     "type": "string"
+    },
+    "bookingUrl": {
+     "type": "string"
+    },
+    "businessType": {
+     "type": "string"
+    },
+    "city": {
+     "type": "string"
+    },
+    "description": {
+     "type": "string"
+    },
+    "email": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "region": {
+     "type": "string"
+    },
+    "services": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "agent_ready_fix_pack",
+  "output_schema": {},
+  "title": "Agent-Ready fix pack generator (free)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check a public site robots.txt for AI crawler allow/deny verdicts.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "path": {
+     "description": "Optional path to test against the rules, default /",
+     "type": "string"
+    },
+    "url": {
+     "description": "Public site URL or domain, e.g. https://example.com",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "ai_crawler_audit",
+  "output_schema": {},
+  "title": "AI crawler robots.txt audit"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Room air-conditioner capacity using the ENERGY STAR sizing chart and its adjustments for sun, occupants and kitchens. Formula: Base BTU from the ENERGY STAR area chart; −10% heavily shaded, +10% very sunny, +600 BTU per person above 2, +4,000 BTU for a kitchen.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "kitchen": {
+     "description": "Used as kitchen; default 0; one of 0 = No, 1 = Yes (+4,000 BTU)",
+     "type": "number"
+    },
+    "occupants": {
+     "description": "Regular occupants; default 2",
+     "type": "number"
+    },
+    "room_sqft": {
+     "description": "Room area (sq ft); default 350",
+     "type": "number"
+    },
+    "shade": {
+     "description": "Sun exposure; default normal",
+     "enum": [
+      "normal",
+      "shaded",
+      "sunny"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_ac_btu",
+  "output_schema": {},
+  "title": "Room AC BTU Calculator (ENERGY STAR Sizing)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Daily and yearly kWh and the cost to run any appliance from its wattage, hours of use and your electricity rate. Formula: kWh per day = watts × hours ÷ 1,000; kWh per year = kWh per day × days; cost = kWh × rate.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "days_per_year": {
+     "description": "Days used per year; default 365",
+     "type": "number"
+    },
+    "hours_per_day": {
+     "description": "Hours used per day (h); default 4",
+     "type": "number"
+    },
+    "rate_per_kwh": {
+     "description": "Your electricity rate (from your bill) ($/kWh); default 0.15",
+     "type": "number"
+    },
+    "watts": {
+     "description": "Appliance wattage (nameplate, or amps × volts) (W); default 1500",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_appliance_energy_cost",
+  "output_schema": {},
+  "title": "Appliance Energy Cost Calculator (kWh and $ per Year)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Tons of hot-mix asphalt for a driveway or lot from area, compacted depth and mix density. Formula: Tons = L × W × depth(in)/12 × density(lb/cu ft) ÷ 2,000.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "depth_in": {
+     "description": "Compacted depth (in); default 2",
+     "type": "number"
+    },
+    "lb_per_cf": {
+     "description": "Mix density (ask your plant) (lb/cu ft); default 145",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Length (ft); default 50",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Width (ft); default 12",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_asphalt",
+  "output_schema": {},
+  "title": "Asphalt Calculator (Tons for Driveways)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much attic ventilation you need by the 1/150 and 1/300 rules (Florida Building Code, Residential R806.2), split into intake and exhaust, and how many vents that is for your vent products. Formula: Total net free area (sq in) = attic floor area (sq ft) × 144 ÷ 150 (or ÷ 300 under the balanced exception). Exhaust NFA = total × high share; intake NFA = the rest. Vents = ⌈NFA ÷ the net free area of one vent (or one foot of continuous vent)⌉.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "attic_floor_sqft": {
+     "description": "Attic floor area (vented space) (sq ft); default 1500",
+     "type": "number"
+    },
+    "exhaust_nfa_per_unit": {
+     "description": "Exhaust vent net free area per unit or per ft of ridge vent (from the label) (sq in); default 18",
+     "type": "number"
+    },
+    "intake_nfa_per_unit": {
+     "description": "Intake vent net free area per unit or per ft of soffit vent (from the label) (sq in); default 9",
+     "type": "number"
+    },
+    "ratio": {
+     "description": "Ventilation rule; default 150; one of 150 = 1/150 (standard), 300 = 1/300 (balanced exception: 40–50% high)",
+     "type": "number"
+    },
+    "upper_pct": {
+     "description": "Share of vent area that is high (exhaust) (%); default 50",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_attic_ventilation",
+  "output_schema": {},
+  "title": "Attic Ventilation Calculator (Net Free Area, Ridge & Soffit Vents)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Board feet and cost for hardwood or dimensional lumber. Formula: Board feet = thickness(in) × width(in) × length(ft) ÷ 12 × pieces (one board foot = 144 cubic inches).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "length_ft": {
+     "description": "Length (ft); default 8",
+     "type": "number"
+    },
+    "price_per_bf": {
+     "description": "Price per board foot (0 = skip) ($); default 0",
+     "type": "number"
+    },
+    "quantity": {
+     "description": "Pieces; default 10",
+     "type": "number"
+    },
+    "thickness_in": {
+     "description": "Thickness (in); default 1",
+     "type": "number"
+    },
+    "width_in": {
+     "description": "Width (in); default 6",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_board_foot",
+  "output_schema": {},
+  "title": "Board Foot Calculator (Lumber)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Required box volume under NEC 314.16 from your conductors, devices, clamps, fittings and grounds, checked against a standard metal box from Table 314.16(A) or your box's marked volume. Formula: Required volume = Σ(conductors × Table 314.16(B) allowance) + 1 allowance for clamps + 1 per fitting type + 2 per yoke + 1 for all grounds, each at the largest conductor size present. Allowances: 18 AWG 1.50, 16 AWG 1.75, 14 AWG 2.00, 12 AWG 2.25, 10 AWG 2.50, 8 AWG 3.00, 6 AWG 5.00 cu in.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "box": {
+     "description": "Box; default dev_3x2x2_5",
+     "enum": [
+      "oct_4x1_25",
+      "oct_4x1_5",
+      "oct_4x2_125",
+      "sq_4x1_25",
+      "sq_4x1_5",
+      "sq_4x2_125",
+      "sq_4l_1_5",
+      "sq_4l_2_125",
+      "dev_3x2x2",
+      "dev_3x2x2_25",
+      "dev_3x2x2_5",
+      "dev_3x2x2_75",
+      "dev_3x2x3_5",
+      "fs_single",
+      "fd_single",
+      "custom"
+     ],
+     "type": "string"
+    },
+    "box_volume_cuin": {
+     "description": "Marked box volume (for \"Other\") (cu in); default 0",
+     "type": "number"
+    },
+    "clamps": {
+     "description": "Internal cable clamps; default 0; one of 0 = None, 1 = Yes (one or more)",
+     "type": "number"
+    },
+    "count_10": {
+     "description": "10 AWG conductors; default 0",
+     "type": "number"
+    },
+    "count_12": {
+     "description": "12 AWG conductors; default 0",
+     "type": "number"
+    },
+    "count_14": {
+     "description": "14 AWG conductors; default 4",
+     "type": "number"
+    },
+    "count_6": {
+     "description": "6 AWG conductors; default 0",
+     "type": "number"
+    },
+    "count_8": {
+     "description": "8 AWG conductors; default 0",
+     "type": "number"
+    },
+    "grounds": {
+     "description": "Equipment grounding conductors; default 1; one of 1 = Yes (one or more), 0 = None",
+     "type": "number"
+    },
+    "support_fittings": {
+     "description": "Luminaire stud/hickey types present; default 0",
+     "type": "number"
+    },
+    "yokes": {
+     "description": "Devices (yokes/straps: switch, receptacle); default 1",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_box_fill",
+  "output_schema": {},
+  "title": "Electrical Box Fill Calculator (NEC 314.16)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Bricks for a single-wythe wall from its area, the brick face size and the mortar joint. Defaults are a modular brick with a ⅜ in joint. Formula: Bricks per sq ft = 144 ÷ ((length + joint) × (height + joint)); bricks = (wall area − openings) × bricks per sq ft × (1 + waste%).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "joint_in": {
+     "description": "Mortar joint (in); default 0.375",
+     "type": "number"
+    },
+    "openings_sqft": {
+     "description": "Openings to subtract (sq ft); default 0",
+     "type": "number"
+    },
+    "unit_height_in": {
+     "description": "Brick height (actual) (in); default 2.25",
+     "type": "number"
+    },
+    "unit_length_in": {
+     "description": "Brick length (actual) (in); default 7.625",
+     "type": "number"
+    },
+    "wall_height_ft": {
+     "description": "Wall height (ft); default 8",
+     "type": "number"
+    },
+    "wall_length_ft": {
+     "description": "Wall length (ft); default 20",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 5",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_brick",
+  "output_schema": {},
+  "title": "Brick Calculator (How Many Bricks for a Wall)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How many tubes of caulk or sealant to buy: linear feet per cartridge for your joint width and depth (or a triangular corner bead), and cartridges for the total length. Formula: Cartridge volume = fl oz × 1.80469 cu in. Bead area = width × depth (or leg² ÷ 2). Linear feet per cartridge = volume ÷ (bead area × 12). Cartridges = length × (1 + waste) ÷ feet per cartridge.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cartridge_floz": {
+     "description": "Cartridge size (fl oz); default 10.1",
+     "type": "number"
+    },
+    "depth_in": {
+     "description": "Joint depth (in); default 0.25",
+     "type": "number"
+    },
+    "joint_length_ft": {
+     "description": "Total joint length (ft); default 100",
+     "type": "number"
+    },
+    "shape": {
+     "description": "Bead shape; default rect",
+     "enum": [
+      "rect",
+      "tri"
+     ],
+     "type": "string"
+    },
+    "waste_pct": {
+     "description": "Waste (%); default 10",
+     "type": "number"
+    },
+    "width_in": {
+     "description": "Joint width (or bead leg) (in); default 0.25",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_caulk",
+  "output_schema": {},
+  "title": "Caulk Calculator (Tubes of Caulk or Sealant per Linear Foot)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What size ceiling fan you need for a room: the suggested blade span from the room's square footage, the largest fan that keeps 18 in from the walls, and the mount type for your ceiling height. Formula: Area = length × width. Blade span: up to 75 sq ft 29–36 in; 76–144 sq ft 36–42 in; 144–225 sq ft 44 in; 225–400 sq ft 50–54 in; over 400 sq ft 54–72 in or several fans. Largest span with 18 in wall clearance = shorter side (in) − 36 in. Mount: 8 ft or lower → hugger; 8–9 ft → standard downrod; higher → extended downrod.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "ceiling_height_ft": {
+     "description": "Ceiling height (ft); default 8",
+     "type": "number"
+    },
+    "room_length_ft": {
+     "description": "Room length (ft); default 15",
+     "type": "number"
+    },
+    "room_width_ft": {
+     "description": "Room width (ft); default 13",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_ceiling_fan_size",
+  "output_schema": {},
+  "title": "Ceiling Fan Size Calculator (Blade Span by Room Size)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Number of 8×8×16 concrete blocks (CMU) for a wall. A standard block plus a ⅜ in joint covers 16 × 8 in, so about 1.125 blocks per square foot. Formula: Blocks per sq ft = 144 ÷ ((length + joint) × (height + joint)) = 144 ÷ (16 × 8) = 1.125 for standard units; blocks = net wall area × 1.125 × (1 + waste%).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "joint_in": {
+     "description": "Mortar joint (in); default 0.375",
+     "type": "number"
+    },
+    "openings_sqft": {
+     "description": "Openings to subtract (sq ft); default 0",
+     "type": "number"
+    },
+    "unit_height_in": {
+     "description": "Block height (actual) (in); default 7.625",
+     "type": "number"
+    },
+    "unit_length_in": {
+     "description": "Block length (actual) (in); default 15.625",
+     "type": "number"
+    },
+    "wall_height_ft": {
+     "description": "Wall height (ft); default 8",
+     "type": "number"
+    },
+    "wall_length_ft": {
+     "description": "Wall length (ft); default 40",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 5",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_concrete_block",
+  "output_schema": {},
+  "title": "Concrete Block (CMU) Calculator"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Concrete needed for round columns, piers and tube forms (sonotubes). Uses cylinder volume, which differs from slab math. Formula: Cubic feet = π × (diameter(in)/24)² × height(ft) × count; cubic yards = cu ft ÷ 27 × (1 + waste%).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bag_yield_cf": {
+     "description": "Bag yield (cu ft/bag); default 0.6",
+     "type": "number"
+    },
+    "count": {
+     "description": "Number of columns; default 4",
+     "type": "number"
+    },
+    "diameter_in": {
+     "description": "Tube diameter (in); default 12",
+     "type": "number"
+    },
+    "height_ft": {
+     "description": "Height (ft); default 4",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_concrete_column",
+  "output_schema": {},
+  "title": "Concrete Column & Sonotube Calculator"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Volume for continuous trench/wall footings where width is in inches and length runs the full perimeter. Formula: Cubic yards = Length(ft) × Width(in)/12 × Depth(in)/12 ÷ 27 × (1 + waste%).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bag_yield_cf": {
+     "description": "Bag yield (cu ft/bag); default 0.6",
+     "type": "number"
+    },
+    "depth_in": {
+     "description": "Footing depth (in); default 8",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Total footing length (ft); default 120",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    },
+    "width_in": {
+     "description": "Footing width (in); default 16",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_concrete_footing",
+  "output_schema": {},
+  "title": "Concrete Footing Calculator (Continuous Wall Footings)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Estimate ready-mix cubic yards or the number of 80 lb bags for a rectangular slab, patio or driveway. Formula: Cubic yards = Length(ft) × Width(ft) × Thickness(in)/12 ÷ 27 × (1 + waste%). Bags = cubic feet ÷ bag yield.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bag_yield_cf": {
+     "description": "Bag yield (cu ft/bag); default 0.6",
+     "type": "number"
+    },
+    "depth_in": {
+     "description": "Thickness (in); default 4",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Length (ft); default 20",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Width (ft); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_concrete_slab",
+  "output_schema": {},
+  "title": "Concrete Slab Calculator (Cubic Yards & Bags)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much concrete solid steps need, from the total height to climb: number of risers, riser height, treads, top landing, cubic yards and 80 lb bags. Formula: Risers n = ⌈total rise ÷ max riser⌉; riser height R = total rise ÷ n. Side profile area = tread × R × n(n − 1) ÷ 2 + landing depth × n × R (each lower tread is a block of its own height; the landing sits at full height). Volume (cu ft) = profile (sq in) × width (in) ÷ 1,728; cubic yards = cu ft × (1 + waste) ÷ 27; bags = cu ft × (1 + waste) ÷ bag yield.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bag_yield_cf": {
+     "description": "Bag yield (from the bag) (cu ft/bag); default 0.6",
+     "type": "number"
+    },
+    "landing_depth_in": {
+     "description": "Top landing depth (0 = no landing) (in); default 36",
+     "type": "number"
+    },
+    "max_riser_in": {
+     "description": "Max riser height (IRC 7¾ in; check your local code) (in); default 7.75",
+     "type": "number"
+    },
+    "step_width_ft": {
+     "description": "Step width (ft); default 4",
+     "type": "number"
+    },
+    "total_rise_in": {
+     "description": "Total rise (ground to top of landing) (in); default 21",
+     "type": "number"
+    },
+    "tread_depth_in": {
+     "description": "Tread depth (in); default 11",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_concrete_steps",
+  "output_schema": {},
+  "title": "Concrete Steps Calculator (Cubic Yards, Bags, Risers & Landing)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Conduit fill for THHN/THWN-2 wires in EMT or Schedule 40 PVC: total wire area, percent fill against the NEC 53/31/40% limits, whether it fits, the smallest conduit that does, and the maximum number of same-size wires. Formula: Wire area = Σ count × Table 5 area (14 AWG 0.0097, 12 AWG 0.0133, 10 AWG 0.0211, 8 AWG 0.0366, 6 AWG 0.0507 sq in …). Allowed = Table 4 conduit area × 53% (1 wire), 31% (2) or 40% (3+). Same-size maximum = allowed ÷ wire area, rounded up only at 0.8 or more.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "conduit": {
+     "description": "Conduit type; default emt",
+     "enum": [
+      "emt",
+      "pvc40"
+     ],
+     "type": "string"
+    },
+    "count_1": {
+     "description": "1 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_10": {
+     "description": "10 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_12": {
+     "description": "12 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_14": {
+     "description": "14 AWG THHN wires; default 6",
+     "type": "number"
+    },
+    "count_1_0": {
+     "description": "1/0 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_2": {
+     "description": "2 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_3": {
+     "description": "3 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_4": {
+     "description": "4 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_6": {
+     "description": "6 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "count_8": {
+     "description": "8 AWG THHN wires; default 0",
+     "type": "number"
+    },
+    "size": {
+     "description": "Trade size; default 3/4",
+     "enum": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "1/2",
+      "3/4",
+      "1-1/4",
+      "1-1/2",
+      "2-1/2",
+      "3-1/2"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_conduit_fill",
+  "output_schema": {},
+  "title": "Conduit Fill Calculator (NEC Chapter 9, EMT and PVC)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Number of deck boards for a rectangular deck, accounting for board width and gap. Formula: Rows = ⌈width(in) ÷ (board width + gap)⌉; boards = rows × ⌈deck length ÷ board length⌉ × (1 + waste%).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "board_length_ft": {
+     "description": "Board length (ft); default 16",
+     "type": "number"
+    },
+    "board_width_in": {
+     "description": "Actual board width (in); default 5.5",
+     "type": "number"
+    },
+    "deck_length_ft": {
+     "description": "Deck length (board direction) (ft); default 16",
+     "type": "number"
+    },
+    "deck_width_ft": {
+     "description": "Deck width (ft); default 12",
+     "type": "number"
+    },
+    "gap_in": {
+     "description": "Gap between boards (in); default 0.1875",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_deck_board",
+  "output_schema": {},
+  "title": "Deck Board Calculator"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What size portable dehumidifier you need, in pints per day, from the ENERGY STAR chart for your space size and how damp it is, with a liters and gallons conversion. Formula: Pick the ENERGY STAR range for the condition and size (under or over 2,000 sq ft), then take the top of the range, or the water your current unit removes per day if that is higher. Liters = pints × 0.4732; gallons = pints ÷ 8.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Area to dehumidify (sq ft); default 1000",
+     "type": "number"
+    },
+    "condition": {
+     "description": "Condition without a dehumidifier; default very",
+     "enum": [
+      "moderate",
+      "very",
+      "wet"
+     ],
+     "type": "string"
+    },
+    "pints_emptied_per_day": {
+     "description": "Water you empty now, if replacing a unit (optional) (pints/day); default 0",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_dehumidifier_size",
+  "output_schema": {},
+  "title": "Dehumidifier Size Calculator (Pints per Day by Room Size)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Number of drywall sheets for walls and optionally the ceiling. Formula: Sheets = (perimeter × height + ceiling area) × (1 + waste%) ÷ sheet area.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_ceiling": {
+     "description": "Include ceiling; default 1; one of 1 = Yes, 0 = No",
+     "type": "number"
+    },
+    "room_length_ft": {
+     "description": "Room length (ceiling) (ft); default 14",
+     "type": "number"
+    },
+    "room_width_ft": {
+     "description": "Room width (ceiling) (ft); default 10",
+     "type": "number"
+    },
+    "sheet_l_ft": {
+     "description": "Sheet length (ft); default 8",
+     "type": "number"
+    },
+    "sheet_w_ft": {
+     "description": "Sheet width (ft); default 4",
+     "type": "number"
+    },
+    "wall_height_ft": {
+     "description": "Wall height (ft); default 8",
+     "type": "number"
+    },
+    "wall_perimeter_ft": {
+     "description": "Room perimeter (ft); default 48",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_drywall",
+  "output_schema": {},
+  "title": "Drywall Calculator (Sheets Needed)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much epoxy floor coating to buy: coverage per gallon at your dry film thickness and volume solids, gallons per coat, total with losses, and kits. Formula: Coverage (sq ft/gal) = 1,604 × solids by volume ÷ dry mils. Gallons per coat = area ÷ coverage. Total = gallons per coat × coats × (1 + loss). Wet mils = dry mils ÷ solids.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Floor area (sq ft); default 400",
+     "type": "number"
+    },
+    "coats": {
+     "description": "Coats; default 2",
+     "type": "number"
+    },
+    "dry_mils_per_coat": {
+     "description": "Dry film thickness per coat (from the data sheet) (mils); default 8",
+     "type": "number"
+    },
+    "kit_gal": {
+     "description": "Kit or can size (gal); default 1",
+     "type": "number"
+    },
+    "loss_pct": {
+     "description": "Surface and application loss (%); default 15",
+     "type": "number"
+    },
+    "solids_pct": {
+     "description": "Solids by volume (from the data sheet) (%); default 100",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_epoxy_floor",
+  "output_schema": {},
+  "title": "Epoxy Floor Calculator (Gallons and Kits by Mils and Solids)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What it costs to charge an electric car at home: cost per mile, per month and per full charge from your car's kWh per 100 miles and your state's average residential electricity price (EIA, August 2026) or your own rate, with an optional gas comparison. Formula: Cost per mile = kWh/100 mi ÷ 100 × $/kWh ÷ (1 − loss%). Month = cost per mile × miles. Full charge = battery kWh × $/kWh ÷ (1 − loss%). Gas cost per mile = $/gal ÷ mpg.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "battery_kwh": {
+     "description": "Battery size (optional, for full-charge cost) (kWh); default 0",
+     "type": "number"
+    },
+    "charging_loss_pct": {
+     "description": "Charging loss allowance (optional) (%); default 0",
+     "type": "number"
+    },
+    "gas_mpg": {
+     "description": "Gas car mpg (optional) (mpg); default 0",
+     "type": "number"
+    },
+    "gas_price": {
+     "description": "Gas price to compare (optional) ($/gal); default 0",
+     "type": "number"
+    },
+    "kwh_per_100mi": {
+     "description": "Efficiency (EPA label) (kWh/100 mi); default 30",
+     "type": "number"
+    },
+    "miles_per_month": {
+     "description": "Miles per month (mi); default 1000",
+     "type": "number"
+    },
+    "rate_per_kwh": {
+     "description": "Your rate (optional; overrides the state) ($/kWh); default 0",
+     "type": "number"
+    },
+    "state": {
+     "description": "State (EIA average residential rate); default US",
+     "enum": [
+      "US",
+      "alabama",
+      "alaska",
+      "arizona",
+      "arkansas",
+      "california",
+      "colorado",
+      "connecticut",
+      "delaware",
+      "district_of_columbia",
+      "florida",
+      "georgia",
+      "hawaii",
+      "idaho",
+      "illinois",
+      "indiana",
+      "iowa",
+      "kansas",
+      "kentucky",
+      "louisiana",
+      "maine",
+      "maryland",
+      "massachusetts",
+      "michigan",
+      "minnesota",
+      "mississippi",
+      "missouri",
+      "montana",
+      "nebraska",
+      "nevada",
+      "new_hampshire",
+      "new_jersey",
+      "new_mexico",
+      "new_york",
+      "north_carolina",
+      "north_dakota",
+      "ohio",
+      "oklahoma",
+      "oregon",
+      "pennsylvania",
+      "rhode_island",
+      "south_carolina",
+      "south_dakota",
+      "tennessee",
+      "texas",
+      "utah",
+      "vermont",
+      "virginia",
+      "washington",
+      "west_virginia",
+      "wisconsin",
+      "wyoming"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_ev_charging_cost",
+  "output_schema": {},
+  "title": "EV Charging Cost Calculator (Cost per Mile, Month and Full Charge by State)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Posts, rails and pickets for a straight run of wood privacy or picket fence. Formula: Sections = ⌈length ÷ spacing⌉; posts = sections + 1 + gates; pickets = ⌈length(in) ÷ (picket width + gap)⌉.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "gates": {
+     "description": "Gates (extra posts); default 1",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Fence length (ft); default 100",
+     "type": "number"
+    },
+    "picket_gap_in": {
+     "description": "Gap between pickets (in); default 0",
+     "type": "number"
+    },
+    "picket_width_in": {
+     "description": "Picket width (in); default 5.5",
+     "type": "number"
+    },
+    "post_spacing_ft": {
+     "description": "Post spacing (ft); default 8",
+     "type": "number"
+    },
+    "rails_per_section": {
+     "description": "Rails per section; default 2",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_fence",
+  "output_schema": {},
+  "title": "Fence Calculator (Posts, Rails & Pickets)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Square footage plus waste and number of boxes for tile, laminate, vinyl plank or hardwood. Formula: Area = L × W; to buy = area × (1 + waste%); boxes = to buy ÷ coverage per box.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "box_coverage_sqft": {
+     "description": "Coverage per box (on the box) (sq ft); default 20",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Room length (ft); default 14",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (more for diagonal layouts) (%); default 10",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Room width (ft); default 12",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_flooring_tile",
+  "output_schema": {},
+  "title": "Flooring & Tile Calculator (Square Feet & Boxes)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What size generator you need for a power outage: add the running watts of everything you will run at once, then add the single biggest motor starting surge. Enter how many of each item you plan to run at the same time. Formula: Total running watts = Σ (quantity × running watts). Total starting watts = total running watts + the single highest additional starting watts among the items you run, because motors rarely start at the same instant. Amps at 240 V = running watts ÷ 240. Margin is an optional buffer you choose.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "box_fan": {
+     "description": "Box fan, 20 in: how many (200 W running); default 0",
+     "type": "number"
+    },
+    "central_ac_24k": {
+     "description": "Central AC, 24,000 BTU (2 ton): how many (3,800 W running, +4,950 W to start); default 0",
+     "type": "number"
+    },
+    "central_ac_40k": {
+     "description": "Central AC, 40,000 BTU: how many (6,000 W running, +6,700 W to start); default 0",
+     "type": "number"
+    },
+    "coffee_maker": {
+     "description": "Coffee maker: how many (1,000 W running); default 0",
+     "type": "number"
+    },
+    "electric_water_heater": {
+     "description": "Electric water heater: how many (4,000 W running); default 0",
+     "type": "number"
+    },
+    "furnace_fan_half_hp": {
+     "description": "Furnace fan blower, 1/2 HP: how many (800 W running, +2,350 W to start); default 0",
+     "type": "number"
+    },
+    "garage_door_half_hp": {
+     "description": "Garage door opener, 1/2 HP: how many (875 W running, +2,350 W to start); default 0",
+     "type": "number"
+    },
+    "light_60w": {
+     "description": "Light bulb, 60 W: how many (60 W running); default 4",
+     "type": "number"
+    },
+    "margin_pct": {
+     "description": "Safety margin (your choice) (%); default 10",
+     "type": "number"
+    },
+    "microwave_1000w": {
+     "description": "Microwave, 1,000 W: how many (1,000 W running); default 1",
+     "type": "number"
+    },
+    "other_running_w": {
+     "description": "Other running watts (TV, router, chargers: from nameplates) (W); default 300",
+     "type": "number"
+    },
+    "other_starting_w": {
+     "description": "Extra starting watts of your largest other motor (0 if none) (W); default 0",
+     "type": "number"
+    },
+    "refrigerator": {
+     "description": "Refrigerator/freezer: how many (700 W running, +2,200 W to start); default 1",
+     "type": "number"
+    },
+    "space_heater": {
+     "description": "Space heater: how many (1,800 W running); default 0",
+     "type": "number"
+    },
+    "sump_pump_half_hp": {
+     "description": "Sump pump, 1/2 HP: how many (1,050 W running, +2,200 W to start); default 0",
+     "type": "number"
+    },
+    "washing_machine": {
+     "description": "Washing machine: how many (1,150 W running, +2,250 W to start); default 0",
+     "type": "number"
+    },
+    "well_pump_third_hp": {
+     "description": "Water well pump, 1/3 HP: how many (1,000 W running, +2,200 W to start); default 0",
+     "type": "number"
+    },
+    "window_ac_10k": {
+     "description": "Window AC, 10,000 BTU: how many (1,200 W running, +1,800 W to start); default 1",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_generator_size",
+  "output_schema": {},
+  "title": "Generator Size Calculator (Running & Starting Watts for Your House)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much grass seed to buy for a new lawn: university seeding rates per 1,000 sq ft for each grass type or mix, adjusted for the purity and germination printed on the seed tag. Formula: Pure live seed (PLS) = purity × germination. Seed (lb) = rate (lb PLS per 1,000 sq ft) × area ÷ 1,000 ÷ PLS. Bags = high-rate pounds ÷ bag size, rounded up.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Area to seed (sq ft); default 5000",
+     "type": "number"
+    },
+    "bag_lb": {
+     "description": "Bag size (optional) (lb); default 0",
+     "type": "number"
+    },
+    "germination_pct": {
+     "description": "Germination % (seed tag) (%); default 100",
+     "type": "number"
+    },
+    "purity_pct": {
+     "description": "Purity % (seed tag) (%); default 100",
+     "type": "number"
+    },
+    "species": {
+     "description": "Grass type; default tall_fescue",
+     "enum": [
+      "tall_fescue",
+      "kentucky_bluegrass",
+      "perennial_ryegrass",
+      "fine_fescue",
+      "kbg_prg_80_20",
+      "kbg_ff_50_50",
+      "bermuda_hulled",
+      "bermuda_unhulled",
+      "zoysia",
+      "centipede"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_grass_seed",
+  "output_schema": {},
+  "title": "Grass Seed Calculator (Pounds of Seed for a New Lawn)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much grout a tile job takes from the tile size, joint width, joint depth and area, in pounds and bags. The grout density is editable so you can match your product. Formula: Each tile plus its joint is a (L + J) × (W + J) module, of which J × (L + W + J) is joint. Joint share = J(L + W + J) ÷ ((L + J)(W + J)). Grout volume (cu ft) = area × joint share × depth(in) ÷ 12; pounds = volume × density × (1 + waste); bags = ⌈pounds ÷ bag size⌉.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Tiled area (sq ft); default 100",
+     "type": "number"
+    },
+    "bag_lb": {
+     "description": "Bag size (lb); default 25",
+     "type": "number"
+    },
+    "density_lb_cf": {
+     "description": "Grout weight per cubic foot of joint (from your grout data sheet; ~100 sanded, ~85 unsanded) (lb/cu ft); default 100",
+     "type": "number"
+    },
+    "joint_depth_in": {
+     "description": "Joint depth (usually tile thickness) (in); default 0.375",
+     "type": "number"
+    },
+    "joint_width_in": {
+     "description": "Joint width (1/8 in = 0.125) (in); default 0.125",
+     "type": "number"
+    },
+    "tile_length_in": {
+     "description": "Tile length (in); default 12",
+     "type": "number"
+    },
+    "tile_width_in": {
+     "description": "Tile width (in); default 12",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_grout",
+  "output_schema": {},
+  "title": "Tile Grout Calculator (Pounds and Bags of Grout)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Check whether a gutter can carry the runoff from your roof in a design storm, and how many downspouts it needs. Uses the USDA NRCS gutter and downspout capacity table and your local rainfall intensity. Formula: Runoff Q (cfs) = roof area (sq ft) × rainfall intensity (in/hr) ÷ 43,200 (12 in/ft × 3,600 s/hr); gpm = cfs × 448.8. The gutter is adequate when Q ≤ its NRCS PA-1 capacity at your slope. Downspouts = the larger of ⌈Q ÷ one downspout's PA-1 capacity⌉ and ⌈run length ÷ max length per downspout⌉. Max roof area for the gutter = capacity × 43,200 ÷ intensity.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "downspout": {
+     "description": "Downspout; default 2x3",
+     "enum": [
+      "2x3",
+      "3x4",
+      "4x5",
+      "5x6",
+      "r3",
+      "r4",
+      "r5"
+     ],
+     "type": "string"
+    },
+    "gutter": {
+     "description": "Gutter; default alum5",
+     "enum": [
+      "alum5",
+      "alum6",
+      "galv5",
+      "galv6",
+      "galv7",
+      "semi6"
+     ],
+     "type": "string"
+    },
+    "gutter_run_ft": {
+     "description": "Gutter run length (ft); default 40",
+     "type": "number"
+    },
+    "max_run_per_downspout_ft": {
+     "description": "Max gutter length per downspout (SMACNA practical max 50 ft) (ft); default 50",
+     "type": "number"
+    },
+    "rain_in_per_hr": {
+     "description": "Design rainfall intensity (5-minute depth from NOAA Atlas 14 × 12) (in/hr); default 6",
+     "type": "number"
+    },
+    "roof_area_sqft": {
+     "description": "Roof area draining to this gutter (plan view, not slope length) (sq ft); default 1200",
+     "type": "number"
+    },
+    "slope": {
+     "description": "Gutter slope; default 1/16",
+     "enum": [
+      "1/64",
+      "1/32",
+      "1/16",
+      "1/8",
+      "1/4"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_gutter_size",
+  "output_schema": {},
+  "title": "Gutter & Downspout Size Calculator (Roof Runoff, Gutter Capacity, Number of Downspouts)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Thickness needed to reach a target R-value for the R-per-inch printed on your insulation product. Formula: Thickness(in) = target R ÷ R per inch. Volume in board feet = area(sq ft) × thickness(in).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Area (optional) (sq ft); default 1000",
+     "type": "number"
+    },
+    "r_per_inch": {
+     "description": "R-value per inch (product label); default 3.2",
+     "type": "number"
+    },
+    "target_r": {
+     "description": "Target R-value; default 38",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_insulation_r_value",
+  "output_schema": {},
+  "title": "Insulation R-Value Thickness Calculator"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much drywall mud and tape to buy: gallons of ready-mix joint compound, 4.5 gal pails and rolls of paper tape for your square footage of drywall, using USG's published coverage. Formula: Gallons = area × coverage ÷ 1,000 × (1 + waste). Pails = gallons ÷ pail size, rounded up. Tape (ft) = area × 370 ÷ 1,000 × (1 + waste). Rolls = tape ÷ roll length, rounded up.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Drywall area (walls + ceiling) (sq ft); default 500",
+     "type": "number"
+    },
+    "coverage_gal_per_1000": {
+     "description": "Compound coverage (from the label) (gal per 1,000 sq ft); default 10",
+     "type": "number"
+    },
+    "pail_gal": {
+     "description": "Pail or carton size (gal); default 4.5",
+     "type": "number"
+    },
+    "tape_ft_per_1000": {
+     "description": "Tape coverage (ft per 1,000 sq ft); default 370",
+     "type": "number"
+    },
+    "tape_roll_ft": {
+     "description": "Tape roll length (ft); default 500",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_joint_compound",
+  "output_schema": {},
+  "title": "Joint Compound Calculator (Drywall Mud & Tape)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much fertilizer to put on your lawn: pounds of product per 1,000 sq ft and for the whole lawn, from the nitrogen rate you want and the N-P-K numbers on the bag, plus bags to buy and the phosphate and potash you apply along with it. Formula: Product per 1,000 sq ft = N rate ÷ (N% ÷ 100). Total = product per 1,000 × area ÷ 1,000. Bags = total ÷ bag weight, rounded up. P₂O₅ (or K₂O) per 1,000 = product per 1,000 × P% (or K%) ÷ 100.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Lawn area (turf only) (sq ft); default 5000",
+     "type": "number"
+    },
+    "bag_lb": {
+     "description": "Bag weight (optional) (lb); default 0",
+     "type": "number"
+    },
+    "k_pct": {
+     "description": "Potash % (third number); default 6",
+     "type": "number"
+    },
+    "n_lb_per_1000": {
+     "description": "Nitrogen rate wanted (lb N per 1,000 sq ft); default 1",
+     "type": "number"
+    },
+    "n_pct": {
+     "description": "Nitrogen % (first number on the bag); default 24",
+     "type": "number"
+    },
+    "p_pct": {
+     "description": "Phosphate % (second number); default 0",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_lawn_fertilizer",
+  "output_schema": {},
+  "title": "Lawn Fertilizer Calculator (Pounds per 1,000 Sq Ft from N-P-K)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Mortar for a brick or concrete block wall: units needed, cubic feet of mortar from the Brick Industry Association quantity table (with bond-pattern correction and waste) and bags of mason mix. Formula: Brick = wall ÷ 100 × Table 4 brick per 100 sq ft × (1 + bond brick factor). Mortar (cu ft) = brick ÷ 1,000 × Table 4 cu ft per 1,000 brick for the joint × (1 + bond mortar factor) × (1 + waste). Block = wall × 1.125. Bags = units ÷ units per bag × (1 + waste).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bond": {
+     "description": "Bond pattern (brick); default running",
+     "enum": [
+      "running",
+      "common6",
+      "english",
+      "flemish"
+     ],
+     "type": "string"
+    },
+    "brick_waste_pct": {
+     "description": "Unit waste (%); default 5",
+     "type": "number"
+    },
+    "joint_in": {
+     "description": "Mortar joint (brick); default 0.375; one of 0.375 = 3/8 in, 0.5 = 1/2 in",
+     "type": "number"
+    },
+    "mortar_waste_pct": {
+     "description": "Mortar waste (%); default 20",
+     "type": "number"
+    },
+    "unit": {
+     "description": "Unit; default modular",
+     "enum": [
+      "modular",
+      "engineer_modular",
+      "closure_modular",
+      "roman",
+      "norman",
+      "utility",
+      "queen",
+      "king",
+      "standard",
+      "cmu"
+     ],
+     "type": "string"
+    },
+    "units_per_bag": {
+     "description": "Units per 80 lb bag (0 = 37 brick / 13 block); default 0",
+     "type": "number"
+    },
+    "wall_sqft": {
+     "description": "Wall area (minus openings) (sq ft); default 100",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_mortar",
+  "output_schema": {},
+  "title": "Mortar Calculator for Brick and Block (Cubic Feet & Bags)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Cubic yards (and optional tons) of mulch, gravel, sand or soil for a bed or path. Formula: Cubic yards = L(ft) × W(ft) × depth(in) ÷ 324 (since 27 cu ft × 12 in = 324). Tons = cu yd × supplier density.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "depth_in": {
+     "description": "Depth (in); default 3",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Length (ft); default 20",
+     "type": "number"
+    },
+    "tons_per_cy": {
+     "description": "Material density from your supplier (0 = skip) (tons/cu yd); default 0",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Width (ft); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_mulch_gravel",
+  "output_schema": {},
+  "title": "Mulch, Gravel & Topsoil Calculator (Cubic Yards)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Gallons in an oval (elliptical) pool. Formula: Gallons = π × (L/2) × (W/2) × average depth × 7.48052.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "avg_depth_ft": {
+     "description": "Average depth (ft); default 4.5",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Length (ft); default 30",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Width (ft); default 15",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_oval_pool_volume",
+  "output_schema": {},
+  "title": "Pool Volume Calculator: Oval (Gallons)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Gallons of wall paint from room perimeter and height, minus doors and windows, for any number of coats. Formula: Paintable area = perimeter × height − 20 sq ft per door − 15 sq ft per window. Gallons = area × coats ÷ label coverage.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "coats": {
+     "description": "Coats; default 2",
+     "type": "number"
+    },
+    "coverage_sqft_per_gal": {
+     "description": "Coverage (from your can label) (sq ft/gal); default 350",
+     "type": "number"
+    },
+    "doors": {
+     "description": "Doors; default 1",
+     "type": "number"
+    },
+    "wall_height_ft": {
+     "description": "Wall height (ft); default 8",
+     "type": "number"
+    },
+    "wall_perimeter_ft": {
+     "description": "Room perimeter (ft); default 48",
+     "type": "number"
+    },
+    "windows": {
+     "description": "Windows; default 2",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_paint",
+  "output_schema": {},
+  "title": "Paint Calculator (Gallons for Walls)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Number of pavers for a patio, walkway or driveway plus cubic yards of compacted base and bedding sand. Formula: Pavers per sq ft = 144 ÷ (paver length × width); pavers = area × per sq ft × (1 + waste%). Base and sand cubic yards = area × depth(in) ÷ 324.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "base_depth_in": {
+     "description": "Base depth (per your design) (in); default 4",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Area length (ft); default 16",
+     "type": "number"
+    },
+    "paver_length_in": {
+     "description": "Paver length (in); default 8",
+     "type": "number"
+    },
+    "paver_width_in": {
+     "description": "Paver width (in); default 4",
+     "type": "number"
+    },
+    "sand_depth_in": {
+     "description": "Bedding sand depth (in); default 1",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (more for patterns/curves) (%); default 10",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Area width (ft); default 12",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_paver",
+  "output_schema": {},
+  "title": "Paver Calculator (Pavers, Base Gravel & Sand)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much baking soda raises your pool's total alkalinity, or how much muriatic acid or dry acid lowers it, for your pool size, using published doses per 10,000 gallons. Formula: Batches = |target − current| ÷ 10 × gallons ÷ 10,000. Raise: baking soda (lb) = batches × 1.4. Lower: muriatic acid 31.4% (fl oz) = batches × 26, or sodium bisulfate (lb) = batches × 2.1. Additions: raise no more than about 50 ppm at a time; add no more than 1 quart of acid per 10,000 gallons at a time.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "current_ppm": {
+     "description": "Current total alkalinity (test result) (ppm); default 60",
+     "type": "number"
+    },
+    "pool_gallons": {
+     "description": "Pool volume (gal); default 15000",
+     "type": "number"
+    },
+    "target_ppm": {
+     "description": "Target total alkalinity (from your pool builder or test kit guide) (ppm); default 100",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_alkalinity",
+  "output_schema": {},
+  "title": "Pool Alkalinity Calculator (Baking Soda to Raise, Muriatic Acid to Lower)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much calcium chloride raises your pool's calcium hardness, or how much water to replace to lower it, based on your pool size and fill-water hardness. Formula: Raise: calcium chloride (lb) = (target − current) ÷ 10 × gallons ÷ 10,000 × 1.2 for 77% (0.9 for 100%). Lower (dilution): share to drain = (current − target) ÷ (current − fill water); gallons = share × pool volume.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "current_ppm": {
+     "description": "Current calcium hardness (test result) (ppm); default 150",
+     "type": "number"
+    },
+    "fill_water_ppm": {
+     "description": "Calcium hardness of your fill water (ppm); default 50",
+     "type": "number"
+    },
+    "pool_gallons": {
+     "description": "Pool volume (gal); default 15000",
+     "type": "number"
+    },
+    "product": {
+     "description": "Calcium chloride strength (on the label); default 77; one of 77 = 77% (flake / dihydrate), 100 = 100% (anhydrous)",
+     "type": "number"
+    },
+    "target_ppm": {
+     "description": "Target calcium hardness (from your pool builder or test kit guide) (ppm); default 250",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_calcium_hardness",
+  "output_schema": {},
+  "title": "Pool Calcium Hardness Calculator (Calcium Chloride to Raise, Water to Drain to Lower)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Fluid ounces of liquid chlorine (sodium hypochlorite) to raise free chlorine by a target number of ppm, from pool volume and product strength. Formula: Available chlorine (g) = gallons × 3.78541 L/gal × ppm (mg/L) ÷ 1,000. Product (mL) = grams ÷ (strength% ÷ 100), since trade percent is grams of available chlorine per 100 mL. Fl oz = mL ÷ 29.5735.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "pool_gallons": {
+     "description": "Pool volume (gal); default 15000",
+     "type": "number"
+    },
+    "raise_ppm": {
+     "description": "Raise free chlorine by (ppm); default 3",
+     "type": "number"
+    },
+    "strength_pct": {
+     "description": "Product strength (trade %, on the jug) (%); default 12.5",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_chlorine",
+  "output_schema": {},
+  "title": "Pool Liquid Chlorine Calculator (Ounces to Raise Free Chlorine)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Heater output in Btu per hour for an outdoor pool from surface area and temperature rise, using the U.S. Department of Energy formula, plus gas input, the matching standard heat pump size and the time to warm the water. Formula: Temperature rise = desired pool temperature − average air temperature of the coldest month of use. Heater output (Btu/h) = surface area × rise × 12 × rate factor (1, 1.5 or 2). Gas input = output ÷ efficiency. Heat to warm the water once = gallons × 8.34 lb × (desired − starting temperature); hours = that ÷ output, with no losses.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "coldest_air_f": {
+     "description": "Average air temperature, coldest month you swim (°F); default 65",
+     "type": "number"
+    },
+    "gas_efficiency_pct": {
+     "description": "Gas heater efficiency (nameplate) (%); default 80",
+     "type": "number"
+    },
+    "heatup_rate": {
+     "description": "Heat-up rate; default 1; one of 1 = 1 to 1¼ °F per hour (DOE base), 1.5 = 1½ °F per hour (×1.5), 2 = 2 °F per hour (×2)",
+     "type": "number"
+    },
+    "pool_gallons": {
+     "description": "Pool volume (optional, for warm-up time) (gal); default 22000",
+     "type": "number"
+    },
+    "pool_temp_f": {
+     "description": "Desired pool temperature (°F); default 80",
+     "type": "number"
+    },
+    "start_water_f": {
+     "description": "Starting water temperature (°F); default 70",
+     "type": "number"
+    },
+    "surface_sqft": {
+     "description": "Pool surface area (length × width for a rectangle) (sq ft); default 512",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_heater_size",
+  "output_schema": {},
+  "title": "Pool Heater Size Calculator (BTU for Gas Heaters and Heat Pumps)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Langelier Saturation Index for your pool or spa from pH, water temperature, calcium hardness and total alkalinity, using the factor table and formula in state pool rules, plus the pH that would balance it. Formula: SI = pH + TF + CF + AF − 12.1 (12.2 when TDS is above 1,000 ppm). TF, CF and AF come from the temperature, calcium hardness and alkalinity factor table; when a reading falls between rows the table method uses the next greater row. pH for SI = 0: 12.1 − TF − CF − AF.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "alkalinity_ppm": {
+     "description": "Total alkalinity (ppm); default 70",
+     "type": "number"
+    },
+    "calcium_ppm": {
+     "description": "Calcium hardness (ppm); default 380",
+     "type": "number"
+    },
+    "method": {
+     "description": "Factor lookup; default table",
+     "enum": [
+      "table",
+      "interpolate"
+     ],
+     "type": "string"
+    },
+    "ph": {
+     "description": "pH; default 7.6",
+     "type": "number"
+    },
+    "tds_ppm": {
+     "description": "Total dissolved solids (0 if unknown) (ppm); default 0",
+     "type": "number"
+    },
+    "temp_f": {
+     "description": "Water temperature (°F); default 86",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_lsi",
+  "output_schema": {},
+  "title": "Pool LSI Calculator (Langelier Saturation Index / Water Balance)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Pounds and bags of pool salt to raise a saltwater pool from its current salt level to the target your chlorine generator needs. Formula: Salt (lb) = gallons × 8.34 lb/gal × (target ppm − current ppm) ÷ 1,000,000. Bags = ⌈lb ÷ bag size⌉.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bag_lb": {
+     "description": "Bag size (lb); default 40",
+     "type": "number"
+    },
+    "current_ppm": {
+     "description": "Current salt level (test strip or meter) (ppm); default 0",
+     "type": "number"
+    },
+    "pool_gallons": {
+     "description": "Pool volume (gal); default 15000",
+     "type": "number"
+    },
+    "target_ppm": {
+     "description": "Target salt level (from your cell manual) (ppm); default 3200",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_salt",
+  "output_schema": {},
+  "title": "Pool Salt Calculator (Pounds of Salt for a Saltwater Pool)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much stabilizer (cyanuric acid, CYA) raises your pool to a target level, or how much water to drain and refill to lower it. Formula: Raise: stabilizer (oz) = (target − current) ÷ 10 × gallons ÷ 10,000 × 13. Lower (dilution): share to drain = (current − target) ÷ (current − fill water); gallons = share × pool volume.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "current_ppm": {
+     "description": "Current cyanuric acid (test result) (ppm); default 0",
+     "type": "number"
+    },
+    "fill_water_ppm": {
+     "description": "Cyanuric acid in your fill water (ppm); default 0",
+     "type": "number"
+    },
+    "pool_gallons": {
+     "description": "Pool volume (gal); default 15000",
+     "type": "number"
+    },
+    "target_ppm": {
+     "description": "Target cyanuric acid (from your pool builder or test kit guide) (ppm); default 40",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_stabilizer",
+  "output_schema": {},
+  "title": "Pool Stabilizer (Cyanuric Acid) Calculator: How Much to Add or Drain"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The flow rate (gpm) your pool pump must deliver for a target turnover time, your actual turnover from a flow meter reading, and whether your filter is big enough for that flow. Formula: Required flow (gpm) = gallons ÷ (turnover hours × 60). Actual turnover (hours) = gallons ÷ (measured gpm × 60). Filter max flow = filter area × rated gpm per sq ft.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "filter_area_sqft": {
+     "description": "Filter area (from the filter label, 0 to skip) (sq ft); default 0",
+     "type": "number"
+    },
+    "filter_rate_gpm_per_sqft": {
+     "description": "Max filter rate (from the filter label) (gpm/sq ft); default 0",
+     "type": "number"
+    },
+    "measured_gpm": {
+     "description": "Flow meter reading (0 to skip) (gpm); default 60",
+     "type": "number"
+    },
+    "pool_gallons": {
+     "description": "Pool volume (gal); default 36000",
+     "type": "number"
+    },
+    "turnover_hours": {
+     "description": "Target turnover time (hours); default 6",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_turnover",
+  "output_schema": {},
+  "title": "Pool Turnover Rate & Pump GPM Calculator"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Gallons in a rectangular pool with a sloped bottom, using average depth. Formula: Gallons = L × W × (shallow + deep)/2 × 7.48052 gal/cu ft.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "deep_ft": {
+     "description": "Deep-end depth (ft); default 6",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Length (ft); default 32",
+     "type": "number"
+    },
+    "shallow_ft": {
+     "description": "Shallow-end depth (ft); default 3.5",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Width (ft); default 16",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_pool_volume",
+  "output_schema": {},
+  "title": "Pool Volume Calculator: Rectangular (Swimming Pool Gallons)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Common rafter length, ridge rise and roof angle from the horizontal run and pitch, with optional overhang. Formula: Pitch factor = √(1 + (rise/12)²). Rafter length = (run + overhang) × pitch factor. Ridge rise = run × rise ÷ 12. Angle = atan(rise ÷ 12).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "overhang_in": {
+     "description": "Horizontal overhang (eave) (in); default 12",
+     "type": "number"
+    },
+    "pitch_rise": {
+     "description": "Pitch (rise per 12 in of run) (in); default 6",
+     "type": "number"
+    },
+    "run_ft": {
+     "description": "Horizontal run (half the span, minus half the ridge board) (ft); default 14",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_rafter_length",
+  "output_schema": {},
+  "title": "Rafter Length Calculator (From Run and Roof Pitch)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How many gallons of rainwater your roof can collect from a storm, a month or a year of rain, how many rain barrels that fills, and how much to divert as first flush, using the Texas Manual on Rainwater Harvesting method. Formula: Gallons = rainfall (in) × roof footprint (sq ft) × 0.62 × efficiency. Barrels = gallons ÷ barrel size, rounded up. First flush = roof ÷ 1,000 × 10 gal.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "barrel_gal": {
+     "description": "Barrel or tank size (gal); default 55",
+     "type": "number"
+    },
+    "efficiency_pct": {
+     "description": "Collection efficiency (%); default 85",
+     "type": "number"
+    },
+    "first_flush_gal_per_1000": {
+     "description": "First-flush diversion (gal per 1,000 sq ft); default 10",
+     "type": "number"
+    },
+    "rain_in": {
+     "description": "Rainfall (in); default 1",
+     "type": "number"
+    },
+    "roof_sqft": {
+     "description": "Roof footprint (horizontal area) (sq ft); default 1500",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_rainwater_harvesting",
+  "output_schema": {},
+  "title": "Rainwater Harvesting Calculator (Gallons from Your Roof)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much rebar a rectangular slab grid needs: bar count each way, lap splices, total linear feet, 20 ft sticks to order and steel weight from ASTM A615 bar weights. Formula: Bars each way = ⌊(clear span ÷ spacing)⌋ + 1, where clear span = side × 12 − 2 × edge clearance. A run longer than one stick needs ⌈(run − lap) ÷ (stick − lap)⌉ pieces, adding one lap per joint; lap = bar diameters × bar diameter. Linear ft = (bars × run + splices × lap) ÷ 12; sticks = ⌈linear ft × (1 + allowance) ÷ stick length⌉; weight = linear ft × ASTM A615 lb/ft.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bar": {
+     "description": "Bar size; default 4",
+     "enum": [
+      "3",
+      "4",
+      "5",
+      "6"
+     ],
+     "type": "string"
+    },
+    "edge_in": {
+     "description": "Edge clearance each side (in); default 3",
+     "type": "number"
+    },
+    "lap_bar_diameters": {
+     "description": "Lap splice length in bar diameters (from your plans or engineer); default 40",
+     "type": "number"
+    },
+    "length_ft": {
+     "description": "Slab length (ft); default 30",
+     "type": "number"
+    },
+    "spacing_in": {
+     "description": "Bar spacing on center (from your plans) (in); default 12",
+     "type": "number"
+    },
+    "stock_length_ft": {
+     "description": "Stick length (ft); default 20",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Cut-off allowance (%); default 5",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Slab width (ft); default 24",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_rebar",
+  "output_schema": {},
+  "title": "Rebar Calculator for a Slab (Bars, Sticks, Lap Splices & Weight)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How many retaining wall blocks you need for a straight wall or a circle (fire pit, tree ring), including the buried course, cap units, base gravel for the leveling pad and drainage rock behind the wall. Block sizes are editable because every product line differs. Formula: Buried depth = max(exposed height ÷ bury ratio, minimum). Courses = ⌈(exposed height + buried depth − cap height) ÷ block height⌉. Blocks per course = ⌈run ÷ block face length⌉, where run = wall length, or π × outside diameter for a circle. Wall blocks = ⌈blocks per course × courses × (1 + waste%)⌉; caps = ⌈run ÷ cap length × (1 + waste%)⌉. Base gravel cu yd = run(ft) × trench width(in) × base depth(in) ÷ 144 ÷ 27; drainage rock cu yd = run(ft) × zone depth(in) × stacked block height(in) ÷ 144 ÷ 27 (straight walls only).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "base_depth_in": {
+     "description": "Compacted base depth (in); default 6",
+     "type": "number"
+    },
+    "block_height_in": {
+     "description": "Block height (from the block label) (in); default 4",
+     "type": "number"
+    },
+    "block_length_in": {
+     "description": "Block face length (from the block label) (in); default 12",
+     "type": "number"
+    },
+    "bury_ratio_in": {
+     "description": "Bury 1 in of block for every __ in of exposed height (from your block maker) (in); default 8",
+     "type": "number"
+    },
+    "cap_height_in": {
+     "description": "Cap height (0 = no caps) (in); default 0",
+     "type": "number"
+    },
+    "cap_length_in": {
+     "description": "Cap face length (in); default 12",
+     "type": "number"
+    },
+    "drain_zone_in": {
+     "description": "Drainage rock zone behind the block (in); default 12",
+     "type": "number"
+    },
+    "exposed_height_in": {
+     "description": "Exposed wall height above grade (including cap) (in); default 24",
+     "type": "number"
+    },
+    "length_or_diameter_ft": {
+     "description": "Wall length (straight) or outside diameter (circle) (ft); default 20",
+     "type": "number"
+    },
+    "min_bury_in": {
+     "description": "Minimum buried depth (from your block maker) (in); default 6",
+     "type": "number"
+    },
+    "shape": {
+     "description": "Wall shape; default straight",
+     "enum": [
+      "straight",
+      "circle"
+     ],
+     "type": "string"
+    },
+    "trench_width_in": {
+     "description": "Base trench width (in); default 24",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Block waste/cut allowance (%); default 5",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_retaining_wall",
+  "output_schema": {},
+  "title": "Retaining Wall Block Calculator (Blocks, Caps, Base Gravel & Drainage Rock)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Roof area from the house footprint and pitch, converted to roofing squares (100 sq ft) and shingle bundles. Formula: Pitch factor = √(1 + (rise/12)²). Roof area = (L + 2×overhang) × (W + 2×overhang) × pitch factor. Squares = area ÷ 100 × (1 + waste%).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bundles_per_square": {
+     "description": "Bundles per square (see wrapper); default 3",
+     "type": "number"
+    },
+    "footprint_length_ft": {
+     "description": "Footprint length (ft); default 40",
+     "type": "number"
+    },
+    "footprint_width_ft": {
+     "description": "Footprint width (ft); default 30",
+     "type": "number"
+    },
+    "overhang_in": {
+     "description": "Eave/rake overhang (in); default 12",
+     "type": "number"
+    },
+    "pitch_rise": {
+     "description": "Pitch (rise per 12 in run) (in); default 6",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_roofing",
+  "output_schema": {},
+  "title": "Roofing Calculator (Squares, Bundles & Pitch Factor)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Gallons in a round or above-ground pool. Formula: Gallons = π × (D/2)² × average depth × 7.48052 (≈ D² × depth × 5.875).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "avg_depth_ft": {
+     "description": "Average water depth (ft); default 4.5",
+     "type": "number"
+    },
+    "diameter_ft": {
+     "description": "Diameter (ft); default 24",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_round_pool_volume",
+  "output_schema": {},
+  "title": "Pool Volume Calculator: Round / Above-Ground (Gallons)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How many bags of self-leveling underlayment or floor resurfacer to buy, from your floor area and the thinnest and thickest pour depth, using the bag's yield in cubic feet. Formula: Average depth = (thinnest + thickest) ÷ 2. Volume = area × average depth ÷ 12. Bags = volume × (1 + allowance) ÷ yield per bag. Coverage at 1/4 in = yield ÷ (0.25 ÷ 12).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Floor area (sq ft); default 100",
+     "type": "number"
+    },
+    "bag_yield_cuft": {
+     "description": "Yield per bag (from the bag or data sheet) (cu ft); default 0.45",
+     "type": "number"
+    },
+    "thickest_in": {
+     "description": "Thickest depth (in); default 0.25",
+     "type": "number"
+    },
+    "thinnest_in": {
+     "description": "Thinnest depth (in); default 0.25",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste and porosity allowance (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_self_leveling_concrete",
+  "output_schema": {},
+  "title": "Self-Leveling Concrete Calculator (Bags of Floor Leveler)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Minimum septic tank size, pump tank size and drainfield area for a single-family home under Florida Rule 62-6.008, from bedrooms, building area and soil type. Formula: Design flow = the larger of the bedroom flow (100 gpd per bedroom up to 4, then +60 per bedroom) and the building-area flow (100 gpd to 750 sq ft, 200 to 1,200, 300 to 2,250, 400 to 3,300, then +60 per extra 750 sq ft or fraction), per Table I and its footnote 4. Septic tank and pump tank minimums come from Table II for that flow. Drainfield area = max(flow, 200 gpd) ÷ the Table III loading rate for the soil and trench or bed.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bedrooms": {
+     "description": "Bedrooms; default 3",
+     "type": "number"
+    },
+    "building_sqft": {
+     "description": "Building area (sq ft); default 2000",
+     "type": "number"
+    },
+    "drainfield": {
+     "description": "Drainfield type; default trench",
+     "enum": [
+      "trench",
+      "bed"
+     ],
+     "type": "string"
+    },
+    "soil": {
+     "description": "Soil (from the site evaluation); default slight",
+     "enum": [
+      "slight",
+      "moderate",
+      "moderate_slow"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_septic_tank_size",
+  "output_schema": {},
+  "title": "Septic Tank Size Calculator (Florida Rule 62-6.008: Tank Gallons & Drainfield Area)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Square feet of sod, number of pieces and pallets for a lawn area. Piece size and pallet coverage are editable because they vary by farm and grass type. Formula: Sq ft to buy = L × W × (1 + waste%); pieces = sq ft ÷ (piece length × width ÷ 144); pallets = sq ft ÷ pallet coverage.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "length_ft": {
+     "description": "Lawn length (ft); default 50",
+     "type": "number"
+    },
+    "pallet_sqft": {
+     "description": "Coverage per pallet (ask your supplier) (sq ft); default 400",
+     "type": "number"
+    },
+    "piece_length_in": {
+     "description": "Piece length (ask your supplier) (in); default 24",
+     "type": "number"
+    },
+    "piece_width_in": {
+     "description": "Piece width (ask your supplier) (in); default 16",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste allowance (%); default 5",
+     "type": "number"
+    },
+    "width_ft": {
+     "description": "Lawn width (ft); default 40",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_sod",
+  "output_schema": {},
+  "title": "Sod Calculator (Square Feet, Pieces & Pallets)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Panels needed to offset annual electricity use, from panel wattage, peak sun hours and system losses. Formula: Annual kWh per panel = W/1000 × peak sun hours × 365 × (1 − losses). Panels = ⌈annual use ÷ kWh per panel⌉.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "annual_kwh": {
+     "description": "Annual usage (from your bills) (kWh); default 12000",
+     "type": "number"
+    },
+    "panel_watts": {
+     "description": "Panel rating (W); default 400",
+     "type": "number"
+    },
+    "peak_sun_hours": {
+     "description": "Peak sun hours/day (look up in PVWatts) (h); default 5",
+     "type": "number"
+    },
+    "system_losses_pct": {
+     "description": "System losses (%); default 14",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_solar_panel",
+  "output_schema": {},
+  "title": "Solar Panel Calculator (How Many Panels Do I Need?)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Number of risers and treads, exact riser height, total run and stringer length from the floor-to-floor rise, checked against the IRC 7¾ in maximum riser. Formula: Risers = ⌈total rise ÷ max riser⌉; riser height = total rise ÷ risers; treads = risers − 1; total run = treads × tread depth; stringer length = √(rise² + run²).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "max_riser_in": {
+     "description": "Maximum riser height allowed (in); default 7.75",
+     "type": "number"
+    },
+    "total_rise_in": {
+     "description": "Total rise (finished floor to finished floor) (in); default 108",
+     "type": "number"
+    },
+    "tread_depth_in": {
+     "description": "Tread depth (run per step) (in); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_stair_stringer",
+  "output_schema": {},
+  "title": "Stair Stringer Calculator (Risers, Treads & Stringer Length)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How many 80 lb bags of stucco you need for a wall: base coat (scratch and brown) bags from the manufacturer's coverage at your system thickness, plus finish coat bags. Formula: Area = (wall − openings) × (1 + waste). Base bags = area ÷ coverage, where coverage per 80 lb bag = 20–24 sq ft × (3/8 in ÷ base thickness). Finish bags = area ÷ (70 sq ft × 1/8 in ÷ finish thickness).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "finish_in": {
+     "description": "Finish coat thickness (0 = none) (in); default 0.125",
+     "type": "number"
+    },
+    "openings_sqft": {
+     "description": "Windows and doors to subtract (sq ft); default 100",
+     "type": "number"
+    },
+    "system": {
+     "description": "Stucco system; default three",
+     "enum": [
+      "three",
+      "two_dense",
+      "two_porous"
+     ],
+     "type": "string"
+    },
+    "wall_sqft": {
+     "description": "Wall area (sq ft); default 1000",
+     "type": "number"
+    },
+    "waste_pct": {
+     "description": "Waste (%); default 10",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_stucco",
+  "output_schema": {},
+  "title": "Stucco Calculator (Bags of Base and Finish Coat)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Size a tankless water heater from your peak hot-water flow and the rise from winter inlet temperature to your setpoint: required Btu/h, gas input, electric kW and amps. Formula: Temperature rise = setpoint − inlet. Heat output (Btu/h) = gpm × 8.34 lb/gal × 60 min × rise. Gas input = output ÷ efficiency. Electric kW = output ÷ 3,412.14; amps = kW × 1,000 ÷ volts.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "gas_efficiency_pct": {
+     "description": "Gas unit efficiency (spec sheet) (%); default 82",
+     "type": "number"
+    },
+    "inlet_f": {
+     "description": "Coldest incoming water temperature (winter) (°F); default 52",
+     "type": "number"
+    },
+    "outlet_f": {
+     "description": "Hot water setpoint (°F); default 120",
+     "type": "number"
+    },
+    "peak_gpm": {
+     "description": "Peak hot-water flow (fixtures used at the same time) (gpm); default 4.5",
+     "type": "number"
+    },
+    "volts": {
+     "description": "Electric supply voltage (V); default 240",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_tankless_water_heater_size",
+  "output_schema": {},
+  "title": "Tankless Water Heater Size Calculator (GPM, Temperature Rise, BTU & kW)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How many bags of thin-set mortar to buy for your tile area and trowel notch, from manufacturer coverage per 50 lb bag, with a conservative and a best-case count. Formula: Bags = area × (1 + allowance) ÷ coverage per bag, rounded up, at the low and high ends of the coverage range. Data-sheet coverage per 50 lb bag: 1/4 × 1/4 in 80–95 sq ft, 1/4 × 3/8 in 60–70, 1/2 × 1/2 in 35–40 (scaled for other bag sizes).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "area_sqft": {
+     "description": "Tile area (sq ft); default 150",
+     "type": "number"
+    },
+    "bag_lb": {
+     "description": "Bag size (lb); default 50",
+     "type": "number"
+    },
+    "coverage_sqft_per_bag": {
+     "description": "Coverage from your bag label (0 = use the data sheet) (sq ft); default 0",
+     "type": "number"
+    },
+    "trowel": {
+     "description": "Square-notch trowel; default 1/4x3/8",
+     "enum": [
+      "1/4x1/4",
+      "1/4x3/8",
+      "1/2x1/2"
+     ],
+     "type": "string"
+    },
+    "waste_pct": {
+     "description": "Extra allowance (%); default 0",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_thinset",
+  "output_schema": {},
+  "title": "Thinset Calculator (Bags of Thin-Set Mortar by Trowel Size)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Voltage drop for a single- or three-phase run using NEC Chapter 9 Table 8 conductor sizes. Formula: VD = 2 × K × I × L ÷ CM (single phase) or √3 × K × I × L ÷ CM (three phase); K = ohm·cmil/ft (approx. 12.9 Cu, 21.2 Al); CM from NEC Ch. 9 Table 8.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "amps": {
+     "description": "Load current (A); default 16",
+     "type": "number"
+    },
+    "awg": {
+     "description": "Wire size (AWG); default 12",
+     "enum": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "6",
+      "8",
+      "10",
+      "12",
+      "14",
+      "1/0",
+      "2/0",
+      "3/0",
+      "4/0"
+     ],
+     "type": "string"
+    },
+    "material": {
+     "description": "Conductor; default copper",
+     "enum": [
+      "copper",
+      "aluminum"
+     ],
+     "type": "string"
+    },
+    "one_way_ft": {
+     "description": "One-way length (ft); default 100",
+     "type": "number"
+    },
+    "phase": {
+     "description": "Phase; default 1; one of 1 = Single phase, 3 = Three phase",
+     "type": "number"
+    },
+    "volts": {
+     "description": "Source voltage (V); default 120",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_voltage_drop",
+  "output_schema": {},
+  "title": "Wire Size & Voltage Drop Calculator (AWG, Copper/Aluminum)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Studs at 16 or 24 in on center for a wall length, plus extras for corners and openings, and linear feet of top and bottom plate. Formula: Studs on layout = ⌈length(in) ÷ spacing⌉ + 1; total = layout + corners × extras per corner + openings × extras per opening. Plate linear ft = length × plates.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "corners": {
+     "description": "Corners in this wall; default 2",
+     "type": "number"
+    },
+    "openings": {
+     "description": "Door/window openings; default 1",
+     "type": "number"
+    },
+    "plates": {
+     "description": "Plates (bottom + double top = 3); default 3",
+     "type": "number"
+    },
+    "spacing_in": {
+     "description": "Stud spacing (on center); default 16; one of 16 = 16 in o.c., 24 = 24 in o.c., 12 = 12 in o.c.",
+     "type": "number"
+    },
+    "studs_per_corner": {
+     "description": "Extra studs per corner; default 2",
+     "type": "number"
+    },
+    "studs_per_opening": {
+     "description": "Extra studs per opening (king/jack); default 2",
+     "type": "number"
+    },
+    "wall_length_ft": {
+     "description": "Wall length (ft); default 20",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_wall_stud",
+  "output_schema": {},
+  "title": "Wall Stud Calculator (Studs & Plates for a Framed Wall)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How big a water softener you need: grains of hardness removed per day from your household size and water hardness, the grain capacity for your regeneration interval, and how often a given softener will regenerate. Formula: Grains per day = people × gallons per person per day × hardness (gpg). Capacity needed = grains per day × days between regenerations. Days between regenerations = rated capacity ÷ grains per day. gpg = mg/L ÷ 17.1.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "days_between_regen": {
+     "description": "Target days between regenerations (days); default 7",
+     "type": "number"
+    },
+    "gal_per_person_day": {
+     "description": "Softened water per person per day (gal); default 75",
+     "type": "number"
+    },
+    "hardness": {
+     "description": "Water hardness; default 10",
+     "type": "number"
+    },
+    "hardness_unit": {
+     "description": "Hardness unit; default gpg",
+     "enum": [
+      "gpg",
+      "mgl"
+     ],
+     "type": "string"
+    },
+    "people": {
+     "description": "People in the home; default 4",
+     "type": "number"
+    },
+    "rated_capacity_grains": {
+     "description": "Softener capacity from its spec sheet (optional) (grains); default 0",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_water_softener_size",
+  "output_schema": {},
+  "title": "Water Softener Size Calculator (Grains per Day and Capacity)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What size well pressure tank you need: the drawdown for your pump's flow and minimum run time, the minimum total tank volume at your pressure-switch setting, and the smallest Amtrol Well-X-Trol model that delivers it. Formula: Required drawdown = pump gpm × run minutes. Acceptance factor = (cut-out − cut-in) ÷ (cut-out + 14.7). Minimum total tank volume = drawdown ÷ acceptance factor. A tank's drawdown = volume × acceptance factor (capped at its maximum acceptance factor). Run time = drawdown ÷ gpm.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cut_in_psi": {
+     "description": "Pressure switch cut-in; default 40; one of 20 = 20 psi, 30 = 30 psi, 40 = 40 psi, 50 = 50 psi, 60 = 60 psi",
+     "type": "number"
+    },
+    "cut_out_psi": {
+     "description": "Pressure switch cut-out; default 60; one of 40 = 40 psi, 50 = 50 psi, 60 = 60 psi, 70 = 70 psi, 80 = 80 psi",
+     "type": "number"
+    },
+    "pump_gpm": {
+     "description": "Pump flow rate (gpm); default 10",
+     "type": "number"
+    },
+    "run_minutes": {
+     "description": "Minimum pump run time; default 1; one of 1 = 1 minute (pumps up to 3/4 hp), 2 = 2 minutes (pumps over 3/4 hp)",
+     "type": "number"
+    },
+    "tank_gal": {
+     "description": "Your tank's total volume (optional) (gal); default 0",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_well_pressure_tank_size",
+  "output_schema": {},
+  "title": "Well Pressure Tank Size Calculator (Drawdown and Pump Run Time)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What gauge wire you need for a circuit: copper or aluminum size from the NEC ampacity table at the right temperature column, with the 125% continuous-load rule, the small-conductor breaker limits and an optional voltage-drop check for long runs. Formula: Design amps = load × 1.25 if continuous. Size = smallest AWG whose ampacity in the 60 °C (or 75 °C) column, capped by 240.4(D) for 14/12/10 AWG, is at least the design amps. Voltage drop % = 2 × K × I × L ÷ cmil ÷ V × 100 (√3 for three phase; K = 12.9 copper, 21.2 aluminum); step up until within the limit.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "continuous": {
+     "description": "Continuous load (3 hours or more)?; default 1; one of 1 = Yes (size at 125%), 0 = No",
+     "type": "number"
+    },
+    "insulation": {
+     "description": "Wire type; default thhn",
+     "enum": [
+      "thhn",
+      "nm"
+     ],
+     "type": "string"
+    },
+    "load_amps": {
+     "description": "Load current (A); default 24",
+     "type": "number"
+    },
+    "material": {
+     "description": "Conductor; default copper",
+     "enum": [
+      "copper",
+      "aluminum"
+     ],
+     "type": "string"
+    },
+    "max_drop_pct": {
+     "description": "Maximum voltage drop (%); default 3",
+     "type": "number"
+    },
+    "one_way_ft": {
+     "description": "One-way length (0 = skip voltage drop) (ft); default 100",
+     "type": "number"
+    },
+    "phase": {
+     "description": "Phase; default 1; one of 1 = Single phase, 3 = Three phase",
+     "type": "number"
+    },
+    "terminal_c": {
+     "description": "Breaker/terminal rating; default 60; one of 60 = 60 °C (default for 100 A or less), 75 = 75 °C (listed equipment, or over 100 A)",
+     "type": "number"
+    },
+    "volts": {
+     "description": "Circuit voltage (V); default 240",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_wire_size",
+  "output_schema": {},
+  "title": "Wire Size Calculator (Ampacity, 125% Rule and Voltage Drop)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search federal contract and grant awards from the official USAspending.gov API by keyword, NAICS, state, date and amount.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "contracts or grants",
+     "type": "string"
+    },
+    "from": {
+     "description": "Start date YYYY-MM-DD",
+     "type": "string"
+    },
+    "keywords": {
+     "description": "Search words, e.g. roofing",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max awards, 1-500",
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "minAmount": {
+     "description": "Minimum award amount in USD",
+     "type": "number"
+    },
+    "naics": {
+     "description": "NAICS code, e.g. 238160",
+     "type": "string"
+    },
+    "states": {
+     "description": "Comma-separated state codes, e.g. FL,GA",
+     "type": "string"
+    },
+    "to": {
+     "description": "End date YYYY-MM-DD",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "federal_awards",
+  "output_schema": {},
+  "title": "Federal awards (USAspending)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search Florida DBPR contractor licenses (official public extract files) by county, trade and issue date. Business records only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "county": {
+     "description": "Florida county name, e.g. Palm Beach",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max rows, 1-1000",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since": {
+     "description": "Only licenses issued on/after this date, YYYY-MM-DD",
+     "type": "string"
+    },
+    "trade": {
+     "description": "Trade keyword, e.g. roofing, pool, solar, general",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "fl_contractor_licenses",
+  "output_schema": {},
+  "title": "Florida contractor licenses (DBPR)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "CustomLab.ai AI operations automation offer from pack JSON. No price, SKU or Payment Link; CTA is a free 30-minute fit call.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "offer_customlab",
+  "output_schema": {},
+  "title": "CustomLab.ai offer (scope-first)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Managed AI Front Office (flagship retainer) facts from pack JSON. HUMAN-GATED: recommend -> human Accept -> written scope -> pay. Agents must not purchase unsupervised.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "offer_flagship",
+  "output_schema": {},
+  "title": "Managed AI Front Office offer (human-gated)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List offers in the agent GEO pack (ids + names + status). Read-only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "offer_list",
+  "output_schema": {},
+  "title": "List pack offers"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Extract URLs from a public sitemap (follows sitemap indexes).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "max": {
+     "description": "Maximum URLs to return, 1-5000",
+     "maximum": 5000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "url": {
+     "description": "Sitemap URL or site root (robots.txt Sitemap: lines are followed)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "sitemap_urls",
+  "output_schema": {},
+  "title": "Sitemap URL extractor"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Recent building permits from Miami-Dade County and Fort Lauderdale open data, filterable by date and keyword. Owner names excluded.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "from": {
+     "description": "Start date YYYY-MM-DD",
+     "type": "string"
+    },
+    "keyword": {
+     "description": "Filter permit descriptions, e.g. roof",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max rows, 1-1000",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "source": {
+     "description": "miami-dade or fort-lauderdale",
+     "type": "string"
+    },
+    "to": {
+     "description": "End date YYYY-MM-DD",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sofl_permits",
+  "output_schema": {},
+  "title": "South Florida building permits"
+ }
+]

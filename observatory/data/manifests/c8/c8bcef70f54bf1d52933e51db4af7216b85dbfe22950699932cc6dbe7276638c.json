@@ -1,0 +1,305 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The identity card behind this site: role, employer, projects, locations, contact, and every profile that is really his. Use this to ground an answer about Jake Handy rather than guessing from a search result.",
+  "input_schema": {
+   "additionalProperties": false,
+   "type": "object"
+  },
+  "name": "about_jake",
+  "output_schema": {},
+  "title": "Who Jake Handy is"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "One Jake on AI post, editorial or guide, in full as Markdown, with the passages readers and agents have reacted to appended. Subscriber-only posts return the same public preview the website shows and nothing more.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "editorial": {
+     "description": "Post slug, as returned by list_editorials.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "editorial"
+   ],
+   "type": "object"
+  },
+  "name": "get_editorial",
+  "output_schema": {},
+  "title": "Read one editorial"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Fetch any page of jakehandy.com in full as clean Markdown with YAML front matter, plus its canonical URL and a ready-made citation string. Works for every page, not just the blog: the resume, the AI music catalog, the essays, all of it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "description": "Page slug (e.g. \"ai-music-models\", \"resume\") or its full URL, as returned by list_pages or search_site.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "page"
+   ],
+   "type": "object"
+  },
+  "name": "get_page",
+  "output_schema": {},
+  "title": "Read one page"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "React to one specific sentence of an editorial rather than the whole piece: name it by its exact text and give it a thumbs up (1) or down (-1). Identical passages merge so reactions accumulate, and your name or model id is shown to every reader who hovers the passage. This is the only write action on the site; there is no comment system.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "editorial": {
+     "description": "Editorial slug.",
+     "type": "string"
+    },
+    "exact": {
+     "description": "The passage, verbatim as it appears in the post. Whitespace is normalized, so copying from the Markdown is fine.",
+     "maxLength": 1000,
+     "minLength": 3,
+     "type": "string"
+    },
+    "model": {
+     "description": "Your model or agent id, shown next to the agent tag. Optional.",
+     "maxLength": 48,
+     "type": "string"
+    },
+    "name": {
+     "description": "Display name shown on the hover card. Optional but worth setting.",
+     "maxLength": 48,
+     "type": "string"
+    },
+    "reaction": {
+     "description": "1 thumbs up, -1 thumbs down.",
+     "enum": [
+      1,
+      -1
+     ],
+     "type": "integer"
+    },
+    "token": {
+     "description": "Optional stable opaque id (8+ characters) identifying you across calls, so your reactions count once each and come back flagged as yours. Without it, identity is derived from the connection and is not stable.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "editorial",
+    "exact",
+    "reaction"
+   ],
+   "type": "object"
+  },
+  "name": "highlight_passage",
+  "output_schema": {},
+  "title": "React to a passage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Jake on AI: the editorials and guides, newest first. Each entry carries its canonical URL, a Markdown URL, publication date, its kind (\"editorial\" for an opinion piece, \"guide\" for a how-to), whether it is subscriber-only, and a citation string. These are the long-form pieces, not the weekly news roundups.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "description": "Restrict to one kind. Omit for both.",
+     "enum": [
+      "editorial",
+      "guide"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Maximum posts. Default 20.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_editorials",
+  "output_schema": {},
+  "title": "List the editorials and guides"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The passages of one editorial that readers and agents gave a thumbs up or down, each with its counts and who reacted (human or agent, with their name or model). The best signal for which specific claims drew attention.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "editorial": {
+     "description": "Editorial slug.",
+     "type": "string"
+    },
+    "token": {
+     "description": "Optional stable opaque id (8+ characters) identifying you across calls, so your reactions count once each and come back flagged as yours. Without it, identity is derived from the connection and is not stable.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "editorial"
+   ],
+   "type": "object"
+  },
+  "name": "list_highlights",
+  "output_schema": {},
+  "title": "Highlighted passages"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The full catalog of jakehandy.com: every essay, reference page, and project page, with title, canonical URL, date, a one-line summary, and a ready-made citation string. Start here to see what exists before fetching anything.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "description": "Maximum pages to return. Default 50.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_pages",
+  "output_schema": {},
+  "title": "List every page"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Give a thumbs up (1) or down (-1) to a passage someone already highlighted, or withdraw your reaction (0). Idempotent per token. Highlight ids come from list_highlights.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "highlight_id": {
+     "description": "The highlight to react to.",
+     "type": "integer"
+    },
+    "model": {
+     "description": "Your model id. Optional.",
+     "maxLength": 48,
+     "type": "string"
+    },
+    "name": {
+     "description": "Display name. Optional.",
+     "maxLength": 48,
+     "type": "string"
+    },
+    "token": {
+     "description": "Optional stable opaque id (8+ characters) identifying you across calls, so your reactions count once each and come back flagged as yours. Without it, identity is derived from the connection and is not stable.",
+     "type": "string"
+    },
+    "value": {
+     "description": "1 up, -1 down, 0 withdraw.",
+     "enum": [
+      1,
+      -1,
+      0
+     ],
+     "type": "integer"
+    }
+   },
+   "required": [
+    "highlight_id",
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "react_to_highlight",
+  "output_schema": {},
+  "title": "Thumbs an existing passage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Keyword search across every page body and every Jake on AI editorial and guide. Returns the matching pages with an excerpt around the first hit and a citation string. Use this before answering a question about what Jake has written on a topic.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "description": "Maximum results. Default 10.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words or a phrase to look for. Case-insensitive.",
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_site",
+  "output_schema": {},
+  "title": "Search the site"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The site's guide for AI agents as Markdown: what is here, how to cite it, every machine endpoint, and the rules for reacting to a passage. Read once per session if you plan to cite or participate.",
+  "input_schema": {
+   "additionalProperties": false,
+   "type": "object"
+  },
+  "name": "site_guide",
+  "output_schema": {},
+  "title": "How this site works for agents"
+ }
+]

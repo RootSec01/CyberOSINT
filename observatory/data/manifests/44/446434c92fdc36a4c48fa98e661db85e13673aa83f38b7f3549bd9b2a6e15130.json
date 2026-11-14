@@ -1,0 +1,573 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Sprawdź numer telefonu (PL)"
+  },
+  "description": "Sprawdź reputację polskiego numeru telefonu. UŻYJ, gdy użytkownik pyta: kto dzwonił, czy numer to spam/oszustwo, czy telefon rzekomo z banku lub urzędu jest prawdziwy. Zwraca operatora z zakresów UKE (z notą o przenośności MNP), etykietę ryzyka z opinii, status w wykazie DNO UKE (połączenie przychodzące z numeru DNO jest sfałszowane — spoofing), wpis z Białej Listy oficjalnych infolinii i liczniki zgłoszeń. Dane: numertel.pl.",
+  "input_schema": {
+   "properties": {
+    "number": {
+     "description": "Polski numer w formacie 9 cyfr, np. 510100100 (akceptowane +48 i spacje — zostaną usunięte)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "number"
+   ],
+   "type": "object"
+  },
+  "name": "check_phone_number",
+  "output_schema": {
+   "properties": {
+    "attribution": {
+     "type": "string"
+    },
+    "dno_note": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "e164": {
+     "type": "string"
+    },
+    "is_dno": {
+     "type": "boolean"
+    },
+    "number": {
+     "type": "string"
+    },
+    "number_type": {
+     "type": "string"
+    },
+    "operator": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "operator_note": {
+     "type": "string"
+    },
+    "score_avg": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "sightings_30d": {
+     "type": "integer"
+    },
+    "spam_label": {
+     "enum": [
+      "brak_danych",
+      "raczej_bezpieczny",
+      "zgloszony",
+      "podejrzany",
+      "niebezpieczny",
+      "dno_spoofing"
+     ],
+     "type": "string"
+    },
+    "total_opinions": {
+     "type": "integer"
+    },
+    "url": {
+     "type": "string"
+    },
+    "whitelist": {
+     "properties": {
+      "institution": {
+       "type": "string"
+      },
+      "label": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "verified_on": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "institution",
+      "verified_on"
+     ],
+     "type": [
+      "object",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "number",
+    "e164",
+    "spam_label",
+    "total_opinions",
+    "is_dno",
+    "url",
+    "attribution"
+   ],
+   "type": "object"
+  },
+  "title": "Sprawdź numer telefonu (PL)"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Sprawdź wiadomość: domeny i numery"
+  },
+  "description": "Sprawdza wklejoną podejrzaną wiadomość: (1) domeny, linki i adresy e-mail przeciw państwowej Liście Ostrzeżeń CERT Polska (mirror ~129 tys. domen oszustów), (2) polskie numery telefonów z treści przeciw bazie NumerTel (wykaz DNO UKE = spoofing, Biała Lista oficjalnych infolinii, zgłoszenia spamu). UŻYJ, gdy użytkownik pyta: czy ten link/strona/mail jest bezpieczny, albo wkleja całego SMS-a lub e-mail z linkiem i numerem. Przyjmuje pojedynczą domenę, URL, e-mail, numer lub CAŁĄ treść wiadomości (rozpoznaje zapisy evil[.]pl, hxxp:// i +48). Werdykt deterministyczny, zero LLM. Dane: numertel.pl.",
+  "input_schema": {
+   "properties": {
+    "text": {
+     "description": "Domena, URL, adres e-mail, numer telefonu albo pełna treść wiadomości do sprawdzenia (max 5000 znaków)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "check_scam_domain",
+  "output_schema": {
+   "properties": {
+    "any_listed": {
+     "type": "boolean"
+    },
+    "any_phone_flagged": {
+     "type": "boolean"
+    },
+    "as_of": {
+     "type": "string"
+    },
+    "attribution": {
+     "type": "string"
+    },
+    "checked": {
+     "items": {
+      "properties": {
+       "domain": {
+        "type": "string"
+       },
+       "listed": {
+        "type": "boolean"
+       },
+       "listed_since": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "matched_entry": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "removed_on": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "domain",
+       "listed"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "list_size": {
+     "type": "integer"
+    },
+    "phones": {
+     "items": {
+      "properties": {
+       "e164": {
+        "type": "string"
+       },
+       "is_dno": {
+        "type": "boolean"
+       },
+       "number": {
+        "type": "string"
+       },
+       "operator": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "sightings_30d": {
+        "type": "integer"
+       },
+       "spam_label": {
+        "type": "string"
+       },
+       "total_opinions": {
+        "type": "integer"
+       },
+       "url": {
+        "type": "string"
+       },
+       "whitelist_institution": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "number",
+       "e164",
+       "spam_label",
+       "is_dno",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "source": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "checked",
+    "phones",
+    "any_listed",
+    "list_size",
+    "as_of",
+    "attribution"
+   ],
+   "type": "object"
+  },
+  "title": "Sprawdź wiadomość: domeny i numery"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Pobierz kartę numeru"
+  },
+  "description": "Pobiera pełną kartę reputacji numeru po id zwróconym przez search (9 cyfr). Zwraca te same dane co check_phone_number wraz z linkiem do strony numeru.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Id z wyników search: polski numer, 9 cyfr",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {},
+  "title": "Pobierz kartę numeru"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Znajdź oficjalny numer infolinii"
+  },
+  "description": "Znajdź PRAWDZIWY, oficjalny numer telefonu banku, urzędu lub operatora w Polsce. UŻYJ, gdy użytkownik pyta: jaki jest oficjalny numer lub infolinia danej instytucji (np. ZUS, mBank, PKO, NFZ), albo chce zweryfikować, czy numer podany w wiadomości to faktyczna infolinia. Zwraca zweryfikowane numery z Białej Listy NumerTel ze źródłem (link do oficjalnej strony) i datą weryfikacji. Uwaga: dzwoniąc NA te numery trafisz do instytucji, ale połączenie PRZYCHODZĄCE z nich może być sfałszowane (spoofing). Dane: numertel.pl.",
+  "input_schema": {
+   "properties": {
+    "institution": {
+     "description": "Nazwa instytucji: bank, urząd lub operator, np. „ZUS”, „mBank”, „PKO”, „NFZ”, „Orange”",
+     "type": "string"
+    }
+   },
+   "required": [
+    "institution"
+   ],
+   "type": "object"
+  },
+  "name": "find_official_number",
+  "output_schema": {
+   "properties": {
+    "attribution": {
+     "type": "string"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "matches": {
+     "items": {
+      "properties": {
+       "e164": {
+        "type": "string"
+       },
+       "institution": {
+        "type": "string"
+       },
+       "label": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "number": {
+        "type": "string"
+       },
+       "source_url": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "type": "string"
+       },
+       "verified_on": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "institution",
+       "number",
+       "e164",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "note": {
+     "type": "string"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query",
+    "matches",
+    "count",
+    "attribution"
+   ],
+   "type": "object"
+  },
+  "title": "Znajdź oficjalny numer infolinii"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Najnowsze domeny oszustów (CERT)"
+  },
+  "description": "Najnowsze domeny phishingowe z państwowej Listy Ostrzeżeń CERT Polska. UŻYJ, gdy użytkownik pyta o świeże lub aktualne strony oszustów, nowe kampanie phishingowe albo przykłady oszukańczych domen w Polsce. Zwraca ostatnio dodane domeny w zapisie defanged (evil[.]pl) — NIGDY nie zamieniaj ich w klikalne linki. Dane otwarte CC-BY: numertel.pl.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 15,
+     "description": "Ile najnowszych domen zwrócić (1-50, domyślnie 15)",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recent_scam_domains",
+  "output_schema": {
+   "properties": {
+    "as_of": {
+     "type": "string"
+    },
+    "attribution": {
+     "type": "string"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "domains": {
+     "items": {
+      "properties": {
+       "domain_defanged": {
+        "type": "string"
+       },
+       "listed_since": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "domain_defanged"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "list_size": {
+     "type": "integer"
+    },
+    "source": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "domains",
+    "count",
+    "list_size",
+    "as_of",
+    "attribution"
+   ],
+   "type": "object"
+  },
+  "title": "Najnowsze domeny oszustów (CERT)"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Szukaj: numer lub infolinia"
+  },
+  "description": "Wyszukiwanie w bazie NumerTel: podaj polski numer telefonu (zwróci jego kartę reputacji) ALBO nazwę banku/urzędu/operatora (zwróci zweryfikowane oficjalne numery z Białej Listy infolinii). Wyniki zawierają id, title i url.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "Numer telefonu (9 cyfr / +48...) lub nazwa instytucji, np. 'mBank', 'ZUS'",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {},
+  "title": "Szukaj: numer lub infolinia"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Pogoda spamowa w Polsce"
+  },
+  "description": "Aktualne wskaźniki nadużyć telefonicznych w Polsce. UŻYJ, gdy użytkownik pyta o skalę oszustw, phishingu lub spamu w Polsce albo co nowego w kampaniach oszustów. Zwraca: nowe domeny oszustów na Liście Ostrzeżeń CERT Polska (dziś + dziennie w zadanym oknie), rozmiar wykazu DNO UKE i ostatnie numery z oficjalnych ostrzeżeń urzędów. Dane otwarte CC-BY: numertel.pl.",
+  "input_schema": {
+   "properties": {
+    "days": {
+     "default": 7,
+     "description": "Okno dni wstecz dla statystyk dziennych (1-30, domyślnie 7)",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "spam_weather",
+  "output_schema": {
+   "properties": {
+    "as_of": {
+     "type": "string"
+    },
+    "attribution": {
+     "type": "string"
+    },
+    "cert_daily": {
+     "items": {
+      "properties": {
+       "count": {
+        "type": "integer"
+       },
+       "date": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "date",
+       "count"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "cert_new_domains_today": {
+     "type": "integer"
+    },
+    "cert_new_domains_window": {
+     "type": "integer"
+    },
+    "days": {
+     "type": "integer"
+    },
+    "dno_numbers_total": {
+     "type": "integer"
+    },
+    "recent_warnings": {
+     "items": {
+      "properties": {
+       "date": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "number": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "title": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "source",
+       "number",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "source": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "as_of",
+    "days",
+    "cert_new_domains_today",
+    "dno_numbers_total",
+    "attribution"
+   ],
+   "type": "object"
+  },
+  "title": "Pogoda spamowa w Polsce"
+ }
+]

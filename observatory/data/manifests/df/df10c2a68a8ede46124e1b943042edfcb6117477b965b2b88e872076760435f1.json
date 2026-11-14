@@ -1,0 +1,2550 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find the existing software products that already do what an idea, a product name or a website does — the same search as risetive.com/find. Use this first when the user asks who else does something, what the alternatives are, or whether something already exists. Returns a one-sentence answer (how many products do it and how big the biggest is), what the input was understood as, and the products doing it, each with its one-line description, monthly visits, Paid/Free when known, whether its site is new, and its niche, most visited first, 25 at a time (page.nextOffset asks for the next ones); products with 10M+ monthly visits come apart in giants. Also the niche most of them are in. For a website it also says whether Risetive lists it. When nothing does the idea yet, the nearest products are returned separately. For one product's features and pricing, call risetive_get_product_profile with its domain. A search takes about 10–60 seconds. Without an account: 5 searches a day and 10 competitors per search. A free Risetive account: 6 searches a day, shared with the website, and every competitor. Risetive Pro ($19/year): unlimited searches. When a list is cut, the answer says how many more there are.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "idea": {
+     "description": "A product idea in one sentence (\"an app that turns meeting notes into tasks\"), a product name (\"Notion\") or a website (\"notion.so\" or \"https://notion.so\"). Up to 300 characters.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "description": "How many competitors to return, 1–50; 25 when omitted.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "How many of the most visited competitors to skip; pass page.nextOffset from the last answer for the next ones. The same idea on the same day is not searched again.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "idea"
+   ],
+   "type": "object"
+  },
+  "name": "risetive_find_competitors",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "answer": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "competitorCount": {
+         "maximum": 9007199254740991,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "competitors": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "domain": {
+            "type": "string"
+           },
+           "monthlyVisits": {
+            "anyOf": [
+             {
+              "type": "number"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "name": {
+            "type": "string"
+           },
+           "newSite": {
+            "type": "boolean"
+           },
+           "niche": {
+            "additionalProperties": false,
+            "properties": {
+             "name": {
+              "type": "string"
+             },
+             "slug": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "slug",
+             "name"
+            ],
+            "type": "object"
+           },
+           "pricing": {
+            "anyOf": [
+             {
+              "enum": [
+               "paid",
+               "free"
+              ],
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "productUrl": {
+            "format": "uri",
+            "type": "string"
+           },
+           "summary": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           }
+          },
+          "required": [
+           "name",
+           "domain",
+           "summary",
+           "monthlyVisits",
+           "pricing",
+           "newSite",
+           "niche",
+           "productUrl"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "didYouMean": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "properties": {
+            "findUrl": {
+             "format": "uri",
+             "type": "string"
+            },
+            "text": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "text",
+            "findUrl"
+           ],
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "findUrl": {
+         "format": "uri",
+         "type": "string"
+        },
+        "giants": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "domain": {
+            "type": "string"
+           },
+           "monthlyVisits": {
+            "anyOf": [
+             {
+              "type": "number"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "name": {
+            "type": "string"
+           },
+           "newSite": {
+            "type": "boolean"
+           },
+           "niche": {
+            "additionalProperties": false,
+            "properties": {
+             "name": {
+              "type": "string"
+             },
+             "slug": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "slug",
+             "name"
+            ],
+            "type": "object"
+           },
+           "pricing": {
+            "anyOf": [
+             {
+              "enum": [
+               "paid",
+               "free"
+              ],
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "productUrl": {
+            "format": "uri",
+            "type": "string"
+           },
+           "summary": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           }
+          },
+          "required": [
+           "name",
+           "domain",
+           "summary",
+           "monthlyVisits",
+           "pricing",
+           "newSite",
+           "niche",
+           "productUrl"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "hiddenCompetitors": {
+         "maximum": 9007199254740991,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "input": {
+         "type": "string"
+        },
+        "nearest": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "domain": {
+            "type": "string"
+           },
+           "monthlyVisits": {
+            "anyOf": [
+             {
+              "type": "number"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "name": {
+            "type": "string"
+           },
+           "newSite": {
+            "type": "boolean"
+           },
+           "niche": {
+            "additionalProperties": false,
+            "properties": {
+             "name": {
+              "type": "string"
+             },
+             "slug": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "slug",
+             "name"
+            ],
+            "type": "object"
+           },
+           "pricing": {
+            "anyOf": [
+             {
+              "enum": [
+               "paid",
+               "free"
+              ],
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "productUrl": {
+            "format": "uri",
+            "type": "string"
+           },
+           "summary": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           }
+          },
+          "required": [
+           "name",
+           "domain",
+           "summary",
+           "monthlyVisits",
+           "pricing",
+           "newSite",
+           "niche",
+           "productUrl"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "niche": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "properties": {
+            "majority": {
+             "type": "boolean"
+            },
+            "name": {
+             "type": "string"
+            },
+            "publicProducts": {
+             "maximum": 9007199254740991,
+             "minimum": 0,
+             "type": "integer"
+            },
+            "slug": {
+             "type": "string"
+            },
+            "url": {
+             "format": "uri",
+             "type": "string"
+            }
+           },
+           "required": [
+            "slug",
+            "name",
+            "publicProducts",
+            "majority",
+            "url"
+           ],
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "outcome": {
+         "enum": [
+          "competitors",
+          "none-yet",
+          "stopped"
+         ],
+         "type": "string"
+        },
+        "page": {
+         "additionalProperties": false,
+         "properties": {
+          "limit": {
+           "exclusiveMinimum": 0,
+           "maximum": 9007199254740991,
+           "type": "integer"
+          },
+          "nextOffset": {
+           "anyOf": [
+            {
+             "maximum": 9007199254740991,
+             "minimum": 0,
+             "type": "integer"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "offset": {
+           "maximum": 9007199254740991,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "total": {
+           "maximum": 9007199254740991,
+           "minimum": 0,
+           "type": "integer"
+          }
+         },
+         "required": [
+          "offset",
+          "limit",
+          "total",
+          "nextOffset"
+         ],
+         "type": "object"
+        },
+        "site": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "properties": {
+            "domain": {
+             "type": "string"
+            },
+            "monthlyVisits": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "name": {
+             "type": "string"
+            },
+            "productUrl": {
+             "anyOf": [
+              {
+               "format": "uri",
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "status": {
+             "enum": [
+              "listed",
+              "unlisted",
+              "unreadable"
+             ],
+             "type": "string"
+            },
+            "summary": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           },
+           "required": [
+            "status",
+            "name",
+            "domain",
+            "summary",
+            "monthlyVisits",
+            "productUrl"
+           ],
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "understood": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "upgrade": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "input",
+        "findUrl",
+        "outcome",
+        "answer",
+        "competitorCount",
+        "site",
+        "didYouMean",
+        "understood",
+        "competitors",
+        "giants",
+        "page",
+        "nearest",
+        "niche"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "retryAfterSeconds": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "confirmed-empty",
+      "rate-limited",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "retryAfterSeconds",
+    "data",
+    "notice"
+   ],
+   "type": "object"
+  },
+  "title": "See who is already building an idea or product"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read one listed software product by its domain: what it does, its main features, monthly visits, backlinks, referring domains, pricing (paid/free/gated, starting price, model) and its niche with its rank there. Use it after risetive_find_competitors or risetive_list_niche_players to look at one product in depth; it does not search — pass an exact domain. Returns not-found for domains Risetive does not list. Works without signing in (small daily allowance, at most 5 rows per list); a free Risetive account returns full results.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "description": "The product's domain or homepage URL, e.g. \"canva.com\".",
+     "maxLength": 253,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "risetive_get_product_profile",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "featureCount": {
+         "maximum": 9007199254740991,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "features": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "name": {
+            "type": "string"
+           },
+           "summary": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           }
+          },
+          "required": [
+           "name",
+           "summary"
+          ],
+          "type": "object"
+         },
+         "maxItems": 6,
+         "type": "array"
+        },
+        "market": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "properties": {
+            "definition": {
+             "type": "string"
+            },
+            "name": {
+             "type": "string"
+            },
+            "slug": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "slug",
+            "name",
+            "definition"
+           ],
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "marketPosition": {
+         "additionalProperties": false,
+         "properties": {
+          "reason": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "state": {
+           "enum": [
+            "available",
+            "unknown",
+            "not-collected",
+            "failed",
+            "confirmed-empty"
+           ],
+           "type": "string"
+          },
+          "topPlayerRank": {
+           "anyOf": [
+            {
+             "exclusiveMinimum": 0,
+             "maximum": 9007199254740991,
+             "type": "integer"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "state",
+          "topPlayerRank",
+          "reason"
+         ],
+         "type": "object"
+        },
+        "metrics": {
+         "additionalProperties": false,
+         "properties": {
+          "backlinks": {
+           "additionalProperties": false,
+           "properties": {
+            "estimated": {
+             "type": "boolean"
+            },
+            "observedAt": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "readAt": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "reason": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "state": {
+             "enum": [
+              "available",
+              "unknown",
+              "not-collected",
+              "failed",
+              "confirmed-empty"
+             ],
+             "type": "string"
+            },
+            "unit": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "value": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           },
+           "required": [
+            "state",
+            "value",
+            "unit",
+            "estimated",
+            "observedAt",
+            "readAt",
+            "reason"
+           ],
+           "type": "object"
+          },
+          "monthlyOrganicTrafficGlobal": {
+           "additionalProperties": false,
+           "properties": {
+            "estimated": {
+             "type": "boolean"
+            },
+            "observedAt": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "readAt": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "reason": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "state": {
+             "enum": [
+              "available",
+              "unknown",
+              "not-collected",
+              "failed",
+              "confirmed-empty"
+             ],
+             "type": "string"
+            },
+            "unit": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "value": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           },
+           "required": [
+            "state",
+            "value",
+            "unit",
+            "estimated",
+            "observedAt",
+            "readAt",
+            "reason"
+           ],
+           "type": "object"
+          },
+          "referringDomains": {
+           "additionalProperties": false,
+           "properties": {
+            "estimated": {
+             "type": "boolean"
+            },
+            "observedAt": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "readAt": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "reason": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "state": {
+             "enum": [
+              "available",
+              "unknown",
+              "not-collected",
+              "failed",
+              "confirmed-empty"
+             ],
+             "type": "string"
+            },
+            "unit": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "value": {
+             "anyOf": [
+              {
+               "type": "number"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           },
+           "required": [
+            "state",
+            "value",
+            "unit",
+            "estimated",
+            "observedAt",
+            "readAt",
+            "reason"
+           ],
+           "type": "object"
+          }
+         },
+         "required": [
+          "monthlyOrganicTrafficGlobal",
+          "backlinks",
+          "referringDomains"
+         ],
+         "type": "object"
+        },
+        "pricing": {
+         "additionalProperties": false,
+         "properties": {
+          "checkedAt": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "model": {
+           "anyOf": [
+            {
+             "enum": [
+              "subscription",
+              "one-time",
+              "usage",
+              "mixed"
+             ],
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "reason": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "sourceUrl": {
+           "anyOf": [
+            {
+             "format": "uri",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "startingPriceUsdMonthly": {
+           "anyOf": [
+            {
+             "type": "number"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "state": {
+           "enum": [
+            "available",
+            "unknown",
+            "not-collected",
+            "failed",
+            "confirmed-empty"
+           ],
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "paid",
+            "gated",
+            "free",
+            "unknown"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "state",
+          "status",
+          "startingPriceUsdMonthly",
+          "model",
+          "checkedAt",
+          "sourceUrl",
+          "reason"
+         ],
+         "type": "object"
+        },
+        "product": {
+         "additionalProperties": false,
+         "properties": {
+          "description": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "domain": {
+           "type": "string"
+          },
+          "group": {
+           "enum": [
+            "top",
+            "reg"
+           ],
+           "type": "string"
+          },
+          "id": {
+           "pattern": "^[1-9][0-9]{0,18}$",
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "status": {
+           "type": "string"
+          },
+          "websiteRegistrationDate": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "id",
+          "name",
+          "domain",
+          "description",
+          "status",
+          "group",
+          "websiteRegistrationDate"
+         ],
+         "type": "object"
+        },
+        "source": {
+         "additionalProperties": false,
+         "properties": {
+          "dataAsOf": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "period": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "readAt": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "url": {
+           "format": "uri",
+           "type": "string"
+          }
+         },
+         "required": [
+          "url",
+          "dataAsOf",
+          "readAt",
+          "period"
+         ],
+         "type": "object"
+        }
+       },
+       "required": [
+        "product",
+        "market",
+        "marketPosition",
+        "metrics",
+        "pricing",
+        "features",
+        "featureCount",
+        "source"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "retryAfterSeconds": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "confirmed-empty",
+      "rate-limited",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "retryAfterSeconds",
+    "data",
+    "notice"
+   ],
+   "type": "object"
+  },
+  "title": "Get a product profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List up to ten products most recently added to Risetive in one niche, newest first, with the same fields as risetive_list_niche_players and when each was added. Use it to see who just entered a niche; the added date is when Risetive listed the product, not its launch date. Works without signing in (small daily allowance, at most 5 rows per list); a free Risetive account returns full results.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "niche": {
+     "description": "Niche slug as returned by risetive_find_competitors or risetive_get_product_profile, or in a niche URL, e.g. \"ai-photo-and-image-editors\".",
+     "maxLength": 160,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "niche"
+   ],
+   "type": "object"
+  },
+  "name": "risetive_list_new_entrants",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "admissionMeaning": {
+         "type": "string"
+        },
+        "entrants": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "admissionMeaning": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "admittedAt": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "dataAsOf": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "domain": {
+            "type": "string"
+           },
+           "group": {
+            "enum": [
+             "top",
+             "reg"
+            ],
+            "type": "string"
+           },
+           "id": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "type": "string"
+           },
+           "monthlyOrganicTraffic": {
+            "additionalProperties": false,
+            "properties": {
+             "estimated": {
+              "type": "boolean"
+             },
+             "observedAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "readAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "reason": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "state": {
+              "enum": [
+               "available",
+               "unknown",
+               "not-collected",
+               "failed",
+               "confirmed-empty"
+              ],
+              "type": "string"
+             },
+             "unit": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "value": {
+              "anyOf": [
+               {
+                "type": "number"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             }
+            },
+            "required": [
+             "state",
+             "value",
+             "unit",
+             "estimated",
+             "observedAt",
+             "readAt",
+             "reason"
+            ],
+            "type": "object"
+           },
+           "name": {
+            "type": "string"
+           },
+           "pricing": {
+            "additionalProperties": false,
+            "properties": {
+             "checkedAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "model": {
+              "anyOf": [
+               {
+                "enum": [
+                 "subscription",
+                 "one-time",
+                 "usage",
+                 "mixed"
+                ],
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "reason": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "sourceUrl": {
+              "anyOf": [
+               {
+                "format": "uri",
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "startingPriceUsdMonthly": {
+              "anyOf": [
+               {
+                "type": "number"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "state": {
+              "enum": [
+               "available",
+               "unknown",
+               "not-collected",
+               "failed",
+               "confirmed-empty"
+              ],
+              "type": "string"
+             },
+             "status": {
+              "enum": [
+               "paid",
+               "gated",
+               "free",
+               "unknown"
+              ],
+              "type": "string"
+             }
+            },
+            "required": [
+             "state",
+             "status",
+             "startingPriceUsdMonthly",
+             "model",
+             "checkedAt",
+             "sourceUrl",
+             "reason"
+            ],
+            "type": "object"
+           },
+           "referringDomains": {
+            "additionalProperties": false,
+            "properties": {
+             "estimated": {
+              "type": "boolean"
+             },
+             "observedAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "readAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "reason": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "state": {
+              "enum": [
+               "available",
+               "unknown",
+               "not-collected",
+               "failed",
+               "confirmed-empty"
+              ],
+              "type": "string"
+             },
+             "unit": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "value": {
+              "anyOf": [
+               {
+                "type": "number"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             }
+            },
+            "required": [
+             "state",
+             "value",
+             "unit",
+             "estimated",
+             "observedAt",
+             "readAt",
+             "reason"
+            ],
+            "type": "object"
+           },
+           "sourceUrl": {
+            "format": "uri",
+            "type": "string"
+           },
+           "summary": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "name",
+           "domain",
+           "summary",
+           "group",
+           "admittedAt",
+           "admissionMeaning",
+           "dataAsOf",
+           "monthlyOrganicTraffic",
+           "referringDomains",
+           "pricing",
+           "sourceUrl"
+          ],
+          "type": "object"
+         },
+         "maxItems": 10,
+         "type": "array"
+        },
+        "market": {
+         "additionalProperties": false,
+         "properties": {
+          "definition": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "slug": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "slug",
+          "name",
+          "definition"
+         ],
+         "type": "object"
+        },
+        "ordering": {
+         "type": "string"
+        },
+        "source": {
+         "additionalProperties": false,
+         "properties": {
+          "dataAsOf": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "period": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "readAt": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "url": {
+           "format": "uri",
+           "type": "string"
+          }
+         },
+         "required": [
+          "url",
+          "dataAsOf",
+          "readAt",
+          "period"
+         ],
+         "type": "object"
+        }
+       },
+       "required": [
+        "market",
+        "ordering",
+        "admissionMeaning",
+        "entrants",
+        "source"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "retryAfterSeconds": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "confirmed-empty",
+      "rate-limited",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "retryAfterSeconds",
+    "data",
+    "notice"
+   ],
+   "type": "object"
+  },
+  "title": "List the newest products in a niche"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List up to eight leading products in one niche — current top products first, then by monthly visits — each with its one-line description, monthly visits, referring domains and pricing. Use it to see who leads a niche; use risetive_list_new_entrants for the newest products in it. No pagination. Works without signing in (small daily allowance, at most 5 rows per list); a free Risetive account returns full results.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "niche": {
+     "description": "Niche slug as returned by risetive_find_competitors or risetive_get_product_profile, or in a niche URL, e.g. \"ai-photo-and-image-editors\".",
+     "maxLength": 160,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "niche"
+   ],
+   "type": "object"
+  },
+  "name": "risetive_list_niche_players",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "market": {
+         "additionalProperties": false,
+         "properties": {
+          "definition": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "slug": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "slug",
+          "name",
+          "definition"
+         ],
+         "type": "object"
+        },
+        "ordering": {
+         "type": "string"
+        },
+        "players": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "admissionMeaning": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "admittedAt": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "dataAsOf": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ]
+           },
+           "domain": {
+            "type": "string"
+           },
+           "group": {
+            "enum": [
+             "top",
+             "reg"
+            ],
+            "type": "string"
+           },
+           "id": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "type": "string"
+           },
+           "monthlyOrganicTraffic": {
+            "additionalProperties": false,
+            "properties": {
+             "estimated": {
+              "type": "boolean"
+             },
+             "observedAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "readAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "reason": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "state": {
+              "enum": [
+               "available",
+               "unknown",
+               "not-collected",
+               "failed",
+               "confirmed-empty"
+              ],
+              "type": "string"
+             },
+             "unit": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "value": {
+              "anyOf": [
+               {
+                "type": "number"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             }
+            },
+            "required": [
+             "state",
+             "value",
+             "unit",
+             "estimated",
+             "observedAt",
+             "readAt",
+             "reason"
+            ],
+            "type": "object"
+           },
+           "name": {
+            "type": "string"
+           },
+           "pricing": {
+            "additionalProperties": false,
+            "properties": {
+             "checkedAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "model": {
+              "anyOf": [
+               {
+                "enum": [
+                 "subscription",
+                 "one-time",
+                 "usage",
+                 "mixed"
+                ],
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "reason": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "sourceUrl": {
+              "anyOf": [
+               {
+                "format": "uri",
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "startingPriceUsdMonthly": {
+              "anyOf": [
+               {
+                "type": "number"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "state": {
+              "enum": [
+               "available",
+               "unknown",
+               "not-collected",
+               "failed",
+               "confirmed-empty"
+              ],
+              "type": "string"
+             },
+             "status": {
+              "enum": [
+               "paid",
+               "gated",
+               "free",
+               "unknown"
+              ],
+              "type": "string"
+             }
+            },
+            "required": [
+             "state",
+             "status",
+             "startingPriceUsdMonthly",
+             "model",
+             "checkedAt",
+             "sourceUrl",
+             "reason"
+            ],
+            "type": "object"
+           },
+           "referringDomains": {
+            "additionalProperties": false,
+            "properties": {
+             "estimated": {
+              "type": "boolean"
+             },
+             "observedAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "readAt": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "reason": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "state": {
+              "enum": [
+               "available",
+               "unknown",
+               "not-collected",
+               "failed",
+               "confirmed-empty"
+              ],
+              "type": "string"
+             },
+             "unit": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "value": {
+              "anyOf": [
+               {
+                "type": "number"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             }
+            },
+            "required": [
+             "state",
+             "value",
+             "unit",
+             "estimated",
+             "observedAt",
+             "readAt",
+             "reason"
+            ],
+            "type": "object"
+           },
+           "sourceUrl": {
+            "format": "uri",
+            "type": "string"
+           },
+           "summary": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "name",
+           "domain",
+           "summary",
+           "group",
+           "admittedAt",
+           "admissionMeaning",
+           "dataAsOf",
+           "monthlyOrganicTraffic",
+           "referringDomains",
+           "pricing",
+           "sourceUrl"
+          ],
+          "type": "object"
+         },
+         "maxItems": 8,
+         "type": "array"
+        },
+        "source": {
+         "additionalProperties": false,
+         "properties": {
+          "dataAsOf": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "period": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "readAt": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "url": {
+           "format": "uri",
+           "type": "string"
+          }
+         },
+         "required": [
+          "url",
+          "dataAsOf",
+          "readAt",
+          "period"
+         ],
+         "type": "object"
+        }
+       },
+       "required": [
+        "market",
+        "ordering",
+        "players",
+        "source"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "retryAfterSeconds": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "confirmed-empty",
+      "rate-limited",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "retryAfterSeconds",
+    "data",
+    "notice"
+   ],
+   "type": "object"
+  },
+  "title": "List the leading products in a niche"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the niches and products the signed-in user saved, with each item's id (pass it as savedItemId to risetive_remove_saved_item). Only the user's own items. Requires signing in with a free Risetive account.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "risetive_list_saved_items",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "items": {
+         "items": {
+          "oneOf": [
+           {
+            "additionalProperties": false,
+            "properties": {
+             "href": {
+              "type": "string"
+             },
+             "id": {
+              "pattern": "^[1-9][0-9]{0,18}$",
+              "type": "string"
+             },
+             "kind": {
+              "enum": [
+               "market",
+               "product"
+              ],
+              "type": "string"
+             },
+             "name": {
+              "type": "string"
+             },
+             "state": {
+              "const": "available",
+              "type": "string"
+             }
+            },
+            "required": [
+             "id",
+             "kind",
+             "state",
+             "name",
+             "href"
+            ],
+            "type": "object"
+           },
+           {
+            "additionalProperties": false,
+            "properties": {
+             "id": {
+              "pattern": "^[1-9][0-9]{0,18}$",
+              "type": "string"
+             },
+             "kind": {
+              "enum": [
+               "market",
+               "product"
+              ],
+              "type": "string"
+             },
+             "state": {
+              "const": "unavailable",
+              "type": "string"
+             }
+            },
+            "required": [
+             "id",
+             "kind",
+             "state"
+            ],
+            "type": "object"
+           }
+          ]
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "items"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "data"
+   ],
+   "type": "object"
+  },
+  "title": "List saved Risetive items"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Remove one item from the signed-in user's Saved list by the id that risetive_save_item or risetive_list_saved_items returns; the niche, product or project itself is not affected. Removing an item that is already gone returns removed: false. Requires signing in with a free Risetive account.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "savedItemId": {
+     "pattern": "^[1-9][0-9]{0,18}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "savedItemId"
+   ],
+   "type": "object"
+  },
+  "name": "risetive_remove_saved_item",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "removed": {
+         "type": "boolean"
+        }
+       },
+       "required": [
+        "removed"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "data"
+   ],
+   "type": "object"
+  },
+  "title": "Remove a saved Risetive item"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Save a niche or a product to the signed-in user's Risetive Saved list (risetive.com/saved). Pass kind and key: kind \"market\" with a niche slug as key, or kind \"product\" with a product id (from risetive_get_product_profile, risetive_list_niche_players or risetive_list_new_entrants) as key. Returns the saved item's id; saving an item twice keeps one copy. Requires signing in with a free Risetive account.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "oneOf": [
+    {
+     "additionalProperties": false,
+     "properties": {
+      "key": {
+       "maxLength": 256,
+       "minLength": 1,
+       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+       "type": "string"
+      },
+      "kind": {
+       "const": "market",
+       "type": "string"
+      }
+     },
+     "required": [
+      "kind",
+      "key"
+     ],
+     "type": "object"
+    },
+    {
+     "additionalProperties": false,
+     "properties": {
+      "key": {
+       "pattern": "^[1-9][0-9]{0,18}$",
+       "type": "string"
+      },
+      "kind": {
+       "const": "product",
+       "type": "string"
+      }
+     },
+     "required": [
+      "kind",
+      "key"
+     ],
+     "type": "object"
+    }
+   ],
+   "type": "object"
+  },
+  "name": "risetive_save_item",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "id": {
+         "pattern": "^[1-9][0-9]{0,18}$",
+         "type": "string"
+        }
+       },
+       "required": [
+        "id"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "message": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "ok",
+      "not-found",
+      "timeout",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "message",
+    "data"
+   ],
+   "type": "object"
+  },
+  "title": "Save a Risetive item"
+ }
+]

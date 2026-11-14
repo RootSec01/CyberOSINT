@@ -1,0 +1,100 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Paid (x402, $0.002 USDC on Base). Fetch any http(s) URL and return clean readable text, title/description/canonical, and outbound links as JSON — the data an agent ingests on each step of a crawl/RAG loop.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "Absolute http(s) URL to fetch and extract (e.g. 'https://example.com/article')",
+     "type": "string"
+    },
+    "x402_payment": {
+     "description": "Base64 X-PAYMENT header from your x402 wallet (omit to get the payment challenge)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "agent_web_reader",
+  "output_schema": {},
+  "title": "Web-content reader"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Paid (x402, $0.005 USDC on Base). For each CoinGecko id return price, market cap, 24h change, 24h volume, plus a derived momentum score (-100..100), a bullish/neutral/bearish signal, and a volatility flag — enriched data an agent ingests in a trading/research loop.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "ids": {
+     "description": "Comma-separated CoinGecko ids (e.g. 'bitcoin,ethereum,solana'), max 25",
+     "type": "string"
+    },
+    "x402_payment": {
+     "description": "Base64 X-PAYMENT header from your x402 wallet (omit to get the payment challenge)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ids"
+   ],
+   "type": "object"
+  },
+  "name": "crypto_market_signal",
+  "output_schema": {},
+  "title": "Crypto market signal"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Paid (x402, $0.005 USDC on Base). Score a GitHub repo's README, description, topics, homepage and metadata and return a 0-100 score, a grade, and concrete fixes. Input: owner, repo.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "owner": {
+     "description": "GitHub repository owner or org",
+     "type": "string"
+    },
+    "repo": {
+     "description": "GitHub repository name",
+     "type": "string"
+    },
+    "x402_payment": {
+     "description": "Base64 X-PAYMENT header from your x402 wallet (omit to get the payment challenge)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "owner",
+    "repo"
+   ],
+   "type": "object"
+  },
+  "name": "github_repo_seo_audit",
+  "output_schema": {},
+  "title": "GitHub repo SEO audit"
+ }
+]

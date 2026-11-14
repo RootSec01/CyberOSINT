@@ -1,0 +1,1537 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check tax residence"
+  },
+  "description": "Determines the person's tax residence between the version's home state and another country, step by step. Without all answers it returns status \"needs_answer\" and the next question (id, text, options); ask the user and call again with all answers collected so far. When complete it returns status \"done\": the conclusion with reliability %, how each law treats the person, the treaty tie-breaker, where and which taxes apply, next steps (certificate of residence, resident / non-resident obligations, steps when leaving), exit tax and the year of the move (with \"move\"), what the result does not cover, the legal basis (norms with links) and court practice, optional per-income-type rules, the disclaimer and a link to the same result on doubletaxation.app. Texts are in the language of the version.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "answers": {
+     "additionalProperties": {
+      "type": [
+       "string",
+       "integer"
+      ]
+     },
+     "description": "Answers so far: { \"<question id>\": value }. Choice questions take an option value (e.g. \"yes\", \"no\", \"unknown\"); number questions take a whole number (days) or \"unknown\" if allowed.",
+     "type": "object"
+    },
+    "citizenship": {
+     "description": "Citizenship option value from list_countries.citizenship_options, e.g. \"UA\", \"UA+OTHER\" (dual), \"NONUS\". Default: the first option (citizen of the home state only).",
+     "type": "string"
+    },
+    "country": {
+     "description": "ISO code of the other country (where the person lives or stays). Must be one of list_countries for this version.",
+     "enum": [
+      "AR",
+      "AT",
+      "BD",
+      "BR",
+      "CA",
+      "CH",
+      "CN",
+      "CZ",
+      "DE",
+      "ES",
+      "FR",
+      "GB",
+      "GE",
+      "HU",
+      "ID",
+      "IN",
+      "IT",
+      "JP",
+      "MX",
+      "MY",
+      "NL",
+      "PK",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SG",
+      "TR",
+      "TW",
+      "UA",
+      "US"
+     ],
+     "type": "string"
+    },
+    "income": {
+     "description": "Optional: the person's income, one item per category, to get the treaty's special rules (who may tax it, rate limits, relief method, example calculation if amount is given).",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "amount": {
+        "description": "Optional annual gross amount (any currency, used for an illustrative calculation).",
+        "type": "number"
+       },
+       "asset": {
+        "description": "capital_gains: what is sold.",
+        "enum": [
+         "immovable",
+         "property_rich_shares",
+         "other"
+        ],
+        "type": "string"
+       },
+       "borne_by_pe": {
+        "description": "employment: is the salary borne by a permanent establishment of the employer in the state of work?",
+        "enum": [
+         "yes",
+         "no",
+         "unknown"
+        ],
+        "type": "string"
+       },
+       "category": {
+        "enum": [
+         "employment",
+         "business",
+         "technical_fees",
+         "government",
+         "pension",
+         "immovable",
+         "dividends",
+         "interest",
+         "royalties",
+         "capital_gains",
+         "directors",
+         "artistes",
+         "students",
+         "other"
+        ],
+        "type": "string"
+       },
+       "days": {
+        "description": "employment: days in the state of work within the treaty period.",
+        "type": "integer"
+       },
+       "employer_resident_of_source": {
+        "description": "employment: is the employer resident in the state of work?",
+        "enum": [
+         "yes",
+         "no",
+         "unknown"
+        ],
+        "type": "string"
+       },
+       "fixed_place": {
+        "description": "business / technical_fees: fixed place of business (permanent establishment) in the state of source?",
+        "enum": [
+         "yes",
+         "no",
+         "unknown"
+        ],
+        "type": "string"
+       },
+       "pension_kind": {
+        "description": "pension: state social pension, pension for government service, or private/occupational pension.",
+        "enum": [
+         "social",
+         "government",
+         "private"
+        ],
+        "type": "string"
+       },
+       "service_days": {
+        "description": "business / technical_fees: days of providing services in the state of source.",
+        "type": "integer"
+       },
+       "service_state": {
+        "description": "government: state where the government service is performed (ISO code).",
+        "type": "string"
+       },
+       "source": {
+        "description": "ISO code of the state of source: where the work is done, the property is, the payer or company is resident, the performance takes place. Must be the home state or the other country.",
+        "type": "string"
+       },
+       "student": {
+        "description": "students: came to the state of study for education, and the payments come from abroad?",
+        "enum": [
+         "yes",
+         "no",
+         "unknown"
+        ],
+        "type": "string"
+       },
+       "study_state": {
+        "description": "students: state where the person studies (ISO code).",
+        "type": "string"
+       }
+      },
+      "required": [
+       "category",
+       "source"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "move": {
+     "additionalProperties": false,
+     "description": "Optional: the person moved this tax year. kind \"depart\" = left the version's home state for the other country; \"arrive\" = moved to the home state from the other country. date YYYY-MM-DD within the tax year. Adds how each state treats the year of the move, the steps when leaving and the exit tax of the state left.",
+     "properties": {
+      "date": {
+       "description": "Date of the move, YYYY-MM-DD.",
+       "type": "string"
+      },
+      "kind": {
+       "enum": [
+        "depart",
+        "arrive"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "kind",
+      "date"
+     ],
+     "type": "object"
+    },
+    "version": {
+     "description": "Version id (home state), see list_versions.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    },
+    "year": {
+     "description": "Tax year: the current year or one of the two previous years. Default: current year.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "version",
+    "country"
+   ],
+   "type": "object"
+  },
+  "name": "check_residency",
+  "output_schema": {},
+  "title": "Check tax residence"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Business taxes: compare legal forms and tax systems"
+  },
+  "description": "Business tax calculator for a resident of one country and one sector (activity): every legal form (sole proprietor, own company) under every available tax system — total tax and contributions, what remains, rate, line items, why a system is unavailable for the sector or amount, conditions, legal norms; requirements for each legal form and the sector's tax features; assumptions and sources. Same calculation and ranking as doubletaxation.app (section \"Business taxes\"); an estimate, not tax advice.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "activity": {
+     "description": "Sector: it = IT and consulting for businesses (default); services = other professional services to companies (marketing, design, translation, engineering, bookkeeping); consumer = services to individuals (household services, repairs, beauty, tutoring); trade = trade in goods, retail or wholesale, incl. online shop (no excise goods); production = making and selling own products.",
+     "enum": [
+      "it",
+      "services",
+      "consumer",
+      "trade",
+      "production"
+     ],
+     "type": "string"
+    },
+    "country": {
+     "description": "ISO code of the country of residence.",
+     "enum": [
+      "AR",
+      "AT",
+      "BD",
+      "BR",
+      "CA",
+      "CH",
+      "CN",
+      "CZ",
+      "DE",
+      "ES",
+      "FR",
+      "GB",
+      "GE",
+      "HU",
+      "ID",
+      "IN",
+      "IT",
+      "JP",
+      "MX",
+      "MY",
+      "NL",
+      "PK",
+      "PL",
+      "RO",
+      "SE",
+      "SG",
+      "TR",
+      "TW",
+      "UA",
+      "US"
+     ],
+     "type": "string"
+    },
+    "currency": {
+     "description": "Currency of revenue and expenses: \"EUR\" or the country's own currency code (e.g. \"PLN\"). EUR amounts are converted at the site's rate (fx.per_eur in the result).",
+     "type": "string"
+    },
+    "distribute": {
+     "description": "For companies: the whole profit after tax is paid to the owner as dividends (true, default) or stays in the company (false; companies are then not ranked against sole proprietors).",
+     "type": "boolean"
+    },
+    "expenses": {
+     "description": "Annual deductible business expenses (not more than revenue), in the same currency.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "revenue": {
+     "description": "Annual revenue, in the currency given by \"currency\".",
+     "minimum": 0,
+     "type": "number"
+    },
+    "version": {
+     "description": "Language of the texts (version id). Default: en.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "country",
+    "revenue",
+    "expenses",
+    "currency"
+   ],
+   "type": "object"
+  },
+  "name": "compare_business_forms",
+  "output_schema": {},
+  "title": "Business taxes: compare legal forms and tax systems"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Count days of stay"
+  },
+  "description": "Counts days of stay per country from the trips the user provides (country, from, to) under each country's own counting rule (calendar year, tax year, any 12 months, US substantial presence test, continuous stay): days in the counting period, the day threshold for tax residence and its legal source, the date it was reached or how many more days are needed, and Schengen 90/180 days used. The day of arrival and departure counts in both countries. It does not track anyone: it only counts the trips passed in, and they are not stored.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "as_of": {
+     "description": "Date to count up to, YYYY-MM-DD. Default: today. Later trips count as planned.",
+     "type": "string"
+    },
+    "trips": {
+     "description": "Stays, one item per stay.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "country": {
+        "description": "ISO 3166-1 alpha-2 code, e.g. \"PL\".",
+        "type": "string"
+       },
+       "from": {
+        "description": "Arrival date, YYYY-MM-DD.",
+        "type": "string"
+       },
+       "to": {
+        "description": "Departure date, YYYY-MM-DD. Omit if the person is still there (counted up to as_of).",
+        "type": "string"
+       }
+      },
+      "required": [
+       "country",
+       "from"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "version": {
+     "description": "Language of the texts (version id). Default: en.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "trips"
+   ],
+   "type": "object"
+  },
+  "name": "count_days",
+  "output_schema": {},
+  "title": "Count days of stay"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Exit tax on individuals"
+  },
+  "description": "Whether a country levies an exit (departure) tax on individuals who give up tax residence: who pays and on what (assets, thresholds, prior residence period), deferral or relief (e.g. moving within the EU/EEA), the legal norm with a link and the date checked.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "countries": {
+     "description": "ISO codes; default: all available countries.",
+     "items": {
+      "enum": [
+       "AR",
+       "AT",
+       "BD",
+       "BR",
+       "CA",
+       "CH",
+       "CN",
+       "CZ",
+       "DE",
+       "ES",
+       "FR",
+       "GB",
+       "GE",
+       "HU",
+       "ID",
+       "IN",
+       "IT",
+       "JP",
+       "MX",
+       "MY",
+       "NL",
+       "PK",
+       "PL",
+       "PT",
+       "RO",
+       "SE",
+       "SG",
+       "TR",
+       "TW",
+       "UA",
+       "US"
+      ],
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "version": {
+     "description": "Language of the texts (version id). Default: en.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "exit_tax_check",
+  "output_schema": {},
+  "title": "Exit tax on individuals"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Ask the monograph: tax residence, tax jurisdiction, taxpayer status"
+  },
+  "description": "Answers general questions about tax residence and the theory behind it from the monograph by DoubleTaxation's legal expert, Yevhen Marynchak, \"The Financial-Legal Link Between an Individual and the State\" (2nd edition, 2020): 893 questions and answers covering what resident status is and why it exists; its history (from the citizenship principle to the residence principle, the League of Nations work of the 1920s, the OECD Model Tax Convention); economic theories of taxation (Smith, von Schanz, Wicksell–Lindahl); concepts of the \"income taxpayer\"; tax sovereignty and tax jurisdiction and their kinds (interstate, state, local, offshore zones); the legal status and tax legal personality of an individual taxpayer; criteria of residence and the treaty tie-breaker; source taxation; e-government; problems of the Ukrainian rules; the author's own terms and definitions. Each entry is a plain-English paraphrase with the book's section, page and a link to find the original text. Use \"query\" for a question (translate it into English key words); call without arguments for an overview and the table of contents. Not for a person's own status: use check_residency.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "ids": {
+     "description": "Return these entries by id (from an earlier result).",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "kind": {
+     "description": "Limit to one kind of entry (e.g. definition, history, legal_norm, proposal).",
+     "enum": [
+      "argument",
+      "classification",
+      "comparison",
+      "definition",
+      "fact",
+      "history",
+      "legal_norm",
+      "problem",
+      "proposal",
+      "scholar_view",
+      "theory"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Maximum entries returned. Default 6.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "The user's question or its key words, in English (translate if needed), e.g. \"why did citizenship stop determining tax duties\" or \"offshore zone definition\".",
+     "maxLength": 300,
+     "type": "string"
+    },
+    "section": {
+     "description": "Limit to one part of the book (with its subsections); alone, lists that part's entries.",
+     "enum": [
+      "Preface",
+      "Introduction",
+      "1",
+      "1.1",
+      "1.1.1",
+      "1.1.2",
+      "1.1.3",
+      "1.2",
+      "1.2.1",
+      "1.2.2",
+      "1.2.3",
+      "Conclusions to chapter 1",
+      "2",
+      "2.1",
+      "2.2",
+      "2.3",
+      "2.3.1",
+      "2.3.2",
+      "2.3.3",
+      "2.3.4",
+      "Conclusions to chapter 2",
+      "3",
+      "3.1",
+      "3.2",
+      "3.3",
+      "Conclusions to chapter 3",
+      "4",
+      "4.1",
+      "4.2",
+      "4.3",
+      "Conclusions to chapter 4",
+      "5",
+      "5.1",
+      "5.2",
+      "5.3",
+      "5.4",
+      "5.5",
+      "Conclusions to chapter 5",
+      "Conclusions"
+     ],
+     "type": "string"
+    },
+    "topic": {
+     "description": "Short overview of one theme instead of a search: what_is = What tax residence is; origin = Where the concept comes from; why_it_matters = Why tax residence matters; criteria = How tax residence is determined; citizenship = Tax residence and citizenship; tax_jurisdiction = Tax sovereignty and tax jurisdiction; ukraine = Ukraine: problems analysed in the monograph.",
+     "enum": [
+      "what_is",
+      "origin",
+      "why_it_matters",
+      "criteria",
+      "citizenship",
+      "tax_jurisdiction",
+      "ukraine"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "explain_residency",
+  "output_schema": {},
+  "title": "Ask the monograph: tax residence, tax jurisdiction, taxpayer status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List countries of a version"
+  },
+  "description": "Lists the countries that can be checked against the home state of a version: whether a tax treaty is in force (title, dates, link), whether per-income treaty rules and tax burden data exist, plus the allowed citizenship options and years for check_residency.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "version": {
+     "description": "Version id from list_versions.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "version"
+   ],
+   "type": "object"
+  },
+  "name": "list_countries",
+  "output_schema": {},
+  "title": "List countries of a version"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List language versions"
+  },
+  "description": "Lists the 27 versions of DoubleTaxation. Each version is written for taxpayers of one home state (in its language) and compares it with 30 other countries. Call this first if you are not sure which version fits the user.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_versions",
+  "output_schema": {},
+  "title": "List language versions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Next steps after the residence conclusion"
+  },
+  "description": "What to do once the tax residence is known (the same blocks as under the result on doubletaxation.app and in check_residency \"done\"): how to get a certificate of residence, obligations of a resident (returns, deadlines), obligations and options of a non-resident with income from the other state (treaty relief forms, refunds), U.S. citizen obligations, steps when leaving the state, the exit tax, how each state treats the year of the move, and what the conclusion does not cover. Each step has the authority, form, link and legal norm. Texts are in the language of the version.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "citizenship": {
+     "description": "Citizenship option value from list_countries.citizenship_options (e.g. \"US\", \"US+OTHER\", \"NONUS\"). Default: the first option. Matters for U.S. citizens (taxed on worldwide income wherever they live).",
+     "type": "string"
+    },
+    "move": {
+     "additionalProperties": false,
+     "description": "Optional: the person moved this tax year. kind \"depart\" = left the version's home state for the other country; \"arrive\" = moved to the home state from the other country. date YYYY-MM-DD within the tax year.",
+     "properties": {
+      "date": {
+       "description": "Date of the move, YYYY-MM-DD.",
+       "type": "string"
+      },
+      "kind": {
+       "enum": [
+        "depart",
+        "arrive"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "kind",
+      "date"
+     ],
+     "type": "object"
+    },
+    "other": {
+     "description": "The other country of the pair (ISO code). Optional when residence is a country other than the home state (then it is that country); needed for BOTH, MAP, NONE, UNDETERMINED and for move kind \"arrive\".",
+     "enum": [
+      "AR",
+      "AT",
+      "BD",
+      "BR",
+      "CA",
+      "CH",
+      "CN",
+      "CZ",
+      "DE",
+      "ES",
+      "FR",
+      "GB",
+      "GE",
+      "HU",
+      "ID",
+      "IN",
+      "IT",
+      "JP",
+      "MX",
+      "MY",
+      "NL",
+      "PK",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "SG",
+      "TR",
+      "TW",
+      "UA",
+      "US"
+     ],
+     "type": "string"
+    },
+    "residence": {
+     "description": "State of tax residence: the version's home state or one of its other countries (ISO code), or \"BOTH\", \"MAP\", \"NONE\", \"UNDETERMINED\" (conclusion.residence from check_residency).",
+     "type": "string"
+    },
+    "version": {
+     "description": "Version id (home state), see list_versions.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    },
+    "year": {
+     "description": "Tax year of the move (current or one of the two previous). Optional; used to check move.date.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "version",
+    "residence"
+   ],
+   "type": "object"
+  },
+  "name": "next_steps",
+  "output_schema": {},
+  "title": "Next steps after the residence conclusion"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search special tax regimes"
+  },
+  "description": "Special and preferential tax regimes for individuals (newcomers / impatriates, employees, self-employed, investors, pensioners) in 30 countries. Filter by country, kind, status and free text. Returns per regime: official name, who it is for, the benefit, duration, how to apply, limits and risks, status (open, closed to new entrants, only for existing participants, starts later), the legal norm with a link and the date checked.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "countries": {
+     "description": "ISO codes; default: all countries.",
+     "items": {
+      "enum": [
+       "AR",
+       "AT",
+       "BD",
+       "BR",
+       "CA",
+       "CH",
+       "CN",
+       "CZ",
+       "DE",
+       "ES",
+       "FR",
+       "GB",
+       "GE",
+       "HU",
+       "ID",
+       "IN",
+       "IT",
+       "JP",
+       "MX",
+       "MY",
+       "NL",
+       "PK",
+       "PL",
+       "RO",
+       "SE",
+       "SG",
+       "TR",
+       "TW",
+       "UA",
+       "US"
+      ],
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "kind": {
+     "description": "Who the regime is for; default: all.",
+     "items": {
+      "enum": [
+       "newcomer",
+       "employee",
+       "self_employed",
+       "investor",
+       "pensioner",
+       "other"
+      ],
+      "type": "string"
+     },
+     "maxItems": 6,
+     "type": "array"
+    },
+    "limit": {
+     "description": "Maximum regimes returned. Default 20.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Free text; all words must match (name, who, benefit, conditions; in the version's language or English), e.g. \"foreign income flat\".",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "status": {
+     "description": "open = can be entered now; closed = closed to new entrants; grandfathered = only for existing participants; announced = starts later. Default: all.",
+     "items": {
+      "enum": [
+       "open",
+       "closed",
+       "grandfathered",
+       "announced"
+      ],
+      "type": "string"
+     },
+     "maxItems": 4,
+     "type": "array"
+    },
+    "version": {
+     "description": "Language of the texts (version id). Default: en.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "regime_search",
+  "output_schema": {},
+  "title": "Search special tax regimes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Tax burden on salary"
+  },
+  "description": "Income tax and social contributions on an annual salary in one or more countries (OECD Taxing Wages method: single person, no children, full-year employee). Returns net pay, personal rate, tax wedge and marginal rate, sorted from lowest to highest personal rate. 30 countries are fully checked; some 140 more have preliminary data (marked level \"preliminary\"). For up to 3 countries also the line-by-line breakdown, special tax regimes for individuals (e.g. for newcomers), assumptions and official sources.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "https://doubletaxation.app/icon.svg?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "512x512"
+    ],
+    "src": "https://doubletaxation.app/icon-512.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "192x192"
+    ],
+    "src": "https://doubletaxation.app/icon-192.png?v=2"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "96x96"
+    ],
+    "src": "https://doubletaxation.app/favicon-96.png?v=2"
+   }
+  ],
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "countries": {
+     "description": "ISO codes; default: the fully checked countries. Other codes in the list have preliminary data (salary tax scale and main contributions only).",
+     "items": {
+      "enum": [
+       "AD",
+       "AE",
+       "AG",
+       "AM",
+       "AO",
+       "AR",
+       "AT",
+       "AU",
+       "AZ",
+       "BA",
+       "BB",
+       "BD",
+       "BE",
+       "BF",
+       "BG",
+       "BH",
+       "BI",
+       "BJ",
+       "BN",
+       "BO",
+       "BR",
+       "BS",
+       "BT",
+       "BW",
+       "BZ",
+       "CA",
+       "CD",
+       "CF",
+       "CG",
+       "CH",
+       "CI",
+       "CL",
+       "CM",
+       "CN",
+       "CO",
+       "CR",
+       "CV",
+       "CY",
+       "CZ",
+       "DE",
+       "DJ",
+       "DK",
+       "DM",
+       "DO",
+       "DZ",
+       "EC",
+       "EE",
+       "EG",
+       "ES",
+       "FI",
+       "FJ",
+       "FM",
+       "FR",
+       "GA",
+       "GB",
+       "GD",
+       "GE",
+       "GH",
+       "GM",
+       "GN",
+       "GR",
+       "GT",
+       "GY",
+       "HK",
+       "HN",
+       "HR",
+       "HT",
+       "HU",
+       "ID",
+       "IE",
+       "IL",
+       "IN",
+       "IQ",
+       "IS",
+       "IT",
+       "JM",
+       "JO",
+       "JP",
+       "KE",
+       "KG",
+       "KH",
+       "KM",
+       "KN",
+       "KR",
+       "KW",
+       "KZ",
+       "LB",
+       "LC",
+       "LI",
+       "LK",
+       "LR",
+       "LS",
+       "LT",
+       "LU",
+       "LV",
+       "MA",
+       "MC",
+       "MD",
+       "ME",
+       "MG",
+       "MH",
+       "MK",
+       "ML",
+       "MM",
+       "MN",
+       "MR",
+       "MT",
+       "MU",
+       "MV",
+       "MW",
+       "MX",
+       "MY",
+       "MZ",
+       "NA",
+       "NE",
+       "NG",
+       "NI",
+       "NL",
+       "NO",
+       "NP",
+       "NR",
+       "NZ",
+       "OM",
+       "PA",
+       "PE",
+       "PG",
+       "PH",
+       "PK",
+       "PL",
+       "PS",
+       "PT",
+       "PW",
+       "PY",
+       "QA",
+       "RO",
+       "RS",
+       "RW",
+       "SA",
+       "SB",
+       "SC",
+       "SE",
+       "SG",
+       "SI",
+       "SK",
+       "SL",
+       "SM",
+       "SN",
+       "SO",
+       "SR",
+       "SS",
+       "SV",
+       "SZ",
+       "TH",
+       "TJ",
+       "TL",
+       "TM",
+       "TN",
+       "TO",
+       "TR",
+       "TT",
+       "TV",
+       "TW",
+       "TZ",
+       "UA",
+       "UG",
+       "US",
+       "UY",
+       "UZ",
+       "VN",
+       "VU",
+       "WS",
+       "XK",
+       "ZA",
+       "ZM",
+       "ZW"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "gross_eur": {
+     "description": "Annual gross salary in EUR. Default 60,000 (reference profiles: 30,000 / 60,000 / 120,000).",
+     "type": "number"
+    },
+    "gross_local": {
+     "description": "Annual gross salary in the country's own currency (only with exactly one country).",
+     "type": "number"
+    },
+    "version": {
+     "description": "Language of the texts (version id). Default: en.",
+     "enum": [
+      "uk",
+      "en",
+      "pl",
+      "cs",
+      "ro",
+      "hu",
+      "tr",
+      "zh",
+      "in",
+      "ja",
+      "bn",
+      "pk",
+      "de",
+      "at",
+      "fr",
+      "es",
+      "pt",
+      "it",
+      "my",
+      "sg",
+      "tw",
+      "se",
+      "br",
+      "ar",
+      "ge",
+      "mx",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "tax_burden",
+  "output_schema": {},
+  "title": "Tax burden on salary"
+ }
+]

@@ -1,0 +1,336 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Certifications created, updated, deactivated, reactivated or removed since a date (history starts at the first ingestion run). Filter by change type, register or NSF code. Example (FR): « Quelles fiches informatique (NSF 326) ont changé depuis le 1er juillet ? »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "default": 50,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "nsf": {
+     "maxLength": 4,
+     "type": "string"
+    },
+    "repertoire": {
+     "enum": [
+      "RNCP",
+      "RS"
+     ],
+     "type": "string"
+    },
+    "since": {
+     "description": "ISO date YYYY-MM-DD",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "created",
+      "updated",
+      "deactivated",
+      "reactivated",
+      "removed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "since"
+   ],
+   "type": "object"
+  },
+  "name": "changes_since",
+  "output_schema": {},
+  "title": "Recent changes in the registers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Is a given SIRET (or SIREN) habilitated for a certification, and for which role: 'former' (train), 'evaluer' (organise assessment) or both? Also detects when the SIRET is the certifier itself. Habilitation is effective only if the certification is active AND the partner state is 'Actif'. Example (FR): « Le SIRET 80875076400025 est-il habilité sur le RNCP 35419 ? »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "numero": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    },
+    "siret": {
+     "description": "SIRET (14 digits) or SIREN (9 digits, matches all establishments)",
+     "maxLength": 20,
+     "minLength": 9,
+     "type": "string"
+    }
+   },
+   "required": [
+    "numero",
+    "siret"
+   ],
+   "type": "object"
+  },
+  "name": "check_habilitation",
+  "output_schema": {},
+  "title": "Check a training organism's habilitation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Is this certification currently registered (active) and until when? Returns status, expiry date, remaining days, delivery deadline, replacement certification(s) and an estimated CPF eligibility (a registered active certification is eligible in principle; the training organism must still be habilitated and referenced). Example (FR): « Le RNCP 35419 est-il encore actif ? Jusqu'à quand ? »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "numero": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "numero"
+   ],
+   "type": "object"
+  },
+  "name": "check_validity",
+  "output_schema": {},
+  "title": "Check registration validity"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Side-by-side comparison of two certifications: level, status, certifiers, NSF/ROME overlap, number of blocs and lexical overlap of blocs (Jaccard on skill terms) and, for each bloc of A, the closest bloc of B (overlap coefficient). Example (FR): « Compare le RNCP 36490 et le RNCP 37873. »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "numero_a": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    },
+    "numero_b": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "numero_a",
+    "numero_b"
+   ],
+   "type": "object"
+  },
+  "name": "compare_certifications",
+  "output_schema": {},
+  "title": "Compare two certifications"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Full structured sheet of one RNCP or RS certification: title, level, status and expiry, certifier(s), activities, attested skills, NSF/ROME/Formacode codes, access routes, legal texts, replacements, statistics, official URL. Long texts are truncated to 4000 chars unless full=true. Example (FR): « Donne-moi la fiche RNCP 35419 et ses compétences attestées. »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "full": {
+     "default": false,
+     "description": "Return untruncated long texts",
+     "type": "boolean"
+    },
+    "numero": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "numero"
+   ],
+   "type": "object"
+  },
+  "name": "get_certification",
+  "output_schema": {},
+  "title": "Get a certification sheet"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Source dataset date, ingestion run, counts (total/active/RNCP/RS/blocs/partners) and age of the data in days. Call this to tell the user how fresh the answers are. Example (FR): « De quand datent les données RNCP ? »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_data_status",
+  "output_schema": {},
+  "title": "Data freshness and coverage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Blocs de compétences of an RNCP certification (code RNCPxxxxxBCyy, title, skills, assessment methods), in the order and wording expected by EDOF / Mon Compte Formation forms. RS certifications have no blocs. Example (FR): « Liste les blocs de compétences du RNCP 37674 à renseigner dans EDOF. »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "numero": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "numero"
+   ],
+   "type": "object"
+  },
+  "name": "list_blocs",
+  "output_schema": {},
+  "title": "List skill blocs (blocs de compétences)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Training organisms habilitated on a certification (name, SIRET, role former/evaluer/both, state, dates). Paginated; filter by SIRET/SIREN prefix. Example (FR): « Quels organismes sont habilités sur le RNCP 37674 ? »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "actifs_only": {
+     "default": true,
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 50,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "numero": {
+     "description": "Certification number: \"RNCP35419\", \"35419\", \"rncp 35419\", \"RS5000\" or a francecompetences.fr URL",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "siret_prefix": {
+     "description": "SIRET/SIREN prefix filter",
+     "maxLength": 14,
+     "type": "string"
+    }
+   },
+   "required": [
+    "numero"
+   ],
+   "type": "object"
+  },
+  "name": "list_partenaires",
+  "output_schema": {},
+  "title": "List habilitated partners"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Full-text search (BM25 + French synonyms) over the French national registers of professional certifications: RNCP (diplomas, titles, CQP) and RS (specific register: skills certificates, habilitations). Filter by register, level (3-8), NSF or ROME code. Returns ranked matches with status and expiry date; use get_certification for details. Example (FR): « Quelles certifications de niveau 6 en cybersécurité sont actives ? »",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "actives_only": {
+     "default": true,
+     "description": "Only certifications currently registered (default true)",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "niveau": {
+     "description": "Qualification level 3 (CAP) to 8 (doctorate); RS entries have no level",
+     "maximum": 8,
+     "minimum": 3,
+     "type": "integer"
+    },
+    "nsf": {
+     "description": "NSF code or prefix, e.g. '326' (IT)",
+     "maxLength": 4,
+     "type": "string"
+    },
+    "query": {
+     "description": "Free text, French (e.g. 'développeur web', 'gestion paie')",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "repertoire": {
+     "description": "Restrict to one register",
+     "enum": [
+      "RNCP",
+      "RS"
+     ],
+     "type": "string"
+    },
+    "rome": {
+     "description": "ROME code, e.g. 'M1805'",
+     "maxLength": 5,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_certifications",
+  "output_schema": {},
+  "title": "Search RNCP / RS certifications"
+ }
+]

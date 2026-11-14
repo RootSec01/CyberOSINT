@@ -1,0 +1,211 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Which FHA multifamily program fits"
+  },
+  "description": "Runs the three-question FHA multifamily program chooser from fhamultifamily.loan/chooser: returns the likely program (223(f), 221(d)(4) new construction or substantial rehab, 223(a)(7), 241(a), or \"not FHA yet\"), the reason, and the program page to read next.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "built": {
+     "description": "Only when has_fha_loan is false: is the property built and operating (false = land or a construction project)? Default true.",
+     "type": "boolean"
+    },
+    "condition": {
+     "description": "Only when has_fha_loan is false and built is true. heavy_renovation means more than about $55,096 a unit of work. Default stabilized_3_plus_years.",
+     "enum": [
+      "stabilized_3_plus_years",
+      "stabilized_built_last_3_years",
+      "heavy_renovation",
+      "leasing_up_or_under_85_pct"
+     ],
+     "type": "string"
+    },
+    "has_fha_loan": {
+     "description": "Does the property already have an FHA-insured mortgage?",
+     "type": "boolean"
+    },
+    "need": {
+     "description": "Only when has_fha_loan is true: what the owner needs. Default lower_rate_no_cash_out.",
+     "enum": [
+      "lower_rate_no_cash_out",
+      "improvements_or_additions",
+      "cash_out_or_bigger_loan"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "has_fha_loan"
+   ],
+   "type": "object"
+  },
+  "name": "choose_program",
+  "output_schema": {},
+  "title": "Which FHA multifamily program fits"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "2026 FHA multifamily limits, ratios, MIP and fees"
+  },
+  "description": "HUD's 2026 FHA multifamily rulebook as the site publishes it: per-unit statutory limits by bedroom (Section 207/223(f)/220, 221(d)(4) or 231; elevator and non-elevator) with the high-cost amount for a state, loan-to-value and coverage ratios by tier, large-loan ratios, MIP, HUD fees and loan terms, each with its source.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "section": {
+     "default": "207_223f_220",
+     "description": "Limits table: 207_223f_220 (Section 207, 207 pursuant to 223(f), and 220), 221d4, or 231. Default 207_223f_220.",
+     "enum": [
+      "207_223f_220",
+      "221d4",
+      "231"
+     ],
+     "type": "string"
+    },
+    "state": {
+     "description": "Optional two-letter state code, to apply its high-cost percentage (405% in AK, HI, GU, VI; 270% elsewhere).",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_limits_and_costs",
+  "output_schema": {},
+  "title": "2026 FHA multifamily limits, ratios, MIP and fees"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Size an FHA 223(f) or 221(d)(4) loan"
+  },
+  "description": "Estimates the maximum FHA 223(f) or 221(d)(4) loan the way HUD Form 92264-A does, with the fhamultifamily.loan sizer: statutory limit (2026 per-unit limits x high-cost %), loan to value or cost, debt service coverage with 0.25% MIP, the 223(f) cash-out or acquisition test, large-loan ratios at $130M+. Returns each test, the one that controls, payment, MIP, fees, DSCR and LTV.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "build_months": {
+     "default": 20,
+     "description": "221(d)(4) only: construction period in months, for the upfront MIP. Default 20 (the sizer page default).",
+     "maximum": 60,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "elevator": {
+     "default": false,
+     "description": "Elevator building (higher per-unit limits). Default false.",
+     "type": "boolean"
+    },
+    "noi": {
+     "description": "Underwritten annual net operating income in dollars.",
+     "maximum": 1000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "payoff": {
+     "description": "223f_refinance only: existing debt plus closing costs, for the cash-out test.",
+     "maximum": 5000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "price": {
+     "description": "223f_purchase only: price plus repairs and closing costs, for the acquisition cost test.",
+     "maximum": 5000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "program": {
+     "description": "223f_refinance, 223f_purchase, 221d4_new_construction or 221d4_substantial_rehab.",
+     "enum": [
+      "223f_refinance",
+      "223f_purchase",
+      "221d4_new_construction",
+      "221d4_substantial_rehab"
+     ],
+     "type": "string"
+    },
+    "rate": {
+     "description": "Note rate in percent. Default 5.54, the median note rate on apartment loans HUD endorsed in the year to September 30, 2026 (not a quote).",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "number"
+    },
+    "state": {
+     "description": "Two-letter state or territory code, e.g. TX. AK, HI, GU and VI use the 405% high-cost percentage; all others 270%.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "tier": {
+     "default": "market",
+     "description": "Rents: market (87% / 1.15), affordable (tax credit or Section 8 rents at least 10% below market), assisted (90%+ of units with rental assistance), middle (221(d)(4) only; on 223(f) it sizes as market). Default market.",
+     "enum": [
+      "market",
+      "affordable",
+      "assisted",
+      "middle"
+     ],
+     "type": "string"
+    },
+    "units": {
+     "additionalProperties": false,
+     "description": "Unit count by bedroom, e.g. {\"br1\": 48, \"br2\": 60, \"br3\": 12}. Keys: studio, br1, br2, br3, br4 (four or more bedrooms). Omitted keys are 0.",
+     "properties": {
+      "br1": {
+       "maximum": 5000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "br2": {
+       "maximum": 5000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "br3": {
+       "maximum": 5000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "br4": {
+       "maximum": 5000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "studio": {
+       "maximum": 5000,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "value": {
+     "description": "223(f): property (or appraised) value in dollars. 221(d)(4): total replacement cost in dollars.",
+     "maximum": 5000000000,
+     "minimum": 1,
+     "type": "number"
+    }
+   },
+   "required": [
+    "program",
+    "state",
+    "units",
+    "value",
+    "noi"
+   ],
+   "type": "object"
+  },
+  "name": "size_loan",
+  "output_schema": {},
+  "title": "Size an FHA 223(f) or 221(d)(4) loan"
+ }
+]

@@ -1,0 +1,164 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check a website for AI visibility"
+  },
+  "description": "Check if ChatGPT, Google, Claude, Perplexity and Grok can find, read and recommend a website. Fetches the page like an AI crawler (raw HTML) and returns a 0-100 score and grade, SEO/AEO/GEO category scores, the top issues to fix, and links to the full results and a shareable score card. Takes about 10 seconds. Free, no key; results are private.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "Website or page to check, e.g. example.com or https://example.com/page",
+     "maxLength": 2048,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "check_website",
+  "output_schema": {
+   "properties": {
+    "categories": {
+     "properties": {
+      "aeo": {
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "score": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "name",
+        "score"
+       ],
+       "type": "object"
+      },
+      "geo": {
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "score": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "name",
+        "score"
+       ],
+       "type": "object"
+      },
+      "seo": {
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "score": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "name",
+        "score"
+       ],
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "checked_at": {
+     "type": "string"
+    },
+    "final_url": {
+     "type": "string"
+    },
+    "grade": {
+     "type": "string"
+    },
+    "http_status": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "issues_total": {
+     "type": "number"
+    },
+    "points_lost": {
+     "type": "number"
+    },
+    "results_url": {
+     "description": "Full free results on clickthislink.xyz, with copy-paste fixes",
+     "type": "string"
+    },
+    "score": {
+     "description": "Overall AI visibility score, 0-100",
+     "type": "number"
+    },
+    "share_url": {
+     "description": "Shareable score card (domain and scores only; nothing stored)",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "top_issues": {
+     "items": {
+      "properties": {
+       "category": {
+        "type": "string"
+       },
+       "check": {
+        "type": "string"
+       },
+       "detail": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "points": {
+        "description": "Estimated overall score points this issue costs",
+        "type": "number"
+       },
+       "status": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "why": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "score",
+    "grade",
+    "categories",
+    "top_issues",
+    "results_url"
+   ],
+   "type": "object"
+  },
+  "title": "Check a website for AI visibility"
+ }
+]

@@ -1,0 +1,305 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://agentdiet/v1/result",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://agentdiet/v1/result",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Execute marketplace tool"
+  },
+  "description": "Execute any of the 16 native AgentDiet B2A tools by slug or proxy an external marketplace tool URL ($0.001-$0.02 per call). WHEN TO USE: Call to run a single tool discovered via search_x402_mcp_marketplace; use execute_workflow_bundle when you want to run a 4-tool composite bundle in parallel. WHEN NOT TO USE: Do not use for catalog search (use search_x402_mcp_marketplace) or wallet checks (use get_agent_wallet_status). PARAMETER INTERACTIONS: Set target_tool to a native slug (e.g. 'distill', 'token-intel', 'sec-intel', 'github-audit') or external https:// URL, and pass its primary input in input_value. Omit agent_id and tx_hash during your 5 free calls. Read-only and idempotent; results are cached for 1 hour (<5ms cache hit). Pricing: the first 5 calls per agent_id are free and failed calls are never charged. After 5 calls, the tool returns a payment-required quote (not a fatal error) with a $2 Stripe top-up link and Base/Solana USDC addresses; complete payment, then retry with your agd_pass_ key in agent_id or pass tx_hash. Example: execute_marketplace_tool(target_tool='example')",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "target_tool": "example"
+    }
+   ],
+   "properties": {
+    "agent_id": {
+     "description": "Optional agent identifier or prepaid agd_pass_ session key. Omit during your 5 free trial calls to use an ID automatically derived from your client IP, or pass your agd_pass_ key after topping up.",
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    },
+    "input_value": {
+     "description": "Primary input parameter for the target tool (URL, 0x address, ticker, domain, email, repo, or query).",
+     "maxLength": 99999,
+     "minLength": 1,
+     "type": "string"
+    },
+    "target_tool": {
+     "description": "Native tool slug (e.g. 'distill', 'token-intel', 'sec-intel', 'github-audit') or external https:// endpoint URL.",
+     "maxLength": 99999,
+     "minLength": 1,
+     "type": "string"
+    },
+    "tx_hash": {
+     "description": "Optional on-chain Base Mainnet (0x...) or Solana SPL USDC transaction hash. Omit unless settling an individual call directly on-chain instead of using an agd_pass_ key in agent_id.",
+     "maxLength": 256,
+     "minLength": 10,
+     "type": "string"
+    }
+   },
+   "required": [
+    "target_tool",
+    "input_value"
+   ],
+   "type": "object"
+  },
+  "name": "execute_marketplace_tool",
+  "output_schema": {
+   "properties": {
+    "data": {
+     "description": "Structured tool output payload.",
+     "type": "object"
+    },
+    "roi_proof": {
+     "description": "Token compression and cost-savings verification metrics.",
+     "type": "object"
+    },
+    "status": {
+     "description": "Execution status ('ok' or 'payment_required').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://agentdiet/v1/result",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://agentdiet/v1/result",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Execute workflow bundle"
+  },
+  "description": "Execute a 4-tool native workflow bundle in parallel in a single call ($0.015-$0.03) and return a unified dossier, saving 3 LLM round-trips. WHEN TO USE: Call for comprehensive multi-source due diligence on a token, company domain, repository, or research topic; use execute_marketplace_tool when you only need a single tool. WHEN NOT TO USE: Do not use for single-endpoint queries or free catalog search. PARAMETER INTERACTIONS: Select bundle_id first and provide the matching entity identifier (token/0x address, domain, repo, or URL) in target. Omit agent_id and tx_hash during your 5 free calls. Read-only and idempotent; results are cached for 1 hour (<5ms cache hit). Pricing: the first 5 calls per agent_id are free and failed calls are never charged. After 5 calls, the tool returns a payment-required quote (not a fatal error) with a $2 Stripe top-up link and Base/Solana USDC addresses; complete payment, then retry with your agd_pass_ key in agent_id or pass tx_hash. Example: execute_workflow_bundle(bundle_id='example')",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "bundle_id": "example"
+    }
+   ],
+   "properties": {
+    "agent_id": {
+     "description": "Optional agent identifier or prepaid agd_pass_ session key. Omit during your 5 free trial calls to use an ID automatically derived from your client IP, or pass your agd_pass_ key after topping up.",
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    },
+    "bundle_id": {
+     "description": "Composite 4-tool workflow bundle identifier to execute in parallel.",
+     "enum": [
+      "alpha_delta_stream_bundle",
+      "crypto_alpha_bundle",
+      "polymarket_alpha_bundle",
+      "defi_yield_arb_bundle",
+      "dex_whale_momentum_bundle",
+      "b2b_due_diligence_bundle",
+      "safe_web_research_bundle"
+     ],
+     "maxLength": 99999,
+     "minLength": 1,
+     "type": "string"
+    },
+    "target": {
+     "description": "Primary target entity for the bundle (0x contract, token symbol, company domain, GitHub repo, or URL).",
+     "maxLength": 99999,
+     "minLength": 1,
+     "type": "string"
+    },
+    "tx_hash": {
+     "description": "Optional on-chain Base Mainnet (0x...) or Solana SPL USDC transaction hash. Omit unless settling an individual call directly on-chain instead of using an agd_pass_ key in agent_id.",
+     "maxLength": 256,
+     "minLength": 10,
+     "type": "string"
+    }
+   },
+   "required": [
+    "bundle_id"
+   ],
+   "type": "object"
+  },
+  "name": "execute_workflow_bundle",
+  "output_schema": {
+   "properties": {
+    "data": {
+     "description": "Structured tool output payload.",
+     "type": "object"
+    },
+    "roi_proof": {
+     "description": "Token compression and cost-savings verification metrics.",
+     "type": "object"
+    },
+    "status": {
+     "description": "Execution status ('ok' or 'payment_required').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://agentdiet/v1/result",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://agentdiet/v1/result",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get agent wallet status"
+  },
+  "description": "Inspect an agent's account ledger: remaining free trial calls (out of 5), prepaid USD balance, cumulative spend, total API calls, and total LLM tokens saved. WHEN TO USE: Call before a batch of paid tool executions or after completing a Stripe or USDC top-up to confirm your balance. WHEN NOT TO USE: Do not use to process web content, execute marketplace tools, or submit payments; use the other tools on this server for execution. PARAMETER INTERACTIONS: Omit agent_id to inspect the default trial account derived from your client IP, or pass your explicit agent_id or agd_pass_ session key to check a specific funded wallet. Free and read-only: never charges a fee or consumes a free trial call. Example: get_agent_wallet_status(agent_id='example')",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent_id": "example"
+    }
+   ],
+   "properties": {
+    "agent_id": {
+     "description": "Optional Agent ID or agd_pass_ session key to inspect. Omit to check the default wallet derived from your client IP.",
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_agent_wallet_status",
+  "output_schema": {
+   "properties": {
+    "data": {
+     "description": "Structured tool output payload.",
+     "type": "object"
+    },
+    "roi_proof": {
+     "description": "Token compression and cost-savings verification metrics.",
+     "type": "object"
+    },
+    "status": {
+     "description": "Execution status ('ok' or 'payment_required').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://agentdiet/v1/result",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://agentdiet/v1/result",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search x402 mcp marketplace"
+  },
+  "description": "Search 490+ indexed MCP and HTTP 402 (x402) tools by capability keyword and return ranked endpoints with pricing, trust scores, and SLA tiers. WHEN TO USE: Call first to discover which native slug or external endpoint matches your task before calling execute_marketplace_tool. WHEN NOT TO USE: Do not use to execute a tool directly (use execute_marketplace_tool or execute_workflow_bundle). PARAMETER INTERACTIONS: Pass capability keywords or a domain in query; omit agent_id and tx_hash (this discovery tool is always free and never consumes a free trial call). Example: search_x402_mcp_marketplace(query='example')",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "query": "example"
+    }
+   ],
+   "properties": {
+    "agent_id": {
+     "description": "Optional agent identifier or prepaid agd_pass_ session key. Omit during your 5 free trial calls to use an ID automatically derived from your client IP, or pass your agd_pass_ key after topping up.",
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    },
+    "query": {
+     "description": "Capability keywords, category name, or endpoint URL to search across the 490+ tool catalog.",
+     "maxLength": 99999,
+     "minLength": 1,
+     "type": "string"
+    },
+    "tx_hash": {
+     "description": "Optional on-chain Base Mainnet (0x...) or Solana SPL USDC transaction hash. Omit unless settling an individual call directly on-chain instead of using an agd_pass_ key in agent_id.",
+     "maxLength": 256,
+     "minLength": 10,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_x402_mcp_marketplace",
+  "output_schema": {
+   "properties": {
+    "data": {
+     "description": "Structured tool output payload.",
+     "type": "object"
+    },
+    "roi_proof": {
+     "description": "Token compression and cost-savings verification metrics.",
+     "type": "object"
+    },
+    "status": {
+     "description": "Execution status ('ok' or 'payment_required').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "type": "object"
+  }
+ }
+]

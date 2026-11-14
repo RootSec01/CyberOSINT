@@ -1,0 +1,740 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get a business"
+  },
+  "description": "One business's public WRDO page: name, category, area, whether it is verified, and (for verified businesses) its description, address, opening hours (hours, as the business wrote them), website and menu link. Also open_now (true, false or null when hours are missing or unreadable) and reviews: WRDO's own reviews only (count, average_rating and up to 3 recent comments; never copied from Google or other sites; count 0 with a note when there are none). For one business already found; to look for businesses use search_local_businesses, and for prices use get_price_list. Takes the id from a search_local_businesses result. An unknown or malformed id returns an error (\"WRDO has no public business with that id\"), not an empty page. Never a phone number or email.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "description": "A WRDO business id (lbiz_…), copied from the \"id\" of a search_local_businesses result. Ids are not guessable; an unknown id returns an error.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_business",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "type": "string"
+    },
+    "area": {
+     "type": "string"
+    },
+    "category": {
+     "type": "string"
+    },
+    "description": {
+     "type": "string"
+    },
+    "facebook_url": {
+     "type": "string"
+    },
+    "hours": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "label": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "label",
+       "value"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "id": {
+     "type": "string"
+    },
+    "last_checked": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "menu_url": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "open_now": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Open right now in SAST from the hours above; null when hours are missing or unreadable."
+    },
+    "page_url": {
+     "type": "string"
+    },
+    "reviews": {
+     "additionalProperties": false,
+     "description": "WRDO's own reviews only (never copied from Google or any other site).",
+     "properties": {
+      "average_rating": {
+       "type": "number"
+      },
+      "count": {
+       "type": "number"
+      },
+      "note": {
+       "type": "string"
+      },
+      "recent": {
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "comment": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "date": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "rating": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "rating",
+         "comment",
+         "date"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "source": {
+       "const": "wrdo",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "count"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "type": "string"
+    },
+    "start_url": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "verified": {
+     "type": "boolean"
+    },
+    "website": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "name",
+    "category",
+    "area",
+    "verified",
+    "page_url",
+    "start_url",
+    "last_checked",
+    "source"
+   ],
+   "type": "object"
+  },
+  "title": "Get a business"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get a price list"
+  },
+  "description": "A business's price list or menu, for any kind of business (salon, barber, nails, beauty, restaurant): sections of items with name, description, price_zar (rand) and, for services, duration_min. prices_confirmed is false (with a price_note) when the prices come from the business website and are not confirmed. For a business already found (has_price_list is true in search_local_businesses); it is not a search and gives no business details (use get_business). Takes the id from a search_local_businesses result. An unknown or malformed id returns an error (\"WRDO has no public business with that id\"); a known business with no list returns empty sections. Never a phone number or email.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "description": "A WRDO business id (lbiz_…), copied from the \"id\" of a search_local_businesses result. Ids are not guessable; an unknown id returns an error.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_price_list",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "business": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "area": {
+         "type": "string"
+        },
+        "category": {
+         "type": "string"
+        },
+        "id": {
+         "type": "string"
+        },
+        "name": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "category",
+        "area"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "item_count": {
+     "type": "number"
+    },
+    "message": {
+     "type": "string"
+    },
+    "page_url": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "price_note": {
+     "type": "string"
+    },
+    "prices_confirmed": {
+     "type": "boolean"
+    },
+    "sections": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "items": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "description": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          },
+          "duration_min": {
+           "type": "number"
+          },
+          "name": {
+           "type": "string"
+          },
+          "price_zar": {
+           "anyOf": [
+            {
+             "type": "number"
+            },
+            {
+             "type": "null"
+            }
+           ]
+          }
+         },
+         "required": [
+          "name",
+          "description",
+          "price_zar"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "title",
+       "items"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "source": {
+     "type": "string"
+    },
+    "truncated": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "business",
+    "sections",
+    "prices_confirmed",
+    "item_count",
+    "truncated",
+    "page_url",
+    "source"
+   ],
+   "type": "object"
+  },
+  "title": "Get a price list"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List areas"
+  },
+  "description": "The towns and suburbs in the Western Cape where WRDO has listings, each with its region and how many businesses (suburbs counted in their town). Gives the valid names for \"where\" in search_local_businesses and list_categories. Optional \"query\" keeps areas whose name or region contains it (e.g. \"paarl\" or \"winelands\"). Most businesses first, up to 100; areas with none are left out. Western Cape only. Names and counts only: no business or contact details.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "query": {
+     "description": "Part of a town, suburb or region name, e.g. \"paarl\" or \"cape town\". Leave out for every area.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_areas",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "areas": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "count": {
+        "description": "Businesses listed there, suburbs included.",
+        "type": "number"
+       },
+       "kind": {
+        "enum": [
+         "town",
+         "suburb"
+        ],
+        "type": "string"
+       },
+       "name": {
+        "description": "Use as \"where\" in search_local_businesses and list_categories.",
+        "type": "string"
+       },
+       "region": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "kind",
+       "region",
+       "count"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "message": {
+     "type": "string"
+    },
+    "source": {
+     "type": "string"
+    },
+    "total": {
+     "description": "How many areas match, before the cap on this list.",
+     "type": "number"
+    },
+    "truncated": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "total",
+    "areas",
+    "truncated",
+    "source"
+   ],
+   "type": "object"
+  },
+  "title": "List areas"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List categories"
+  },
+  "description": "The kinds of business WRDO lists in the Western Cape, with how many of each, for a town or suburb or everywhere. Answers \"what is there in Paarl?\". Each slug is a valid \"category\" for search_local_businesses. Most businesses first; categories with none are left out. Outside the Western Cape it returns nothing. No business details, no contact details.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "where": {
+     "description": "A town or suburb in the Western Cape, e.g. \"Paarl\" or \"Val de Vie, Paarl\". Leave out for the whole Western Cape.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "categories": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "count": {
+        "type": "number"
+       },
+       "group": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "name",
+       "group",
+       "count"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "message": {
+     "type": "string"
+    },
+    "source": {
+     "type": "string"
+    },
+    "total": {
+     "type": "number"
+    },
+    "where": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   },
+   "required": [
+    "where",
+    "total",
+    "categories",
+    "source"
+   ],
+   "type": "object"
+  },
+  "title": "List categories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search local businesses"
+  },
+  "description": "Find local businesses on WRDO in the Western Cape by what they do (or their name), optionally in a town or suburb, optionally narrowed by category, price list, price and whether they are open now. Example: \"hairdressers in Paarl under R200 that are open now\". Give \"what\" (words) and/or \"category\" (an exact slug from list_categories). Returns id, name, category, area, verified (claimed by the owner), page_url, start_url, has_price_list, price_from_rand (cheapest listed price, rand, or null) and open_now (true, false or null when unknown). When any of has_price_list, max_price_rand or open_now is used, only the top 100 matches are checked (a message says so). open_now uses opening hours that verified businesses publish; a business without readable hours is left out when open_now is true. No contact details: to reach a business, give the person its start_url.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "Only businesses in this category: an exact plural slug such as \"restaurants\", \"hair-salons\" or \"plumbers\" (list_categories returns the valid slugs and which have businesses). An unknown slug returns an error listing the valid ones.",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "has_price_list": {
+     "description": "true: only businesses with a price list or menu on WRDO (so get_price_list will have content). false: only those without. Leave out for both.",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "How many results, 1 to 20 (default 10).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_price_rand": {
+     "description": "Only businesses with at least one listed item priced at or under this many rand (e.g. 200). Businesses without a listed price never match. The cheapest price may be unconfirmed (from their website); get_price_list says so.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "open_now": {
+     "description": "true: only businesses that are open right now in South Africa (SAST). Only verified businesses with readable hours can match; those without hours are excluded. Leave out when the person does not need it.",
+     "type": "boolean"
+    },
+    "what": {
+     "description": "What the person needs: a kind of business or service (\"plumber\", \"pizza\") or a business name. Optional when \"category\" is given.",
+     "maxLength": 80,
+     "minLength": 2,
+     "type": "string"
+    },
+    "where": {
+     "description": "A town or suburb in the Western Cape, e.g. \"Paarl\" or \"Val de Vie, Paarl\". Leave out for the whole Western Cape.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_local_businesses",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "message": {
+     "type": "string"
+    },
+    "results": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "area": {
+        "type": "string"
+       },
+       "category": {
+        "type": "string"
+       },
+       "has_price_list": {
+        "description": "True when WRDO holds a price list or menu for this business (see get_price_list).",
+        "type": "boolean"
+       },
+       "id": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "open_now": {
+        "anyOf": [
+         {
+          "type": "boolean"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Open right now in South Africa (SAST), from the hours on a verified business page; null when unknown."
+       },
+       "page_url": {
+        "type": "string"
+       },
+       "price_from_rand": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Cheapest listed item with a price, in rand; null when no item has a price."
+       },
+       "start_url": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "verified": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "category",
+       "area",
+       "verified",
+       "page_url",
+       "start_url",
+       "has_price_list",
+       "price_from_rand",
+       "open_now"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "source": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "results",
+    "source"
+   ],
+   "type": "object"
+  },
+  "title": "Search local businesses"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Start a request in WRDO"
+  },
+  "description": "Get a link the person opens to ask WRDO for a quote, booking or order (optionally from one business). The person finishes in WRDO. This tool never books, charges or creates an account. It only starts a request: nothing is booked until the business confirms in WRDO. The result is a plain wa.me link with the request already typed in; it is not stored, has no token and does not expire. Nothing is sent or saved until the person opens it and sends the message. \"what\" is required; business_id is optional and must come from search_local_businesses (an unknown id returns an error).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "business_id": {
+     "description": "A WRDO business id (lbiz_…), copied from the \"id\" of a search_local_businesses result. Ids are not guessable; an unknown id returns an error.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "what": {
+     "description": "What the person needs: a kind of business or service (\"plumber\", \"pizza\") or a business name.",
+     "maxLength": 80,
+     "minLength": 2,
+     "type": "string"
+    },
+    "when": {
+     "description": "When they want it, in their words, e.g. \"Saturday morning\".",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "required": [
+    "what"
+   ],
+   "type": "object"
+  },
+  "name": "start_request",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "message": {
+     "type": "string"
+    },
+    "next_step": {
+     "type": "string"
+    },
+    "start_url": {
+     "type": "string"
+    },
+    "status": {
+     "const": "not_booked",
+     "type": "string"
+    }
+   },
+   "required": [
+    "start_url",
+    "status",
+    "next_step",
+    "message"
+   ],
+   "type": "object"
+  },
+  "title": "Start a request in WRDO"
+ }
+]

@@ -1,0 +1,2350 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check whether a website is listed (Pro)"
+  },
+  "description": "FirmLedger Pro. Given a website domain or URL, report whether an approved FirmLedger record uses it and return that record — useful for \"is this site legit?\" questions.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "description": "A domain such as \"example.co.ke\" or a full URL.",
+     "maxLength": 200,
+     "minLength": 3,
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "check_domain",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Check whether a website is listed (Pro)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Compare FirmLedger listings side by side"
+  },
+  "description": "Compare 2 to 4 approved FirmLedger companies side by side: entity type, category, location, founded, team size, website, tagline, date registered, ownership, tick, confidence and sponsored status — the same rows as the FirmLedger comparison page. Use after search_listings when the user wants to weigh companies against each other.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listings": {
+     "description": "2 to 4 companies (slugs are best).",
+     "items": {
+      "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 4,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "listings"
+   ],
+   "type": "object"
+  },
+  "name": "compare_listings",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Compare FirmLedger listings side by side"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check FirmLedger connection access"
+  },
+  "description": "Report what this FirmLedger connection can do: Free or Pro access, authentication and active free-trial status, and which tools and fields are available. Use when the user asks why something is locked.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "connection_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Check FirmLedger connection access"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Open a support ticket"
+  },
+  "description": "Open a FirmLedger support ticket for the user. Categories: billing, technical, listing, account, verification, other. Requires the user's confirmation of the exact subject and message.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "description": "The issue in a few sentences.",
+     "maxLength": 5000,
+     "minLength": 20,
+     "type": "string"
+    },
+    "category": {
+     "enum": [
+      "billing",
+      "technical",
+      "listing",
+      "account",
+      "verification",
+      "other"
+     ],
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "subject": {
+     "maxLength": 200,
+     "minLength": 4,
+     "type": "string"
+    }
+   },
+   "required": [
+    "subject",
+    "category",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "create_support_ticket",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Open a support ticket"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create a webhook destination"
+  },
+  "description": "Register a webhook on the user’s account after explicit confirmation. Listing events will be sent to this URL. Requires Pro (including a free trial) and write:account. The signing secret is returned only once; keep it private.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "categories": {
+     "items": {
+      "maxLength": 80,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "events": {
+     "items": {
+      "enum": [
+       "listing.approved",
+       "listing.rejected",
+       "listing.updated",
+       "listing.created",
+       "listing.deleted",
+       "claim.verified"
+      ],
+      "type": "string"
+     },
+     "maxItems": 6,
+     "minItems": 1,
+     "type": "array"
+    },
+    "label": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "url": {
+     "description": "Public HTTPS destination for signed events.",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "events"
+   ],
+   "type": "object"
+  },
+  "name": "create_webhook",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Create a webhook destination"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Export my watchlist as CSV"
+  },
+  "description": "The user's watchlist as CSV text (name, category, type, location, contact details, tech stack, verified owner, confidence, watched since) — the same file as the dashboard's Export button.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "export_watchlist_csv",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Export my watchlist as CSV"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read my audience analytics"
+  },
+  "description": "Audience analytics for the user's own listings — views today/7/30 days/total, distinct hashed visitor signals, profile and website clicks, leads, the 30-day funnel (placements served and browser-measured viewable impressions are separate), top locations and per-listing views. The same numbers as Dashboard → Audience analytics.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listing": {
+     "description": "Optional: one of the user's listings. Omit for all of them combined.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_analytics",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read my audience analytics"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "REST API v1 status for this key"
+  },
+  "description": "The state of the FirmLedger REST API for this account and API key, as /api/v1/me and /api/v1/usage answer it: identity, plan and free-trial status, the key's scopes, live per-minute read/write budgets, durable usage aggregates and the endpoint catalogue. Also states plainly that the MCP connector and REST API v1 are the same platform API — one account, one key, one Pro entitlement — and exactly what happens to API and MCP access when a free trial ends.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "key_prefix": {
+     "description": "Optional: focus on one key by its prefix.",
+     "maxLength": 40,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_api_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "REST API v1 status for this key"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get FirmLedger connection status"
+  },
+  "description": "Report how this assistant is connected to FirmLedger: public (no sign-in), an API key, or the member's account through sign-in (OAuth). Shows Free or Pro, the trial status, which tools and fields are available, and whether the sign-in token is about to expire. Use it when the member asks whether they are connected or signed in, or why something is locked.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_connection_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Get FirmLedger connection status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read one lead conversation"
+  },
+  "description": "One conversation from the Leads inbox with the inquirer's details and every message, oldest first. Use before reply_to_lead so the reply fits the thread.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lead_id": {
+     "description": "lead_id from list_leads.",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_lead",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read one lead conversation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get a FirmLedger company profile"
+  },
+  "description": "The public FirmLedger profile of one company: description, category, location, verification state (tick, how ownership was proved, when it was last checked), confidence and health scores, sources, recent moderated news headlines, open jobs count, reported revenue and the rolling ten-calendar-year revenue history answer (reported years, explicit gaps, per-year sources and the current/most recent figure with its sources). With FirmLedger Pro it also includes website, email, phone, social links, key people, timeline and technology — the same line the website draws.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "get_listing",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Get a FirmLedger company profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List my FirmLedger listings"
+  },
+  "description": "The listings this account owns or submitted, with moderation status, tick, scores, Pro perks, sponsorship, jobs and new-lead counts. Use first when the user refers to \"my listing\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_my_listings",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List my FirmLedger listings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "View my revenue submissions"
+  },
+  "description": "List published and pending revenue records for a listing you own, including moderation status and sources. Also returns the standard ten-year revenue history answer: reported years, gaps, per-year source URLs, and the figure/period/sources shown on the profile when no in-window history exists.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "get_my_revenue",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "View my revenue submissions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get moderated company news (Pro)"
+  },
+  "description": "FirmLedger Pro. Recent moderated news headlines about one company with dates, publishers and links — the same accuracy-gated stories shown on the profile's news panel.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "pattern": "^-?[0-9]+$",
+       "type": "string"
+      }
+     ],
+     "default": 10,
+     "description": "Stories to return (1-12).. Integer or numeric string, clamped to 1–12."
+    },
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "get_news",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get moderated company news (Pro)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read my notifications"
+  },
+  "description": "The user's in-app FirmLedger notifications, newest first, with the unread count. Set unread_only for just the unread ones.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 20,
+     "maximum": 60,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "unread_only": {
+     "default": false,
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_notifications",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read my notifications"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get a company's relationship graph (Pro)"
+  },
+  "description": "FirmLedger Pro. The recorded relationship graph of one company: founders, investors, parent companies, subsidiaries, products, services and partners — plus the reverse edges (companies it founded or invested in). Only relationships recorded by the verified owner or moderators; nothing is inferred.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "get_relationships",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get a company's relationship graph (Pro)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read my watchlist"
+  },
+  "description": "The companies the user watches on FirmLedger, newest first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_watchlist",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read my watchlist"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List FirmLedger advertising packages"
+  },
+  "description": "The current Sponsored-placement advertising packages with price, billing and duration. With an API key it also lists the user's own listings and which of them can be advertised or are already sponsored. Use before prepare_advertising.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_ad_packages",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "List FirmLedger advertising packages"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List my API keys"
+  },
+  "description": "The account's API keys with label, prefix, scopes, usage totals and last use — never a raw key. Use it to name a key before revoking or re-scoping it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_api_keys",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List my API keys"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List FirmLedger categories"
+  },
+  "description": "Every FirmLedger category with its number of approved listings. Use to pick a valid category for search_listings.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "List FirmLedger categories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List countries on FirmLedger"
+  },
+  "description": "The countries present in the FirmLedger directory, each with its number of approved listings.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_countries",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "List countries on FirmLedger"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List open jobs (Pro)"
+  },
+  "description": "FirmLedger Pro. Open roles at approved FirmLedger companies, filtered by company and/or location and keyword: title, company, location, posted date and where to apply. Jobs on unapproved listings never appear.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "company": {
+     "description": "Optional company (slug, exact name, FirmLedger ID or profile URL).",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "pattern": "^-?[0-9]+$",
+       "type": "string"
+      }
+     ],
+     "default": 10,
+     "description": "limit. Integer or numeric string, clamped to 1–25."
+    },
+    "location": {
+     "description": "Optional location, e.g. \"Nairobi\" or \"Kenya\" or \"Remote\".",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "offset": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "pattern": "^-?[0-9]+$",
+       "type": "string"
+      }
+     ],
+     "default": 0,
+     "description": "offset. Integer or numeric string, clamped to 0–10000."
+    },
+    "query": {
+     "description": "Optional keyword in the job title or description.",
+     "maxLength": 80,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_jobs",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List open jobs (Pro)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List my leads"
+  },
+  "description": "The user's FirmLedger Leads inbox: inquiries received on their listings (box \"received\", the default), archived ones (\"archived\"), or inquiries they sent to other businesses (\"sent\"). Filter by status or listing; paginated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "box": {
+     "enum": [
+      "received",
+      "archived",
+      "sent"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "listing": {
+     "description": "Optional: only leads for this listing of the user's.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "page": {
+     "default": 1,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "enum": [
+      "new",
+      "contacted",
+      "qualified",
+      "won",
+      "lost"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_leads",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List my leads"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read my support tickets"
+  },
+  "description": "The user's FirmLedger support tickets. Pass a ticket reference to read that ticket's full conversation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "ticket": {
+     "description": "Optional ticket reference, e.g. \"TK-1A2B3C\".",
+     "maxLength": 40,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_my_tickets",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read my support tickets"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List FirmLedger Pro plans"
+  },
+  "description": "The current FirmLedger Pro offers with price, billing and duration. With an API key it also says whether this account is already on Pro and whether a free trial is available. Use before prepare_upgrade.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_plans",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "List FirmLedger Pro plans"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List my webhook destinations"
+  },
+  "description": "The account's webhook destinations with events, category filters, active state and signing-secret prefix — plus recent deliveries (status, HTTP code, attempts, last error) when a webhook id is given.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "webhook_id": {
+     "description": "Optional: one destination, with its recent deliveries.",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_webhooks",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "read:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List my webhook destinations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Manage my API keys"
+  },
+  "description": "Create an API key (the raw key is returned once), revoke a key, or change a key's scopes — the dashboard's Developer API controls. Requires the user's confirmation. Keys can also carry the AI-assistant scopes (read:account / write:account) that this connector uses.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "create",
+      "revoke",
+      "update_scopes"
+     ],
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "key_id": {
+     "description": "revoke/update_scopes: the key id from list_api_keys.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "key_prefix": {
+     "description": "Optional alternative to key_id.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "label": {
+     "description": "create: a name for the key.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "scopes": {
+     "description": "Scope ids. Required for update_scopes; create defaults to the standard scopes.",
+     "items": {
+      "enum": [
+       "read:listings",
+       "write:listings",
+       "export",
+       "manage:webhooks",
+       "read:usage",
+       "read:account",
+       "write:account"
+      ],
+      "type": "string"
+     },
+     "maxItems": 9,
+     "minItems": 1,
+     "type": "array",
+     "uniqueItems": true
+    }
+   },
+   "required": [
+    "action"
+   ],
+   "type": "object"
+  },
+  "name": "manage_api_keys",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Manage my API keys"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Edit, close or remove my job"
+  },
+  "description": "Manage a job owned by the member: edit its title, type, location, apply link or description, close it, or permanently remove it. Editing a live or closed role returns it to moderation before it is public again. Requires the user’s confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "edit",
+      "close",
+      "remove",
+      "delete"
+     ],
+     "type": "string"
+    },
+    "apply_url": {
+     "maxLength": 400,
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "description": {
+     "maxLength": 600,
+     "type": "string"
+    },
+    "job_id": {
+     "minimum": 1,
+     "type": "integer"
+    },
+    "location": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "role_type": {
+     "enum": [
+      "Full-time",
+      "Part-time",
+      "Contract",
+      "Internship",
+      "Remote"
+     ],
+     "type": "string"
+    },
+    "title": {
+     "maxLength": 80,
+     "type": "string"
+    }
+   },
+   "required": [
+    "action",
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "manage_job",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Edit, close or remove my job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Archive, restore or delete a lead conversation"
+  },
+  "description": "Archive a conversation out of the business inbox, restore it, or delete it permanently — the dashboard's conversation controls. Requires the user's confirmation (deleting is irreversible).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "archive",
+      "unarchive",
+      "delete"
+     ],
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "lead_id": {
+     "description": "The lead id from list_leads.",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "action",
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "manage_lead",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Archive, restore or delete a lead conversation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Submit a revenue change for moderation"
+  },
+  "description": "Add reported revenue, edit an approved owner record with target_id, or request deletion. All changes require explicit confirmation and moderation; never immediately changes published revenue. Sources are public HTTPS URLs separated by newlines.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "save",
+      "delete"
+     ],
+     "type": "string"
+    },
+    "amount": {
+     "maxLength": 32,
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "currency": {
+     "maxLength": 3,
+     "type": "string"
+    },
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "period": {
+     "maxLength": 10,
+     "type": "string"
+    },
+    "sources": {
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "target_id": {
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "listing",
+    "action"
+   ],
+   "type": "object"
+  },
+  "name": "manage_my_revenue",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Submit a revenue change for moderation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Manage my webhook destinations"
+  },
+  "description": "Create, update, pause, resume, rotate the signing secret of, test, retry a delivery for, or delete a webhook destination on the user's account — the same operations as Dashboard → Developer API. Secrets come back only for create and rotate. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "create",
+      "update",
+      "pause",
+      "resume",
+      "rotate_secret",
+      "test",
+      "retry_delivery",
+      "delete"
+     ],
+     "type": "string"
+    },
+    "categories": {
+     "items": {
+      "maxLength": 80,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "delivery_id": {
+     "description": "retry_delivery: which delivery to retry.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "events": {
+     "description": "create/update: event types to subscribe to.",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 6,
+     "type": "array"
+    },
+    "label": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "url": {
+     "description": "create/update: the receiver URL (https in production).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "webhook_id": {
+     "description": "Required for every action except create.",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "action"
+   ],
+   "type": "object"
+  },
+  "name": "manage_webhooks",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Manage my webhook destinations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Mark notifications as read"
+  },
+  "description": "Mark one notification (notification_id) or all of them (all: true) as read. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "all": {
+     "type": "boolean"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "notification_id": {
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "mark_notifications_read",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Mark notifications as read"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Post a job on my listing"
+  },
+  "description": "Submit a job opening on one of the user's listings (the listing needs active Pro perks; up to 5 open or pending roles). Like the dashboard form, it goes to moderation first and is published after approval. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "apply_url": {
+     "description": "Full https:// link to the job post or careers page.",
+     "maxLength": 400,
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "description": {
+     "maxLength": 600,
+     "minLength": 30,
+     "type": "string"
+    },
+    "listing": {
+     "description": "One of the user's own listings.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "location": {
+     "description": "City, or \"Remote\".",
+     "maxLength": 80,
+     "minLength": 1,
+     "type": "string"
+    },
+    "role_type": {
+     "enum": [
+      "Full-time",
+      "Part-time",
+      "Contract",
+      "Internship",
+      "Remote"
+     ],
+     "type": "string"
+    },
+    "title": {
+     "maxLength": 80,
+     "minLength": 3,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing",
+    "title",
+    "location",
+    "apply_url",
+    "description"
+   ],
+   "type": "object"
+  },
+  "name": "post_job",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Post a job on my listing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Prepare a FirmLedger advertising checkout link"
+  },
+  "description": "Does NOT charge anything. Checks that the listing belongs to this account and is approved, then returns a personal link to FirmLedger's own checkout for the chosen Sponsored-placement package. The user reviews and pays there themselves; you can never complete or confirm a payment. If the user says \"yes, do it\", give them the link again.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listing": {
+     "description": "One of the user's own approved listings (see get_my_listings or list_ad_packages).",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "package": {
+     "description": "The package id from list_ad_packages (or its exact name).",
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing",
+    "package"
+   ],
+   "type": "object"
+  },
+  "name": "prepare_advertising",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Prepare a FirmLedger advertising checkout link"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Prepare a listing ownership claim"
+  },
+  "description": "Free. Prepare a link to claim an approved listing using DNS TXT, HTML meta tag or site badge. Creates nothing and never grants ownership. The user signs in, generates a token, installs the proof on the business domain and verifies it on FirmLedger.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "method": {
+     "enum": [
+      "dns",
+      "meta",
+      "badge"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "prepare_listing_claim",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Prepare a listing ownership claim"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Prepare a FirmLedger listing submission link"
+  },
+  "description": "Does NOT create anything. Returns a link to the real FirmLedger submission form with the company name, website and (optional) category, country and city pre-filled. The user opens it, signs in, completes the remaining fields, reviews everything and submits it themselves. Also reports if the company is already listed, so nothing is submitted twice.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Optional category.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "city": {
+     "description": "Optional city.",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "country": {
+     "description": "Optional country.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "name": {
+     "description": "Company name.",
+     "maxLength": 120,
+     "minLength": 2,
+     "type": "string"
+    },
+    "website": {
+     "description": "Company website, e.g. \"example.co.ke\".",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "prepare_listing_submission",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Prepare a FirmLedger listing submission link"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Prepare a FirmLedger Pro checkout link"
+  },
+  "description": "Does NOT charge anything. Returns a personal link to FirmLedger's own checkout for the chosen Pro plan (optionally with a promo code). The user opens it, signs in, reviews the order on FirmLedger and pays on the secure Lemon Squeezy checkout themselves. You can never complete or confirm a payment and must never ask for card details; if the user says \"yes, do it\", give them the link again. Without an API key it returns the pricing page instead.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "plan": {
+     "description": "The plan id from list_plans (or its exact name).",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "promo_code": {
+     "description": "Optional promo code the user gave you.",
+     "maxLength": 40,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "prepare_upgrade",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Prepare a FirmLedger Pro checkout link"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Refresh my listing's news"
+  },
+  "description": "Look for new coverage of one of the user's approved listings with the same accuracy rules and moderation as the dashboard's \"Refresh news\" (once a minute per listing). Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "One of the user's own approved listings.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "refresh_listing_news",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Refresh my listing's news"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Refresh my listing's scores"
+  },
+  "description": "Recompute the confidence, health and completeness scores of one of the user's listings from its current record — the dashboard's \"Re-align scores\". Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "One of the user's own listings.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "refresh_listing_scores",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Refresh my listing's scores"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Refresh my listing's technology snapshot"
+  },
+  "description": "Scan the website of one of the user's listings and refresh its technology snapshot — the dashboard's \"Refresh tech\". Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "One of the user's own listings.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "refresh_listing_tech",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Refresh my listing's technology snapshot"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Reply to a lead"
+  },
+  "description": "Send a reply in one of the user's lead conversations, exactly as the Reply box on the website does (the other party is notified). Requires the user's confirmation: the first call returns the exact message for them to approve.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "lead_id": {
+     "minimum": 1,
+     "type": "integer"
+    },
+    "message": {
+     "description": "The reply text, written or approved by the user.",
+     "maxLength": 4000,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "lead_id",
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "reply_to_lead",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Reply to a lead"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Reply to an open support ticket"
+  },
+  "description": "Send a reply in one of the user's own support tickets — the same thread the dashboard shows, and the same message an agent answers. Closed tickets cannot take replies. Requires the user's confirmation of the exact text.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "message": {
+     "description": "The reply text, written or approved by the user.",
+     "maxLength": 4000,
+     "minLength": 2,
+     "type": "string"
+    },
+    "ticket": {
+     "description": "The ticket reference (e.g. TK-1A2B3C) or its id, from list_my_tickets.",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticket",
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "reply_to_ticket",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Reply to an open support ticket"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Connect or renew the FirmLedger account"
+  },
+  "description": "Connect this assistant to the member's own FirmLedger account by sign-in (OAuth), or renew or replace that connection. Call it when the member says \"connect me to my account\", \"sign me in\", or asks to switch accounts. The assistant opens FirmLedger in the browser, the member approves there, and no password or key passes through the chat. mode \"connect\" (the default) starts sign-in when the connection needs it. mode \"reauthenticate\" ends the current connection so the member can choose the account again. mode \"refresh\" renews a sign-in token that is about to expire, and the assistant should then retry.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "mode": {
+     "description": "connect (default): sign in if needed. reauthenticate: end this connection so the member can choose the account again. refresh: renew a token that is about to expire.",
+     "enum": [
+      "connect",
+      "reauthenticate",
+      "refresh"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "request_authentication",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Connect or renew the FirmLedger account"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Request removal of my listing"
+  },
+  "description": "Send a removal request for a listing the user owns or originally submitted. A moderator reviews it; nothing is removed until they accept. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "A listing the user owns or submitted.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "reason": {
+     "description": "Why it should be removed (20+ characters).",
+     "maxLength": 2000,
+     "minLength": 20,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing",
+    "reason"
+   ],
+   "type": "object"
+  },
+  "name": "request_listing_removal",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Request removal of my listing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Remove the FirmLedger account connection"
+  },
+  "description": "Disconnect this assistant from the member's FirmLedger account. The sign-in is revoked on FirmLedger's side at once, and every token it issued stops working. Call it when the member asks to remove, sign out or disconnect their account. It cannot erase the token stored in the member's assistant app, so tell the member to remove the FirmLedger connector there as well.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "revoke_connection",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Remove the FirmLedger account connection"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search FirmLedger listings"
+  },
+  "description": "Search approved FirmLedger company records by name or keyword, category, country, city and verified status. Returns a short list (name, category, location, verified flag, tick, confidence score, one-line description) plus the accurate total, for picking the right company before calling get_listing. Use city for places like \"Nairobi\" and country for \"Kenya\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Category name, e.g. \"Fintech\". Call list_categories for valid names.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "city": {
+     "description": "City or region, e.g. \"Nairobi\".",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "country": {
+     "description": "Country name, e.g. \"Kenya\".",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "limit": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "pattern": "^-?[0-9]+$",
+       "type": "string"
+      }
+     ],
+     "default": 10,
+     "description": "Results per page (1-25).. Integer or numeric string, clamped to 1–25."
+    },
+    "offset": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "pattern": "^-?[0-9]+$",
+       "type": "string"
+      }
+     ],
+     "default": 0,
+     "description": "Results to skip, for paging (use next_offset).. Integer or numeric string, clamped to 0–10000."
+    },
+    "query": {
+     "description": "Company name or keyword (matched against name, tagline, description, tags and city).",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "type": {
+     "description": "Entity type.",
+     "enum": [
+      "company",
+      "startup",
+      "agency",
+      "organization",
+      "product",
+      "service",
+      "publisher"
+     ],
+     "type": "string"
+    },
+    "verified_only": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "enum": [
+        "true",
+        "false"
+       ],
+       "type": "string"
+      }
+     ],
+     "description": "Only ownership-verified records (boolean or the string true/false)."
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_listings",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Search FirmLedger listings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Change a lead's status"
+  },
+  "description": "Move a lead in the user's business inbox to new, contacted, qualified, won or lost. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "lead_id": {
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "enum": [
+      "new",
+      "contacted",
+      "qualified",
+      "won",
+      "lost"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "lead_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "name": "set_lead_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Change a lead's status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Contact a claimed business"
+  },
+  "description": "Start a new FirmLedger Leads conversation with another approved, claimed business. The signed-in member email is used automatically, the business email stays private, and the owner is notified in their Leads inbox. Requires the user’s confirmation of the exact inquiry.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "looking_for": {
+     "description": "Optional short subject or what the member needs.",
+     "maxLength": 140,
+     "type": "string"
+    },
+    "message": {
+     "maxLength": 4000,
+     "minLength": 10,
+     "type": "string"
+    },
+    "name": {
+     "description": "Optional sender name; defaults to the member profile name.",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "phone": {
+     "maxLength": 40,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing",
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "start_lead",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Contact a claimed business"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Edit one of my listings"
+  },
+  "description": "Change fields on a listing the user owns (name, tagline, description, website, email, phone, country, city, region, address, logo_url, founded, size, tags, socials) — the same service the dashboard edit form and PUT /api/v1/my/listings/:id use, including the re-moderation rule when the core record changes. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "city": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "country": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "description": {
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "email": {
+     "maxLength": 190,
+     "type": "string"
+    },
+    "founded": {
+     "maxLength": 12,
+     "type": "string"
+    },
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    },
+    "logo_url": {
+     "maxLength": 500,
+     "type": "string"
+    },
+    "name": {
+     "maxLength": 120,
+     "type": "string"
+    },
+    "phone": {
+     "maxLength": 40,
+     "type": "string"
+    },
+    "region": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "size": {
+     "maxLength": 40,
+     "type": "string"
+    },
+    "socials": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "facebook": {
+         "maxLength": 500,
+         "type": "string"
+        },
+        "instagram": {
+         "maxLength": 500,
+         "type": "string"
+        },
+        "linkedin": {
+         "maxLength": 500,
+         "type": "string"
+        },
+        "x": {
+         "maxLength": 500,
+         "type": "string"
+        },
+        "youtube": {
+         "maxLength": 500,
+         "type": "string"
+        }
+       },
+       "type": "object"
+      },
+      {
+       "maxLength": 800,
+       "type": "string"
+      }
+     ],
+     "description": "Social profile links keyed by network; use an empty object to clear. A JSON object string is also accepted."
+    },
+    "tagline": {
+     "maxLength": 160,
+     "type": "string"
+    },
+    "tags": {
+     "maxLength": 300,
+     "type": "string"
+    },
+    "website": {
+     "maxLength": 300,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "update_my_listing",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Edit one of my listings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Add a company to my watchlist"
+  },
+  "description": "Add an approved company to the user's watchlist so they are notified when its record changes. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "watchlist_add",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Add a company to my watchlist"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Remove a company from my watchlist"
+  },
+  "description": "Remove a company from the user's watchlist. Requires the user's confirmation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmation_token": {
+     "description": "Leave empty on the first call: you get an action_summary and a token instead of the action. After the user explicitly confirms that summary, call again with the SAME arguments plus this token.",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "listing": {
+     "description": "The company: its FirmLedger slug (best — returned by search_listings), its exact name, its FirmLedger ID such as \"FL-00012\", or its FirmLedger profile URL.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing"
+   ],
+   "type": "object"
+  },
+  "name": "watchlist_remove",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "mcp",
+     "write:account"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Remove a company from my watchlist"
+ }
+]

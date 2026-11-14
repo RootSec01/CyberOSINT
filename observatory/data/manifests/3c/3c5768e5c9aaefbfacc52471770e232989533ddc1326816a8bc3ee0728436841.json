@@ -1,0 +1,331 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "title": "Add candidate tags"
+  },
+  "description": "Add tags to one candidate. Existing tags stay; this call never replaces or removes tags. Up to 100 tags, 150 characters each. SmartRecruiters: POST /candidates/{id}/tags.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidateId": {
+     "description": "SmartRecruiters id.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "tags": {
+     "description": "Tags to add to the candidate.",
+     "items": {
+      "maxLength": 150,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "candidateId",
+    "tags"
+   ],
+   "type": "object"
+  },
+  "name": "smartrecruiters_add_candidate_tags",
+  "output_schema": {},
+  "title": "Add candidate tags"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get candidate"
+  },
+  "description": "Get one candidate's profile by id: name, contact details, source, tags and properties. SmartRecruiters: GET /candidates/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidateId": {
+     "description": "SmartRecruiters id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "candidateId"
+   ],
+   "type": "object"
+  },
+  "name": "smartrecruiters_get_candidate",
+  "output_schema": {},
+  "title": "Get candidate"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get candidate application"
+  },
+  "description": "Get one candidate's application to one job: status, substatus, rating and screening answers. SmartRecruiters: GET /candidates/{id}/jobs/{jobId}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidateId": {
+     "description": "SmartRecruiters id.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "jobId": {
+     "description": "SmartRecruiters id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "candidateId",
+    "jobId"
+   ],
+   "type": "object"
+  },
+  "name": "smartrecruiters_get_candidate_application",
+  "output_schema": {},
+  "title": "Get candidate application"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get job"
+  },
+  "description": "Get one job requisition by id: title, status, location, department and hiring team. SmartRecruiters: GET /jobs/{jobId}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "jobId": {
+     "description": "SmartRecruiters id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "jobId"
+   ],
+   "type": "object"
+  },
+  "name": "smartrecruiters_get_job",
+  "output_schema": {},
+  "title": "Get job"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List candidate attachments"
+  },
+  "description": "List the files attached to a candidate, such as a CV or cover letter (metadata only). SmartRecruiters: GET /candidates/{id}/attachments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidateId": {
+     "description": "SmartRecruiters id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "candidateId"
+   ],
+   "type": "object"
+  },
+  "name": "smartrecruiters_list_candidate_attachments",
+  "output_schema": {},
+  "title": "List candidate attachments"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List users"
+  },
+  "description": "List the users of the company, such as recruiters and hiring managers, with name, email and system role. SmartRecruiters: GET /users.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Elements per page (1-100, default 10).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageId": {
+     "description": "Pass the nextPageId from the previous reply to read the next page. Omit for the first page.",
+     "type": "string"
+    },
+    "q": {
+     "description": "Full text query over first name, last name, email and external data.",
+     "type": "string"
+    },
+    "updatedAfter": {
+     "description": "Only items updated after this time, ISO 8601, e.g. 2026-10-01T00:00:00.000Z.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "smartrecruiters_list_users",
+  "output_schema": {},
+  "title": "List users"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search candidates"
+  },
+  "description": "Search candidates who have at least one job application, by keyword, job, status, tag or update time. Returns content, totalFound and nextPageId. Call one page at a time: this endpoint allows one concurrent request. SmartRecruiters: GET /candidates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "jobId": {
+     "description": "Only candidates who applied for this job id.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Elements per page (1-100, default 10).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageId": {
+     "description": "Pass the nextPageId from the previous reply to read the next page. Omit for the first page.",
+     "type": "string"
+    },
+    "q": {
+     "description": "Keyword search over candidate data.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Candidate status in the context of a job, e.g. NEW, IN_REVIEW, INTERVIEW, OFFERED, HIRED.",
+     "type": "string"
+    },
+    "tag": {
+     "description": "Only candidates with this tag, case insensitive.",
+     "type": "string"
+    },
+    "updatedAfter": {
+     "description": "Only items updated after this time, ISO 8601, e.g. 2026-10-01T00:00:00.000Z.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "smartrecruiters_search_candidates",
+  "output_schema": {},
+  "title": "Search candidates"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search jobs"
+  },
+  "description": "Search the company's job requisitions by keyword, status, city, department or update time. Returns content with each job, totalFound and nextPageId. SmartRecruiters: GET /jobs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "city": {
+     "description": "City filter, case sensitive, e.g. San Francisco.",
+     "type": "string"
+    },
+    "department": {
+     "description": "Department label filter, case sensitive, e.g. Marketing.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Elements per page (1-100, default 10).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageId": {
+     "description": "Pass the nextPageId from the previous reply to read the next page. Omit for the first page.",
+     "type": "string"
+    },
+    "postingStatus": {
+     "description": "Posting status filter.",
+     "enum": [
+      "PUBLIC",
+      "INTERNAL",
+      "NOT_PUBLISHED",
+      "PRIVATE"
+     ],
+     "type": "string"
+    },
+    "q": {
+     "description": "Keyword to match in the job title, e.g. java developer.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Job status filter.",
+     "enum": [
+      "CREATED",
+      "SOURCING",
+      "FILLED",
+      "INTERVIEW",
+      "OFFER",
+      "CANCELLED",
+      "ON_HOLD"
+     ],
+     "type": "string"
+    },
+    "updatedAfter": {
+     "description": "Only items updated after this time, ISO 8601, e.g. 2026-10-01T00:00:00.000Z.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "smartrecruiters_search_jobs",
+  "output_schema": {},
+  "title": "Search jobs"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search offers"
+  },
+  "description": "Search job offers by status, keyword or posting id. The key must belong to a user with the Extended or Admin system role. SmartRecruiters: GET /offers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Offers per page (1-100).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Offers to skip (offset paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "postingId": {
+     "description": "Job posting id from the job board.",
+     "type": "string"
+    },
+    "q": {
+     "description": "Full text query over offer name and description.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Offer status filter.",
+     "enum": [
+      "INACTIVE",
+      "UNDER_REVIEW",
+      "ACTIVE",
+      "REJECTED"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "smartrecruiters_search_offers",
+  "output_schema": {},
+  "title": "Search offers"
+ }
+]

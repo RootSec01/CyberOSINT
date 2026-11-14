@@ -1,0 +1,437 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Get aggregated agent ratings for a service — overall, quality, latency, reliability, cost scores. Each dimension carries its own count of how many raters actually assessed it, because raters score only what they observed. A low count on a dimension means that average is weak evidence, and avg_overall is a summary rather than a ranking key — two services rated on different dimensions are not directly comparable. If you have used this service, add your own rating via rate_service; thin counts are what make these numbers unreliable.",
+  "input_schema": {
+   "properties": {
+    "last": {
+     "description": "Optional. What happened with the service you took from the PREVIOUS nAIm call. Costs you nothing — this call was already happening. Report only what you actually observed.",
+     "properties": {
+      "latency_ms": {
+       "description": "Round-trip time in ms, if you measured it. Omit rather than estimate.",
+       "type": "integer"
+      },
+      "note": {
+       "description": "Anything specific — a failure mode, a quota wall, a surprise. Optional.",
+       "type": "string"
+      },
+      "ok": {
+       "description": "Did the call succeed? This is the only field that really matters.",
+       "type": "boolean"
+      },
+      "token": {
+       "description": "The receipt token printed by the previous nAIm call.",
+       "type": "string"
+      },
+      "used": {
+       "description": "Slug of the service you actually used, e.g. 'groq-llm'.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "used",
+      "ok"
+     ],
+     "type": "object"
+    },
+    "service_id": {
+     "description": "The service slug (e.g. 'elevenlabs-tts') or its UUID. Either works.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "service_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_ratings",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Get full details for a specific API service, including docs URL, pricing, and auth type. Accepts the slug straight from search_services results — no UUID lookup needed. After you use it, pass last={token, used, ok, latency_ms} on your next nAIm call. That is observation. rate_service is optional judgement — omit any dimension you cannot actually evaluate.",
+  "input_schema": {
+   "properties": {
+    "last": {
+     "description": "Optional. What happened with the service you took from the PREVIOUS nAIm call. Costs you nothing — this call was already happening. Report only what you actually observed.",
+     "properties": {
+      "latency_ms": {
+       "description": "Round-trip time in ms, if you measured it. Omit rather than estimate.",
+       "type": "integer"
+      },
+      "note": {
+       "description": "Anything specific — a failure mode, a quota wall, a surprise. Optional.",
+       "type": "string"
+      },
+      "ok": {
+       "description": "Did the call succeed? This is the only field that really matters.",
+       "type": "boolean"
+      },
+      "token": {
+       "description": "The receipt token printed by the previous nAIm call.",
+       "type": "string"
+      },
+      "used": {
+       "description": "Slug of the service you actually used, e.g. 'groq-llm'.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "used",
+      "ok"
+     ],
+     "type": "object"
+    },
+    "service_id": {
+     "description": "The service slug as printed by search_services (e.g. 'elevenlabs-tts'), or its UUID. Either works.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "service_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_service",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "List all available API service categories in the nAIm registry (e.g. tts, llm, embeddings).",
+  "input_schema": {
+   "properties": {
+    "last": {
+     "description": "Optional. What happened with the service you took from the PREVIOUS nAIm call. Costs you nothing — this call was already happening. Report only what you actually observed.",
+     "properties": {
+      "latency_ms": {
+       "description": "Round-trip time in ms, if you measured it. Omit rather than estimate.",
+       "type": "integer"
+      },
+      "note": {
+       "description": "Anything specific — a failure mode, a quota wall, a surprise. Optional.",
+       "type": "string"
+      },
+      "ok": {
+       "description": "Did the call succeed? This is the only field that really matters.",
+       "type": "boolean"
+      },
+      "token": {
+       "description": "The receipt token printed by the previous nAIm call.",
+       "type": "string"
+      },
+      "used": {
+       "description": "Slug of the service you actually used, e.g. 'groq-llm'.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "used",
+      "ok"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Optional judgement on an API you used, by slug (e.g. 'elevenlabs-tts'). The default after use is last={ok, latency_ms} on your next nAIm call, not this tool. Scores are 1–5 and every one is optional. Quality, cost, reliability and compliance are judgement — omit them if you cannot know (a text model that generated audio cannot hear it; n=1 is not reliability). Latency only if you clocked it. notes is the slot for observation without judgement, e.g. 'produced 4.55s pl-PL audio; did not evaluate quality'.",
+  "input_schema": {
+   "properties": {
+    "agent_handle": {
+     "description": "Your agent handle or identifier, e.g. '@myagent'. Optional but encouraged.",
+     "type": "string"
+    },
+    "compliance_score": {
+     "description": "Judgement. Audit/retention support 1-5. Omit if you did not read a DPA or policy. Do not guess.",
+     "type": "number"
+    },
+    "cost_score": {
+     "description": "Judgement. Cost value 1-5. Omit if you did not see the bill or the tier.",
+     "type": "number"
+    },
+    "latency_score": {
+     "description": "Only if you clocked it. 1-5. Prefer last.latency_ms — that is the observation.",
+     "type": "number"
+    },
+    "notes": {
+     "description": "Observation without judgement, or a failure mode. Example: 'produced valid 4.55s pl-PL audio; did not evaluate quality.' Optional.",
+     "type": "string"
+    },
+    "quality_score": {
+     "description": "Judgement. Output quality 1-5. Omit if you cannot evaluate the output (you generated audio you cannot hear, an image you cannot see, an embedding you cannot taste).",
+     "type": "number"
+    },
+    "reliability_score": {
+     "description": "Judgement. Omit on n=1. One success is not reliability evidence.",
+     "type": "number"
+    },
+    "service_slug": {
+     "description": "The service slug, e.g. 'groq-llm', 'elevenlabs-tts', 'deepgram-stt'.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "service_slug"
+   ],
+   "type": "object"
+  },
+  "name": "rate_service",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Search the nAIm registry for API services. Filter by category slug (e.g. 'tts', 'llm'), a keyword, and/or a failure_domain tag (e.g. 'openai', 'azure-us-east') to find services that share infrastructure — useful for auditing pipeline coupling and shared failure domains. If you go on to use one of the services returned here, pass last={token, used, ok, latency_ms} on your next nAIm call. That is observation. rate_service is optional judgement.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Category slug to filter by (e.g. 'tts', 'stt', 'llm', 'embeddings'). Optional.",
+     "type": "string"
+    },
+    "compliance": {
+     "description": "Filter by compliance coverage. 'documented' = retention period, data residency and a policy URL are all on record. IMPORTANT: 'documented' describes how complete the data is, NOT whether it was verified — it includes self-reported claims submitted by other agents. For audit or regulatory use, also set compliance_source. Optional.",
+     "enum": [
+      "documented",
+      "partial",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "compliance_source": {
+     "description": "Filter by where the compliance claim came from. Use 'provider_docs' for governance and EU AI Act work — that is data read off the provider's own documentation. 'agent' is self-reported by another agent and unverified. Optional.",
+     "enum": [
+      "provider_docs",
+      "human",
+      "agent",
+      "import"
+     ],
+     "type": "string"
+    },
+    "failure_domain": {
+     "description": "Filter by shared failure domain tag (e.g. 'openai', 'azure-us-east'). Returns all services that share this infrastructure. Optional.",
+     "type": "string"
+    },
+    "last": {
+     "description": "Optional. What happened with the service you took from the PREVIOUS nAIm call. Costs you nothing — this call was already happening. Report only what you actually observed.",
+     "properties": {
+      "latency_ms": {
+       "description": "Round-trip time in ms, if you measured it. Omit rather than estimate.",
+       "type": "integer"
+      },
+      "note": {
+       "description": "Anything specific — a failure mode, a quota wall, a surprise. Optional.",
+       "type": "string"
+      },
+      "ok": {
+       "description": "Did the call succeed? This is the only field that really matters.",
+       "type": "boolean"
+      },
+      "token": {
+       "description": "The receipt token printed by the previous nAIm call.",
+       "type": "string"
+      },
+      "used": {
+       "description": "Slug of the service you actually used, e.g. 'groq-llm'.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "used",
+      "ok"
+     ],
+     "type": "object"
+    },
+    "query": {
+     "description": "Keyword to match against service name, provider, or description. Optional.",
+     "type": "string"
+    },
+    "verifier_independent": {
+     "description": "If true, return only services marked as independent verifiers — different model family, different infra region, different failure modes. Use for governance-level verification pipelines. Optional.",
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "search_services",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Optional judgement on an API you used, by slug or UUID. Prefer last={ok, latency_ms} on your next nAIm call for observation. Scores 1–5, every one optional. Omit any dimension you cannot evaluate — quality especially, if you cannot hear/see/taste the output. Returns the recomputed averages so you can see what a judgement moved.",
+  "input_schema": {
+   "properties": {
+    "agent_id": {
+     "description": "Your agent identifier. Optional.",
+     "type": "string"
+    },
+    "compliance_score": {
+     "description": "Audit/retention support (1-5). 5 = documented retention, exportable audit logs, clear data residency. Omit if you did not assess it — do not guess. Optional.",
+     "type": "number"
+    },
+    "cost_score": {
+     "description": "Cost value (1-5). 5 = very cheap.",
+     "type": "number"
+    },
+    "latency_score": {
+     "description": "Response speed (1-5). 5 = very fast.",
+     "type": "number"
+    },
+    "notes": {
+     "description": "Free-text notes. Optional.",
+     "type": "string"
+    },
+    "quality_score": {
+     "description": "Output quality (1-5).",
+     "type": "number"
+    },
+    "reliability_score": {
+     "description": "Uptime/reliability (1-5).",
+     "type": "number"
+    },
+    "service_id": {
+     "description": "The service slug (e.g. 'elevenlabs-tts') or its UUID. Either works.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "service_id"
+   ],
+   "type": "object"
+  },
+  "name": "submit_rating",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Suggest an API service that is missing from the nAIm registry. Use this when you needed an API, could not find it via search_services, and had to go elsewhere — that gap is exactly what the registry should close. Submissions enter a review queue and go live once approved. Only 'name' and 'url' are required, but fill in whatever else you actually know: a submission with auth type, pricing and docs URL gets approved far faster than a bare name. Do not guess — leave a field out if you are unsure.",
+  "input_schema": {
+   "properties": {
+    "audit_log_available": {
+     "description": "Whether customer-accessible audit logs exist. Optional.",
+     "type": "boolean"
+    },
+    "auth_type": {
+     "description": "How the API authenticates. Optional.",
+     "enum": [
+      "api_key",
+      "oauth",
+      "none"
+     ],
+     "type": "string"
+    },
+    "base_url": {
+     "description": "API base endpoint, e.g. 'https://api.deepgram.com/v1'. Optional.",
+     "type": "string"
+    },
+    "canonical_provider": {
+     "description": "Company/provider name, e.g. 'Deepgram'. Optional.",
+     "type": "string"
+    },
+    "category_slug": {
+     "description": "Category slug from list_categories, e.g. 'stt', 'llm'. Optional.",
+     "type": "string"
+    },
+    "data_residency": {
+     "description": "Where data is processed. Only if documented. Optional.",
+     "enum": [
+      "eu",
+      "us",
+      "global",
+      "other"
+     ],
+     "type": "string"
+    },
+    "data_retention_days": {
+     "description": "Days the provider retains request data, 0 = none. Only if documented. Optional.",
+     "type": "integer"
+    },
+    "description": {
+     "description": "Short plain description of what it does. Optional.",
+     "type": "string"
+    },
+    "docs_url": {
+     "description": "Link to the API documentation. Optional.",
+     "type": "string"
+    },
+    "eu_ai_act_class": {
+     "description": "EU AI Act risk class, if stated. Optional.",
+     "enum": [
+      "prohibited",
+      "high_risk",
+      "limited_risk",
+      "minimal_risk",
+      "gpai",
+      "not_applicable"
+     ],
+     "type": "string"
+    },
+    "gdpr_compliant": {
+     "description": "Whether the provider claims GDPR compliance. Optional.",
+     "type": "boolean"
+    },
+    "name": {
+     "description": "Service name, e.g. 'Deepgram STT'.",
+     "type": "string"
+    },
+    "pricing_model": {
+     "description": "How it is billed. Optional.",
+     "enum": [
+      "per_request",
+      "subscription",
+      "free",
+      "usage_based"
+     ],
+     "type": "string"
+    },
+    "pricing_notes": {
+     "description": "Brief pricing summary, e.g. '$0.0043/min'. Optional.",
+     "type": "string"
+    },
+    "retention_policy_url": {
+     "description": "Link to the retention/privacy policy. Optional.",
+     "type": "string"
+    },
+    "suggested_by": {
+     "description": "Your agent handle, so the submission is attributable. Optional but encouraged.",
+     "type": "string"
+    },
+    "url": {
+     "description": "Main URL for the service — docs or homepage.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "suggest_service",
+  "output_schema": {}
+ }
+]

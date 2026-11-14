@@ -1,0 +1,773 @@
+[
+ {
+  "description": "Body mass index from weight and height, with the NHS adult category and the healthy-weight range for that height. UK thresholds; note the NHS lowers them for some ethnic backgrounds. General information, not a diagnosis.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "height_cm": {
+     "description": "Height in cm (120-230)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "weight_kg": {
+     "description": "Body weight in kg (30-350)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "weight_kg",
+    "height_cm"
+   ],
+   "type": "object"
+  },
+  "name": "bmi_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Convert between a dose (mg or mcg), syringe units and mL at a known strength. Give the strength as conc_mg_ml, or as vial_mg + water_ml. Set direction to dose_to_units or units_to_dose. Returns the counterpart plus concentration and mcg per unit. Arithmetic only.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "conc_mg_ml": {
+     "description": "Known strength; or give vial_mg + water_ml instead",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "direction": {
+     "default": "dose_to_units",
+     "enum": [
+      "dose_to_units",
+      "units_to_dose"
+     ],
+     "type": "string"
+    },
+    "dose": {
+     "$ref": "#/properties/conc_mg_ml",
+     "description": "Required when direction is dose_to_units"
+    },
+    "dose_unit": {
+     "default": "mcg",
+     "enum": [
+      "mg",
+      "mcg"
+     ],
+     "type": "string"
+    },
+    "syringe": {
+     "default": "u100-0.5",
+     "enum": [
+      "u100-0.3",
+      "u100-0.5",
+      "u100-1.0",
+      "u40-1.0"
+     ],
+     "type": "string"
+    },
+    "units": {
+     "$ref": "#/properties/conc_mg_ml",
+     "description": "Required when direction is units_to_dose"
+    },
+    "vial_mg": {
+     "$ref": "#/properties/conc_mg_ml"
+    },
+    "water_ml": {
+     "$ref": "#/properties/conc_mg_ml"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calc_convert",
+  "output_schema": {}
+ },
+ {
+  "description": "Work out the units to draw for a prescribed dose from a powder vial and bacteriostatic water. Inputs: vial mg, water mL, the dose (mg or mcg), and the syringe. Returns units, mL, the nearest syringe line and doses per vial. Arithmetic only — the user's own dose, no presets.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "dose": {
+     "description": "The prescribed dose, in the unit given by dose_unit",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "dose_unit": {
+     "default": "mcg",
+     "enum": [
+      "mg",
+      "mcg"
+     ],
+     "type": "string"
+    },
+    "syringe": {
+     "default": "u100-0.5",
+     "enum": [
+      "u100-0.3",
+      "u100-0.5",
+      "u100-1.0",
+      "u40-1.0"
+     ],
+     "type": "string"
+    },
+    "vial_mg": {
+     "description": "Powder in the vial, in mg",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "water_ml": {
+     "description": "Bacteriostatic water added, in mL",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "vial_mg",
+    "water_ml",
+    "dose"
+   ],
+   "type": "object"
+  },
+  "name": "calc_reconstitute",
+  "output_schema": {}
+ },
+ {
+  "description": "Put two weight-loss/diabetes injections (Mounjaro, Wegovy, Ozempic, Saxenda) side by side on SmPC facts: doses, frequency, pen, licensing, NHS access, storage. Returns a row-by-row table with the rows that differ flagged. Facts only, never a 'which is right for you'.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "a": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    },
+    "b": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "a",
+    "b"
+   ],
+   "type": "object"
+  },
+  "name": "compare_medicines",
+  "output_schema": {}
+ },
+ {
+  "description": "Get one compound's UK legal status: whether it is licensed, in trials, cosmetic or unlicensed, the evidence and risks, and the licensed alternative. Returns sources and dates. No dosing is included, by design.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "compounds_get",
+  "output_schema": {}
+ },
+ {
+  "description": "List the UK peptide/compound profiles with their UK legal status (licensed, in trials, cosmetic, or research/unlicensed). Filter by status or category. Returns name, aka, class, status and the licensed alternative. A legal-status index, not a dosing tool.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Category code, e.g. WL, Longevity, Repair",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "licensed",
+      "trials",
+      "cosmetic",
+      "research"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "compounds_list",
+  "output_schema": {}
+ },
+ {
+  "description": "Daily energy use (BMR via Mifflin-St Jeor, then TDEE for activity) and two safe calorie-deficit targets for weight loss, clamped to the NHS lower limits. Needs age and sex for the equation. General information, not a diet plan.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "activity": {
+     "enum": [
+      "sedentary",
+      "light",
+      "moderate",
+      "very",
+      "extra"
+     ],
+     "type": "string"
+    },
+    "age": {
+     "description": "Age in years (18-100)",
+     "type": "integer"
+    },
+    "height_cm": {
+     "description": "Height in cm (120-230)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "sex": {
+     "description": "Biological sex, for the metabolic equation",
+     "enum": [
+      "female",
+      "male"
+     ],
+     "type": "string"
+    },
+    "weight_kg": {
+     "description": "Body weight in kg (30-350)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "weight_kg",
+    "height_cm",
+    "age",
+    "sex"
+   ],
+   "type": "object"
+  },
+  "name": "energy_tdee",
+  "output_schema": {}
+ },
+ {
+  "description": "Rough daily fluid estimate from body weight (about 30-35 ml/kg), framed against the NHS 6-to-8-glasses guidance. Needs rise in heat, with exercise, and with GLP-1 sickness. A general estimate, not a medical fluid target.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "weight_kg": {
+     "description": "Body weight in kg (30-350)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "weight_kg"
+   ],
+   "type": "object"
+  },
+  "name": "fluid_target",
+  "output_schema": {}
+ },
+ {
+  "description": "Browse On the Register's plain-English UK guides to weight-loss medicines and the providers who supply them: checking a provider, cost and NHS access, using a pen, and side effects and treatment. Filter by category. Returns each guide's title, summary and page URL to link as further reading.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "checking (providers), cost (price and NHS access), pen (storage and use), or treatment (side effects, switching)",
+     "enum": [
+      "checking",
+      "cost",
+      "pen",
+      "treatment"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "guides_list",
+  "output_schema": {}
+ },
+ {
+  "description": "Estimate when a GLP-1/GIP injection is essentially cleared after the last dose, from the SmPC half-life (about five half-lives). Give the drug and the last-dose date. Returns the clear date and whether the basis is the SmPC or an estimate. Informational.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "drug": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    },
+    "last_dose": {
+     "description": "Date of the last dose, YYYY-MM-DD",
+     "type": "string"
+    }
+   },
+   "required": [
+    "drug",
+    "last_dose"
+   ],
+   "type": "object"
+  },
+  "name": "howlong_clearance",
+  "output_schema": {}
+ },
+ {
+  "description": "Give the SmPC milestones for when a GLP-1/GIP injection starts working: when appetite drops, when the first full dose is, and how the effect builds. Returns dated-by-week milestones with their citation. Informational, no prediction for any one person.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "drug": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "drug"
+   ],
+   "type": "object"
+  },
+  "name": "howlong_timeline",
+  "output_schema": {}
+ },
+ {
+  "description": "Lay out the change days for an HRT estradiol patch from the day the first patch goes on, and rotate the application site. Products: estradot, evorel, evorel_conti, estraderm_mx (twice weekly); femseven, femseven_conti, progynova_ts (weekly). Optional weeks to show (default 8). SmPC change interval, not dosing advice.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "product": {
+     "enum": [
+      "estradot",
+      "evorel",
+      "evorel_conti",
+      "estraderm_mx",
+      "femseven",
+      "femseven_conti",
+      "progynova_ts"
+     ],
+     "type": "string"
+    },
+    "start_date": {
+     "description": "The day the first patch goes on, YYYY-MM-DD",
+     "type": "string"
+    },
+    "weeks": {
+     "description": "How many weeks to lay out, default 8",
+     "maximum": 26,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "product",
+    "start_date"
+   ],
+   "type": "object"
+  },
+  "name": "patch_calendar",
+  "output_schema": {}
+ },
+ {
+  "description": "Give the step-by-step injection walkthrough for a GLP-1 pen (Mounjaro KwikPen, Wegovy, Ozempic or Saxenda), from the maker's UK instructions. Returns the ordered steps and the symptom list you can troubleshoot. Routes to the leaflet; not a substitute for it.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "pen": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "pen"
+   ],
+   "type": "object"
+  },
+  "name": "pen_howto",
+  "output_schema": {}
+ },
+ {
+  "description": "Answer a GLP-1 pen problem (won't dial, no clicks, stuck, not at zero, no drop at the needle, a bubble, a leak, cold, unsure) for a given pen, from the maker's UK leaflet. Returns what it means and what to do, with when to stop and call the pharmacist.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "pen": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    },
+    "symptom": {
+     "enum": [
+      "wont-dial",
+      "no-clicks",
+      "stuck",
+      "not-zero",
+      "last-dose",
+      "no-drop",
+      "bubble",
+      "leak",
+      "unsure",
+      "cold"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "pen",
+    "symptom"
+   ],
+   "type": "object"
+  },
+  "name": "pen_troubleshoot",
+  "output_schema": {}
+ },
+ {
+  "description": "Work out a daily protein target for someone losing weight on a GLP-1, from weight (and height, which sharpens it) and activity level. Returns grams per day with the band and which body-weight basis was used. General information, not personalised dietetic advice.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "activity": {
+     "enum": [
+      "light",
+      "active",
+      "strength"
+     ],
+     "type": "string"
+    },
+    "height_cm": {
+     "description": "Height in cm (120-230); sharpens the target",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "weight_kg": {
+     "description": "Body weight in kg (30-350)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "weight_kg"
+   ],
+   "type": "object"
+  },
+  "name": "protein_target",
+  "output_schema": {}
+ },
+ {
+  "description": "Check a provider by name, website URL or postcode against our CQC/GPhC register data. Returns whether it is a registered, listable provider and its registration wording, with how it was resolved. If we don't hold it, returns the official register to search by hand. Never a guess.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "A provider name, website URL, or postcode",
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "providers_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Get one registered provider by its slug: its registration wording and rating, the treatments it offers, its locations, and its own published consultation fee where known. Returns null if the slug is not a listable provider. Registration facts only, no recommendation.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "providers_get",
+  "output_schema": {}
+ },
+ {
+  "description": "Find UK providers that offer a treatment and are on the CQC/GPhC register. Filter by treatment (glp1-weight-loss, hormone-therapy, iv-therapy, vitamin-injections), kind (online/clinic/mobile), nation, town slug, a name search, or near a postcode. Sort by distance, CQC rating, Google rating or review count. Returns listings with registration wording, the Google rating and the provider's own consultation fee where published. Lists, never ranks by price or recommends.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "enum": [
+      "online",
+      "clinic",
+      "mobile"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "nation": {
+     "enum": [
+      "england",
+      "scotland",
+      "wales",
+      "ni"
+     ],
+     "type": "string"
+    },
+    "near": {
+     "description": "A UK postcode or outcode to search near; returns nearest first",
+     "type": "string"
+    },
+    "q": {
+     "description": "Text to match in the provider name",
+     "type": "string"
+    },
+    "radius_km": {
+     "default": 25,
+     "description": "Search radius for `near`, in km",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "number"
+    },
+    "sort": {
+     "description": "Order: distance (needs `near`), cqc_rating, google_rating, or reviews (Google count). Default: distance with `near`, else cqc_rating.",
+     "enum": [
+      "distance",
+      "cqc_rating",
+      "google_rating",
+      "reviews"
+     ],
+     "type": "string"
+    },
+    "town_slug": {
+     "type": "string"
+    },
+    "treatment": {
+     "enum": [
+      "glp1-weight-loss",
+      "hormone-therapy",
+      "iv-therapy",
+      "vitamin-injections"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "treatment"
+   ],
+   "type": "object"
+  },
+  "name": "providers_search",
+  "output_schema": {}
+ },
+ {
+  "description": "List the SmPC side effects of a GLP-1/GIP injection (Mounjaro, Wegovy, Ozempic, Saxenda) by frequency band, plus the serious warnings with what to do (999/111/prescriber) and the Yellow Card link. General leaflet information, not a prediction and not triage.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "drug": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "drug"
+   ],
+   "type": "object"
+  },
+  "name": "sideeffects_list",
+  "output_schema": {}
+ },
+ {
+  "description": "Say whether a GLP-1 pen or a reconstituted peptide vial is still good, given the situation (unopened, in use in the fridge, or left out) and, if left out, how long and how warm. Returns a graded verdict with the SmPC in-use limit. No dosing.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hours_out": {
+     "description": "Hours out of the fridge, for 'left-out'",
+     "minimum": 0,
+     "type": "number"
+    },
+    "product": {
+     "enum": [
+      "mounjaro",
+      "wegovy",
+      "ozempic",
+      "saxenda",
+      "peptide"
+     ],
+     "type": "string"
+    },
+    "situation": {
+     "enum": [
+      "unopened",
+      "in-use-fridge",
+      "left-out"
+     ],
+     "type": "string"
+    },
+    "temp_band": {
+     "description": "How warm it got, for 'left-out'",
+     "enum": [
+      "fridge",
+      "room",
+      "warm",
+      "hot"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "product",
+    "situation"
+   ],
+   "type": "object"
+  },
+  "name": "storage_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Work out when an HRT or testosterone gel, spray or sachet pack runs out and when to reorder. Inputs: product (oestrogel, sandrena, lenzetto, testogel_pump, testogel_sachet, tostran), doses per day, optional containers, pack-opened date and reorder lead days. Returns doses left, days, run-out and order-by dates. Counts are estimates for metered packs.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "containers": {
+     "description": "Units in the pack (canisters, or sachets); default the product's pack size",
+     "maximum": 120,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "lead_days": {
+     "description": "Reorder lead time in days, default 7",
+     "maximum": 60,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "opened_on": {
+     "description": "Date the pack was first opened, YYYY-MM-DD; default today",
+     "type": "string"
+    },
+    "per_day": {
+     "description": "Pumps, sprays or sachets used per day (the user's prescription)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "product": {
+     "enum": [
+      "oestrogel",
+      "sandrena",
+      "lenzetto",
+      "testogel_pump",
+      "testogel_sachet",
+      "tostran",
+      "testavan"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "product",
+    "per_day"
+   ],
+   "type": "object"
+  },
+  "name": "supply_runout",
+  "output_schema": {}
+ },
+ {
+  "description": "Waist-to-height ratio from waist and height, against the NICE bands (keep your waist under half your height). Flags central-fat risk that BMI can miss. For adults with BMI under 35. General information, not a diagnosis.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "height_cm": {
+     "description": "Height in cm (120-230)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "waist_cm": {
+     "description": "Waist measurement in cm (40-200), at the belly button",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "waist_cm",
+    "height_cm"
+   ],
+   "type": "object"
+  },
+  "name": "waist_ratio",
+  "output_schema": {}
+ },
+ {
+  "description": "Healthy-weight range for a given height, from the healthy BMI band (18.5-24.9), with the BMI-22 midpoint as a single figure. There is no one 'ideal weight'; this is the healthy range. General information.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "height_cm": {
+     "description": "Height in cm (120-230)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "height_cm"
+   ],
+   "type": "object"
+  },
+  "name": "weight_ideal",
+  "output_schema": {}
+ }
+]

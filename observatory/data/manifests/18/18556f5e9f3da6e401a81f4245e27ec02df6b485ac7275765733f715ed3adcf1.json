@@ -1,0 +1,5489 @@
+[
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Approve plan and request start"
+  },
+  "description": "Records approval of an unchanged conversion plan proposal plus one start request, identified by revision, digest and request_id, after the customer explicitly accepted that scope in chat. The start runs only after the matching installation has fresh verified callbacks. Requires confirmed: true and customer_confirmation with scope approve_and_start_after_checks. A repeated request_id is treated as a retry of the same request. Requires a paired server key and the approval and execution features. Sends nothing now, bypasses no checks, and does not resume a paused, revoked, changed or restaged installation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed": {
+     "enum": [
+      true
+     ],
+     "type": "boolean"
+    },
+    "customer_confirmation": {
+     "additionalProperties": false,
+     "properties": {
+      "business_outcomes_confirmed": {
+       "enum": [
+        true
+       ],
+       "type": "boolean"
+      },
+      "proposal_presented": {
+       "enum": [
+        true
+       ],
+       "type": "boolean"
+      },
+      "scope": {
+       "enum": [
+        "approve_and_start_after_checks"
+       ],
+       "type": "string"
+      },
+      "source": {
+       "enum": [
+        "customer_chat"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "proposal_presented",
+      "business_outcomes_confirmed",
+      "scope"
+     ],
+     "type": "object"
+    },
+    "digest": {
+     "pattern": "^[0-9a-f]{64}$",
+     "type": "string"
+    },
+    "request_id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "maximum": 2147483647,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "revision",
+    "digest",
+    "request_id",
+    "confirmed",
+    "customer_confirmation"
+   ],
+   "type": "object"
+  },
+  "name": "approve_and_start_conversion_plan",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Approve plan and request start"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Approve conversion plan"
+  },
+  "description": "Records approval of an unchanged conversion plan proposal, identified by its revision and digest, after the customer explicitly accepted it in chat. Requires confirmed: true and customer_confirmation with scope approve_plan. The connected key can approve only its own project; Tyton records connected-agent provenance, not verified human identity. Stale or changed revisions are rejected. Approval only: does not activate tracking or authorize live Meta events. The customer can also approve in the signed-in report.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed": {
+     "enum": [
+      true
+     ],
+     "type": "boolean"
+    },
+    "customer_confirmation": {
+     "additionalProperties": false,
+     "properties": {
+      "business_outcomes_confirmed": {
+       "enum": [
+        true
+       ],
+       "type": "boolean"
+      },
+      "proposal_presented": {
+       "enum": [
+        true
+       ],
+       "type": "boolean"
+      },
+      "scope": {
+       "enum": [
+        "approve_plan"
+       ],
+       "type": "string"
+      },
+      "source": {
+       "enum": [
+        "customer_chat"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "proposal_presented",
+      "business_outcomes_confirmed",
+      "scope"
+     ],
+     "type": "object"
+    },
+    "digest": {
+     "pattern": "^[0-9a-f]{64}$",
+     "type": "string"
+    },
+    "revision": {
+     "maximum": 2147483647,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "revision",
+    "digest",
+    "confirmed",
+    "customer_confirmation"
+   ],
+   "type": "object"
+  },
+  "name": "approve_conversion_plan",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Approve conversion plan"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Audit a public page"
+  },
+  "description": "Inspects one public page's HTML and saves a partial audit report, without signup. Takes the audit session fields and the page URL, plus optional sanitized HTML supplied by the agent, which is stored as unverified evidence. One session can hold several related components. Returns evidence, limitations and discovery actions, not a full tracking-health verdict.",
+  "input_schema": {
+   "properties": {
+    "audit_id": {
+     "description": "audit run ID returned by Tyton; each audit run has its own ID",
+     "pattern": "^audit-[a-f0-9]{32}$",
+     "type": "string"
+    },
+    "audit_key": {
+     "description": "private audit write capability returned by Tyton; a secret that authorizes changes to this audit only",
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "fresh": {
+     "description": "bypass the short public-page cache when verifying a change",
+     "type": "boolean"
+    },
+    "html": {
+     "description": "Authorized, sanitized page HTML, including local previews. The entire JSON-RPC request is limited to 256 KiB after JSON escaping, so a larger page needs a focused capture. Page markup only, without private source or personal data.",
+     "maxLength": 2000000,
+     "type": "string"
+    },
+    "request_id": {
+     "description": "UUID identifying one mutation; a repeated request_id with identical content is treated as a retry",
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "description": "latest run revision; 0 for the first write of a new audit session, then the revision returned by the previous write",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "url": {
+     "description": "the site to audit",
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "audit_site",
+  "output_schema": {
+   "properties": {
+    "capturedAt": {
+     "type": "string"
+    },
+    "components": {
+     "items": {
+      "properties": {
+       "code": {
+        "type": "boolean"
+       },
+       "html": {
+        "type": "boolean"
+       },
+       "runtime": {
+        "type": "boolean"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "html",
+       "code",
+       "runtime"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "context": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic",
+       "value",
+       "source",
+       "capturedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "decision": {
+     "properties": {
+      "coverage": {
+       "properties": {
+        "codeReviews": {
+         "type": "number"
+        },
+        "components": {
+         "type": "number"
+        },
+        "htmlPages": {
+         "type": "number"
+        },
+        "runtimePages": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "components",
+        "htmlPages",
+        "runtimePages",
+        "codeReviews"
+       ],
+       "type": "object"
+      },
+      "fit": {
+       "properties": {
+        "ctaLabel": {
+         "type": "string"
+        },
+        "detail": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "investigate_first",
+          "review_options"
+         ],
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "title",
+        "detail",
+        "ctaLabel"
+       ],
+       "type": "object"
+      },
+      "issues": {
+       "items": {
+        "properties": {
+         "action": {
+          "type": "string"
+         },
+         "detail": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "priority": {
+          "enum": [
+           "high",
+           "medium"
+          ],
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         },
+         "verification": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "priority",
+         "title",
+         "detail",
+         "url",
+         "action",
+         "verification"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "nextSteps": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "questions": {
+       "items": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "question": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "question"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "score": {
+       "properties": {
+        "checkpoints": {
+         "items": {
+          "properties": {
+           "id": {
+            "enum": [
+             "pixel",
+             "server_events",
+             "deduplication",
+             "consent",
+             "meta_delivery"
+            ],
+            "type": "string"
+           },
+           "label": {
+            "type": "string"
+           },
+           "state": {
+            "enum": [
+             "pass",
+             "fail",
+             "unknown",
+             "not_applicable"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "label",
+           "state"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "label": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "enum": [
+            null
+           ],
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "value",
+        "label",
+        "reason",
+        "checkpoints"
+       ],
+       "type": "object"
+      },
+      "status": {
+       "enum": [
+        "needs_input",
+        "partial"
+       ],
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      },
+      "verdict": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "status",
+      "verdict",
+      "summary",
+      "issues",
+      "questions",
+      "nextSteps",
+      "coverage",
+      "score",
+      "fit"
+     ],
+     "type": "object"
+    },
+    "findings": {
+     "items": {
+      "properties": {
+       "evidence": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "state",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "inventory": {
+     "properties": {
+      "buttons": {
+       "type": "number"
+      },
+      "controls": {
+       "items": {
+        "properties": {
+         "href": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "link",
+           "button"
+          ],
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "href",
+         "kind"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "forms": {
+       "type": "number"
+      },
+      "links": {
+       "type": "number"
+      },
+      "providers": {
+       "items": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "link",
+           "embed",
+           "script"
+          ],
+          "type": "string"
+         },
+         "provider": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "kind",
+         "url"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "truncated": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "buttons",
+      "links",
+      "forms",
+      "truncated",
+      "controls",
+      "providers"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "enum": [
+      "session",
+      "page",
+      "code",
+      "context",
+      "runtime",
+      "resume"
+     ],
+     "type": "string"
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "nextActions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "consentState": {
+        "type": "string"
+       },
+       "findings": {
+        "items": {
+         "properties": {
+          "evidence": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "label",
+          "state",
+          "evidence"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "enum": [
+         "page",
+         "code",
+         "runtime"
+        ],
+        "type": "string"
+       },
+       "limitations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "reviewedFiles": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "source": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "kind",
+       "source",
+       "capturedAt",
+       "findings",
+       "limitations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "reportSaved": {
+     "type": "boolean"
+    },
+    "reportUrl": {
+     "type": "string"
+    },
+    "schemaVersion": {
+     "enum": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "session": {
+     "properties": {
+      "auditId": {
+       "type": "string"
+      },
+      "auditKey": {
+       "type": "string"
+      },
+      "expiresAt": {
+       "type": "string"
+      },
+      "requestId": {
+       "type": "string"
+      },
+      "revision": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "auditId",
+      "auditKey",
+      "revision"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "enum": [
+      "live_fetch",
+      "agent_html_unverified",
+      "agent_reported"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "partial",
+      "unavailable"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "url",
+    "capturedAt",
+    "source",
+    "reportSaved",
+    "findings",
+    "limitations",
+    "nextActions"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Audit a public page"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Begin free audit"
+  },
+  "description": "Starts a new free audit session for a URL. Returns a private capability (audit_id and audit_key), revision 0 and an initial request_id for the first evidence save, so a lost save response can be retried safely. Saves nothing. The capability covers only this audit record, not access to the website.",
+  "input_schema": {
+   "properties": {
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "begin_audit",
+  "output_schema": {
+   "properties": {
+    "capturedAt": {
+     "type": "string"
+    },
+    "components": {
+     "items": {
+      "properties": {
+       "code": {
+        "type": "boolean"
+       },
+       "html": {
+        "type": "boolean"
+       },
+       "runtime": {
+        "type": "boolean"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "html",
+       "code",
+       "runtime"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "context": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic",
+       "value",
+       "source",
+       "capturedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "decision": {
+     "properties": {
+      "coverage": {
+       "properties": {
+        "codeReviews": {
+         "type": "number"
+        },
+        "components": {
+         "type": "number"
+        },
+        "htmlPages": {
+         "type": "number"
+        },
+        "runtimePages": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "components",
+        "htmlPages",
+        "runtimePages",
+        "codeReviews"
+       ],
+       "type": "object"
+      },
+      "fit": {
+       "properties": {
+        "ctaLabel": {
+         "type": "string"
+        },
+        "detail": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "investigate_first",
+          "review_options"
+         ],
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "title",
+        "detail",
+        "ctaLabel"
+       ],
+       "type": "object"
+      },
+      "issues": {
+       "items": {
+        "properties": {
+         "action": {
+          "type": "string"
+         },
+         "detail": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "priority": {
+          "enum": [
+           "high",
+           "medium"
+          ],
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         },
+         "verification": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "priority",
+         "title",
+         "detail",
+         "url",
+         "action",
+         "verification"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "nextSteps": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "questions": {
+       "items": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "question": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "question"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "score": {
+       "properties": {
+        "checkpoints": {
+         "items": {
+          "properties": {
+           "id": {
+            "enum": [
+             "pixel",
+             "server_events",
+             "deduplication",
+             "consent",
+             "meta_delivery"
+            ],
+            "type": "string"
+           },
+           "label": {
+            "type": "string"
+           },
+           "state": {
+            "enum": [
+             "pass",
+             "fail",
+             "unknown",
+             "not_applicable"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "label",
+           "state"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "label": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "enum": [
+            null
+           ],
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "value",
+        "label",
+        "reason",
+        "checkpoints"
+       ],
+       "type": "object"
+      },
+      "status": {
+       "enum": [
+        "needs_input",
+        "partial"
+       ],
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      },
+      "verdict": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "status",
+      "verdict",
+      "summary",
+      "issues",
+      "questions",
+      "nextSteps",
+      "coverage",
+      "score",
+      "fit"
+     ],
+     "type": "object"
+    },
+    "findings": {
+     "items": {
+      "properties": {
+       "evidence": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "state",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "inventory": {
+     "properties": {
+      "buttons": {
+       "type": "number"
+      },
+      "controls": {
+       "items": {
+        "properties": {
+         "href": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "link",
+           "button"
+          ],
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "href",
+         "kind"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "forms": {
+       "type": "number"
+      },
+      "links": {
+       "type": "number"
+      },
+      "providers": {
+       "items": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "link",
+           "embed",
+           "script"
+          ],
+          "type": "string"
+         },
+         "provider": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "kind",
+         "url"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "truncated": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "buttons",
+      "links",
+      "forms",
+      "truncated",
+      "controls",
+      "providers"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "enum": [
+      "session",
+      "page",
+      "code",
+      "context",
+      "runtime",
+      "resume"
+     ],
+     "type": "string"
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "nextActions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "consentState": {
+        "type": "string"
+       },
+       "findings": {
+        "items": {
+         "properties": {
+          "evidence": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "label",
+          "state",
+          "evidence"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "enum": [
+         "page",
+         "code",
+         "runtime"
+        ],
+        "type": "string"
+       },
+       "limitations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "reviewedFiles": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "source": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "kind",
+       "source",
+       "capturedAt",
+       "findings",
+       "limitations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "reportSaved": {
+     "type": "boolean"
+    },
+    "reportUrl": {
+     "type": "string"
+    },
+    "schemaVersion": {
+     "enum": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "session": {
+     "properties": {
+      "auditId": {
+       "type": "string"
+      },
+      "auditKey": {
+       "type": "string"
+      },
+      "expiresAt": {
+       "type": "string"
+      },
+      "requestId": {
+       "type": "string"
+      },
+      "revision": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "auditId",
+      "auditKey",
+      "revision"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "enum": [
+      "live_fetch",
+      "agent_html_unverified",
+      "agent_reported"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "partial",
+      "unavailable"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "url",
+    "capturedAt",
+    "source",
+    "reportSaved",
+    "findings",
+    "limitations",
+    "nextActions"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Begin free audit"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check live event receipts"
+  },
+  "description": "Checks whether specific PageView or conversion event IDs from an activated live installation reached Tyton's dashboard storage in the last 24 hours. Takes the installation ID and up to 20 unique event and source pairs. Read-only: sends no events and grants no approval. Verification callbacks are not live events. Reports receipt of the requested events only, not business outcomes, all site traffic, target or generation attribution, or Meta delivery. Requires a connected site.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "events": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "conversion_id": {
+        "description": "Approved conversion ID; absent only for browser PageView.",
+        "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+        "type": "string"
+       },
+       "event_id": {
+        "description": "Opaque eventId from a fresh live SDK result or browser network request; an identifier, not personal data such as an email.",
+        "pattern": "^[A-Za-z0-9_.:-]{1,128}$",
+        "type": "string"
+       },
+       "source": {
+        "enum": [
+         "browser",
+         "server"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "event_id",
+       "source"
+      ],
+      "type": "object"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    },
+    "installation_id": {
+     "format": "uuid",
+     "type": "string"
+    }
+   },
+   "required": [
+    "installation_id",
+    "events"
+   ],
+   "type": "object"
+  },
+  "name": "check_live_setup",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Check live event receipts"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Connect with pairing code"
+  },
+  "description": "Connects a Tyton site to this connection using a single-use pairing code from the site's card on usetyton.com (valid for 15 minutes). Returns the site's server key and browser key, shown only once, with configuration examples for common MCP hosts.",
+  "input_schema": {
+   "properties": {
+    "client": {
+     "description": "which host is calling; used to label the new key",
+     "enum": [
+      "cursor",
+      "claude_code",
+      "other"
+     ],
+     "type": "string"
+    },
+    "code": {
+     "description": "the pairing code, e.g. 7K2M-QX4T (dashes optional)",
+     "maxLength": 16,
+     "minLength": 6,
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "connect",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Connect with pairing code"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Delete connected site"
+  },
+  "description": "Permanently deletes the Tyton project connected to this connection, including its keys, setup and stored event history. Requires confirmed: true and expected_url equal to the connected project's current URL; nothing is deleted if they differ. The account subscription and billing, the website itself and the Meta dataset and its data are unchanged. The Tyton snippet or SDK stays on the website until removed, and a browser Pixel already loaded there can keep sending to Meta until it is removed and the page reloads. A Meta request already in progress cannot be recalled. Requires a connected site.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed": {
+     "enum": [
+      true
+     ],
+     "type": "boolean"
+    },
+    "expected_url": {
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmed",
+    "expected_url"
+   ],
+   "type": "object"
+  },
+  "name": "delete_connected_project",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Delete connected site"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get SDK install instructions"
+  },
+  "description": "Returns the private Tyton server SDK download, its SHA-256 checksum and the local-file install steps for the connected project. The download authenticates with the connection's server key; no npm publisher account or access to Tyton's repository is needed. Read-only: does not install, approve, start tracking or send events. Requires a connected site.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_sdk_installation",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get SDK install instructions"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read setup progress"
+  },
+  "description": "Reads the connected site's setup state in one compact response: plan approval, installation generation, missing callback sources, intentional pauses and the single next step. Read-only: makes no approval or activation and sends no test events. Callback evidence is not business success or Meta receipt. Verification-only setup works without Meta credentials. Requires a connected site.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_setup_progress",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read setup progress"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check signup status"
+  },
+  "description": "Checks a signup and Connect request using its request_id and private poll_token. Returns waiting, unavailable or expired, or, after the site owner approves, this connection's server URL, private server key, public browser key and project. The suggested polling interval is 5 seconds. A connection is not tracking approval or activation.",
+  "input_schema": {
+   "properties": {
+    "poll_token": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "request_id": {
+     "format": "uuid",
+     "type": "string"
+    }
+   },
+   "required": [
+    "request_id",
+    "poll_token"
+   ],
+   "type": "object"
+  },
+  "name": "get_signup_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Check signup status"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Draft conversion plan"
+  },
+  "description": "Saves a conversion plan draft for the connected site. Does not approve or activate it. document.revision must equal expected_revision + 1; a repeated request_id is treated as a retry of the same change. Document: {schemaVersion:1,revision,conversions:[{id,label,enabled,eventName,targets:[{id,label,origin,path}],success:{kind,description}}]}. IDs are stable lowercase slugs; labels are distinct. Official Meta event names only. HTTPS origins only; a path has no query or fragment. Success kind: confirmed_success, checkout_started (InitiateCheckout only), or unresolved. 1 to 50 conversions, 1 to 20 targets each, 100 total, 32 KiB normalized document maximum. No tracking or verification fields. Returns the saved proposal, its open questions and the review link.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "document": {
+     "additionalProperties": false,
+     "properties": {
+      "conversions": {
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "enabled": {
+          "type": "boolean"
+         },
+         "eventName": {
+          "enum": [
+           "PageView",
+           "ViewContent",
+           "Search",
+           "AddToCart",
+           "AddToWishlist",
+           "InitiateCheckout",
+           "AddPaymentInfo",
+           "Purchase",
+           "Lead",
+           "CompleteRegistration",
+           "Contact",
+           "Schedule",
+           "StartTrial",
+           "Subscribe",
+           "SubmitApplication",
+           "CustomizeProduct",
+           "FindLocation",
+           "Donate"
+          ],
+          "type": "string"
+         },
+         "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+         },
+         "label": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+         },
+         "success": {
+          "additionalProperties": false,
+          "properties": {
+           "description": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+           },
+           "kind": {
+            "enum": [
+             "confirmed_success",
+             "checkout_started",
+             "unresolved"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "kind",
+           "description"
+          ],
+          "type": "object"
+         },
+         "targets": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "id": {
+             "maxLength": 64,
+             "minLength": 1,
+             "type": "string"
+            },
+            "label": {
+             "maxLength": 100,
+             "minLength": 1,
+             "type": "string"
+            },
+            "origin": {
+             "maxLength": 2048,
+             "type": "string"
+            },
+            "path": {
+             "maxLength": 512,
+             "type": "string"
+            }
+           },
+           "required": [
+            "id",
+            "label",
+            "origin",
+            "path"
+           ],
+           "type": "object"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "type": "array"
+         }
+        },
+        "required": [
+         "id",
+         "label",
+         "enabled",
+         "eventName",
+         "targets",
+         "success"
+        ],
+        "type": "object"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      },
+      "revision": {
+       "maximum": 2147483647,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "schemaVersion": {
+       "enum": [
+        1
+       ],
+       "type": "number"
+      }
+     },
+     "required": [
+      "schemaVersion",
+      "revision",
+      "conversions"
+     ],
+     "type": "object"
+    },
+    "expected_revision": {
+     "maximum": 2147483646,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "request_id": {
+     "format": "uuid",
+     "type": "string"
+    }
+   },
+   "required": [
+    "expected_revision",
+    "request_id",
+    "document"
+   ],
+   "type": "object"
+  },
+  "name": "propose_conversion_plan",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Draft conversion plan"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read audit"
+  },
+  "description": "Reads an existing audit using its private capability. Returns recorded context, scoped observations, provenance, component coverage, the current decision with open questions, and the report link. Read-only; does not verify the site's backend or grant access to it.",
+  "input_schema": {
+   "properties": {
+    "audit_id": {
+     "pattern": "^audit-[a-f0-9]{32}$",
+     "type": "string"
+    },
+    "audit_key": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "request_id": {
+     "description": "UUID identifying one mutation; a repeated request_id with identical content is treated as a retry",
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "description": "latest run revision; 0 for the first write of a new audit session, then the revision returned by the previous write",
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "audit_id",
+    "audit_key"
+   ],
+   "type": "object"
+  },
+  "name": "read_audit",
+  "output_schema": {
+   "properties": {
+    "capturedAt": {
+     "type": "string"
+    },
+    "components": {
+     "items": {
+      "properties": {
+       "code": {
+        "type": "boolean"
+       },
+       "html": {
+        "type": "boolean"
+       },
+       "runtime": {
+        "type": "boolean"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "html",
+       "code",
+       "runtime"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "context": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic",
+       "value",
+       "source",
+       "capturedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "decision": {
+     "properties": {
+      "coverage": {
+       "properties": {
+        "codeReviews": {
+         "type": "number"
+        },
+        "components": {
+         "type": "number"
+        },
+        "htmlPages": {
+         "type": "number"
+        },
+        "runtimePages": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "components",
+        "htmlPages",
+        "runtimePages",
+        "codeReviews"
+       ],
+       "type": "object"
+      },
+      "fit": {
+       "properties": {
+        "ctaLabel": {
+         "type": "string"
+        },
+        "detail": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "investigate_first",
+          "review_options"
+         ],
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "title",
+        "detail",
+        "ctaLabel"
+       ],
+       "type": "object"
+      },
+      "issues": {
+       "items": {
+        "properties": {
+         "action": {
+          "type": "string"
+         },
+         "detail": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "priority": {
+          "enum": [
+           "high",
+           "medium"
+          ],
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         },
+         "verification": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "priority",
+         "title",
+         "detail",
+         "url",
+         "action",
+         "verification"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "nextSteps": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "questions": {
+       "items": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "question": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "question"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "score": {
+       "properties": {
+        "checkpoints": {
+         "items": {
+          "properties": {
+           "id": {
+            "enum": [
+             "pixel",
+             "server_events",
+             "deduplication",
+             "consent",
+             "meta_delivery"
+            ],
+            "type": "string"
+           },
+           "label": {
+            "type": "string"
+           },
+           "state": {
+            "enum": [
+             "pass",
+             "fail",
+             "unknown",
+             "not_applicable"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "label",
+           "state"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "label": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "enum": [
+            null
+           ],
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "value",
+        "label",
+        "reason",
+        "checkpoints"
+       ],
+       "type": "object"
+      },
+      "status": {
+       "enum": [
+        "needs_input",
+        "partial"
+       ],
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      },
+      "verdict": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "status",
+      "verdict",
+      "summary",
+      "issues",
+      "questions",
+      "nextSteps",
+      "coverage",
+      "score",
+      "fit"
+     ],
+     "type": "object"
+    },
+    "findings": {
+     "items": {
+      "properties": {
+       "evidence": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "state",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "inventory": {
+     "properties": {
+      "buttons": {
+       "type": "number"
+      },
+      "controls": {
+       "items": {
+        "properties": {
+         "href": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "link",
+           "button"
+          ],
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "href",
+         "kind"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "forms": {
+       "type": "number"
+      },
+      "links": {
+       "type": "number"
+      },
+      "providers": {
+       "items": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "link",
+           "embed",
+           "script"
+          ],
+          "type": "string"
+         },
+         "provider": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "kind",
+         "url"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "truncated": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "buttons",
+      "links",
+      "forms",
+      "truncated",
+      "controls",
+      "providers"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "enum": [
+      "session",
+      "page",
+      "code",
+      "context",
+      "runtime",
+      "resume"
+     ],
+     "type": "string"
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "nextActions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "consentState": {
+        "type": "string"
+       },
+       "findings": {
+        "items": {
+         "properties": {
+          "evidence": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "label",
+          "state",
+          "evidence"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "enum": [
+         "page",
+         "code",
+         "runtime"
+        ],
+        "type": "string"
+       },
+       "limitations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "reviewedFiles": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "source": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "kind",
+       "source",
+       "capturedAt",
+       "findings",
+       "limitations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "reportSaved": {
+     "type": "boolean"
+    },
+    "reportUrl": {
+     "type": "string"
+    },
+    "schemaVersion": {
+     "enum": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "session": {
+     "properties": {
+      "auditId": {
+       "type": "string"
+      },
+      "auditKey": {
+       "type": "string"
+      },
+      "expiresAt": {
+       "type": "string"
+      },
+      "requestId": {
+       "type": "string"
+      },
+      "revision": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "auditId",
+      "auditKey",
+      "revision"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "enum": [
+      "live_fetch",
+      "agent_html_unverified",
+      "agent_reported"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "partial",
+      "unavailable"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "url",
+    "capturedAt",
+    "source",
+    "reportSaved",
+    "findings",
+    "limitations",
+    "nextActions"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Read audit"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read installation state"
+  },
+  "description": "Reads staged callback bindings, observed verification signals and the active or paused installation state for the connected site. Read-only. A verified callback proves receipt only, not business success or permission to send live. A matching pending approve-and-start request activates automatically after every fresh current-key check; otherwise the signed-in owner activates separately. Agents cannot activate manually. Active authorization does not prove live client deployment or Meta receipt.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "read_conversion_installation",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read installation state"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read conversion plan"
+  },
+  "description": "Reads the connected site's current conversion plan draft, its open questions, approval state and review link. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "read_conversion_plan",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read conversion plan"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read Tyton guidance"
+  },
+  "description": "Returns Tyton guidance on one topic. meta_setup is the dashboard's nine-step Meta checklist (business, dataset, website, Conversions API token, testing), optionally a single step. website_management covers the website selector, per-project agent connections and deletion. Other topics: install, events, dedup, crawler_protection, create_pixel, create_business, consent, pricing, privacy, performance, gtm, platforms, faq. Read-only reference text, not saved checklist state or proof of delivery.",
+  "input_schema": {
+   "properties": {
+    "step": {
+     "description": "Optional Meta setup step; only used with topic meta_setup.",
+     "enum": [
+      "business",
+      "pixel",
+      "domain",
+      "token",
+      "installed",
+      "browser_seen",
+      "server_seen",
+      "dedup",
+      "finished"
+     ],
+     "type": "string"
+    },
+    "topic": {
+     "enum": [
+      "meta_setup",
+      "website_management",
+      "install",
+      "events",
+      "dedup",
+      "crawler_protection",
+      "create_pixel",
+      "create_business",
+      "consent",
+      "pricing",
+      "privacy",
+      "performance",
+      "gtm",
+      "platforms",
+      "faq"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic"
+   ],
+   "type": "object"
+  },
+  "name": "read_docs",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Read Tyton guidance"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Record audit answers"
+  },
+  "description": "Saves answers about one audited component to the audit. audit_scope records the customer's choice between continuing the investigation and a public-only audit; availability_expectation records whether unavailable controls are expected. Both must have source human_reported. Earlier topics are kept; a new answer replaces the same topic. A public-only choice allows a partial report without further access requests. Returns the updated audit decision and report link.",
+  "input_schema": {
+   "properties": {
+    "answers": {
+     "properties": {
+      "access_limitations": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source"
+       ],
+       "type": "object"
+      },
+      "app_backend": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source"
+       ],
+       "type": "object"
+      },
+      "audit_scope": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "scope_choice": {
+         "enum": [
+          "continue_investigation",
+          "public_only"
+         ],
+         "type": "string"
+        },
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source",
+        "scope_choice"
+       ],
+       "type": "object"
+      },
+      "availability_expectation": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "availability_choice": {
+         "enum": [
+          "expected",
+          "unexpected"
+         ],
+         "type": "string"
+        },
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source",
+        "availability_choice"
+       ],
+       "type": "object"
+      },
+      "consent_expectation": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source"
+       ],
+       "type": "object"
+      },
+      "conversion_goal": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source"
+       ],
+       "type": "object"
+      },
+      "marketing_site": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source"
+       ],
+       "type": "object"
+      },
+      "repository_scope": {
+       "description": "A concise non-sensitive answer and its actual source; inference is not confirmation",
+       "properties": {
+        "source": {
+         "enum": [
+          "human_reported",
+          "agent_observed",
+          "inferred"
+         ],
+         "type": "string"
+        },
+        "value": {
+         "maxLength": 300,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "value",
+        "source"
+       ],
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "audit_id": {
+     "description": "audit run ID returned by Tyton; each audit run has its own ID",
+     "pattern": "^audit-[a-f0-9]{32}$",
+     "type": "string"
+    },
+    "audit_key": {
+     "description": "private audit write capability returned by Tyton; a secret that authorizes changes to this audit only",
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "request_id": {
+     "description": "UUID identifying one mutation; a repeated request_id with identical content is treated as a retry",
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "description": "latest run revision; 0 for the first write of a new audit session, then the revision returned by the previous write",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "answers"
+   ],
+   "type": "object"
+  },
+  "name": "record_audit_context",
+  "output_schema": {
+   "properties": {
+    "capturedAt": {
+     "type": "string"
+    },
+    "components": {
+     "items": {
+      "properties": {
+       "code": {
+        "type": "boolean"
+       },
+       "html": {
+        "type": "boolean"
+       },
+       "runtime": {
+        "type": "boolean"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "html",
+       "code",
+       "runtime"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "context": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic",
+       "value",
+       "source",
+       "capturedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "decision": {
+     "properties": {
+      "coverage": {
+       "properties": {
+        "codeReviews": {
+         "type": "number"
+        },
+        "components": {
+         "type": "number"
+        },
+        "htmlPages": {
+         "type": "number"
+        },
+        "runtimePages": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "components",
+        "htmlPages",
+        "runtimePages",
+        "codeReviews"
+       ],
+       "type": "object"
+      },
+      "fit": {
+       "properties": {
+        "ctaLabel": {
+         "type": "string"
+        },
+        "detail": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "investigate_first",
+          "review_options"
+         ],
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "title",
+        "detail",
+        "ctaLabel"
+       ],
+       "type": "object"
+      },
+      "issues": {
+       "items": {
+        "properties": {
+         "action": {
+          "type": "string"
+         },
+         "detail": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "priority": {
+          "enum": [
+           "high",
+           "medium"
+          ],
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         },
+         "verification": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "priority",
+         "title",
+         "detail",
+         "url",
+         "action",
+         "verification"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "nextSteps": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "questions": {
+       "items": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "question": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "question"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "score": {
+       "properties": {
+        "checkpoints": {
+         "items": {
+          "properties": {
+           "id": {
+            "enum": [
+             "pixel",
+             "server_events",
+             "deduplication",
+             "consent",
+             "meta_delivery"
+            ],
+            "type": "string"
+           },
+           "label": {
+            "type": "string"
+           },
+           "state": {
+            "enum": [
+             "pass",
+             "fail",
+             "unknown",
+             "not_applicable"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "label",
+           "state"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "label": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "enum": [
+            null
+           ],
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "value",
+        "label",
+        "reason",
+        "checkpoints"
+       ],
+       "type": "object"
+      },
+      "status": {
+       "enum": [
+        "needs_input",
+        "partial"
+       ],
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      },
+      "verdict": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "status",
+      "verdict",
+      "summary",
+      "issues",
+      "questions",
+      "nextSteps",
+      "coverage",
+      "score",
+      "fit"
+     ],
+     "type": "object"
+    },
+    "findings": {
+     "items": {
+      "properties": {
+       "evidence": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "state",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "inventory": {
+     "properties": {
+      "buttons": {
+       "type": "number"
+      },
+      "controls": {
+       "items": {
+        "properties": {
+         "href": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "link",
+           "button"
+          ],
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "href",
+         "kind"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "forms": {
+       "type": "number"
+      },
+      "links": {
+       "type": "number"
+      },
+      "providers": {
+       "items": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "link",
+           "embed",
+           "script"
+          ],
+          "type": "string"
+         },
+         "provider": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "kind",
+         "url"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "truncated": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "buttons",
+      "links",
+      "forms",
+      "truncated",
+      "controls",
+      "providers"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "enum": [
+      "session",
+      "page",
+      "code",
+      "context",
+      "runtime",
+      "resume"
+     ],
+     "type": "string"
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "nextActions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "consentState": {
+        "type": "string"
+       },
+       "findings": {
+        "items": {
+         "properties": {
+          "evidence": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "label",
+          "state",
+          "evidence"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "enum": [
+         "page",
+         "code",
+         "runtime"
+        ],
+        "type": "string"
+       },
+       "limitations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "reviewedFiles": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "source": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "kind",
+       "source",
+       "capturedAt",
+       "findings",
+       "limitations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "reportSaved": {
+     "type": "boolean"
+    },
+    "reportUrl": {
+     "type": "string"
+    },
+    "schemaVersion": {
+     "enum": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "session": {
+     "properties": {
+      "auditId": {
+       "type": "string"
+      },
+      "auditKey": {
+       "type": "string"
+      },
+      "expiresAt": {
+       "type": "string"
+      },
+      "requestId": {
+       "type": "string"
+      },
+      "revision": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "auditId",
+      "auditKey",
+      "revision"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "enum": [
+      "live_fetch",
+      "agent_html_unverified",
+      "agent_reported"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "partial",
+      "unavailable"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "url",
+    "capturedAt",
+    "source",
+    "reportSaved",
+    "findings",
+    "limitations",
+    "nextActions"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Record audit answers"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Record runtime evidence"
+  },
+  "description": "Saves bounded runtime evidence to the same audit run: sanitized observations from a real browser, authorized backend inspection or a destination UI, with the consent state and observation time. Does not run a browser or send events. A check whose evidence type does not prove it is stored as unknown. Returns the updated findings and report link.",
+  "input_schema": {
+   "properties": {
+    "audit_id": {
+     "description": "audit run ID returned by Tyton; each audit run has its own ID",
+     "pattern": "^audit-[a-f0-9]{32}$",
+     "type": "string"
+    },
+    "audit_key": {
+     "description": "private audit write capability returned by Tyton; a secret that authorizes changes to this audit only",
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "checks": {
+     "items": {
+      "properties": {
+       "check": {
+        "enum": [
+         "rendered_controls",
+         "pixel_request",
+         "server_delivery",
+         "destination_receipt",
+         "cross_source_dedup",
+         "consent_behavior"
+        ],
+        "type": "string"
+       },
+       "evidence": {
+        "description": "sanitized summary of the inspected observation, without payloads, identifiers or credentials",
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+       },
+       "evidence_type": {
+        "enum": [
+         "browser_dom",
+         "browser_network",
+         "backend_log",
+         "destination_ui",
+         "human_report"
+        ],
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "check",
+       "state",
+       "evidence_type",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    },
+    "consent_state": {
+     "enum": [
+      "unknown",
+      "not_interacted",
+      "accepted",
+      "declined",
+      "no_banner_observed"
+     ],
+     "type": "string"
+    },
+    "observed_at": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "request_id": {
+     "description": "UUID identifying one mutation; a repeated request_id with identical content is treated as a retry",
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "description": "latest run revision; 0 for the first write of a new audit session, then the revision returned by the previous write",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "observed_at",
+    "consent_state",
+    "checks"
+   ],
+   "type": "object"
+  },
+  "name": "record_audit_runtime",
+  "output_schema": {
+   "properties": {
+    "capturedAt": {
+     "type": "string"
+    },
+    "components": {
+     "items": {
+      "properties": {
+       "code": {
+        "type": "boolean"
+       },
+       "html": {
+        "type": "boolean"
+       },
+       "runtime": {
+        "type": "boolean"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "html",
+       "code",
+       "runtime"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "context": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic",
+       "value",
+       "source",
+       "capturedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "decision": {
+     "properties": {
+      "coverage": {
+       "properties": {
+        "codeReviews": {
+         "type": "number"
+        },
+        "components": {
+         "type": "number"
+        },
+        "htmlPages": {
+         "type": "number"
+        },
+        "runtimePages": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "components",
+        "htmlPages",
+        "runtimePages",
+        "codeReviews"
+       ],
+       "type": "object"
+      },
+      "fit": {
+       "properties": {
+        "ctaLabel": {
+         "type": "string"
+        },
+        "detail": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "investigate_first",
+          "review_options"
+         ],
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "title",
+        "detail",
+        "ctaLabel"
+       ],
+       "type": "object"
+      },
+      "issues": {
+       "items": {
+        "properties": {
+         "action": {
+          "type": "string"
+         },
+         "detail": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "priority": {
+          "enum": [
+           "high",
+           "medium"
+          ],
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         },
+         "verification": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "priority",
+         "title",
+         "detail",
+         "url",
+         "action",
+         "verification"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "nextSteps": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "questions": {
+       "items": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "question": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "question"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "score": {
+       "properties": {
+        "checkpoints": {
+         "items": {
+          "properties": {
+           "id": {
+            "enum": [
+             "pixel",
+             "server_events",
+             "deduplication",
+             "consent",
+             "meta_delivery"
+            ],
+            "type": "string"
+           },
+           "label": {
+            "type": "string"
+           },
+           "state": {
+            "enum": [
+             "pass",
+             "fail",
+             "unknown",
+             "not_applicable"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "label",
+           "state"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "label": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "enum": [
+            null
+           ],
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "value",
+        "label",
+        "reason",
+        "checkpoints"
+       ],
+       "type": "object"
+      },
+      "status": {
+       "enum": [
+        "needs_input",
+        "partial"
+       ],
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      },
+      "verdict": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "status",
+      "verdict",
+      "summary",
+      "issues",
+      "questions",
+      "nextSteps",
+      "coverage",
+      "score",
+      "fit"
+     ],
+     "type": "object"
+    },
+    "findings": {
+     "items": {
+      "properties": {
+       "evidence": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "state",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "inventory": {
+     "properties": {
+      "buttons": {
+       "type": "number"
+      },
+      "controls": {
+       "items": {
+        "properties": {
+         "href": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "link",
+           "button"
+          ],
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "href",
+         "kind"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "forms": {
+       "type": "number"
+      },
+      "links": {
+       "type": "number"
+      },
+      "providers": {
+       "items": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "link",
+           "embed",
+           "script"
+          ],
+          "type": "string"
+         },
+         "provider": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "kind",
+         "url"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "truncated": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "buttons",
+      "links",
+      "forms",
+      "truncated",
+      "controls",
+      "providers"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "enum": [
+      "session",
+      "page",
+      "code",
+      "context",
+      "runtime",
+      "resume"
+     ],
+     "type": "string"
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "nextActions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "consentState": {
+        "type": "string"
+       },
+       "findings": {
+        "items": {
+         "properties": {
+          "evidence": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "label",
+          "state",
+          "evidence"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "enum": [
+         "page",
+         "code",
+         "runtime"
+        ],
+        "type": "string"
+       },
+       "limitations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "reviewedFiles": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "source": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "kind",
+       "source",
+       "capturedAt",
+       "findings",
+       "limitations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "reportSaved": {
+     "type": "boolean"
+    },
+    "reportUrl": {
+     "type": "string"
+    },
+    "schemaVersion": {
+     "enum": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "session": {
+     "properties": {
+      "auditId": {
+       "type": "string"
+      },
+      "auditKey": {
+       "type": "string"
+      },
+      "expiresAt": {
+       "type": "string"
+      },
+      "requestId": {
+       "type": "string"
+      },
+      "revision": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "auditId",
+      "auditKey",
+      "revision"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "enum": [
+      "live_fetch",
+      "agent_html_unverified",
+      "agent_reported"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "partial",
+      "unavailable"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "url",
+    "capturedAt",
+    "source",
+    "reportSaved",
+    "findings",
+    "limitations",
+    "nextActions"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Record runtime evidence"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Link audit to site"
+  },
+  "description": "Links an existing Tyton audit report to the connected website's Get Started checklist. Takes the report URL; only a report for this exact website is accepted. A linked report completes the checklist's audit step; it is not proof that tracking works. Requires a connected site.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "report_url": {
+     "pattern": "^https:\\/\\/usetyton\\.com\\/audit\\/audit-[a-f0-9]{32}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "report_url"
+   ],
+   "type": "object"
+  },
+  "name": "save_audit_to_project",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Link audit to site"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Save Conversions API token"
+  },
+  "description": "Saves a Meta Conversions API token for the connected site's current Pixel. Takes the Pixel ID plus exactly one of capi_token (the raw token) or sealed_capi_token (a sealed token from the Tyton browser extension, starting with `tyton_sealed_v1.`). The Pixel ID must match the site's saved Pixel. Meta checks the token; an explicit invalid or expired response is rejected, otherwise the token is saved with delivery unchecked. Saves the token encrypted; it is never returned. Does not send a test conversion, approve or activate tracking, or prove delivery. Requires a connected site with an active Tyton plan.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "capi_token": {
+     "maxLength": 4096,
+     "minLength": 20,
+     "pattern": "^[A-Za-z0-9_.-]+$",
+     "type": "string"
+    },
+    "pixel_id": {
+     "pattern": "^\\d{5,25}$",
+     "type": "string"
+    },
+    "sealed_capi_token": {
+     "description": "A sealed token from the Tyton browser extension, exactly as given (starts with tyton_sealed_v1.).",
+     "maxLength": 5000,
+     "type": "string"
+    }
+   },
+   "required": [
+    "pixel_id"
+   ],
+   "type": "object"
+  },
+  "name": "save_capi_token",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Save Conversions API token"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Save server setup answers"
+  },
+  "description": "Saves checkout and landing answers (payment provider, landing type and route, checkout domains) for the connected project and returns the reviewed server SDK success-callback contract. Does not install an integration or prove provider support; approval and activation are separate. Requires a connected site.",
+  "input_schema": {
+   "properties": {
+    "backend": {
+     "description": "where server code runs, as shown by the code (api, server or functions directories, or a separate service)",
+     "enum": [
+      "in_repo",
+      "separate_repo",
+      "none_hosted_only"
+     ],
+     "type": "string"
+    },
+    "checkout_domains": {
+     "description": "hostnames checkout lives on, if not the site itself ([] clears what's stored)",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "landing_marker": {
+     "description": "what marks a purchase in the landing URL, e.g. ?checkout=success; often empty",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "landing_route": {
+     "description": "e.g. /checkout/success or /dashboard; applies only to thank_you_page and app_route",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "landing_type": {
+     "description": "where the person ends up after paying: a thank-you page, back in the app, nowhere (overlay checkout), or the provider's own screen",
+     "enum": [
+      "thank_you_page",
+      "app_route",
+      "no_redirect",
+      "provider_hosted",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "payment_provider": {
+     "description": "who processes payments, as shown in code (package.json, env vars, webhook routes)",
+     "enum": [
+      "stripe",
+      "lemonsqueezy",
+      "paddle",
+      "gumroad",
+      "shopify",
+      "polar",
+      "other",
+      "none",
+      "unknown"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "payment_provider",
+    "landing_type",
+    "backend"
+   ],
+   "type": "object"
+  },
+  "name": "setup_server",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Save server setup answers"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read site configuration"
+  },
+  "description": "Reads the connected project's configuration: site URL, Pixel ID, token status and saved checkout answers. Read-only. Configuration and token status are not plan approval, callback verification, activation or Meta receipt. Requires a connected site.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "setup_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read site configuration"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    },
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Discover or configure site"
+  },
+  "description": "Discovers or configures reviewed v2 setup for a site. With only a URL it is read-only, needs no Pixel and returns setup guidance. With a real Pixel ID on a connected project, it saves the project's site URL and Pixel ID; switching an existing Pixel or site requires confirm_change. Does not approve, install or activate tracking.",
+  "input_schema": {
+   "properties": {
+    "checkout_domains": {
+     "description": "hostnames where checkout happens, if already known",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "confirm_change": {
+     "description": "true = yes, switch this project to a different Pixel ID or site URL on purpose",
+     "type": "boolean"
+    },
+    "name": {
+     "description": "project name; defaults to the site name",
+     "maxLength": 80,
+     "minLength": 1,
+     "type": "string"
+    },
+    "pixel_id": {
+     "description": "Meta Pixel ID, numeric; optional while it is not yet known",
+     "pattern": "^\\d{5,25}$",
+     "type": "string"
+    },
+    "url": {
+     "description": "the site being tracked: a domain or full URL",
+     "maxLength": 2000,
+     "minLength": 4,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "setup_tracking",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   },
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Discover or configure site"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Stage installation"
+  },
+  "description": "Stages callback bindings (conversion, target and a browser or server source) for the approved latest plan revision and digest under an installation generation. A matching generation is resumed; staging a new generation pauses the previous installation, clears verification and can cancel a pending start. Each enabled target needs a source, and Purchase requires a server source. Each binding reports through client.conversion(conversionId, targetId, data, {installationId: generation, eventId: stableOccurrenceId, verify: true}) on trusted confirmed success, not on a click, submit attempt or URL query parameter. Browser init with mode:'verify' suppresses automatic PageView and Pixel. A closed widget without a trustworthy success callback is unsupported. Does not activate tracking.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "bindings": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "conversionId": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+       },
+       "source": {
+        "enum": [
+         "browser",
+         "server"
+        ],
+        "type": "string"
+       },
+       "targetId": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "conversionId",
+       "targetId",
+       "source"
+      ],
+      "type": "object"
+     },
+     "maxItems": 200,
+     "type": "array"
+    },
+    "digest": {
+     "pattern": "^[0-9a-f]{64}$",
+     "type": "string"
+    },
+    "generation": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "maximum": 2147483647,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "revision",
+    "digest",
+    "generation",
+    "bindings"
+   ],
+   "type": "object"
+  },
+  "name": "stage_conversion_installation",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Stage installation"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Create signup link"
+  },
+  "description": "Creates a Tyton signup and Connect link for one website. Takes either a saved free audit (audit_id and audit_key, which brings the report along) or site_url, the customer's live https website. customer_approved records that the customer agreed to set up Tyton. Returns authorization_url for the customer, plus a private request_id and poll_token for checking the request's status. The customer can pick the free plan or a paid one; existing accounts with a plan skip that step. The link grants no access and starts no tracking by itself.",
+  "input_schema": {
+   "properties": {
+    "audit_id": {
+     "pattern": "^audit-[a-f0-9]{32}$",
+     "type": "string"
+    },
+    "audit_key": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "client": {
+     "enum": [
+      "codex",
+      "cursor",
+      "claude_code",
+      "other"
+     ],
+     "type": "string"
+    },
+    "customer_approved": {
+     "enum": [
+      true
+     ],
+     "type": "boolean"
+    },
+    "site_url": {
+     "description": "The customer's website (https) when there is no saved audit. The customer sees and approves it before connecting.",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "required": [
+    "customer_approved"
+   ],
+   "type": "object"
+  },
+  "name": "start_signup",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Create signup link"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Submit code findings"
+  },
+  "description": "Saves code review findings from the customer's repository to the audit: server-side events, dedup IDs, Pixel and container presence, payment provider, framework, backend location and existing Conversions API quality, plus the relative paths reviewed and any inapplicable checks with reasons. Unknown values stay unknown, not failed. Findings are stored as agent-reported, not verified deployed behavior. A group label is a label only; each report stays separate. Returns the updated audit decision and report link.",
+  "input_schema": {
+   "properties": {
+    "audit_id": {
+     "description": "audit run ID returned by Tyton; each audit run has its own ID",
+     "pattern": "^audit-[a-f0-9]{32}$",
+     "type": "string"
+    },
+    "audit_key": {
+     "description": "private audit write capability returned by Tyton; a secret that authorizes changes to this audit only",
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "backend": {
+     "description": "where the backend code is: in this repo, a separate repo not available here, or unknown",
+     "enum": [
+      "in_repo",
+      "separate_repo",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "checkout_domains": {
+     "description": "domains the checkout lives on, if separate; no customer paths or query strings",
+     "items": {
+      "maxLength": 253,
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "container_in_code": {
+     "description": "Tyton container script embedded?",
+     "enum": [
+      "yes",
+      "no",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "dedup_ids": {
+     "description": "orderId/event_id on both browser and server events?",
+     "enum": [
+      "yes",
+      "no",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "existing_capi": {
+     "description": "grades for existing CAPI code, if any: hashes_pii (does it hash emails/phones before sending?), sends_event_id (does each server event include an event_id?), graph_version (which Graph API version, e.g. v19.0), test_event_code_in_prod (is a test code left in production?), sends_fbp_fbc (are browser cookie values forwarded?)",
+     "properties": {
+      "graph_version": {
+       "description": "Graph API version used, e.g. v19.0",
+       "maxLength": 10,
+       "type": "string"
+      },
+      "hashes_pii": {
+       "description": "emails/phones hashed before sending?",
+       "enum": [
+        "yes",
+        "no",
+        "unknown"
+       ],
+       "type": "string"
+      },
+      "sends_event_id": {
+       "description": "event_id sent with server events?",
+       "enum": [
+        "yes",
+        "no",
+        "unknown"
+       ],
+       "type": "string"
+      },
+      "sends_fbp_fbc": {
+       "description": "fbp/fbc cookie values forwarded in server events?",
+       "enum": [
+        "yes",
+        "no",
+        "unknown"
+       ],
+       "type": "string"
+      },
+      "test_event_code_in_prod": {
+       "description": "test_event_code left in production code?",
+       "enum": [
+        "yes",
+        "no",
+        "unknown"
+       ],
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "framework": {
+     "description": "frontend framework (from package.json deps)",
+     "enum": [
+      "nextjs",
+      "nuxt",
+      "astro",
+      "remix",
+      "sveltekit",
+      "vite",
+      "cra",
+      "plain_html",
+      "other"
+     ],
+     "type": "string"
+    },
+    "group": {
+     "description": "legacy grouping label only; does not combine reports or verify domain ownership",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "not_applicable": {
+     "description": "Inapplicable checks, each with the actual reason, based on reviewed files and confirmed scope. Missing access counts as unknown, not N/A.",
+     "items": {
+      "properties": {
+       "check": {
+        "enum": [
+         "C1",
+         "C2",
+         "C4",
+         "C5",
+         "C4a",
+         "C4b",
+         "C4d",
+         "C4e"
+        ],
+        "type": "string"
+       },
+       "reason": {
+        "maxLength": 160,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "check",
+       "reason"
+      ],
+      "type": "object"
+     },
+     "maxItems": 8,
+     "type": "array"
+    },
+    "notes": {
+     "anyOf": [
+      {
+       "maxLength": 2000,
+       "type": "string"
+      },
+      {
+       "items": {
+        "maxLength": 160,
+        "type": "string"
+       },
+       "maxItems": 10,
+       "type": "array"
+      }
+     ],
+     "description": "anything else found; a string or an array of strings"
+    },
+    "payment_provider": {
+     "description": "payment processor used (from package.json, env vars, webhook routes)",
+     "enum": [
+      "stripe",
+      "lemonsqueezy",
+      "paddle",
+      "gumroad",
+      "shopify",
+      "polar",
+      "other",
+      "none",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "pixel_in_code": {
+     "description": "Meta Pixel initialized anywhere in the code?",
+     "enum": [
+      "yes",
+      "no",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "request_id": {
+     "description": "UUID identifying one mutation; a repeated request_id with identical content is treated as a retry",
+     "format": "uuid",
+     "type": "string"
+    },
+    "reviewed_files": {
+     "description": "relative paths actually inspected in the relevant customer repository; no source code, absolute paths or secret files",
+     "items": {
+      "maxLength": 160,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "revision": {
+     "description": "latest run revision; 0 for the first write of a new audit session, then the revision returned by the previous write",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "server_evidence": {
+     "description": "one line: file/function where it was found",
+     "maxLength": 300,
+     "type": "string"
+    },
+    "server_side_events": {
+     "description": "code sends server-side events (CAPI/SDK/webhook)? unknown when not checked",
+     "enum": [
+      "yes",
+      "no",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "description": "the site these findings belong to",
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "submit_findings",
+  "output_schema": {
+   "properties": {
+    "capturedAt": {
+     "type": "string"
+    },
+    "components": {
+     "items": {
+      "properties": {
+       "code": {
+        "type": "boolean"
+       },
+       "html": {
+        "type": "boolean"
+       },
+       "runtime": {
+        "type": "boolean"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "html",
+       "code",
+       "runtime"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "context": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic",
+       "value",
+       "source",
+       "capturedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "decision": {
+     "properties": {
+      "coverage": {
+       "properties": {
+        "codeReviews": {
+         "type": "number"
+        },
+        "components": {
+         "type": "number"
+        },
+        "htmlPages": {
+         "type": "number"
+        },
+        "runtimePages": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "components",
+        "htmlPages",
+        "runtimePages",
+        "codeReviews"
+       ],
+       "type": "object"
+      },
+      "fit": {
+       "properties": {
+        "ctaLabel": {
+         "type": "string"
+        },
+        "detail": {
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "investigate_first",
+          "review_options"
+         ],
+         "type": "string"
+        },
+        "title": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "title",
+        "detail",
+        "ctaLabel"
+       ],
+       "type": "object"
+      },
+      "issues": {
+       "items": {
+        "properties": {
+         "action": {
+          "type": "string"
+         },
+         "detail": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "priority": {
+          "enum": [
+           "high",
+           "medium"
+          ],
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         },
+         "verification": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "priority",
+         "title",
+         "detail",
+         "url",
+         "action",
+         "verification"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "nextSteps": {
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "questions": {
+       "items": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "question": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "question"
+        ],
+        "type": "object"
+       },
+       "maxItems": 3,
+       "type": "array"
+      },
+      "score": {
+       "properties": {
+        "checkpoints": {
+         "items": {
+          "properties": {
+           "id": {
+            "enum": [
+             "pixel",
+             "server_events",
+             "deduplication",
+             "consent",
+             "meta_delivery"
+            ],
+            "type": "string"
+           },
+           "label": {
+            "type": "string"
+           },
+           "state": {
+            "enum": [
+             "pass",
+             "fail",
+             "unknown",
+             "not_applicable"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "id",
+           "label",
+           "state"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "label": {
+         "type": "string"
+        },
+        "reason": {
+         "type": "string"
+        },
+        "value": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "number"
+          },
+          {
+           "enum": [
+            null
+           ],
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "value",
+        "label",
+        "reason",
+        "checkpoints"
+       ],
+       "type": "object"
+      },
+      "status": {
+       "enum": [
+        "needs_input",
+        "partial"
+       ],
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      },
+      "verdict": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "status",
+      "verdict",
+      "summary",
+      "issues",
+      "questions",
+      "nextSteps",
+      "coverage",
+      "score",
+      "fit"
+     ],
+     "type": "object"
+    },
+    "findings": {
+     "items": {
+      "properties": {
+       "evidence": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "state": {
+        "enum": [
+         "present",
+         "absent",
+         "unknown",
+         "not_applicable"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "label",
+       "state",
+       "evidence"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "inventory": {
+     "properties": {
+      "buttons": {
+       "type": "number"
+      },
+      "controls": {
+       "items": {
+        "properties": {
+         "href": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "link",
+           "button"
+          ],
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "href",
+         "kind"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "forms": {
+       "type": "number"
+      },
+      "links": {
+       "type": "number"
+      },
+      "providers": {
+       "items": {
+        "properties": {
+         "kind": {
+          "enum": [
+           "link",
+           "embed",
+           "script"
+          ],
+          "type": "string"
+         },
+         "provider": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "kind",
+         "url"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "truncated": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "buttons",
+      "links",
+      "forms",
+      "truncated",
+      "controls",
+      "providers"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "enum": [
+      "session",
+      "page",
+      "code",
+      "context",
+      "runtime",
+      "resume"
+     ],
+     "type": "string"
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "nextActions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "properties": {
+       "capturedAt": {
+        "type": "string"
+       },
+       "consentState": {
+        "type": "string"
+       },
+       "findings": {
+        "items": {
+         "properties": {
+          "evidence": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "state": {
+           "enum": [
+            "present",
+            "absent",
+            "unknown",
+            "not_applicable"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "label",
+          "state",
+          "evidence"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "enum": [
+         "page",
+         "code",
+         "runtime"
+        ],
+        "type": "string"
+       },
+       "limitations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "reviewedFiles": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "source": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "kind",
+       "source",
+       "capturedAt",
+       "findings",
+       "limitations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "reportSaved": {
+     "type": "boolean"
+    },
+    "reportUrl": {
+     "type": "string"
+    },
+    "schemaVersion": {
+     "enum": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "session": {
+     "properties": {
+      "auditId": {
+       "type": "string"
+      },
+      "auditKey": {
+       "type": "string"
+      },
+      "expiresAt": {
+       "type": "string"
+      },
+      "requestId": {
+       "type": "string"
+      },
+      "revision": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "auditId",
+      "auditKey",
+      "revision"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "enum": [
+      "live_fetch",
+      "agent_html_unverified",
+      "agent_reported"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "partial",
+      "unavailable"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "url",
+    "capturedAt",
+    "source",
+    "reportSaved",
+    "findings",
+    "limitations",
+    "nextActions"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Submit code findings"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read tracking status"
+  },
+  "description": "Reads aggregate browser and server event observations, delivery statuses, and the known-crawler protection mode and counts for the connected site. Read-only. Counts are not unique business conversions, current installation verification or proof of Meta deduplication. Requires a connected site.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "tracking_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Read tracking status"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "site"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check page HTML for Pixel"
+  },
+  "description": "Checks a page's static HTML for Tyton container and Meta Pixel references, using a public fetch or HTML supplied by the agent, and compares them with the connected project. Read-only. Does not verify runtime callbacks, activation, consent behavior or Meta receipt. Requires a connected site.",
+  "input_schema": {
+   "properties": {
+    "html": {
+     "description": "page HTML fetched by the agent",
+     "maxLength": 2000000,
+     "type": "string"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "verify_install",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "site"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Check page HTML for Pixel"
+ }
+]

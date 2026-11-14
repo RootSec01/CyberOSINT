@@ -1,0 +1,919 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one customer"
+  },
+  "description": "Fetch a single customer by id, with visits, total spent and points balance. Loyverse: GET /customers/{customer_id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_id": {
+     "description": "The customer id (UUID).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "customer_id"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_get_customer",
+  "output_schema": {},
+  "title": "Get one customer"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one item"
+  },
+  "description": "Fetch a single catalog item by id, with its variants. Loyverse: GET /items/{item_id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "item_id": {
+     "description": "The item id (UUID).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "item_id"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_get_item",
+  "output_schema": {},
+  "title": "Get one item"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get the merchant"
+  },
+  "description": "Fetch the merchant account this token belongs to — business name, email, country and currency. A cheap way to confirm the token works. Loyverse: GET /merchant/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "loyverse_get_merchant",
+  "output_schema": {},
+  "title": "Get the merchant"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one receipt"
+  },
+  "description": "Fetch a single receipt by its receipt number (e.g. 2-1008), with line items, modifiers, discounts, taxes and payments. Loyverse: GET /receipts/{receipt_number}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "receipt_number": {
+     "description": "The receipt number, e.g. 2-1008.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "receipt_number"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_get_receipt",
+  "output_schema": {},
+  "title": "Get one receipt"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List categories"
+  },
+  "description": "List item categories. Loyverse: GET /categories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "categories_ids": {
+     "description": "Comma-separated list of category ids to return.",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_categories",
+  "output_schema": {},
+  "title": "List categories"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List customers"
+  },
+  "description": "List loyalty customers, newest first, with visits, total spent and points balance. Filter by email or ids. Loyverse: GET /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "customer_ids": {
+     "description": "Comma-separated list of customer ids to return.",
+     "type": "string"
+    },
+    "email": {
+     "description": "Only the customer with this email.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_customers",
+  "output_schema": {},
+  "title": "List customers"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List discounts"
+  },
+  "description": "List configured discounts (fixed/variable percent or amount, discount-by-points) and where they apply. Loyverse: GET /discounts.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "discount_ids": {
+     "description": "Comma-separated list of discount ids to return.",
+     "type": "string"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_discounts",
+  "output_schema": {},
+  "title": "List discounts"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List employees"
+  },
+  "description": "List employees, with the stores each can access and whether they are the owner. Loyverse: GET /employees.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "employee_ids": {
+     "description": "Comma-separated list of employee ids to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_employees",
+  "output_schema": {},
+  "title": "List employees"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List inventory levels"
+  },
+  "description": "List current stock (`in_stock`) per variant per store. Filter by stores and/or variants — the answer to 'what is running low?'. Loyverse: GET /inventory.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "store_ids": {
+     "description": "Comma-separated store ids.",
+     "type": "string"
+    },
+    "updated_at_max": {
+     "description": "Only levels updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only levels updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "variant_ids": {
+     "description": "Comma-separated variant ids.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_inventory",
+  "output_schema": {},
+  "title": "List inventory levels"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List items"
+  },
+  "description": "List catalog items with their variants (SKU, barcode, price, cost, per-store pricing), category, taxes and modifiers. Loyverse: GET /items.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "items_ids": {
+     "description": "Comma-separated list of item ids to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_items",
+  "output_schema": {},
+  "title": "List items"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List payment types"
+  },
+  "description": "List the payment types (cash, card, integrated terminals…) and the stores where each is available. Receipt payments reference these ids. Loyverse: GET /payment_types.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "payment_type_ids": {
+     "description": "Comma-separated list of payment type ids to return.",
+     "type": "string"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_payment_types",
+  "output_schema": {},
+  "title": "List payment types"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List receipts"
+  },
+  "description": "List sales and refund receipts, newest first, with line items, payments, discounts and taxes. Filter by store, time range or receipt numbers — the core of any sales question. Loyverse: GET /receipts.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "before_receipt_number": {
+     "description": "Only receipts created up to the receipt with this number.",
+     "type": "string"
+    },
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "order": {
+     "description": "Only receipts with this order name/number.",
+     "type": "string"
+    },
+    "receipt_numbers": {
+     "description": "Comma-separated receipt numbers to return, e.g. 2-1008,2-1009.",
+     "type": "string"
+    },
+    "since_receipt_number": {
+     "description": "Only receipts created at or after the receipt with this number.",
+     "type": "string"
+    },
+    "source": {
+     "description": "Only receipts from this source (e.g. an app name).",
+     "type": "string"
+    },
+    "store_id": {
+     "description": "Only receipts from this store.",
+     "type": "string"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_receipts",
+  "output_schema": {},
+  "title": "List receipts"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List shifts"
+  },
+  "description": "List cash-register shifts with their cash, gross/net sales, refunds, discounts, taxes, per-payment-type totals and pay-in/pay-out movements — the end-of-day view. Loyverse: GET /shifts.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only shifts opened at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only shifts opened at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "store_ids": {
+     "description": "Comma-separated list of store ids to return.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_shifts",
+  "output_schema": {},
+  "title": "List shifts"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List stores"
+  },
+  "description": "List the merchant's stores (locations) with their addresses. Store ids are what the receipt, shift and inventory filters take. Loyverse: GET /stores.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "store_ids": {
+     "description": "Comma-separated list of store ids to return.",
+     "type": "string"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_stores",
+  "output_schema": {},
+  "title": "List stores"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List suppliers"
+  },
+  "description": "List suppliers with their contact details. Loyverse: GET /suppliers/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "suppliers_ids": {
+     "description": "Comma-separated list of supplier ids to return.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_suppliers",
+  "output_schema": {},
+  "title": "List suppliers"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List taxes"
+  },
+  "description": "List taxes with their rate, whether they are INCLUDED in or ADDED to the price, and the stores they apply in. Loyverse: GET /taxes.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "tax_ids": {
+     "description": "Comma-separated list of tax ids to return.",
+     "type": "string"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_taxes",
+  "output_schema": {},
+  "title": "List taxes"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List item variants"
+  },
+  "description": "List item variants — the sellable SKUs — optionally for given items or one SKU. Variant ids are what inventory levels are keyed on. Loyverse: GET /variants.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_at_max": {
+     "description": "Only records created at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "created_at_min": {
+     "description": "Only records created at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The `cursor` from the previous page's response. Omit for the first page.",
+     "type": "string"
+    },
+    "items_ids": {
+     "description": "Comma-separated item ids whose variants to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Page size, 1-250 (Loyverse default 50).",
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "show_deleted": {
+     "description": "Also return soft-deleted records (they carry deleted_at).",
+     "type": "boolean"
+    },
+    "sku": {
+     "description": "Only the variant with this SKU.",
+     "type": "string"
+    },
+    "updated_at_max": {
+     "description": "Only records updated at or before this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "updated_at_min": {
+     "description": "Only records updated at or after this time (ISO 8601 UTC, e.g. 2026-03-30T18:30:00.000Z).",
+     "type": "string"
+    },
+    "variants_ids": {
+     "description": "Comma-separated list of variant ids to return.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "loyverse_list_variants",
+  "output_schema": {},
+  "title": "List item variants"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Set inventory levels"
+  },
+  "description": "Set the ABSOLUTE stock (`stock_after`) of one or more variants at given stores — e.g. after a stock count. This overwrites the current level rather than adding to it; read the current levels with loyverse_list_inventory first so they can be restored. Loyverse: POST /inventory.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "inventory_levels": {
+     "description": "The stock levels to set.",
+     "items": {
+      "properties": {
+       "stock_after": {
+        "description": "The new stock level for that variant at that store.",
+        "type": "number"
+       },
+       "store_id": {
+        "description": "The store id.",
+        "minLength": 1,
+        "type": "string"
+       },
+       "variant_id": {
+        "description": "The item variant id.",
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "variant_id",
+       "store_id",
+       "stock_after"
+      ],
+      "type": "object"
+     },
+     "maxItems": 250,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "inventory_levels"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_set_inventory_levels",
+  "output_schema": {},
+  "title": "Set inventory levels"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create or update a category"
+  },
+  "description": "Create an item category, or rename/recolor one by passing its `id`. Loyverse: POST /categories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "color": {
+     "description": "Display color on the POS.",
+     "enum": [
+      "GREY",
+      "RED",
+      "PINK",
+      "ORANGE",
+      "GREEN",
+      "BLUE",
+      "PURPLE"
+     ],
+     "type": "string"
+    },
+    "id": {
+     "description": "Existing category id to update. Omit to create.",
+     "type": "string"
+    },
+    "name": {
+     "description": "The category name (required).",
+     "maxLength": 64,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_upsert_category",
+  "output_schema": {},
+  "title": "Create or update a category"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create or update a customer"
+  },
+  "description": "Create a loyalty customer, or update one by passing its `id`. Loyverse does not document whether omitted fields survive an update, so on update fetch the customer first and send the full record. Loyverse: POST /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "address": {
+     "description": "Street address.",
+     "maxLength": 192,
+     "type": "string"
+    },
+    "city": {
+     "description": "City, town or village.",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "country_code": {
+     "description": "Two-letter ISO 3166-1 alpha-2 country code, e.g. US.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "customer_code": {
+     "description": "Your own customer code (e.g. a loyalty card number).",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "id": {
+     "description": "Existing customer id to update. Omit to create.",
+     "type": "string"
+    },
+    "name": {
+     "description": "The customer's name (required).",
+     "maxLength": 64,
+     "minLength": 1,
+     "type": "string"
+    },
+    "note": {
+     "description": "A note about the customer.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "phone_number": {
+     "description": "Phone number.",
+     "maxLength": 15,
+     "type": "string"
+    },
+    "postal_code": {
+     "description": "Postal / ZIP code.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "region": {
+     "description": "Province, state or prefecture.",
+     "maxLength": 64,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_upsert_customer",
+  "output_schema": {},
+  "title": "Create or update a customer"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create or update a supplier"
+  },
+  "description": "Create a supplier, or update one by passing its `id`. Loyverse does not document whether omitted fields survive an update, so on update send the full record. Loyverse: POST /suppliers/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "address_1": {
+     "description": "Address line 1.",
+     "maxLength": 192,
+     "type": "string"
+    },
+    "address_2": {
+     "description": "Address line 2.",
+     "maxLength": 192,
+     "type": "string"
+    },
+    "city": {
+     "description": "City, town or village.",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "contact": {
+     "description": "Contact person's name.",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "country_code": {
+     "description": "Two-letter ISO 3166-1 alpha-2 country code, e.g. US.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "id": {
+     "description": "Existing supplier id to update. Omit to create.",
+     "type": "string"
+    },
+    "name": {
+     "description": "The supplier company name (required).",
+     "maxLength": 64,
+     "minLength": 1,
+     "type": "string"
+    },
+    "note": {
+     "description": "A note about the supplier.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "phone_number": {
+     "description": "Phone number.",
+     "maxLength": 15,
+     "type": "string"
+    },
+    "postal_code": {
+     "description": "Postal / ZIP code.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "region": {
+     "description": "Province, state or prefecture.",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "website": {
+     "description": "Website URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "loyverse_upsert_supplier",
+  "output_schema": {},
+  "title": "Create or update a supplier"
+ }
+]

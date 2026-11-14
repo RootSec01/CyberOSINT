@@ -1,0 +1,159 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Use this to check a Relay swap's status by requestId and confirm app-fee collection (appFees vs paidAppFees).",
+  "input_schema": {
+   "properties": {
+    "requestId": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "requestId"
+   ],
+   "type": "object"
+  },
+  "name": "check_swap",
+  "output_schema": {},
+  "title": "Check a swap + fee collection"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true
+  },
+  "description": "Use this when a US user wants to buy USDC on Base with a card / Apple Pay / Google Pay. Returns a payment link a HUMAN must physically tap (fiat legs cannot be programmatically triggered); a human is notified. US-only guest checkout, <= $500/week.",
+  "input_schema": {
+   "properties": {
+    "amountUsd": {
+     "type": "number"
+    },
+    "destinationAddress": {
+     "type": "string"
+    },
+    "geo": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "amountUsd",
+    "destinationAddress"
+   ],
+   "type": "object"
+  },
+  "name": "create_onramp_session",
+  "output_schema": {},
+  "title": "Create a US card onramp session (HITL)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true
+  },
+  "description": "Use this to swap any token on any chain into USDC on Base via Relay. Returns a headless deposit address (no signing) or an on-chain intent. App fees accrue on swaps.",
+  "input_schema": {
+   "properties": {
+    "amount": {
+     "type": "string"
+    },
+    "fromChain": {
+     "type": "string"
+    },
+    "fromToken": {
+     "type": "string"
+    },
+    "humanPresent": {
+     "type": "boolean"
+    },
+    "recipient": {
+     "type": "string"
+    },
+    "toChain": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "fromToken",
+    "fromChain",
+    "amount",
+    "recipient"
+   ],
+   "type": "object"
+  },
+  "name": "create_swap",
+  "output_schema": {},
+  "title": "Create a crypto swap (Relay)"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Use this when a human or agent wants the best non-custodial way to move value between fiat and crypto (or crypto to crypto). Returns ranked rails with fees, ETA, KYC burden, limits, and reasoning.",
+  "input_schema": {
+   "properties": {
+    "amountUsd": {
+     "type": "number"
+    },
+    "destination": {
+     "type": "object"
+    },
+    "geo": {
+     "type": "string"
+    },
+    "humanPresent": {
+     "type": "boolean"
+    },
+    "kycTolerance": {
+     "enum": [
+      "none",
+      "guest",
+      "light",
+      "full"
+     ],
+     "type": "string"
+    },
+    "source": {
+     "type": "object"
+    },
+    "speed": {
+     "enum": [
+      "cheapest",
+      "fastest",
+      "balanced"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "source",
+    "destination",
+    "amountUsd"
+   ],
+   "type": "object"
+  },
+  "name": "get_route_quote",
+  "output_schema": {},
+  "title": "Get a ranked value-routing quote"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true
+  },
+  "description": "Use this to create a gasless, non-custodial CDP Embedded Wallet address on Base (TEE keys, user-exportable) to receive routed value.",
+  "input_schema": {
+   "properties": {
+    "owner": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "owner"
+   ],
+   "type": "object"
+  },
+  "name": "provision_wallet",
+  "output_schema": {},
+  "title": "Provision a gasless Base wallet"
+ }
+]

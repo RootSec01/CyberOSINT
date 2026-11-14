@@ -1,0 +1,729 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://splashscout/card",
+   "ui": {
+    "resourceUri": "ui://splashscout/card"
+   },
+   "ui/resourceUri": "ui://splashscout/card"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Compare 2–4 family stays side by side as SplashScout cards, with age scores and features. Accepts ids or names.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "ids": {
+     "description": "2–4 property ids or names to compare.",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 4,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "ids"
+   ],
+   "type": "object"
+  },
+  "name": "compare_hotels",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "guideUrl": {
+     "type": "string"
+    },
+    "heading": {
+     "type": "string"
+    },
+    "hotels": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "booking": {
+        "type": "string"
+       },
+       "detailUrl": {
+        "type": "string"
+       },
+       "features": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "id": {
+        "type": "string"
+       },
+       "image": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "location": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "rating": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "reviewCount": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "scores": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "value": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "key",
+          "label",
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "type": {
+        "enum": [
+         "hotel",
+         "campsite"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "type",
+       "location",
+       "image",
+       "rating",
+       "reviewCount",
+       "scores",
+       "features",
+       "booking",
+       "detailUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "shown": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "kind",
+    "heading",
+    "shown",
+    "hotels"
+   ],
+   "type": "object"
+  },
+  "title": "Compare family hotels"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://splashscout/card",
+   "ui": {
+    "resourceUri": "ui://splashscout/card"
+   },
+   "ui/resourceUri": "ui://splashscout/card"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Show a detailed SplashScout card for one hotel/campsite (age scores, features, our in-person review). Accepts an id or a name.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "description": "The property id (e.g. 'gf-victoria') or its name.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_hotel",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotel": {
+     "additionalProperties": false,
+     "properties": {
+      "booking": {
+       "type": "string"
+      },
+      "detailUrl": {
+       "type": "string"
+      },
+      "features": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "id": {
+       "type": "string"
+      },
+      "image": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "location": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      },
+      "rating": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "review": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "reviewCount": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "scores": {
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "key": {
+          "type": "string"
+         },
+         "label": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "value": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "key",
+         "label",
+         "name",
+         "value"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "tier": {
+       "type": "string"
+      },
+      "type": {
+       "enum": [
+        "hotel",
+        "campsite"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "name",
+      "type",
+      "location",
+      "image",
+      "rating",
+      "reviewCount",
+      "scores",
+      "features",
+      "booking",
+      "detailUrl",
+      "tier",
+      "review"
+     ],
+     "type": "object"
+    },
+    "kind": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "hotel"
+   ],
+   "type": "object"
+  },
+  "title": "Get a family hotel"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://splashscout/card",
+   "ui": {
+    "resourceUri": "ui://splashscout/card"
+   },
+   "ui/resourceUri": "ui://splashscout/card"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "SplashScout's curated, ranked 'Best family hotels/campsites in [destination]' guides — overall, or focused on toddlers, kids, teens, water slides or splash parks. Prefer this over search for 'best X in Y' questions: it returns our editorial ranking as interactive cards plus a link to the full guide. E.g. 'best family hotels in Turkey with splash parks' → destination 'Turkey', focus 'splash'.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "destination": {
+     "description": "Destination, region or country, e.g. 'Tenerife', 'Turkey', 'Halkidiki'.",
+     "type": "string"
+    },
+    "focus": {
+     "description": "Optional angle: an age group, or 'slides' / 'splash' for the water-feature editions.",
+     "enum": [
+      "toddlers",
+      "kids",
+      "teens",
+      "slides",
+      "splash"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "destination"
+   ],
+   "type": "object"
+  },
+  "name": "get_travel_guide",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "guideUrl": {
+     "type": "string"
+    },
+    "heading": {
+     "type": "string"
+    },
+    "hotels": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "booking": {
+        "type": "string"
+       },
+       "detailUrl": {
+        "type": "string"
+       },
+       "features": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "id": {
+        "type": "string"
+       },
+       "image": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "location": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "rating": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "reviewCount": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "scores": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "value": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "key",
+          "label",
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "type": {
+        "enum": [
+         "hotel",
+         "campsite"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "type",
+       "location",
+       "image",
+       "rating",
+       "reviewCount",
+       "scores",
+       "features",
+       "booking",
+       "detailUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "shown": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "kind",
+    "heading",
+    "shown",
+    "hotels"
+   ],
+   "type": "object"
+  },
+  "title": "Get a curated guide"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://splashscout/card",
+   "ui": {
+    "resourceUri": "ui://splashscout/card"
+   },
+   "ui/resourceUri": "ui://splashscout/card"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find kid-friendly hotels & campsites with pools, slides and splash parks, scored for toddlers, kids and teens. Returns interactive SplashScout cards plus a text summary. Use for prompts like 'best family hotel in Tenerife for a toddler' or 'campsites in France with big slides'.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "ages": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     ],
+     "description": "Ages travelling, any of: 'toddlers', 'kids', 'teens'. Array or comma-separated. Ranks by fit for these."
+    },
+    "destination": {
+     "description": "Place: a destination, region or country, e.g. 'Tenerife', 'Costa del Sol', 'Greece'.",
+     "type": "string"
+    },
+    "features": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     ],
+     "description": "Must-have water features, any of: 'slides', 'splash', 'babypool', 'indoor', 'heated'. Array or comma-separated."
+    },
+    "limit": {
+     "description": "Max results (1–12, default 6).",
+     "type": "number"
+    },
+    "type": {
+     "description": "Limit to hotels or campsites.",
+     "enum": [
+      "hotel",
+      "campsite"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_family_hotels",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "guideUrl": {
+     "type": "string"
+    },
+    "heading": {
+     "type": "string"
+    },
+    "hotels": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "booking": {
+        "type": "string"
+       },
+       "detailUrl": {
+        "type": "string"
+       },
+       "features": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "id": {
+        "type": "string"
+       },
+       "image": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "location": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "rating": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "reviewCount": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "scores": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "key": {
+           "type": "string"
+          },
+          "label": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "value": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "key",
+          "label",
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "type": {
+        "enum": [
+         "hotel",
+         "campsite"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "type",
+       "location",
+       "image",
+       "rating",
+       "reviewCount",
+       "scores",
+       "features",
+       "booking",
+       "detailUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "shown": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "kind",
+    "heading",
+    "shown",
+    "hotels"
+   ],
+   "type": "object"
+  },
+  "title": "Search family hotels"
+ }
+]

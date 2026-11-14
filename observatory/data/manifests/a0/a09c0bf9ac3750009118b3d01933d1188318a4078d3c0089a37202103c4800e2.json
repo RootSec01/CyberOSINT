@@ -1,0 +1,90 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "公開求人キー（job_search の結果 URL 末尾のキー、または https://aile-ai.jp/jobs/<key> のキー）から求人詳細（求人説明・必要資格・選考フロー・勤務地・年収）を返す（読み取り専用）。",
+  "input_schema": {
+   "properties": {
+    "public_key": {
+     "description": "公開求人キー（4〜8 桁の英数字）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "public_key"
+   ],
+   "type": "object"
+  },
+  "name": "job_detail",
+  "output_schema": {}
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://widget/job-results.html",
+   "openai/toolInvocation/invoked": "求人を検索しました",
+   "openai/toolInvocation/invoking": "求人を検索しています"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "掲載中の公開求人を検索する（読み取り専用）。正準職種・都道府県・希望年収下限（円）・リモート可否で絞り込み、求人タイトル・会社名・正準職種・給与レンジ・勤務地・公開求人キー・公開 URL のリストを返す。返却された職種は salary_market にそのまま指定できる。",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "返却件数の上限（1〜20、既定 10）",
+     "type": "integer"
+    },
+    "occupation": {
+     "description": "求人の正準職種名（任意、完全一致）",
+     "type": "string"
+    },
+    "prefecture": {
+     "description": "勤務地の都道府県標準表記（任意、完全一致。例: 東京都）",
+     "type": "string"
+    },
+    "remote": {
+     "description": "リモート可の求人に限定するか（任意、既定 false）",
+     "type": "boolean"
+    },
+    "salary_min": {
+     "description": "希望年収下限（円、任意。例: 4000000）",
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "job_search",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "職種 × 都道府県の年収相場（掲載中求人の求人数・提示年収の下限 / 中央値 / 上限、万円）を返す（読み取り専用）。",
+  "input_schema": {
+   "properties": {
+    "occupation": {
+     "description": "求人の正準職種名（完全一致）",
+     "type": "string"
+    },
+    "prefecture": {
+     "description": "勤務地の都道府県名（任意。例: 大阪府）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "occupation"
+   ],
+   "type": "object"
+  },
+  "name": "salary_market",
+  "output_schema": {}
+ }
+]

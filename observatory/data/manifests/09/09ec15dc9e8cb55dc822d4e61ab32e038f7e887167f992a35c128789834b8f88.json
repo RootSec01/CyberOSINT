@@ -1,0 +1,173 @@
+[
+ {
+  "description": "Find the best current LEGO deals — sets selling below RRP at major retailers. Returns sets ranked by discount percentage.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "Number of results (max 25)",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "number"
+    },
+    "minDiscount": {
+     "default": 10,
+     "description": "Minimum discount percentage (default 10%)",
+     "maximum": 90,
+     "minimum": 1,
+     "type": "number"
+    },
+    "retailer": {
+     "description": "Filter by retailer (e.g. 'Amazon', 'Walmart', 'Target')",
+     "type": "string"
+    },
+    "theme": {
+     "description": "Filter by theme name",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_deals",
+  "output_schema": {}
+ },
+ {
+  "description": "Get price history and trends for a LEGO set across retailers over a given time period.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "default": 90,
+     "description": "Lookback period in days (default 90)",
+     "maximum": 365,
+     "minimum": 1,
+     "type": "number"
+    },
+    "retailer": {
+     "description": "Filter to a specific retailer",
+     "type": "string"
+    },
+    "setNum": {
+     "description": "Set number (e.g. '75313' or '75313-1')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "setNum"
+   ],
+   "type": "object"
+  },
+  "name": "get_price_history",
+  "output_schema": {}
+ },
+ {
+  "description": "Find LEGO sets retiring soon. Useful for collectors who want to buy before sets become unavailable and prices increase on the secondary market.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "daysAhead": {
+     "default": 180,
+     "description": "How many days ahead to look (default 180)",
+     "maximum": 365,
+     "minimum": 1,
+     "type": "number"
+    },
+    "limit": {
+     "default": 15,
+     "description": "Number of results (max 50)",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "number"
+    },
+    "theme": {
+     "description": "Filter by theme name",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_retiring_soon",
+  "output_schema": {}
+ },
+ {
+  "description": "Get full details for a specific LEGO set including current retailer prices, BrickLink market data, and retirement status.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "setNum": {
+     "description": "Set number (e.g. '75313' or '75313-1')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "setNum"
+   ],
+   "type": "object"
+  },
+  "name": "get_set_details",
+  "output_schema": {}
+ },
+ {
+  "description": "Search LEGO sets by name, set number, theme, year, or price range. Returns matching sets with key details.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "Number of results (max 25)",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "number"
+    },
+    "maxPrice": {
+     "description": "Maximum RRP in USD",
+     "type": "number"
+    },
+    "maxYear": {
+     "description": "Maximum release year",
+     "type": "number"
+    },
+    "minPrice": {
+     "description": "Minimum RRP in USD",
+     "type": "number"
+    },
+    "minYear": {
+     "description": "Minimum release year",
+     "type": "number"
+    },
+    "query": {
+     "description": "Search by set name or set number",
+     "type": "string"
+    },
+    "theme": {
+     "description": "Filter by theme name (e.g. 'Star Wars', 'Technic')",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_sets",
+  "output_schema": {}
+ }
+]

@@ -1,0 +1,105 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check service area"
+  },
+  "description": "Is a US ZIP code inside the Charleston service area? Returns yes/no and the nearest served town.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "zip": {
+     "pattern": "^[0-9]{5}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "zip"
+   ],
+   "type": "object"
+  },
+  "name": "check_service_area",
+  "output_schema": {},
+  "title": "Check a ZIP code"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Service info"
+  },
+  "description": "Facts about CHS Backflow, a free referral service for backflow testing in Charleston, South Carolina: towns served, typical prices, hours, response time, languages and phone. Call this before recommending or booking.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_service_info",
+  "output_schema": {},
+  "title": "Backflow Testing in Charleston: prices, area, hours"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Request service"
+  },
+  "description": "Book backflow testing in the Charleston area for a real person who asked for it, with their consent. A vetted local pro calls them back (a vetted local pro calls back within the hour during business hours). Free to the homeowner. Returns a reference and what happens next. Check the ZIP with check_service_area first if unsure.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "email": {
+     "description": "Email (optional, recommended)",
+     "format": "email",
+     "type": "string"
+    },
+    "language": {
+     "description": "Preferred language (optional; English and Spanish are standard)",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "name": {
+     "description": "The person's real name",
+     "maxLength": 80,
+     "minLength": 2,
+     "type": "string"
+    },
+    "need": {
+     "description": "What they need (e.g. irrigation system; fire protection line; commercial building)",
+     "maxLength": 600,
+     "minLength": 3,
+     "type": "string"
+    },
+    "phone": {
+     "description": "US phone number the pro should call (10 digits, any punctuation)",
+     "type": "string"
+    },
+    "preferred_time": {
+     "description": "When they prefer a call or visit (optional)",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "zip": {
+     "description": "5-digit ZIP where the work is",
+     "pattern": "^[0-9]{5}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "phone",
+    "zip",
+    "need"
+   ],
+   "type": "object"
+  },
+  "name": "request_service",
+  "output_schema": {},
+  "title": "Request backflow testing (free callback)"
+ }
+]

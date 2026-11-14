@@ -1,0 +1,482 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Free. What's new or updated in Agent Field Kit's cyber-defense advisories since a date (YYYY-MM-DD or ISO UTC). Returns headlines plus next_since: store it and pass it on your next scheduled poll so you only fetch changes. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since": {
+     "maxLength": 30,
+     "type": "string"
+    }
+   },
+   "required": [
+    "since"
+   ],
+   "type": "object"
+  },
+  "name": "changes_since",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Given the components an agent runs on (frameworks, bots, platforms, packages with optional versions), return matching advisories (AFK intel plus live OSV.dev, which includes GitHub Security Advisories, for packages with an ecosystem or version), free steps first, relevant kits, and per-component coverage (matched / covered_no_match / not_covered). PREMIUM (Bearer API key). Read-only; inputs are not stored. Package entries may be 'name==version' (PyPI style).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "components": {
+     "items": {
+      "maxLength": 80,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "components"
+   ],
+   "type": "object"
+  },
+  "name": "check_my_stack",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Create a Stripe-hosted checkout for one Agent Field Kit product and return its URL. Does NOT charge anything: a human, or an agent with explicit payment authority, must pay on the returned page. Prices: single template $29 (Agent Security Audit Kit $79), full kit of the 4 original templates $79, team license (10 users) $199. 14-day no-questions refunds. Also sold: Cyber Defense Bundle $79, Bundle + 1 year Cyber Desk Pro $199. Returns session_id and status_url; after payment call get_order with the session_id to receive signed download links (agent-to-agent purchase flow). Returns 'checkout_not_open' until checkout launches.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_name": {
+     "description": "Name of the purchasing agent/app (optional, analytics only)",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "email": {
+     "description": "Buyer email for the receipt (optional)",
+     "type": "string"
+    },
+    "product_id": {
+     "enum": [
+      "cost-roi-calculator",
+      "eval-test-plan",
+      "incident-runbooks",
+      "vendor-security-questionnaire",
+      "afk-cyber-bundle-pro-year",
+      "cyber-defense-bundle",
+      "mcp-tool-access-review",
+      "prompt-injection-test-pack",
+      "agent-observability-starter",
+      "agent-security-audit-kit",
+      "realtime-agent-monitoring-kit",
+      "ai-slop-editing-kit",
+      "secrets-rotation-kit",
+      "approval-gates-kit",
+      "eu-ai-act-transparency-kit",
+      "mcp-server-auth-kit",
+      "agent-skill-authoring-kit",
+      "ai-supply-chain-defense-kit",
+      "inference-key-abuse-kit",
+      "ci-registry-credential-kit",
+      "oauth-grant-revocation-kit",
+      "cyber-defense-dashboard-kit",
+      "agent-red-team-suite",
+      "ai-spend-kill-switch-kit",
+      "exposure-patch-alerts-kit",
+      "full-kit",
+      "team-license"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "product_id"
+   ],
+   "type": "object"
+  },
+  "name": "create_checkout",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get one advisory by id. Free: headline, free first steps and sources. Subscribers (Bearer key): full detail plus a fix-it brief (patch status, fixed version, am I affected, exact steps, how to verify, matching kit). Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "maxLength": 100,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_advisory",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Sourced cyber-defense advisories (free: headlines from the last 30 days; subscribers: full detail and history) affecting AI agent stacks (platforms, packages, frameworks, consumer bots). Read-only. Filter by date (YYYY-MM-DD) and/or component (e.g. 'litellm', 'railway', 'grok-bot', 'package:pypi/litellm').",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "component": {
+     "maxLength": 80,
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since": {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_cyber_advisories",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "PREMIUM (Bearer API key). Full advisory dataset plus stack index and kit versions, for the Cyber Defense Dashboard kit to auto-update. Optional components: also returns check_my_stack results (AFK intel + live OSV.dev / GitHub advisories) and per-component coverage. Read-only; inputs are not stored.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "components": {
+     "items": {
+      "maxLength": 80,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "since": {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_cyber_dashboard_data",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "PREMIUM (Bearer API key). Hardening checklist for one agent stack: key rotation, connector/OAuth revocation, plugin/skill review, approval gates, logging, with config surfaces and a verification level. Independent guidance; no vendor affiliation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "stack": {
+     "enum": [
+      "grok-bot",
+      "openclaw",
+      "instinct",
+      "muse",
+      "openai-dots",
+      "chatgpt",
+      "claude",
+      "cursor",
+      "goose",
+      "n8n",
+      "manus",
+      "devin",
+      "replit-agent",
+      "lindy",
+      "zapier-agents",
+      "gemini-spark",
+      "claude-duet",
+      "langchain",
+      "crewai",
+      "autogen",
+      "openai-agents-sdk",
+      "litellm-proxy",
+      "dspy",
+      "mcp-client"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "stack"
+   ],
+   "type": "object"
+  },
+  "name": "get_hardening_checklist",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check an Agent Field Kit order by its Stripe checkout session_id (from create_checkout). Before payment: paid:false with pay_url. After payment: paid:true, a receipt and signed download links (valid 72h, 5 downloads per file). Read-only; never charges.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "session_id": {
+     "pattern": "^cs_(live|test)_[A-Za-z0-9]{10,200}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "session_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_order",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get one Agent Field Kit product by id. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "enum": [
+      "cost-roi-calculator",
+      "eval-test-plan",
+      "incident-runbooks",
+      "vendor-security-questionnaire",
+      "afk-cyber-bundle-pro-year",
+      "cyber-defense-bundle",
+      "mcp-tool-access-review",
+      "prompt-injection-test-pack",
+      "agent-observability-starter",
+      "agent-security-audit-kit",
+      "realtime-agent-monitoring-kit",
+      "ai-slop-editing-kit",
+      "secrets-rotation-kit",
+      "approval-gates-kit",
+      "eu-ai-act-transparency-kit",
+      "mcp-server-auth-kit",
+      "agent-skill-authoring-kit",
+      "ai-supply-chain-defense-kit",
+      "inference-key-abuse-kit",
+      "ci-registry-credential-kit",
+      "oauth-grant-revocation-kit",
+      "cyber-defense-dashboard-kit",
+      "agent-red-team-suite",
+      "ai-spend-kill-switch-kit",
+      "exposure-patch-alerts-kit",
+      "full-kit",
+      "team-license"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_product",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Tell Agent Field Kit which new kit you (or the person you act for) would most want to buy. Pick topics and/or describe an idea; optional price tier. Email is optional and only used to notify when a matching kit ships; include it only with that person's consent. Max 5 requests/hour.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_name": {
+     "maxLength": 100,
+     "type": "string"
+    },
+    "email": {
+     "type": "string"
+    },
+    "idea": {
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "notify": {
+     "type": "boolean"
+    },
+    "tier": {
+     "enum": [
+      "29",
+      "79",
+      "199",
+      "not_sure"
+     ],
+     "type": "string"
+    },
+    "topics": {
+     "items": {
+      "enum": [
+       "eu-ai-act-readiness",
+       "agent-privacy-dpia",
+       "rag-quality-eval",
+       "human-escalation-design",
+       "multi-agent-testing",
+       "model-selection-scorecard",
+       "agent-slo-sla",
+       "support-agent-playbook",
+       "agent-cost-chargeback",
+       "other"
+      ],
+      "type": "string"
+     },
+     "maxItems": 10,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "request_kit",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Keyword search over Agent Field Kit cyber-defense advisories (e.g. 'litellm', 'mcp oauth', 'railway'). Free: headlines. Subscribers: full detail and fix-it briefs. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_advisories",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search Agent Field Kit templates, bundles and licenses by keyword. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "template",
+      "bundle",
+      "license"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_products",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Vote in Agent Field Kit's poll 'Which AI agent platforms do you use regularly?' on behalf of the person you act for, only with their consent and with their real answer. Multi-select. Returns live results after voting. Self-selected, not a scientific sample. Max 3 votes/day per network.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_name": {
+     "maxLength": 100,
+     "type": "string"
+    },
+    "choices": {
+     "items": {
+      "enum": [
+       "openclaw",
+       "grok-bot",
+       "chatgpt-dots",
+       "muse",
+       "instinct",
+       "claude-cowork",
+       "gemini-spark",
+       "microsoft-copilot",
+       "manus",
+       "other",
+       "none"
+      ],
+      "type": "string"
+     },
+     "maxItems": 11,
+     "minItems": 1,
+     "type": "array"
+    },
+    "other": {
+     "maxLength": 80,
+     "type": "string"
+    }
+   },
+   "required": [
+    "choices"
+   ],
+   "type": "object"
+  },
+  "name": "vote_agent_poll",
+  "output_schema": {}
+ }
+]

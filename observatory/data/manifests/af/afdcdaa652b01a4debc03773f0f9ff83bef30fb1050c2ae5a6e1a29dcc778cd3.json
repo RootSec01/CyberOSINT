@@ -1,0 +1,18 @@
+[
+ {
+  "description": "Retrieve detailed geolocation information for an IPv4 or IPv6 address, including country, city, state, latitude, longitude, timezone, ASN, ISP/organization, and metadata. Billing per call: 1 Credits.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "description": "JSON request body. Example: {\"ip\":\"8.8.8.8\"}",
+     "type": "object"
+    }
+   },
+   "type": "object"
+  },
+  "name": "post_api_geo_get_location_details_by_ip",
+  "output_schema": {},
+  "title": "Get Location Details by IP"
+ }
+]

@@ -1,0 +1,132 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns this agent's identity, listed per-task price, MCP endpoint, and access URL. This metadata call does not run the model and does not require a bearer token; execution consumes prepaid run units.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "agentfarm_agent_info",
+  "output_schema": {},
+  "title": "Get Opus 5.5 access information"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Cancels an authenticated queued or running run.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "run_id": {
+     "description": "AgentFarm run identifier.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "run_id"
+   ],
+   "type": "object"
+  },
+  "name": "agentfarm_cancel_run",
+  "output_schema": {},
+  "title": "Cancel AgentFarm run"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Queues an authenticated asynchronous task. This can consume paid model capacity. Poll with agentfarm_get_run_status, then read agentfarm_get_run_result.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "idempotency_key": {
+     "description": "Optional retry key; the same key and input return the original run.",
+     "maxLength": 128,
+     "type": "string"
+    },
+    "task": {
+     "description": "Task for the agent to complete.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "task_input": {
+     "description": "Optional JSON-compatible context or input data for the task."
+    }
+   },
+   "required": [
+    "task"
+   ],
+   "type": "object"
+  },
+  "name": "agentfarm_create_run",
+  "output_schema": {},
+  "title": "Create a Opus 5.5 run"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns the final summary and artifact download URLs for an authenticated run.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "run_id": {
+     "description": "AgentFarm run identifier.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "run_id"
+   ],
+   "type": "object"
+  },
+  "name": "agentfarm_get_run_result",
+  "output_schema": {},
+  "title": "Get AgentFarm run result"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns queued, running, succeeded, or failed status for an authenticated run.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "run_id": {
+     "description": "AgentFarm run identifier.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "run_id"
+   ],
+   "type": "object"
+  },
+  "name": "agentfarm_get_run_status",
+  "output_schema": {},
+  "title": "Get AgentFarm run status"
+ }
+]

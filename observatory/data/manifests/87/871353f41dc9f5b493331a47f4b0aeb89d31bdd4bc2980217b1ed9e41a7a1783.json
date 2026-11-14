@@ -1,0 +1,145 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "종목 배당 상세 (Security dividend detail)"
+  },
+  "description": "종목 하나의 상세 배당 정보(연도별 배당 이력, 배당 지급 내역, 총수익률 등)를 가져옵니다.",
+  "input_schema": {
+   "properties": {
+    "market": {
+     "description": "시장: US(미국) 또는 KR(한국)",
+     "enum": [
+      "US",
+      "KR"
+     ],
+     "type": "string"
+    },
+    "ticker": {
+     "description": "티커 (예: O, SCHD, 005930)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "market",
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_security_detail",
+  "output_schema": {},
+  "title": "종목 배당 상세 (Security dividend detail)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "배당 종목 순위 (Rank dividend securities)"
+  },
+  "description": "조건으로 걸러 배당률·배당 성장률·연속 증가 연수·규모 순으로 종목 순위를 냅니다.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "최대 결과 수 (기본 20, 최대 100)",
+     "type": "number"
+    },
+    "market": {
+     "description": "시장 필터: US(미국) 또는 KR(한국). 생략하면 전체",
+     "enum": [
+      "US",
+      "KR"
+     ],
+     "type": "string"
+    },
+    "maxCutCount10Y": {
+     "description": "10년 내 최대 배당 삭감 횟수",
+     "type": "number"
+    },
+    "maxYield": {
+     "description": "최대 현재 배당률(%)",
+     "type": "number"
+    },
+    "minGrowthStreakYears": {
+     "description": "최소 연속 배당 증가 연수",
+     "type": "number"
+    },
+    "minYield": {
+     "description": "최소 현재 배당률(%)",
+     "type": "number"
+    },
+    "paymentFrequency": {
+     "description": "배당 주기 필터: 월(MONTHLY), 분기(QUARTERLY), 반기(SEMI_ANNUAL), 연(ANNUAL)",
+     "enum": [
+      "MONTHLY",
+      "QUARTERLY",
+      "SEMI_ANNUAL",
+      "ANNUAL"
+     ],
+     "type": "string"
+    },
+    "securityType": {
+     "description": "STOCK, ETF, REIT 등",
+     "type": "string"
+    },
+    "sortBy": {
+     "description": "정렬 기준 (기본 currentYield)",
+     "enum": [
+      "currentYield",
+      "avgYield5Y",
+      "dividendCagr5Y",
+      "dividendCagr10Y",
+      "growthStreakYears",
+      "assetSize"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rank_securities",
+  "output_schema": {},
+  "title": "배당 종목 순위 (Rank dividend securities)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "배당 종목 검색 (Search dividend securities)"
+  },
+  "description": "한국·미국 배당 종목을 티커, 영문명, 한글명으로 검색합니다. 대소문자를 구분하지 않습니다.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "최대 결과 수 (기본 10, 최대 50)",
+     "type": "number"
+    },
+    "market": {
+     "description": "시장 필터 (생략하면 전체)",
+     "enum": [
+      "US",
+      "KR"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "description": "티커 또는 종목명 일부 (예: SCHD, 리얼티인컴, 삼성전자)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_securities",
+  "output_schema": {},
+  "title": "배당 종목 검색 (Search dividend securities)"
+ }
+]

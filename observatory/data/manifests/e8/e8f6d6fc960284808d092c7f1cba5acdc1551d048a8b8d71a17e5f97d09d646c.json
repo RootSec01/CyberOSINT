@@ -1,0 +1,2916 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the dossier projection for a corridor, in the requested cognitive lens. Same lens enum and default as describe_place. Corridor projections surface cross-municipal dialectics and shared-infrastructure dynamics that no single place dossier captures.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lens": {
+     "default": "synthesis",
+     "description": "The cognitive position to project. Defaults to \"synthesis\". Canonical lenses: developer, investor, broker, attorney, business, resident, civic-leader. Aliases route to canonical: legal/lawyer/counsel/regulator → attorney; realtor/intermediary → broker; civic/government → civic-leader; homeowner → resident; operator/site-selector → business; builder → developer.",
+     "enum": [
+      "synthesis",
+      "developer",
+      "investor",
+      "broker",
+      "attorney",
+      "business",
+      "resident",
+      "civic-leader"
+     ],
+     "type": "string"
+    },
+    "slug": {
+     "description": "The corridor slug (e.g., \"us-27-south-lake\"). Use list_corridors to discover available slugs.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "describe_corridor",
+  "output_schema": {
+   "properties": {
+    "available_lenses": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "claims": {
+     "items": {
+      "properties": {
+       "citations": {
+        "items": {
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "url": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "facet": {
+        "description": "Structural facet category.",
+        "enum": [
+         "primary_force",
+         "voxel_lead",
+         "exhibit",
+         "defensive_response",
+         "lesson",
+         "notable_decision",
+         "voting_record"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Full claim_id slug, in the form `{scope}.{facet}.{noun}`.",
+        "type": "string"
+       },
+       "schema_id": {
+        "description": "Full @id URL for JSON-LD reference.",
+        "type": "string"
+       },
+       "text": {
+        "description": "Claim text, verbatim.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "facet",
+       "text",
+       "schema_id",
+       "citations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "fell_back_to_synthesis": {
+     "type": "boolean"
+    },
+    "freshness": {
+     "properties": {
+      "corpus_last_harvested": {
+       "description": "YYYY-MM-DD: most recent harvest_date in corpus.",
+       "type": "string"
+      },
+      "dossier_last_material_update": {
+       "description": "YYYY-MM-DD: when this dossier last changed.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "page_last_rendered": {
+       "description": "ISO 8601: request-time stamp.",
+       "type": "string"
+      },
+      "site_build_committed": {
+       "description": "Short git SHA.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "corpus_last_harvested",
+      "page_last_rendered",
+      "site_build_committed"
+     ],
+     "type": "object"
+    },
+    "frontmatter": {
+     "type": "object"
+    },
+    "lens": {
+     "type": "string"
+    },
+    "lens_was_requested": {
+     "type": "string"
+    },
+    "projection": {
+     "type": "string"
+    },
+    "record_status": {
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "slug": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "corridor"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "type",
+    "url",
+    "lens",
+    "projection",
+    "claims",
+    "freshness"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Corridor"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the full structured dossier for a named entity: the canonical citable artifact for any actor, organization, ordinance, or project the corpus references. Returns: voxel_lead (134-167 word voxel-disciplined identity prose), canonical_role, the class-specific cluster (person.voting_record for board members; organization.type + jurisdiction; legislation.legal_status + effective_date + sunset_date + citation; creative_work.work_type + status + case_number), the bidirectional graph references (appears_in_meetings, appears_in_briefs, appears_in_watches, exhibits_patterns, related_entities, related_places, related_corridors), the provenance_chain, and the canonical surfaces (dossier URL, schema_id, decoder_index_hub). Each schema_id (`/entities/{slug}#{class.toLowerCase()}`) is the stable cross-page Schema.org reference (Person / Organization / Legislation / CreativeWork) that AI agents resolve to when citing the entity. Use when grounding a citation, when reasoning about an entity's full role across the corpus, or when traversing the entity graph from a single name. This dossier answers what one node touches; trace_connection answers what joins two of them and how specific that join is.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "The entity slug (e.g., \"sb-180\", \"hanover-land-company\", \"anita-geraci-carver\"). Use list_entities to discover available slugs. The Decoder Index hub at /entities lists every entity grouped by class.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "describe_entity",
+  "output_schema": {
+   "properties": {
+    "appears_in_briefs": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "appears_in_meetings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "appears_in_watches": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "canonical_role": {
+     "type": "string"
+    },
+    "creative_work": {
+     "type": "object"
+    },
+    "display_name": {
+     "type": "string"
+    },
+    "entity_class": {
+     "type": "string"
+    },
+    "exhibits_patterns": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "last_active": {
+     "type": "string"
+    },
+    "legislation": {
+     "type": "object"
+    },
+    "named_at": {
+     "type": "string"
+    },
+    "organization": {
+     "type": "object"
+    },
+    "person": {
+     "type": "object"
+    },
+    "provenance_chain": {
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "related_entities": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "related_places": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "schema_id": {
+     "type": "string"
+    },
+    "slug": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    },
+    "voxel_lead": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "display_name",
+    "entity_class",
+    "url",
+    "schema_id"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Entity"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the full dossier projection for a meeting reading, in the requested cognitive lens. Same lens enum and default as describe_place / describe_corridor: eight total projections (seven stakeholder lenses, namely developer, investor, broker, attorney, business, resident and civic-leader, plus synthesis as the default). Returns the lens-projected body, full frontmatter (jurisdiction, board, meeting_date, document_type, key_signals, vote tallies), citation-stable claims[] (per the Phase 11 Citable Contract; populates as meeting claim scopes graduate), four-clock freshness, and the structured record_status block (record_type / meeting_status / outcome_status / minutes_available / vote_final). The last prevents agents from summarizing agenda intent as completed action. Use to ground citations in a specific meeting's reading; pair with list_meetings or meeting_index for discovery.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lens": {
+     "description": "Optional cognitive lens. Default: synthesis (the whole-picture multi-projection view). Canonical lenses: developer, investor, broker, attorney, business, resident, civic-leader. Aliases route to canonical (legal/lawyer/counsel/regulator → attorney; realtor/intermediary → broker; civic/government → civic-leader; homeowner → resident; operator/site-selector → business; builder → developer). When the requested lens is not present in the dossier body, the response falls back to synthesis with fell_back_to_synthesis: true.",
+     "enum": [
+      "synthesis",
+      "developer",
+      "investor",
+      "broker",
+      "attorney",
+      "business",
+      "resident",
+      "civic-leader"
+     ],
+     "type": "string"
+    },
+    "slug": {
+     "description": "The meeting slug (e.g., \"leesburg-pc-2026-01\"). Use list_meetings or meeting_index to discover available slugs.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "describe_meeting",
+  "output_schema": {
+   "properties": {
+    "available_lenses": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "claims": {
+     "items": {
+      "properties": {
+       "citations": {
+        "items": {
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "url": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "facet": {
+        "description": "Structural facet category.",
+        "enum": [
+         "primary_force",
+         "voxel_lead",
+         "exhibit",
+         "defensive_response",
+         "lesson",
+         "notable_decision",
+         "voting_record"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Full claim_id slug, in the form `{scope}.{facet}.{noun}`.",
+        "type": "string"
+       },
+       "schema_id": {
+        "description": "Full @id URL for JSON-LD reference.",
+        "type": "string"
+       },
+       "text": {
+        "description": "Claim text, verbatim.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "facet",
+       "text",
+       "schema_id",
+       "citations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "fell_back_to_synthesis": {
+     "type": "boolean"
+    },
+    "freshness": {
+     "properties": {
+      "corpus_last_harvested": {
+       "description": "YYYY-MM-DD: most recent harvest_date in corpus.",
+       "type": "string"
+      },
+      "dossier_last_material_update": {
+       "description": "YYYY-MM-DD: when this dossier last changed.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "page_last_rendered": {
+       "description": "ISO 8601: request-time stamp.",
+       "type": "string"
+      },
+      "site_build_committed": {
+       "description": "Short git SHA.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "corpus_last_harvested",
+      "page_last_rendered",
+      "site_build_committed"
+     ],
+     "type": "object"
+    },
+    "frontmatter": {
+     "type": "object"
+    },
+    "lens": {
+     "type": "string"
+    },
+    "lens_was_requested": {
+     "type": "string"
+    },
+    "projection": {
+     "type": "string"
+    },
+    "record_status": {
+     "properties": {
+      "meeting_status": {
+       "enum": [
+        "scheduled",
+        "convened",
+        "cancelled"
+       ],
+       "type": "string"
+      },
+      "minutes_available": {
+       "type": "boolean"
+      },
+      "outcome_status": {
+       "enum": [
+        "pending",
+        "recorded"
+       ],
+       "type": "string"
+      },
+      "record_type": {
+       "enum": [
+        "agenda",
+        "minutes",
+        "unknown"
+       ],
+       "type": "string"
+      },
+      "vote_final": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "record_type",
+      "meeting_status",
+      "outcome_status",
+      "minutes_available",
+      "vote_final"
+     ],
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "slug": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "meeting"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "type",
+    "url",
+    "lens",
+    "projection",
+    "claims",
+    "freshness",
+    "record_status"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Meeting"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the full dossier for a named pattern: voxel_lead, signal_status (horizon/confidence), scope (spatial/temporal/topical/corridors), full exhibits inventory with detection metadata, defensive responses, provenance chain, related briefs, related places, related corridors, audiences, and the canonical surfaces (dossier URL, DefinedTerm @id, DefinedTermSet @id, atlas list URL). Use when an agent needs the structured pattern data to cite or analyze. Each pattern is a citable entity in the corpus's entity graph; the DefinedTerm canonical home gives AI agents a stable reference.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "The pattern slug (e.g., \"self-storage-canary\"). Use current_named_patterns to discover available slugs.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "describe_pattern",
+  "output_schema": {
+   "properties": {
+    "audiences": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "claims": {
+     "items": {
+      "properties": {
+       "citations": {
+        "items": {
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "url": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "facet": {
+        "description": "Structural facet category.",
+        "enum": [
+         "primary_force",
+         "voxel_lead",
+         "exhibit",
+         "defensive_response",
+         "lesson",
+         "notable_decision",
+         "voting_record"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Full claim_id slug, in the form `{scope}.{facet}.{noun}`.",
+        "type": "string"
+       },
+       "schema_id": {
+        "description": "Full @id URL for JSON-LD reference.",
+        "type": "string"
+       },
+       "text": {
+        "description": "Claim text, verbatim.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "facet",
+       "text",
+       "schema_id",
+       "citations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "defensive_response": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "exhibits": {
+     "items": {
+      "properties": {
+       "date": {
+        "type": "string"
+       },
+       "detected_via": {
+        "type": "string"
+       },
+       "note": {
+        "type": "string"
+       },
+       "source": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "freshness": {
+     "properties": {
+      "corpus_last_harvested": {
+       "description": "YYYY-MM-DD: most recent harvest_date in corpus.",
+       "type": "string"
+      },
+      "dossier_last_material_update": {
+       "description": "YYYY-MM-DD: when this dossier last changed.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "page_last_rendered": {
+       "description": "ISO 8601: request-time stamp.",
+       "type": "string"
+      },
+      "site_build_committed": {
+       "description": "Short git SHA.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "corpus_last_harvested",
+      "page_last_rendered",
+      "site_build_committed"
+     ],
+     "type": "object"
+    },
+    "lifecycle_stage": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "named_at": {
+     "type": "string"
+    },
+    "provenance_chain": {
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "related_briefs": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "related_corridors": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "related_places": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "scope": {
+     "properties": {
+      "corridors": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "spatial": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "temporal": {
+       "type": "string"
+      },
+      "topical": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "signal_status": {
+     "properties": {
+      "confidence": {
+       "enum": [
+        "low",
+        "medium",
+        "high",
+        "very-high"
+       ],
+       "type": "string"
+      },
+      "horizon": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "slug": {
+     "type": "string"
+    },
+    "surfaces": {
+     "properties": {
+      "defined_term_id": {
+       "type": "string"
+      },
+      "defined_term_set": {
+       "type": "string"
+      },
+      "dossier": {
+       "type": "string"
+      },
+      "list_in_atlas": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "url": {
+     "type": "string"
+    },
+    "voxel_lead": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "name",
+    "url",
+    "claims",
+    "freshness"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Pattern"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the dossier projection for a city, in the requested cognitive lens. Defaults to the synthesis projection (the multidimensional view that holds all lenses in superposition and names the dialectics). Pass a single-lens value to get the focused cognitive position. This is useful when the agent is acting on behalf of a user with a specific stake (developer underwriting, investor thesis, broker client argument, attorney precedent search, resident orientation, civic-leader regional coordination).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lens": {
+     "default": "synthesis",
+     "description": "The cognitive position to project. Defaults to \"synthesis\". Canonical lenses: developer, investor, broker, attorney, business, resident, civic-leader. Aliases route to canonical: legal/lawyer/counsel/land-use-counsel/regulator → attorney; realtor/intermediary/real-estate-broker → broker; civic/government/official/governance → civic-leader; homeowner/citizen → resident; operator/site-selector/occupier → business; builder/land-developer → developer.",
+     "enum": [
+      "synthesis",
+      "developer",
+      "investor",
+      "broker",
+      "attorney",
+      "business",
+      "resident",
+      "civic-leader"
+     ],
+     "type": "string"
+    },
+    "slug": {
+     "description": "The place slug (e.g., \"clermont-florida\"). Use list_places to discover available slugs.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "describe_place",
+  "output_schema": {
+   "properties": {
+    "available_lenses": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "claims": {
+     "items": {
+      "properties": {
+       "citations": {
+        "items": {
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "url": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "facet": {
+        "description": "Structural facet category.",
+        "enum": [
+         "primary_force",
+         "voxel_lead",
+         "exhibit",
+         "defensive_response",
+         "lesson",
+         "notable_decision",
+         "voting_record"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Full claim_id slug, in the form `{scope}.{facet}.{noun}`.",
+        "type": "string"
+       },
+       "schema_id": {
+        "description": "Full @id URL for JSON-LD reference.",
+        "type": "string"
+       },
+       "text": {
+        "description": "Claim text, verbatim.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "facet",
+       "text",
+       "schema_id",
+       "citations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "fell_back_to_synthesis": {
+     "type": "boolean"
+    },
+    "freshness": {
+     "properties": {
+      "corpus_last_harvested": {
+       "description": "YYYY-MM-DD: most recent harvest_date in corpus.",
+       "type": "string"
+      },
+      "dossier_last_material_update": {
+       "description": "YYYY-MM-DD: when this dossier last changed.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "page_last_rendered": {
+       "description": "ISO 8601: request-time stamp.",
+       "type": "string"
+      },
+      "site_build_committed": {
+       "description": "Short git SHA.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "corpus_last_harvested",
+      "page_last_rendered",
+      "site_build_committed"
+     ],
+     "type": "object"
+    },
+    "frontmatter": {
+     "type": "object"
+    },
+    "lens": {
+     "type": "string"
+    },
+    "lens_was_requested": {
+     "type": "string"
+    },
+    "projection": {
+     "type": "string"
+    },
+    "record_status": {
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "slug": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "place"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "type",
+    "url",
+    "lens",
+    "projection",
+    "claims",
+    "freshness"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Place"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the full dossier for a watch item, the observatory's forward-looking observation primitive. Returns title, subtitle, scope (place / corridor / pattern / brief / region), trigger (type / date / condition), significance (horizon / confidence / why_it_matters_voxel), full body prose, four-clock freshness, and citation-stable claims[]. For RESOLVED watches, also returns the outcome cluster (outcome_type, outcome_summary, prediction_assessment with directional/horizon/significance assessments, lesson, citations), and the lesson surfaces as a stable claim_id (per the Phase 11 Citable Contract × Phase 8 Resolution Bridge compound). Use to ground citations in a specific watch's prediction or resolution; pair with list_watch_items for discovery.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "The watch slug (e.g., \"lake-bright-council-mar-23\"). Use list_watch_items to discover available slugs.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "describe_watch",
+  "output_schema": {
+   "properties": {
+    "body": {
+     "type": "string"
+    },
+    "claims": {
+     "items": {
+      "properties": {
+       "citations": {
+        "items": {
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "url": {
+           "type": "string"
+          }
+         },
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "facet": {
+        "description": "Structural facet category.",
+        "enum": [
+         "primary_force",
+         "voxel_lead",
+         "exhibit",
+         "defensive_response",
+         "lesson",
+         "notable_decision",
+         "voting_record"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Full claim_id slug, in the form `{scope}.{facet}.{noun}`.",
+        "type": "string"
+       },
+       "schema_id": {
+        "description": "Full @id URL for JSON-LD reference.",
+        "type": "string"
+       },
+       "text": {
+        "description": "Claim text, verbatim.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "facet",
+       "text",
+       "schema_id",
+       "citations"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "freshness": {
+     "properties": {
+      "corpus_last_harvested": {
+       "description": "YYYY-MM-DD: most recent harvest_date in corpus.",
+       "type": "string"
+      },
+      "dossier_last_material_update": {
+       "description": "YYYY-MM-DD: when this dossier last changed.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "page_last_rendered": {
+       "description": "ISO 8601: request-time stamp.",
+       "type": "string"
+      },
+      "site_build_committed": {
+       "description": "Short git SHA.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "corpus_last_harvested",
+      "page_last_rendered",
+      "site_build_committed"
+     ],
+     "type": "object"
+    },
+    "outcome": {
+     "properties": {
+      "citations": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "lesson": {
+       "type": "string"
+      },
+      "outcome_summary": {
+       "type": "string"
+      },
+      "outcome_type": {
+       "type": "string"
+      },
+      "prediction_assessment": {
+       "type": "object"
+      },
+      "resolved_at_meeting": {
+       "type": "string"
+      },
+      "resolved_date": {
+       "type": "string"
+      },
+      "status": {
+       "enum": [
+        "pending",
+        "resolved",
+        "obsolete"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "status"
+     ],
+     "type": "object"
+    },
+    "scope": {
+     "properties": {
+      "brief": {
+       "type": "string"
+      },
+      "corridor": {
+       "type": "string"
+      },
+      "pattern": {
+       "type": "string"
+      },
+      "place": {
+       "type": "string"
+      },
+      "region": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "significance": {
+     "properties": {
+      "confidence": {
+       "type": "string"
+      },
+      "horizon": {
+       "type": "string"
+      },
+      "score": {
+       "type": "number"
+      },
+      "why_it_matters_voxel": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "slug": {
+     "type": "string"
+    },
+    "subtitle": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "trigger": {
+     "properties": {
+      "condition": {
+       "type": "string"
+      },
+      "date": {
+       "type": "string"
+      },
+      "type": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "type": {
+     "enum": [
+      "watch"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "type",
+    "url",
+    "outcome",
+    "claims",
+    "freshness"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Watch"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the canonical product description for Zoning Signal: what the observatory is, the four artifact types it publishes, the regional scope of current coverage, and the methodology. Call once per session to ground subsequent tool calls in canonical context.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "describe_zoning_signal",
+  "output_schema": {
+   "properties": {
+    "artifact_types": {
+     "items": {
+      "properties": {
+       "purpose": {
+        "type": "string"
+       },
+       "type": {
+        "type": "string"
+       },
+       "url_pattern": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "type",
+       "url_pattern",
+       "purpose"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "built_by": {
+     "properties": {
+      "studio": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "description": {
+     "type": "string"
+    },
+    "methodology": {
+     "properties": {
+      "cognitive_lenses": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "default_projection": {
+       "type": "string"
+      },
+      "summary": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "name": {
+     "type": "string"
+    },
+    "regional_scope": {
+     "properties": {
+      "cities": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "primary_region": {
+       "type": "string"
+      },
+      "state": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "surfaces": {
+     "properties": {
+      "decoder_index": {
+       "type": "string"
+      },
+      "llms_full": {
+       "type": "string"
+      },
+      "llms_index": {
+       "type": "string"
+      },
+      "mcp_endpoint": {
+       "type": "string"
+      },
+      "mcp_manifest": {
+       "type": "string"
+      },
+      "patterns_atlas": {
+       "type": "string"
+      },
+      "schema_url": {
+       "type": "string"
+      },
+      "site": {
+       "type": "string"
+      },
+      "sitemap": {
+       "type": "string"
+      },
+      "status_url": {
+       "type": "string"
+      },
+      "track_record": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "site",
+      "mcp_endpoint",
+      "status_url",
+      "schema_url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "name",
+    "description",
+    "artifact_types",
+    "methodology",
+    "surfaces"
+   ],
+   "type": "object"
+  },
+  "title": "Describe Zoning Signal"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the observatory's public calibration scorecard: the aggregate accuracy of past watch-item directional reads, horizon calls, and significance assessments across resolved watches. Returns: total_resolved, directional accuracy (aligned + 0.5 × mixed), horizon accuracy (within / total), significance accuracy (confirmed / total), per-confidence-pip stratification, recent resolutions, and per-jurisdiction breakdown. Optionally scope to a single jurisdiction or corridor's constituent set. When multiple scopes are supplied, jurisdiction takes precedence over corridor, then brief. Use when an agent or user wants to assess Zoning Signal's historical forecasting accuracy before citing a current prediction. Misreads are reported.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "brief": {
+     "description": "Optional: scope to a brief slug (e.g., \"six-month-board-flip\"). Returns the track record for watches linked to a specific named-pattern brief.",
+     "type": "string"
+    },
+    "corridor": {
+     "description": "Optional: scope to a corridor slug (e.g., \"us-27-south-lake\"). Returns the aggregate track record across the corridor's constituent places.",
+     "type": "string"
+    },
+    "jurisdiction": {
+     "description": "Optional: scope to a single place slug (e.g., \"leesburg-florida\") for that city's track record only. Use list_cities to discover available slugs.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_track_record",
+  "output_schema": {
+   "properties": {
+    "by_confidence": {
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "directional": {
+     "properties": {
+      "accuracy_pct": {
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "aligned": {
+       "type": "number"
+      },
+      "misread": {
+       "type": "number"
+      },
+      "mixed": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      },
+      "unforeseen": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "horizon": {
+     "properties": {
+      "accuracy_pct": {
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "early": {
+       "type": "number"
+      },
+      "late": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      },
+      "within": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "obsolete": {
+     "type": "number"
+    },
+    "pending": {
+     "type": "number"
+    },
+    "recent": {
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "scope": {
+     "type": "object"
+    },
+    "significance": {
+     "properties": {
+      "accuracy_pct": {
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "confirmed": {
+       "type": "number"
+      },
+      "overstated": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      },
+      "understated": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "surfaces": {
+     "properties": {
+      "list_resolved_watches": {
+       "type": "string"
+      },
+      "public_scorecard": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "total_resolved": {
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get Track Record"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List every published corridor page. A corridor is the cross-municipal economic-topology view: the cross-jurisdiction read on a shared infrastructure spine, aquifer, or commercial gravity field. Returns name, slug, constituent cities, primary axis, and URL.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_corridors",
+  "output_schema": {
+   "properties": {
+    "corridors": {
+     "items": {
+      "properties": {
+       "constituent_places": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "name": {
+        "type": "string"
+       },
+       "primary_axis": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "name",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "count": {
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Corridors"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List every named entity in the Decoder Index, the smallest citable unit of authority in the corpus. Returns the four-class taxonomy (Person / Organization / Legislation / CreativeWork) with class-specific summary fields (jobTitle for Person; jurisdiction for Organization / Legislation / Project; legal_status for Legislation; case_number + work_status for Project) plus cross-reference counts (meetings_count, briefs_count, watches_count, patterns_count) for each entity. Filter by entity_class, place (jurisdiction), or search substring. Use as the discovery surface for the entity graph; pair with describe_entity for full structured detail. Each entity's schema_id is a stable cross-page reference (`/entities/{slug}#{class.toLowerCase()}`) that resolves to the canonical Schema.org node (Person / Organization / Legislation / CreativeWork) for AI-citation grounding.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "entity_class": {
+     "description": "Filter by entity class. \"Person\" = board members, attorneys, applicants (individuals), elected officials. \"Organization\" = developer firms, law firms, agencies, HOAs, planning consultancies. \"Legislation\" = state statutes, city ordinances, code sections, design standards. \"CreativeWork\" = specific projects, case numbers, master plans, infrastructure programs. Omit to return all classes.",
+     "enum": [
+      "Person",
+      "Organization",
+      "Legislation",
+      "CreativeWork"
+     ],
+     "type": "string"
+    },
+    "place": {
+     "description": "Optional: filter to entities scoped to a specific place (e.g., \"leesburg-florida\"). Matches entities whose related_places, organization.jurisdiction, legislation.jurisdiction, or creative_work.jurisdiction includes the place slug.",
+     "type": "string"
+    },
+    "search": {
+     "description": "Optional case-insensitive substring search across display_name, canonical_role, voxel_lead, and slug. Use for natural-language entity discovery (e.g., \"denial bloc\", \"intersection mitigation\", \"form-based code\").",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_entities",
+  "output_schema": {
+   "properties": {
+    "by_class": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "type": "object"
+    },
+    "count": {
+     "type": "number"
+    },
+    "entities": {
+     "items": {
+      "properties": {
+       "briefs_count": {
+        "type": "number"
+       },
+       "canonical_role": {
+        "type": "string"
+       },
+       "case_number": {
+        "type": "string"
+       },
+       "display_name": {
+        "type": "string"
+       },
+       "entity_class": {
+        "type": "string"
+       },
+       "jurisdiction": {
+        "type": "string"
+       },
+       "legal_status": {
+        "type": "string"
+       },
+       "meetings_count": {
+        "type": "number"
+       },
+       "patterns_count": {
+        "type": "number"
+       },
+       "schema_id": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       },
+       "voxel_lead": {
+        "type": "string"
+       },
+       "watches_count": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "slug",
+       "display_name",
+       "entity_class",
+       "url",
+       "schema_id"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "filters": {
+     "properties": {
+      "entity_class": {
+       "type": "string"
+      },
+      "place": {
+       "type": "string"
+      },
+      "search": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "surfaces": {
+     "properties": {
+      "architecture_doc": {
+       "type": "string"
+      },
+      "decoder_index_hub": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Entities"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return meeting readings across all cities, optionally filtered by date range or jurisdiction substring. Same response shape as meeting_index but with no required parameters. Call with no args to get the full corpus, or pass a jurisdiction substring (e.g., \"minneola\") to filter by city without requiring an exact match. Use when you need to enumerate the full meeting record or scan across cities by date range.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "from_date": {
+     "description": "Inclusive lower bound (ISO 8601 date). Omit to span back to the earliest reading.",
+     "format": "date",
+     "type": "string"
+    },
+    "jurisdiction": {
+     "description": "Optional case-insensitive substring to filter by city (e.g., \"minneola\"). Omit for all cities.",
+     "type": "string"
+    },
+    "to_date": {
+     "description": "Inclusive upper bound (ISO 8601 date). Omit for the latest reading.",
+     "format": "date",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_meetings",
+  "output_schema": {
+   "properties": {
+    "count": {
+     "type": "number"
+    },
+    "filters": {
+     "properties": {
+      "board": {
+       "type": "string"
+      },
+      "jurisdiction": {
+       "type": "string"
+      },
+      "year": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "meetings": {
+     "items": {
+      "properties": {
+       "board": {
+        "type": "string"
+       },
+       "document_type": {
+        "type": "string"
+       },
+       "jurisdiction": {
+        "type": "string"
+       },
+       "meeting_date": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       },
+       "voxel_lead": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Meetings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List every named pattern in the Pattern Atlas. A named pattern is a coined recurring structure observed across multiple jurisdictions or multiple meetings (e.g., \"The Quiet Revolution\"). Returns slug, display name, canonical pattern URL (/patterns/{slug}, the DefinedTerm canonical home as of Phase 9), lifecycle stage, horizon, confidence, exhibits count, spatial scope, related briefs, and the voxel_lead. Use as the discovery surface for the Pattern Atlas; pair with describe_pattern for full dossier detail. Phase 12 renamed it from current_named_patterns to align with the canonical content-type vocabulary (loader: getAllContent(\"pattern\"); URLs: /patterns/{slug}; describe tool: describe_pattern).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_patterns",
+  "output_schema": {
+   "properties": {
+    "count": {
+     "type": "number"
+    },
+    "patterns": {
+     "items": {
+      "properties": {
+       "audiences": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "canonical_url": {
+        "type": "string"
+       },
+       "confidence": {
+        "type": "string"
+       },
+       "exhibits_count": {
+        "type": "number"
+       },
+       "horizon": {
+        "type": "string"
+       },
+       "lifecycle_stage": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "pattern_url": {
+        "type": "string"
+       },
+       "related_briefs": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "spatial": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "voxel_lead": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "name",
+       "pattern_url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Patterns"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List every place dossier (per-jurisdiction reading) the observatory publishes. Optionally filter by state. Returns city, state, slug, signal strength, signal direction, and the dossier URL. Use to discover the available place-level coverage before calling describe_place. Phase 12 renamed it from list_cities to align with the canonical content-type vocabulary (the loader function is getAllContent(\"place\"); URLs are /places/{slug}; the describe tool is describe_place).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "state": {
+     "description": "Optional US state name (e.g., \"Florida\") to filter the result set. Omit for all places across all states.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_places",
+  "output_schema": {
+   "properties": {
+    "cities": {
+     "items": {
+      "properties": {
+       "city": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "state": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "city",
+       "state",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "count": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "cities",
+    "count"
+   ],
+   "type": "object"
+  },
+  "title": "List Places"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return The Watch, the field's forward calendar of pending events, scheduled hearings, regulatory sunsets, and condition-triggered milestones the observatory is tracking. Filter by status (pending / resolved / obsolete), horizon (imminent / near-term / structural), or scope (place / corridor / brief). Use to surface what the field is watching from any cognitive position.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "brief": {
+     "description": "Optional: filter to items linked to a specific named-pattern brief.",
+     "type": "string"
+    },
+    "corridor": {
+     "description": "Optional: filter to items scoped to a specific corridor (e.g., \"us-27-south-lake\").",
+     "type": "string"
+    },
+    "horizon": {
+     "description": "Optional: filter to items in the named horizon band. Imminent = ≤14 days; near-term = ≤90 days; structural = >90 days or condition-triggered.",
+     "enum": [
+      "imminent",
+      "near-term",
+      "structural"
+     ],
+     "type": "string"
+    },
+    "place": {
+     "description": "Optional: filter to items scoped to a specific place dossier (e.g., \"leesburg-florida\").",
+     "type": "string"
+    },
+    "status": {
+     "description": "Filter by lifecycle status. Defaults to 'pending' (active watch items only); pass 'all' for the full corpus including resolved + obsolete entries.",
+     "enum": [
+      "pending",
+      "resolved",
+      "obsolete",
+      "all"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_watch_items",
+  "output_schema": {
+   "properties": {
+    "count": {
+     "type": "number"
+    },
+    "status": {
+     "enum": [
+      "pending",
+      "resolved",
+      "obsolete",
+      "all"
+     ],
+     "type": "string"
+    },
+    "watch_items": {
+     "items": {
+      "properties": {
+       "outcome": {
+        "type": "object"
+       },
+       "scope": {
+        "type": "object"
+       },
+       "significance": {
+        "type": "object"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "subtitle": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "trigger_date": {
+        "type": "string"
+       },
+       "trigger_type": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "title",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Watch Items"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return meeting readings for a specific city across an optional date range. A meeting reading is a plain-English read of one harvested planning-board, council, or commission meeting, with signal extraction and entity mapping. Use to drill from a city or corridor into the temporal record.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "city": {
+     "description": "City name (e.g., \"Clermont\"). Case-insensitive.",
+     "type": "string"
+    },
+    "from_date": {
+     "description": "Inclusive lower bound (ISO 8601 date). Omit to span back to the earliest reading.",
+     "format": "date",
+     "type": "string"
+    },
+    "to_date": {
+     "description": "Inclusive upper bound (ISO 8601 date). Omit for the latest reading.",
+     "format": "date",
+     "type": "string"
+    }
+   },
+   "required": [
+    "city"
+   ],
+   "type": "object"
+  },
+  "name": "meeting_index",
+  "output_schema": {
+   "properties": {
+    "city": {
+     "type": "string"
+    },
+    "count": {
+     "type": "number"
+    },
+    "from_date": {
+     "type": "string"
+    },
+    "meetings": {
+     "items": {
+      "properties": {
+       "board": {
+        "type": "string"
+       },
+       "month": {
+        "type": "number"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       },
+       "year": {
+        "type": "number"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "to_date": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Meeting Index"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search every record by exact words and by meaning at once: meeting agendas and minutes, place dossiers, corridors, named patterns and briefs, entities and watch items. Finds a case, ordinance or resolution number, a parcel id or alternate key, an address, a project, firm or person, or a plain-language question. Ranking fuses three lists by reciprocal rank: full-text match (every word as written; \"quotes\", OR and -word work as in web search), title match, and voyage-4 embedding similarity. Each hit carries its true cosine `similarity` and `matched` (title, text, meaning). Every response states `scope` (the query names a covered place, a place outside coverage, or no place) and `evidence` (strong when a top record contains the query's terms or closely resembles it); when either needs explaining it adds a `note` and the coverage. `weak_match` is deprecated and will be removed in 2.4.0: it is true when scope is outside or evidence is not strong, so read those instead. Coverage: 25 jurisdictions in Lake, Orange, Osceola, Polk and Seminole counties, Florida, from 2024, listed in the coverage resource. Top 12.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "q": {
+     "description": "A name, a number or a question. Text matching needs every word to appear in a record, so extra words narrow it; meaning matching tolerates any wording. Maximum 500 characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "semantic_search",
+  "output_schema": {
+   "properties": {
+    "count": {
+     "type": "number"
+    },
+    "coverage": {
+     "description": "What the corpus covers; present with note. Same object as the coverage resource.",
+     "type": "object"
+    },
+    "evidence": {
+     "description": "strong: a top record contains the query terms or closely resembles it (cosine >= 0.5). weak: records only loosely resemble it. none: nothing returned.",
+     "enum": [
+      "strong",
+      "weak",
+      "none"
+     ],
+     "type": "string"
+    },
+    "hits": {
+     "items": {
+      "properties": {
+       "matched": {
+        "description": "Which rankings found the record: its title holds every query term, its text does, and/or it is among the 50 nearest by meaning.",
+        "items": {
+         "enum": [
+          "title",
+          "text",
+          "meaning"
+         ],
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "similarity": {
+        "description": "True cosine between the query and the record embedding.",
+        "type": "number"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "subtitle": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "type": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "type",
+       "title",
+       "similarity",
+       "url",
+       "matched"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "note": {
+     "description": "Present when scope is outside, evidence is weak, or nothing matched.",
+     "type": "string"
+    },
+    "query": {
+     "type": "string"
+    },
+    "scope": {
+     "description": "Whether the query names a covered place, a place outside coverage, or no place.",
+     "enum": [
+      "covered",
+      "outside",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "weak_match": {
+     "deprecated": true,
+     "description": "Deprecated since 2.3.0; removed in 2.4.0. True when scope is outside or evidence is not strong. Read scope and evidence instead.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "query",
+    "hits",
+    "count",
+    "scope",
+    "evidence"
+   ],
+   "type": "object"
+  },
+  "title": "Search"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Submit feedback to the observatory's operators about the MCP tool surface. The active counterpart to the passive invocation log. Categories: 'gap' (a capability you expected and didn't find), 'error' (an unexpected failure or wrong result), 'praise' (a tool or surface that did exactly what you needed), 'suggestion' (a refinement you'd recommend), 'citation_request' (a claim or fact you want surfaced with a stable @id you can cite). The submission auto-attaches the prior 10 invocations from your MCP-Session-Id, so operators read your feedback annotated with the call sequence that produced it, so there is no need to repeat what you tried. Operators triage every submission and surface notable feedback at /agent-observatory. This is how the observatory evolves toward what agents actually need.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "about_tool": {
+     "description": "Optional: the tool name this feedback is about (e.g., \"describe_corridor\"). Lets operators rollup feedback per tool.",
+     "type": "string"
+    },
+    "about_url": {
+     "description": "Optional: a URL on the observatory this feedback references (e.g., \"https://zoningsignal.com/corridors/us-27-south-lake\").",
+     "type": "string"
+    },
+    "agent_context": {
+     "description": "Optional: brief description of what the agent was trying to do, the user task that led to this surface. Helps operators understand intent without seeing only the failure point.",
+     "maxLength": 4096,
+     "type": "string"
+    },
+    "category": {
+     "description": "Bounded categorization. 'gap' = expected capability is missing. 'error' = tool returned wrong/unexpected/malformed result. 'praise' = a surface or tool that worked exceptionally well. 'suggestion' = a refinement (better tool description, additional argument, alternative output shape). 'citation_request' = a claim or fact you want surfaced with a stable citation @id.",
+     "enum": [
+      "gap",
+      "error",
+      "praise",
+      "suggestion",
+      "citation_request"
+     ],
+     "type": "string"
+    },
+    "message": {
+     "description": "The feedback prose itself. Be specific. What were you trying to accomplish? What was missing or wrong? Voice that survives compression. Operators read every submission.",
+     "maxLength": 8192,
+     "type": "string"
+    },
+    "suggested_resolution": {
+     "description": "Optional: if you have a concrete proposal (a new tool, a renamed parameter, a missing field on a response), name it here.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "category",
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "submit_agent_feedback",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "attached_invocation_count": {
+     "description": "How many prior invocations (from your MCP-Session-Id) were auto-attached for operator context.",
+     "type": "number"
+    },
+    "category": {
+     "description": "The category the feedback was filed under.",
+     "type": "string"
+    },
+    "feedback_id": {
+     "description": "Stable id for the stored feedback record.",
+     "type": "string"
+    },
+    "message": {
+     "description": "Human-readable acknowledgement.",
+     "type": "string"
+    },
+    "ok": {
+     "description": "True when the feedback was accepted and stored.",
+     "type": "boolean"
+    },
+    "received_at": {
+     "description": "ISO-8601 timestamp the feedback was recorded.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ok",
+    "feedback_id"
+   ],
+   "type": "object"
+  },
+  "title": "Submit Agent Feedback"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Trace how two named things in the planning record connect, and report how specific that connection is. Give `from` and `to` for the shortest route between them; give `from` alone to rank what one actor connects to; give neither to rank the corpus's most specific connections. Endpoints are entity, meeting, or named-pattern slugs; list_entities, list_meetings and list_patterns discover them.\n\nRoutes run over the three layers where a shared node is a specific claim: meeting attendance transcribed from agendas and minutes (249 references across 78 meeting records; a meeting record holds a median of 3 entities and at most 12), peer claims authored on an entity dossier (162 links, 44 of them stated on both dossiers), and shared named patterns (58 references across 15 patterns; a pattern holds a median of 2 entities and at most 10). That substrate is 161 nodes and 469 links over 68 entities, in one connected component. Place, corridor, brief and watch links serve here as filters and citations rather than as routes: the us-27-south-lake node alone carries 117 links, so a route through it would hold for nearly every pair in the corpus.\n\nHop count is a result here rather than an input. Across the full frontmatter graph, 94.5% of entity pairs already sit within two steps and a three-step expansion reaches a median of 235 of 243 nodes, so depth returns the corpus rather than an answer. What discriminates is the degree of the WIDEST node a route passes through, and the ranking leads on it: a route is only as specific as its least specific waypoint. Two more measured properties travel with every row: how many equally-short routes exist (uniqueness runs 65% at two hops, 40% at three, 14% at four), and whether the two endpoints are minuted in disjoint jurisdictions, which 15 of 68 entities are positioned to be. `interior_degrees` carries every degree on the chain so you can re-rank on any of them, and `provenance` says whether the whole join rests on the meeting record, on a curator’s hand, or on both.\n\nFilter with `evidence` to choose which layers may carry a hop, `crossing` to keep only pairs minuted in different jurisdictions, and `exclude_published` to keep only pairs the observatory’s own briefs have not already put together. Every response reports how many of the 2,278 possible entity pairs the filters matched, splits them by provenance, and accounts for the rest, so a query that discriminated nothing says so in its own output. Note one interaction the response also states: two entities minuted in one room share that room’s jurisdiction, so `crossing: \"jurisdiction\"` holds no two-hop minuted route, and the minuted routes that satisfy it run three hops or more.\n\nWhat it leaves undetermined, stated on every call: vote outcomes and dispositions, which live in meeting prose and item tables; direction and sequence, since a route is co-occurrence in a record; and the 347 of 425 meeting records not yet linked to an entity, where what the tool covers is what has been curated. In from and sweep modes, rows that share a chain of intermediaries collapse to one finding, which names the rest of its roster in `route_also_joins`. Pair with describe_entity for a node’s full dossier, describe_meeting for the room itself, and semantic_search for prose.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "crossing": {
+     "default": "any",
+     "description": "\"any\" ranks every matching pair. \"jurisdiction\" keeps only pairs whose record-backed jurisdiction footprints are disjoint and both present, computed from the jurisdiction on each minuted meeting rather than from an authored place list.",
+     "enum": [
+      "any",
+      "jurisdiction"
+     ],
+     "type": "string"
+    },
+    "evidence": {
+     "default": [
+      "minuted",
+      "authored",
+      "named_pattern"
+     ],
+     "description": "Which layers may carry a hop. \"minuted\" = attendance transcribed from an agenda or minutes; \"authored\" = a peer claim stated on an entity dossier; \"named_pattern\" = two entities listed as exhibits of one named pattern. This is the substrate choice and the largest single lever on the answer: a restricted set fragments the graph (minuted alone is 5 components), and the response reports substrate.components and a fragmentation note rather than returning a bare no_path.",
+     "items": {
+      "enum": [
+       "minuted",
+       "authored",
+       "named_pattern"
+      ],
+      "type": "string"
+     },
+     "maxItems": 3,
+     "minItems": 1,
+     "type": "array",
+     "uniqueItems": true
+    },
+    "exclude_published": {
+     "default": false,
+     "description": "true keeps only the pairs the observatory's own briefs have yet to put together, tested against the union of an entity's appears_in_briefs and the briefs that name it.",
+     "type": "boolean"
+    },
+    "from": {
+     "description": "One endpoint slug, resolved in order against entities, meetings, then named patterns: the three vocabularies in which a shared node is a specific claim. No slug is shared between them on the deployed corpus, so a bare slug resolves unambiguously and needs no type prefix (e.g., \"tara-tedrow\", \"minneola-pz-2025-01\", \"self-storage-canary\"). Omit both endpoints to rank the whole corpus.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 5,
+     "description": "How many connections to return. It caps connections; routes within one connection are shown five at a time in pair mode and one at a time in from and sweep modes, and `routes_shown` beside the exact `shortest_path_count` names how many. A value outside 1–25 is refused rather than clamped, so selectivity.returned always agrees with what you asked for.",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "to": {
+     "description": "The other endpoint, drawn from the same three vocabularies as `from`. Supplying `to` without `from` is accepted and read as `from`, because the graph is undirected; the response echoes that as query.normalized_as.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "trace_connection",
+  "output_schema": {
+   "properties": {
+    "calibration": {
+     "description": "Measured background rates for the chosen evidence layers: what to read a row against.",
+     "properties": {
+      "distance_histogram": {
+       "type": "object"
+      },
+      "max_shortest_path_count": {
+       "type": "number"
+      },
+      "note": {
+       "type": "string"
+      },
+      "unique_shortest_path_by_distance": {
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "connections": {
+     "items": {
+      "properties": {
+       "crosses_jurisdiction": {
+        "description": "Both footprints are on from.jurisdictions_minuted and to.jurisdictions_minuted.",
+        "type": "boolean"
+       },
+       "date_span": {
+        "description": "Populated only when every hop on the representative route runs through a meeting record; otherwise carries a reason scoped to that route.",
+        "type": "object"
+       },
+       "evidence_used": {
+        "description": "The union of layers across ALL shortest routes between these two: the honest scope for a row that reports how many of them there are. The representative route’s own layers are on its hops.",
+        "items": {
+         "enum": [
+          "minuted",
+          "authored",
+          "named_pattern"
+         ],
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "from": {
+        "description": "slug, kind, display_name, entity_class, canonical_role, url, jurisdictions_minuted[].",
+        "type": "object"
+       },
+       "hops": {
+        "type": "number"
+       },
+       "interior_degrees": {
+        "description": "Every interior node's degree on the representative route, in route order.",
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "provenance": {
+        "description": "Derived from evidence_used. \"record\" = every shortest route runs on transcribed meeting attendance; \"curated\" = the whole join is authored on a dossier or grouped into a pattern, which describe_entity and describe_pattern already return.",
+        "enum": [
+         "record",
+         "mixed",
+         "curated"
+        ],
+        "type": "string"
+       },
+       "published_together_in": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "route_also_joins": {
+        "description": "From and sweep modes: the other pairs this same chain of intermediaries joins. A node of degree 6 yields fifteen pairs, and they are one finding rather than fifteen rows.",
+        "properties": {
+         "count": {
+          "type": "number"
+         },
+         "pairs": {
+          "items": {
+           "properties": {
+            "from": {
+             "type": "string"
+            },
+            "to": {
+             "type": "string"
+            }
+           },
+           "required": [
+            "from",
+            "to"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "count",
+         "pairs"
+        ],
+        "type": "object"
+       },
+       "routes": {
+        "items": {
+         "properties": {
+          "hops": {
+           "items": {
+            "properties": {
+             "basis": {
+              "description": "A sentence naming what kind of knowing this hop is: a record, an authored claim, or a curated grouping.",
+              "type": "string"
+             },
+             "detail": {
+              "type": "string"
+             },
+             "evidence": {
+              "enum": [
+               "minuted",
+               "authored",
+               "named_pattern"
+              ],
+              "type": "string"
+             },
+             "from": {
+              "type": "string"
+             },
+             "jurisdiction": {
+              "description": "Present on meeting hops: the room's own jurisdiction slug, so a caller sees where a crossing happens without the tool nominating a carrier.",
+              "type": "string"
+             },
+             "node_degree": {
+              "type": "number"
+             },
+             "to": {
+              "type": "string"
+             },
+             "url": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "from",
+             "to",
+             "evidence",
+             "node_degree",
+             "url",
+             "detail",
+             "basis"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "hops"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "routes_shown": {
+        "description": "Routes displayed: five in pair mode, one in from and sweep modes. Read against shortest_path_count.",
+        "type": "number"
+       },
+       "shortest_path_count": {
+        "description": "Exact, independent of how many routes are shown.",
+        "type": "number"
+       },
+       "summary": {
+        "type": "string"
+       },
+       "to": {
+        "type": "object"
+       },
+       "undetermined": {
+        "description": "Read across all shortest routes, matching evidence_used. A row that reports eight routes and qualifies one would under-report what it leaves open.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "widest_node": {
+        "description": "The WIDEST node the route passes through, named rather than scored. It is the primary ranking key, and exactly the narrowest such node any shortest route achieves. Computed by a dynamic program over the whole predecessor DAG, so it is exact however many routes are displayed. Null at one hop.",
+        "properties": {
+         "degree": {
+          "type": "number"
+         },
+         "degree_means": {
+          "type": "string"
+         },
+         "display_name": {
+          "type": "string"
+         },
+         "id": {
+          "type": "string"
+         },
+         "kind": {
+          "enum": [
+           "entity",
+           "meeting",
+           "pattern"
+          ],
+          "type": "string"
+         },
+         "slug": {
+          "type": "string"
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "type": [
+         "object",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "from",
+       "to",
+       "hops",
+       "shortest_path_count",
+       "routes_shown",
+       "interior_degrees",
+       "evidence_used",
+       "provenance",
+       "crosses_jurisdiction",
+       "summary",
+       "routes",
+       "undetermined"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "coverage": {
+     "description": "What the corpus covers, plus what the graph covers: meetings linked to entities against meetings in corpus, jurisdictions linked against jurisdictions in corpus, and the per-jurisdiction breakdown.",
+     "type": "object"
+    },
+    "declared_direct": {
+     "description": "From and sweep modes: one-hop authored pairs, unscored, as slug pairs; describe_entity already returns each one in its dossier context.",
+     "items": {
+      "properties": {
+       "authored_on": {
+        "description": "The dossiers carrying the reference: one slug for a one-way claim, both for a reciprocal one.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "crosses_jurisdiction": {
+        "type": "boolean"
+       },
+       "from": {
+        "description": "Entity slug.",
+        "type": "string"
+       },
+       "published_together_in": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "to": {
+        "description": "Entity slug.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "from",
+       "to",
+       "authored_on",
+       "crosses_jurisdiction",
+       "published_together_in"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "declared_direct_note": {
+     "description": "Present whenever declared_direct carries a row: the call that reads any of them in full.",
+     "type": "string"
+    },
+    "limits": {
+     "description": "Assembled per call. The coverage line is always first: absence in this tool is absence of curation.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "no_path": {
+     "description": "Pair mode only, when the endpoints are unreachable on the chosen layers. Null everywhere else, including in pair mode when a route exists.",
+     "properties": {
+      "components": {
+       "type": "number"
+      },
+      "evidence": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "fragmentation_note": {
+       "description": "Present when the chosen layers fragment the substrate; a full-substrate retry may join the two.",
+       "type": "string"
+      },
+      "from": {
+       "type": "object"
+      },
+      "note": {
+       "type": "string"
+      },
+      "to": {
+       "type": "object"
+      }
+     },
+     "required": [
+      "from",
+      "to",
+      "evidence",
+      "components",
+      "note"
+     ],
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "query": {
+     "properties": {
+      "crossing": {
+       "enum": [
+        "any",
+        "jurisdiction"
+       ],
+       "type": "string"
+      },
+      "depth_parameter": {
+       "description": "Constant. Hop count is a result the query returns; endpoints and filters are what it takes.",
+       "type": "string"
+      },
+      "evidence": {
+       "items": {
+        "enum": [
+         "minuted",
+         "authored",
+         "named_pattern"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "exclude_published": {
+       "type": "boolean"
+      },
+      "from": {
+       "properties": {
+        "resolved_kind": {
+         "enum": [
+          "entity",
+          "meeting",
+          "pattern"
+         ],
+         "type": "string"
+        },
+        "slug": {
+         "type": "string"
+        }
+       },
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "limit": {
+       "type": "number"
+      },
+      "mode": {
+       "description": "Set by arity: both endpoints, one, or neither. The scoring path is identical in all three.",
+       "enum": [
+        "pair",
+        "from",
+        "sweep"
+       ],
+       "type": "string"
+      },
+      "normalized_as": {
+       "description": "Present when `to` arrived without `from` and was read as `from`.",
+       "type": "string"
+      },
+      "resolution_note": {
+       "description": "Present when a supplied slug also names a document of another type.",
+       "type": "string"
+      },
+      "to": {
+       "properties": {
+        "resolved_kind": {
+         "enum": [
+          "entity",
+          "meeting",
+          "pattern"
+         ],
+         "type": "string"
+        },
+        "slug": {
+         "type": "string"
+        }
+       },
+       "type": [
+        "object",
+        "null"
+       ]
+      }
+     },
+     "required": [
+      "mode",
+      "evidence",
+      "crossing",
+      "exclude_published",
+      "limit",
+      "depth_parameter"
+     ],
+     "type": "object"
+    },
+    "ranking": {
+     "description": "The sort rule, verbatim, labelled a judgement call. Every integer behind it is in each row.",
+     "type": "string"
+    },
+    "selectivity": {
+     "description": "How much of the population the filters kept: the tool grading its own discrimination.",
+     "properties": {
+      "by_provenance": {
+       "description": "Matched pairs by how the join is known. A zero on `record` says a filter has excluded the evidentiary layer, which `crossing: \"jurisdiction\"` does at two hops.",
+       "properties": {
+        "curated": {
+         "type": "number"
+        },
+        "mixed": {
+         "type": "number"
+        },
+        "record": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "record",
+        "mixed",
+        "curated"
+       ],
+       "type": "object"
+      },
+      "declared_direct": {
+       "description": "Matched pairs that sit at one hop and moved to declared_direct.",
+       "type": "number"
+      },
+      "distinct_routes": {
+       "description": "Distinct chains of intermediaries among the matched pairs: findings behind pairs.",
+       "type": "number"
+      },
+      "filtered_out": {
+       "description": "Pairs a filter rejected. matched + declared_direct + unreachable + filtered_out === of_possible.",
+       "type": "number"
+      },
+      "matched": {
+       "description": "Pairs scored, filtered and ranked.",
+       "type": "number"
+      },
+      "of_possible": {
+       "description": "The candidate pairs this call's arity put in scope: one in pair mode, 67 from a named entity, 2,278 across the corpus.",
+       "type": "number"
+      },
+      "reading": {
+       "description": "Plain sentence naming the cause it can prove: an unreachable pair reads as unreachable, a filtered one names the filter that rejected it.",
+       "type": "string"
+      },
+      "returned": {
+       "description": "Rows returned, after the roster collapse and the cut at `limit`.",
+       "type": "number"
+      },
+      "unreachable": {
+       "description": "Pairs in separate components on the selected evidence layers. Attributing these to the filters would name the wrong cause.",
+       "type": "number"
+      }
+     },
+     "required": [
+      "matched",
+      "of_possible",
+      "returned",
+      "declared_direct",
+      "unreachable",
+      "filtered_out",
+      "by_provenance",
+      "distinct_routes",
+      "reading"
+     ],
+     "type": "object"
+    },
+    "substrate": {
+     "description": "The graph the routes ran over, for the evidence layers this call selected.",
+     "properties": {
+      "by_kind": {
+       "properties": {
+        "entity": {
+         "type": "number"
+        },
+        "meeting": {
+         "type": "number"
+        },
+        "pattern": {
+         "type": "number"
+        }
+       },
+       "type": "object"
+      },
+      "components": {
+       "description": "Above 1, the chosen layers fragment the graph and a no_path is a property of that choice.",
+       "type": "number"
+      },
+      "entities_present": {
+       "type": "string"
+      },
+      "excluded_layers": {
+       "description": "The frontmatter arrays that serve as filters and citations here rather than as routes, each with the reason.",
+       "items": {
+        "properties": {
+         "name": {
+          "type": "string"
+         },
+         "reason": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "reason"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "fragmentation_note": {
+       "description": "Present when components > 1.",
+       "type": "string"
+      },
+      "layers": {
+       "description": "Per-layer reference counts and node-size profiles, measured on the artifact.",
+       "type": "object"
+      },
+      "links": {
+       "type": "number"
+      },
+      "nodes": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "nodes",
+      "links",
+      "components",
+      "entities_present",
+      "layers",
+      "excluded_layers"
+     ],
+     "type": "object"
+    },
+    "tie_note": {
+     "description": "A sentence, present when the cut at `limit` lands inside a band of connections that tie on widest-node degree, hop count and path count, naming the band, its size, and that order within it falls back to slug.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "query",
+    "substrate",
+    "selectivity",
+    "connections",
+    "ranking",
+    "calibration",
+    "coverage",
+    "limits"
+   ],
+   "type": "object"
+  },
+  "title": "Trace Connection"
+ }
+]

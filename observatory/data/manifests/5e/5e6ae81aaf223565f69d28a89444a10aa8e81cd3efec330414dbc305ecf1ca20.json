@@ -1,0 +1,119 @@
+[
+ {
+  "description": "한국관광공사 지역코드 목록. 다른 관광 도구의 areaCode 인자에 쓴다.",
+  "input_schema": {
+   "properties": {
+    "areaCode": {
+     "description": "주면 해당 지역의 시군구 코드를 반환",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "korea_area_codes",
+  "output_schema": {}
+ },
+ {
+  "description": "시내버스 정보를 제공하는 한국 도시코드 목록.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "korea_bus_cities",
+  "output_schema": {}
+ },
+ {
+  "description": "한국 시내버스 정류소를 도시별로 검색한다(국토교통부 TAGO). 정류소명 일부로 찾고 좌표를 돌려준다.",
+  "input_schema": {
+   "properties": {
+    "cityCode": {
+     "description": "도시코드. korea_bus_cities 로 조회 (예: 25=대전, 21=부산)",
+     "type": "string"
+    },
+    "limit": {
+     "description": "최대 건수 (기본 10)",
+     "type": "number"
+    },
+    "name": {
+     "description": "정류소명 일부 (예: \"시청\")",
+     "type": "string"
+    }
+   },
+   "required": [
+    "cityCode"
+   ],
+   "type": "object"
+  },
+  "name": "korea_bus_stops",
+  "output_schema": {}
+ },
+ {
+  "description": "한국관광공사 국문 관광정보에서 관광지·음식점·숙박·축제를 키워드 또는 지역으로 검색한다. 실데이터(주소·좌표·전화·사진)를 반환한다.",
+  "input_schema": {
+   "properties": {
+    "areaCode": {
+     "description": "지역코드. 1=서울 6=부산 32=강원 39=제주 등. korea_area_codes 로 조회",
+     "type": "string"
+    },
+    "contentTypeId": {
+     "description": "12=관광지 14=문화시설 15=축제 25=여행코스 28=레포츠 32=숙박 38=쇼핑 39=음식점",
+     "type": "string"
+    },
+    "keyword": {
+     "description": "검색 키워드 (예: \"해운대\", \"한옥마을\"). areaCode 와 함께 쓰거나 단독으로 쓴다",
+     "type": "string"
+    },
+    "limit": {
+     "description": "최대 건수 (기본 10, 최대 50)",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "korea_tour_search",
+  "output_schema": {}
+ },
+ {
+  "description": "Search Korean tourist attractions, restaurants and accommodations in ENGLISH (Korea Tourism Organization official English dataset). Use this when the user is not Korean-speaking or wants English place names.",
+  "input_schema": {
+   "properties": {
+    "areaCode": {
+     "description": "Area code. 1=Seoul 6=Busan 32=Gangwon 39=Jeju",
+     "type": "string"
+    },
+    "keyword": {
+     "description": "Search keyword in English (e.g. \"Gyeongbokgung\", \"beach\")",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max results (default 10, max 50)",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "korea_tour_search_en",
+  "output_schema": {}
+ },
+ {
+  "description": "한국 기상 평년값(1991~2020, 30년) — 지점별 월평균기온·월평균최고·월평균최저. \"그 지역 10월이 보통 몇 도인가\" 같은 질문에 쓴다. 예보가 아니라 평년 통계다.",
+  "input_schema": {
+   "properties": {
+    "month": {
+     "description": "1~12. 주면 그 달만, 없으면 12개월 전부",
+     "type": "number"
+    },
+    "stationId": {
+     "description": "기상청 지점번호. 108=서울 159=부산 143=대구 156=광주 133=대전 184=제주 105=강릉",
+     "type": "string"
+    }
+   },
+   "required": [
+    "stationId"
+   ],
+   "type": "object"
+  },
+  "name": "korea_weather_normals",
+  "output_schema": {}
+ }
+]

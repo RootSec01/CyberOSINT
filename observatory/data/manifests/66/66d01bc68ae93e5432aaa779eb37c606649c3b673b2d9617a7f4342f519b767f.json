@@ -1,0 +1,363 @@
+[
+ {
+  "description": "Book a class, event or retreat for a person with no MoveMentors account. No sign-in needed: ask the person for their name and email and pass them in. The seat is held while the person pays by card: the response has a single-use Stripe Checkout URL to open in a browser (a payment vault or one-time card works there). The seat is released if unpaid, and once paid the confirmation email, with a link to change or cancel, goes to guestEmail in the language given. Only card-paid bookings work here; for a free class, a host paid in cash or by bank transfer, a host who checks phone numbers by text, a promo code or a retreat payment plan, the tool answers with the class page where the person books it themselves (no account needed). Find scheduleId with search_classes. For a pay-what-you-can class pass pwycAmountCents (at least minPriceCents from search_classes). Limited to a few bookings an hour per person.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "guestEmail": {
+     "description": "Where the confirmation email and booking link go. Use the person's own address.",
+     "maxLength": 254,
+     "type": "string"
+    },
+    "guestName": {
+     "description": "The person's full name, as the host will see it.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "locale": {
+     "description": "Language for the emails and booking page. Defaults to English.",
+     "enum": [
+      "en",
+      "es",
+      "pt",
+      "de",
+      "fr",
+      "it",
+      "nl"
+     ],
+     "type": "string"
+    },
+    "notes": {
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "partySize": {
+     "default": 1,
+     "description": "Total seats to reserve, including the person booking.",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pwycAmountCents": {
+     "description": "Pay-what-you-can classes only: the per-seat amount the person chooses, in cents of the class currency. Defaults to the suggested price.",
+     "maximum": 10000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "scheduleId": {
+     "description": "Schedule ID (use search_classes to discover).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "scheduleId",
+    "guestName",
+    "guestEmail"
+   ],
+   "type": "object"
+  },
+  "name": "book_class_as_guest",
+  "output_schema": {}
+ },
+ {
+  "description": "Return the list of payment methods the payee accepts for a class. Use this before calling book_class so you can ask the user which one to use (especially when the class's payee doesn't have Stripe enabled). Each entry has a canonical `key` (pass that to book_class as paymentMethod) and a human-readable `label`. Note: full payment details (bank account number, PayPal handle, etc.) are NOT returned here — they live on the confirmation page after booking, since they're sensitive to the payee.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "classId": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "classId"
+   ],
+   "type": "object"
+  },
+  "name": "get_class_payment_methods",
+  "output_schema": {}
+ },
+ {
+  "description": "Fetch full public details for a single mentor by slug: bio, location, ratings, certifications, taught styles, and canonical URL. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "Mentor slug (the part after /mentors/...).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_mentor",
+  "output_schema": {}
+ },
+ {
+  "description": "List a mentor's or studio's published video library by slug (pass exactly one of mentorSlug / studioSlug). Returns title, durationSec, priceCents (0 = free), currency, hasPreview (whether a free watchable snippet of the actual video exists on the page), and the public page path for each video. Buying or claiming happens on that page (/videos/{id}) and requires a free MoveMentors account; the video saves to the buyer's library and plays on any signed-in device. Videos a mentor includes with their membership are free to watch for that mentor's active subscribers. Hosts keep 100% of video sales. Hosts manage their library at /mentor/library or /studio/library.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "mentorSlug": {
+     "type": "string"
+    },
+    "studioSlug": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_host_videos",
+  "output_schema": {}
+ },
+ {
+  "description": "List a mentor's active class packs by slug. Returns name, sessionCount, priceCents, currency, validityDays for each pack. Public read; useful when a client asks 'what packs does X sell?' or before calling buy_class_pack.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "mentorSlug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "mentorSlug"
+   ],
+   "type": "object"
+  },
+  "name": "list_mentor_class_packs",
+  "output_schema": {}
+ },
+ {
+  "description": "See what a mentor offers for private one-to-one sessions: each place with its lengths and prices, the ways to pay the mentor, the cancellation policy and, when durationMinutes is given, the open start times (UTC ISO, with the place's IANA time zone) over the next `days`. Open times already leave out classes, other bookings, time the mentor blocked and the 12-hour notice. An empty `places` list means the mentor has not opened private sessions; use send_mentor_inquiry instead. Book a time with book_private_session. The same flow for a person is the 'Book a private session' section on the mentor's public profile.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "default": 14,
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "durationMinutes": {
+     "description": "Session length. Omit to get only the lengths and prices.",
+     "enum": [
+      30,
+      60,
+      90,
+      120
+     ],
+     "type": "integer"
+    },
+    "mentorSlug": {
+     "description": "Mentor profile slug.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mentorSlug"
+   ],
+   "type": "object"
+  },
+  "name": "list_private_session_slots",
+  "output_schema": {}
+ },
+ {
+  "description": "List reviews for a specific class (by id or slug), latest first. Includes the rating, written review, mentor response (when present), and reviewer first-name-only. No auth required.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "classId": {
+     "type": "string"
+    },
+    "classSlug": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_reviews_for_class",
+  "output_schema": {}
+ },
+ {
+  "description": "Search bookable classes, events, or retreats by query, city, discipline, date, session type, kind, or format (in-person vs online). Returns id, slug, title, kind, price, pricingModel, currency, duration, instructor, location, isOnline, meetingProvider, and the canonical URL. When pricingModel is PWYC (pay what you can), priceCents is the suggested amount and minPriceCents the lowest the user may pay (0 means they may attend free): ask the user what they want to pay and pass it to book_class as pwycAmountCents. Each result includes the next upcoming schedule. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Class type slug.",
+     "type": "string"
+    },
+    "city": {
+     "type": "string"
+    },
+    "date": {
+     "description": "ISO date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "format": {
+     "description": "Filter by class format. `online` returns classes taught remotely (mentor's connected Google Meet or Zoom mints the join link at booking time). `in_person` returns classes hosted at a physical venue. Omit to include both.",
+     "enum": [
+      "in_person",
+      "online"
+     ],
+     "type": "string"
+    },
+    "kind": {
+     "description": "Programming kind. CLASS = recurring per-session classes (the default mix); EVENT = focused workshops with an agenda; RETREAT = multi-day arcs with optional installment payments.",
+     "enum": [
+      "CLASS",
+      "EVENT",
+      "RETREAT"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum results to return.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "PRIVATE",
+      "GROUP"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_classes",
+  "output_schema": {}
+ },
+ {
+  "description": "Search the MoveMentors help center for articles matching a free-text query. Returns the top matches with title, description, category, locale, and a permalink the agent can cite or fetch for the full markdown body. Filter by category slug (e.g., 'payments', 'for-mentors') or locale ('en', 'es', etc.). No auth required.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Optional category slug. Run with no category once to discover; the response includes categories alongside results.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 8,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "locale": {
+     "default": "en",
+     "description": "Locale of the article body to search. Defaults to English.",
+     "enum": [
+      "en",
+      "es",
+      "pt",
+      "de",
+      "fr",
+      "it",
+      "nl"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "maxLength": 200,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_help_articles",
+  "output_schema": {}
+ },
+ {
+  "description": "Search instructor profiles by free-text query, city, or discipline (yoga, pilates, meditation, etc). Returns slug, display name, city, ratings, top class types, and the canonical public URL. Many instructors also offer client-bookable private one-on-one sessions, bookable directly from their profile page (pick a room, length, and open half-hour slot). Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Class type slug (e.g. 'vinyasa', 'pilates').",
+     "type": "string"
+    },
+    "city": {
+     "description": "City name (case-insensitive).",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum results to return.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Free-text search across name/bio/class types.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_mentors",
+  "output_schema": {}
+ },
+ {
+  "description": "Search studios and gyms by free-text query or city. Pass rentable=true to restrict results to studios with at least one location that publishes rentable space (visiting mentors can claim slots and pay rent via Stripe Connect). Returns slug, business name, city, ratings, the canonical public URL, and rentable=true / false per studio. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "city": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum results to return.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "type": "string"
+    },
+    "rentable": {
+     "description": "When true, only return studios with at least one Location where rentalEnabled = true. Matches the public /studios?rentable=1 directory filter.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_studios",
+  "output_schema": {}
+ },
+ {
+  "description": "Browse the cross-host public video directory (the /videos page): published class recordings and courses from every mentor and studio. Optional `query` filters by title (case-insensitive). Returns title, host, durationSec, priceCents (0 = free), currency, hasPreview (a free watchable snippet on the page), series (the collection title when the video is part of a multi-part course, else null), and the public page path. Buying or claiming happens on /videos/{id} and requires a free MoveMentors account: the video saves to the buyer's library (/videos/mine), plays on any device they sign in on, and resumes where they left off. Mentors can include videos with their recurring membership, so subscribers watch those at no extra cost. Use when a client asks 'what videos can I watch or buy?' without naming a specific teacher.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "type": "number"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_videos",
+  "output_schema": {}
+ }
+]

@@ -1,0 +1,1211 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get one Answer — question, grounded answer, visible citations — by id or slug, in the Answer contract v0 shape (ANSWERS-PROGRAM.md). Read-only. Returns null if not found.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "description": "The Answer's stable id or slug.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_answer",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "answer": {
+     "anyOf": [
+      {
+       "additionalProperties": {},
+       "propertyNames": {
+        "type": "string"
+       },
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   },
+   "required": [
+    "answer"
+   ],
+   "type": "object"
+  },
+  "title": "Get an answer"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get one guide's registry row by slug, with its artifact + routing-surface status.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "description": "The guide slug, e.g. start-a-company.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_guide",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "api_version": {
+     "type": "string"
+    },
+    "guide": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "api_version",
+    "guide"
+   ],
+   "type": "object"
+  },
+  "title": "Get one guide's registry row"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List Answers (contract v0), paginated with an opaque cursor. Read-only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cursor": {
+     "description": "Opaque pagination cursor from a previous list_answers call's nextCursor.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max answers to return (default: loader's choice, capped 200).",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_answers",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "items": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "nextCursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    }
+   },
+   "required": [
+    "items",
+    "nextCursor"
+   ],
+   "type": "object"
+  },
+  "title": "List answers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Traverse the capability spine joining books, guides (capability packages), KSAO-grade elements and jobs. Use min_guides=2 for the cross-cutting capabilities that span many guides, role=<role> for what a job requires, capability_detail=<slug> for one package with its elements and books hydrated. ksao_type/canon_component_id are null by design where unresolved — treat null as 'not yet joined', never as 'no link'.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "canon_promotion_candidate": {
+     "description": "true = only elements the JobFrame canon has NO component for. This is a real answer, not a failed lookup — these are the constructs to PROMOTE into the canon.",
+     "type": "boolean"
+    },
+    "capability": {
+     "description": "Elements taught by this capability (guide slug).",
+     "type": "string"
+    },
+    "capability_detail": {
+     "description": "Return ONE capability with its elements and books hydrated, instead of querying elements.",
+     "type": "string"
+    },
+    "conflicting": {
+     "description": "Only elements where 2+ non-career guides define the same label differently — these need a ruling.",
+     "type": "boolean"
+    },
+    "construct_class": {
+     "description": "person-attribute (knowledge/skill/ability — what a JOB requires and a learner develops) | condition-or-outcome (what a capability PRODUCES, e.g. 'Retention & Workforce Stability'). Only ~30% of elements are person attributes — filter to these for 'what does this role need'.",
+     "type": "string"
+    },
+    "has_canon_identity": {
+     "description": "true = only elements resolved to a JobFrame canon component (an IDENTITY, panel-adjudicated). false = only unresolved.",
+     "type": "boolean"
+    },
+    "has_job": {
+     "description": "Only elements that some job requires (via a career guide).",
+     "type": "boolean"
+    },
+    "ksao_type": {
+     "description": "knowledge | skill | ability | other — from a panel validated at 95.1% on gold O*NET labels. 'other' is UNVALIDATED (no gold labels existed for it).",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Cap the rows returned (default 200). `total` always reports the true count.",
+     "type": "number"
+    },
+    "min_guides": {
+     "description": "Only elements taught by >= N capabilities. 2 gives the cross-cutting spine.",
+     "type": "number"
+    },
+    "q": {
+     "description": "Substring match on the element label.",
+     "type": "string"
+    },
+    "role": {
+     "description": "Elements required by this job role, e.g. compensation-analyst.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_capabilities",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "api_version": {
+     "type": "string"
+    },
+    "capability": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "elements": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "returned": {
+     "type": "number"
+    },
+    "spine_meta": {},
+    "total": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "api_version",
+    "spine_meta"
+   ],
+   "type": "object"
+  },
+  "title": "Traverse the capability spine (books · guides · KSAO elements · jobs)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List organizational conditions (identity, label, guide count, causal-role counts). Filter by draft domain, subdomain, or causal_role (driver|mediator|outcome). Names and counts only — no addresses, no passages.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "causal_role": {
+     "description": "driver | mediator | outcome. Unknown values match nothing.",
+     "type": "string"
+    },
+    "domain": {
+     "description": "Draft domain slug, e.g. organizational-structure-and-culture.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Exact condition_identity_id. When set, other filters are ignored.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Cap rows returned. Default 100, max 500.",
+     "type": "number"
+    },
+    "q": {
+     "description": "Substring match on the condition label.",
+     "type": "string"
+    },
+    "subdomain": {
+     "description": "Draft sub-domain slug, e.g. organizational-learning-and-improvement.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_conditions",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address_status": {
+     "const": "draft",
+     "type": "string"
+    },
+    "api_version": {
+     "type": "string"
+    },
+    "conditions": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "causal_roles": {
+        "additionalProperties": false,
+        "properties": {
+         "driver": {
+          "type": "number"
+         },
+         "mediator": {
+          "type": "number"
+         },
+         "outcome": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "driver",
+         "mediator",
+         "outcome"
+        ],
+        "type": "object"
+       },
+       "condition_identity_id": {
+        "type": "string"
+       },
+       "domain": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "guide_corroboration_count": {
+        "type": "number"
+       },
+       "label": {
+        "type": "string"
+       },
+       "subdomain": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      },
+      "required": [
+       "condition_identity_id",
+       "label",
+       "guide_corroboration_count",
+       "causal_roles",
+       "domain",
+       "subdomain"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "count": {
+     "type": "number"
+    },
+    "filters": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "taxonomy": {
+     "additionalProperties": false,
+     "properties": {
+      "domains": {
+       "type": "number"
+      },
+      "identities": {
+       "type": "number"
+      },
+      "subdomains": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "domains",
+      "subdomains",
+      "identities"
+     ],
+     "type": "object"
+    },
+    "total_matching": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "api_version",
+    "address_status",
+    "filters",
+    "count",
+    "total_matching",
+    "taxonomy",
+    "conditions"
+   ],
+   "type": "object"
+  },
+  "title": "List organizational conditions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Where does the field disagree? Returns cross-book tension names and the books on each pole (title, author, library_id) plus the guide URL. Filter by slug, persona, or category. Names and provenance only — no passages.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "Subject shelf, e.g. field, skills, analytics.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Cap rows returned. Default 100, max 500.",
+     "type": "number"
+    },
+    "persona": {
+     "description": "Audience filter, e.g. people-analytics-professional.",
+     "type": "string"
+    },
+    "slug": {
+     "description": "One guide, e.g. start-a-company. When set, persona/category are ignored.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_disagreements",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "api_version": {
+     "type": "string"
+    },
+    "count": {
+     "type": "number"
+    },
+    "disagreements": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "guide_slug": {
+        "type": "string"
+       },
+       "guide_url": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "poles": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "books": {
+           "items": {
+            "additionalProperties": false,
+            "properties": {
+             "author": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "library_id": {
+              "anyOf": [
+               {
+                "type": "string"
+               },
+               {
+                "type": "null"
+               }
+              ]
+             },
+             "title": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "title",
+             "author",
+             "library_id"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          },
+          "label": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "label",
+          "books"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "name",
+       "poles",
+       "guide_slug",
+       "guide_url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "filters": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "total_matching": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "api_version",
+    "filters",
+    "count",
+    "total_matching",
+    "disagreements"
+   ],
+   "type": "object"
+  },
+  "title": "List cross-book disagreements"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the bicycle.guide registry — every guide's home, status, access, standard, syndication and grounding, plus the distribution roll-up (including guides homed to a property with no rendering surface).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "access": {
+     "description": "Filter by access: free | gated.",
+     "type": "string"
+    },
+    "category": {
+     "description": "Filter by subject shelf — the reader-facing topic axis, e.g. field, skills, analytics, writing, comp. Matches the primary category OR a cross-shelf tag.",
+     "type": "string"
+    },
+    "domain": {
+     "description": "Filter by life-domain — the layer ABOVE the subject shelf: work | life | play. Derived from the guide's category via content/registry/shelves.json. `rollup.by_domain` lists them.",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Row shape. \"compact\" returns only slug/title/home/status/access/price_cents/has_artifact/category/domain/personas/canonical_url — no rollup, no registry_meta. \"full\" returns the entire decorated registry row plus the rollup and registry_meta, as before. Default over this server: \"compact\".",
+     "enum": [
+      "compact",
+      "full"
+     ],
+     "type": "string"
+    },
+    "guide_type": {
+     "description": "Filter by guide CLASS: career (level-based job guides, their own program) | capability | book_profile. Combine with series=ladder:<role> to get one role's whole ladder.",
+     "type": "string"
+    },
+    "has_artifact": {
+     "description": "Only guides that do (true) / do not (false) have a new-design artifact.",
+     "type": "boolean"
+    },
+    "home": {
+     "description": "Filter by owning property, e.g. jobframe, peopleanalyst, penwright.",
+     "type": "string"
+    },
+    "home_unrouted": {
+     "description": "Only guides whose home has NO rendering surface at all (the distribution gap).",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Cap the rows returned. Default 100, max 500.",
+     "type": "number"
+    },
+    "persona": {
+     "description": "Filter by the audience a guide serves, e.g. people-analytics-professional, aspiring-author, executive-performance-leader. A guide can serve several; this matches any of them.",
+     "type": "string"
+    },
+    "series": {
+     "description": "Filter by guide series — the operational grouping of guides made to be used together, e.g. competencies, penwright-writing, startup-journey, ladder:hr-business-partner.",
+     "type": "string"
+    },
+    "standard": {
+     "description": "Filter by standard: bicycle | life-stage | problem-opportunity.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Filter by status: on | draft.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_guides",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "api_version": {
+     "type": "string"
+    },
+    "count": {
+     "type": "number"
+    },
+    "fields": {
+     "enum": [
+      "compact",
+      "full"
+     ],
+     "type": "string"
+    },
+    "filters": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "guides": {
+     "items": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "access": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "canonical_url": {
+          "type": "string"
+         },
+         "category": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "domain": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "has_artifact": {
+          "type": "boolean"
+         },
+         "home": {
+          "type": "string"
+         },
+         "personas": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "price_cents": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "slug": {
+          "type": "string"
+         },
+         "status": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "title": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         }
+        },
+        "required": [
+         "slug",
+         "title",
+         "home",
+         "status",
+         "access",
+         "price_cents",
+         "has_artifact",
+         "category",
+         "domain",
+         "personas",
+         "canonical_url"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": {},
+        "propertyNames": {
+         "type": "string"
+        },
+        "type": "object"
+       }
+      ]
+     },
+     "type": "array"
+    },
+    "limit": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "registry_meta": {},
+    "rollup": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "total_matching": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "api_version",
+    "fields",
+    "count",
+    "total_matching",
+    "limit",
+    "filters",
+    "guides"
+   ],
+   "type": "object"
+  },
+  "title": "List the guide registry"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the bicycle.guide vocabulary — domains, shelves (with live guide counts), series, personas, guide_types, and the classification conventions (pillar/spoke, discriminant home, bicycle-guide-serves-all) as machine-readable data rather than prose.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_taxonomy",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "api_version": {
+     "type": "string"
+    },
+    "conventions": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "counts_basis": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "domains": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "guide_types": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "personas": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "registry_meta": {},
+    "series": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "shelves": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "unclassified": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "api_version",
+    "registry_meta",
+    "counts_basis",
+    "domains",
+    "shelves",
+    "series",
+    "personas",
+    "guide_types",
+    "conventions",
+    "unclassified"
+   ],
+   "type": "object"
+  },
+  "title": "Get the guide program's vocabulary"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search Answers by free-text query over question/answer text. Returns contract v0 records. Read-only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "description": "Max results to return (default: loader's choice, capped 200).",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Free-text query matched against question/answer text.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_answers",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "results": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Search answers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search published guides by topic. Returns matches, or a structured refusal with the nearest owned guides and the missing topic. No model call. Filter by persona or category.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "Subject shelf filter. A miss that fails this rule is a structured refusal.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Cap hits returned. Default 10, max 20.",
+     "type": "number"
+    },
+    "persona": {
+     "description": "Audience filter. A miss that fails this rule is a structured refusal.",
+     "type": "string"
+    },
+    "q": {
+     "description": "Topic or question in plain language. No model call — matched against registry taxonomy and the capability spine.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "search_guides",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "api_version": {
+     "type": "string"
+    },
+    "covered": {
+     "type": "boolean"
+    },
+    "filters": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "guides": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "canonical_url": {
+        "type": "string"
+       },
+       "category": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "home": {
+        "type": "string"
+       },
+       "personas": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "title": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "why": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "title",
+       "home",
+       "category",
+       "personas",
+       "canonical_url",
+       "why"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "missing_topic": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "nearest": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "canonical_url": {
+        "type": "string"
+       },
+       "category": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "home": {
+        "type": "string"
+       },
+       "personas": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "title": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "why": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "title",
+       "home",
+       "category",
+       "personas",
+       "canonical_url",
+       "why"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "query": {
+     "type": "string"
+    },
+    "suggest": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "authors": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "title": {
+        "type": "string"
+       },
+       "topic": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      },
+      "required": [
+       "title",
+       "authors",
+       "topic"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "api_version",
+    "covered",
+    "query",
+    "missing_topic",
+    "filters",
+    "guides",
+    "nearest",
+    "suggest"
+   ],
+   "type": "object"
+  },
+  "title": "Search guides, or refuse with the nearest owned"
+ }
+]

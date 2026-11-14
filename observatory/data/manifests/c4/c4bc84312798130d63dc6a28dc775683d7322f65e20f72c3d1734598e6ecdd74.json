@@ -1,0 +1,1515 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create an alert"
+  },
+  "description": "Create a stock alert on an item (type Quantity, e.g. threshold_method quantity_less_than with threshold_value 5, or less_than_or_equal_to_min_quantity), or a DateReminder on a datetime custom field (custom_attribute_id + before/after/same_day + threshold_interval). WRITE. Sortly: POST /api/v1/alerts.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_attribute_id": {
+     "description": "For DateReminder: the datetime custom field to watch.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "item_id": {
+     "description": "The item the alert watches.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "recipient_groups": {
+     "description": "Who is notified: owners, admins, members, limited, or a custom role name. Default owners.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "threshold_interval": {
+     "description": "Required for DateReminder; omit for Quantity.",
+     "enum": [
+      "days",
+      "weeks",
+      "months",
+      "years"
+     ],
+     "type": "string"
+    },
+    "threshold_method": {
+     "description": "What triggers it: a quantity_* method for Quantity, before/after/same_day for DateReminder.",
+     "enum": [
+      "less_than_or_equal_to_min_quantity",
+      "quantity_greater_than",
+      "quantity_less_than",
+      "quantity_less_than_equal_to",
+      "quantity_greater_than_equal_to",
+      "before",
+      "after",
+      "same_day"
+     ],
+     "type": "string"
+    },
+    "threshold_value": {
+     "description": "The number compared against (or the interval count).",
+     "type": "number"
+    },
+    "type": {
+     "description": "Quantity = stock threshold; DateReminder = date custom field.",
+     "enum": [
+      "Quantity",
+      "DateReminder"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "item_id",
+    "type",
+    "threshold_method"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_create_alert",
+  "output_schema": {},
+  "title": "Create an alert"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create an item or folder"
+  },
+  "description": "Create a trackable item (type item) or a folder (type folder), optionally inside a folder via parent_id, with quantity, price, tags, custom fields, barcodes and a measured quantity. WRITE. Sortly: POST /api/v1/items.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_attribute_values": {
+     "description": "Custom field values. Look up ids with sortly_list_custom_fields first.",
+     "items": {
+      "properties": {
+       "custom_attribute_id": {
+        "description": "Custom field id, from sortly_list_custom_fields.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "value": {
+        "description": "Value to store; null clears it.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "custom_attribute_id",
+       "value"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "label_url": {
+     "description": "Value encoded in the primary QR code / barcode.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "label_url_extra": {
+     "description": "Value encoded in the secondary code.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "label_url_extra_type": {
+     "anyOf": [
+      {
+       "enum": [
+        "org.gs1.UPC-E",
+        "org.iso.Code39",
+        "org.iso.Code39Mod43",
+        "org.gs1.EAN-13",
+        "org.gs1.EAN-8",
+        "com.intermec.Code93",
+        "org.iso.Code128",
+        "org.iso.PDF417",
+        "org.iso.Aztec",
+        "org.iso.QRCode",
+        "org.ansi.Interleaved2of5",
+        "org.iso.DataMatrix",
+        "com.sortly.textEntry"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Symbology of the secondary code."
+    },
+    "label_url_type": {
+     "anyOf": [
+      {
+       "enum": [
+        "org.gs1.UPC-E",
+        "org.iso.Code39",
+        "org.iso.Code39Mod43",
+        "org.gs1.EAN-13",
+        "org.gs1.EAN-8",
+        "com.intermec.Code93",
+        "org.iso.Code128",
+        "org.iso.PDF417",
+        "org.iso.Aztec",
+        "org.iso.QRCode",
+        "org.ansi.Interleaved2of5",
+        "org.iso.DataMatrix",
+        "com.sortly.textEntry"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Symbology of the primary code."
+    },
+    "measured_quantity": {
+     "description": "For items measured in something other than units.",
+     "properties": {
+      "name": {
+       "description": "The unit, e.g. kg, ft, l, units (see sortly_list_units).",
+       "enum": [
+        "lbs",
+        "g",
+        "kg",
+        "oz",
+        "yd",
+        "cm",
+        "ft",
+        "in",
+        "m",
+        "gal",
+        "ml",
+        "l",
+        "ft3",
+        "in3",
+        "ft2",
+        "in2",
+        "units"
+       ],
+       "type": "string"
+      },
+      "type": {
+       "description": "Kind of measurement; set on create only.",
+       "enum": [
+        "weight",
+        "length",
+        "volume",
+        "area",
+        "count"
+       ],
+       "type": "string"
+      },
+      "value": {
+       "description": "The measured amount.",
+       "type": "number"
+      }
+     },
+     "required": [
+      "value",
+      "type",
+      "name"
+     ],
+     "type": "object"
+    },
+    "min_quantity": {
+     "description": "Minimum level; a Quantity alert can fire when stock reaches it.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "name": {
+     "description": "Name, max 190 characters.",
+     "maxLength": 190,
+     "minLength": 1,
+     "type": "string"
+    },
+    "notes": {
+     "description": "Free-text notes.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "parent_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Folder to create it in. Omit/null = root."
+    },
+    "photo_ids": {
+     "description": "Ids of photos already in the account to attach.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "price": {
+     "description": "Unit price.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "quantity": {
+     "description": "How many you have.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "tags": {
+     "description": "Tag names, e.g. [\"furniture\", \"used\"].",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "type": {
+     "description": "item = trackable stock; folder = a container.",
+     "enum": [
+      "item",
+      "folder"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "type"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_create_item",
+  "output_schema": {},
+  "title": "Create an item or folder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create a job"
+  },
+  "description": "Create a job (and its job folder) in not_started status. Name must be unique in the company. Then use sortly_pull_items_into_job to record the stock it uses. WRITE. Sortly: POST /api/v1/jobs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_field_values": {
+     "description": "Up to 2 job custom field values.",
+     "items": {
+      "properties": {
+       "custom_field_id": {
+        "description": "Job custom field id.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "value": {
+        "description": "Value, max 191 characters.",
+        "maxLength": 191,
+        "type": "string"
+       }
+      },
+      "required": [
+       "custom_field_id",
+       "value"
+      ],
+      "type": "object"
+     },
+     "maxItems": 2,
+     "type": "array"
+    },
+    "end_date": {
+     "description": "YYYY-MM-DD.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "external_job_link": {
+     "description": "Link to the job in another system.",
+     "format": "uri",
+     "type": "string"
+    },
+    "name": {
+     "description": "Unique job name, max 190 characters.",
+     "maxLength": 190,
+     "minLength": 1,
+     "type": "string"
+    },
+    "notes": {
+     "description": "Job notes, max 4000 characters.",
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "start_date": {
+     "description": "YYYY-MM-DD.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "subfolders": {
+     "description": "Subfolder names to create, up to 25.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 25,
+     "type": "array"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_create_job",
+  "output_schema": {},
+  "title": "Create a job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Draft a purchase order"
+  },
+  "description": "Create a purchase order in draft status (no stock or ordering happens until it is moved on in Sortly). Sortly computes amounts, sub_total and total from the lines; omit purchase_order_number to have one generated. Needs Purchase Orders on the plan (else 402). WRITE. Sortly: POST /api/v1/purchase_orders.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "bill_to": {
+     "description": "Billing address.",
+     "properties": {
+      "city": {
+       "type": "string"
+      },
+      "country": {
+       "type": "string"
+      },
+      "line1": {
+       "type": "string"
+      },
+      "line2": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      },
+      "state": {
+       "type": "string"
+      },
+      "zip_code": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "charges": {
+     "description": "Order-level charges; each defaults to 0.",
+     "properties": {
+      "discount": {
+       "anyOf": [
+        {
+         "pattern": "^-?\\d+(\\.\\d+)?$",
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "description": "A decimal, e.g. \"10\" or \"2.5\"."
+      },
+      "shipping_cost": {
+       "anyOf": [
+        {
+         "pattern": "^-?\\d+(\\.\\d+)?$",
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "description": "A decimal, e.g. \"10\" or \"2.5\"."
+      },
+      "tax": {
+       "anyOf": [
+        {
+         "pattern": "^-?\\d+(\\.\\d+)?$",
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "description": "A decimal, e.g. \"10\" or \"2.5\"."
+      }
+     },
+     "type": "object"
+    },
+    "currency_code": {
+     "description": "ISO 4217 code, e.g. USD.",
+     "maxLength": 3,
+     "minLength": 3,
+     "type": "string"
+    },
+    "expected_delivery_date": {
+     "description": "ISO 8601 timestamp, e.g. 2026-08-20T00:00:00Z.",
+     "type": "string"
+    },
+    "line_items": {
+     "description": "Up to 100 lines.",
+     "items": {
+      "properties": {
+       "item_id": {
+        "description": "Sortly item to order (must exist).",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       },
+       "item_number": {
+        "maxLength": 25,
+        "type": "string"
+       },
+       "name": {
+        "description": "Name recorded on the line.",
+        "maxLength": 191,
+        "minLength": 1,
+        "type": "string"
+       },
+       "notes": {
+        "maxLength": 314,
+        "type": "string"
+       },
+       "quantity": {
+        "anyOf": [
+         {
+          "pattern": "^-?\\d+(\\.\\d+)?$",
+          "type": "string"
+         },
+         {
+          "type": "number"
+         }
+        ],
+        "description": "Quantity, e.g. \"10\" or 2.5."
+       },
+       "unit_of_measure": {
+        "description": "Unit abbreviation, e.g. units, ft, kg.",
+        "type": "string"
+       },
+       "unit_rate": {
+        "anyOf": [
+         {
+          "pattern": "^-?\\d+(\\.\\d+)?$",
+          "type": "string"
+         },
+         {
+          "type": "number"
+         }
+        ],
+        "description": "Price per unit. Omit for an unpriced line."
+       },
+       "variant_options": {
+        "items": {
+         "properties": {
+          "name": {
+           "type": "string"
+          },
+          "value": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "name",
+          "value"
+         ],
+         "type": "object"
+        },
+        "maxItems": 3,
+        "type": "array"
+       }
+      },
+      "required": [
+       "item_id",
+       "name",
+       "quantity",
+       "unit_of_measure"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    },
+    "notes": {
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "purchase_order_number": {
+     "description": "Unique PO number, max 20 chars. Omit to auto-generate.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "ship_to": {
+     "description": "Shipping address.",
+     "properties": {
+      "city": {
+       "type": "string"
+      },
+      "country": {
+       "type": "string"
+      },
+      "line1": {
+       "type": "string"
+      },
+      "line2": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      },
+      "state": {
+       "type": "string"
+      },
+      "zip_code": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "terms": {
+     "description": "e.g. Net 30.",
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "vendor": {
+     "description": "The vendor, captured on the PO.",
+     "properties": {
+      "city": {
+       "type": "string"
+      },
+      "country": {
+       "type": "string"
+      },
+      "email": {
+       "maxLength": 190,
+       "type": "string"
+      },
+      "line1": {
+       "type": "string"
+      },
+      "line2": {
+       "type": "string"
+      },
+      "name": {
+       "maxLength": 50,
+       "type": "string"
+      },
+      "phone": {
+       "maxLength": 22,
+       "type": "string"
+      },
+      "state": {
+       "type": "string"
+      },
+      "zip_code": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "currency_code"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_create_purchase_order",
+  "output_schema": {},
+  "title": "Draft a purchase order"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one item or folder"
+  },
+  "description": "Fetch a single item or folder by numeric id: quantity, min_quantity, price, tags, sid, barcodes, and optionally custom field values and photos. Sortly: GET /api/v1/items/{item_id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include": {
+     "description": "Nested associations to embed: custom_attributes and/or photos.",
+     "items": {
+      "enum": [
+       "custom_attributes",
+       "photos"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "item_id": {
+     "description": "The item's or folder's numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "item_id"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_get_item",
+  "output_schema": {},
+  "title": "Get one item or folder"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one job"
+  },
+  "description": "Fetch a single job: status, folder_id (where its pulled items sit), dates, notes, custom field values and the version needed for updates. Sortly: GET /api/v1/jobs/{job_id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "job_id": {
+     "description": "The job's id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_get_job",
+  "output_schema": {},
+  "title": "Get one job"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one purchase order"
+  },
+  "description": "Fetch a single purchase order with its line_items (quantity vs received_quantity), vendor, addresses, charges, totals and version. Sortly: GET /api/v1/purchase_orders/{purchase_order_id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "purchase_order_id": {
+     "description": "The purchase order's id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "purchase_order_id"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_get_purchase_order",
+  "output_schema": {},
+  "title": "Get one purchase order"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a purchase order's receive status"
+  },
+  "description": "Report the most recent receive against a purchase order: pending / completed / failed, with the line ids received, pending and failed (and why). Returns 404 until something has been received. Sortly: GET /api/v1/purchase_orders/{purchase_order_id}/receive/status.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "purchase_order_id": {
+     "description": "The purchase order's id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "purchase_order_id"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_get_purchase_order_receive_status",
+  "output_schema": {},
+  "title": "Get a purchase order's receive status"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List alerts"
+  },
+  "description": "List stock (Quantity) and date (DateReminder) alerts, with is_fired showing which have already triggered — the quick way to find low-stock items. Sortly: GET /api/v1/alerts.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size (default 10).",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_list_alerts",
+  "output_schema": {},
+  "title": "List alerts"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List custom fields"
+  },
+  "description": "List the account's custom fields (id, name, type, applies_to). Call this before writing custom_attribute_values to get the right custom_attribute_id. Sortly: GET /api/v1/custom_fields.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size (default 10).",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_list_custom_fields",
+  "output_schema": {},
+  "title": "List custom fields"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List items and folders"
+  },
+  "description": "List items and folders, newest first. By default the root level; pass folder_id for a folder's direct contents, plus include_subfolders for everything nested under it. Paginated via meta.next_page_url / total_pages. Sortly: GET /api/v1/items.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "folder_id": {
+     "description": "Only the direct contents of this folder. Omit for the root level.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "include": {
+     "description": "Nested associations to embed: custom_attributes and/or photos.",
+     "items": {
+      "enum": [
+       "custom_attributes",
+       "photos"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "include_subfolders": {
+     "description": "With folder_id: also return everything nested beneath it. Default false.",
+     "type": "boolean"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size, 1-1000 (default 10).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_list_items",
+  "output_schema": {},
+  "title": "List items and folders"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List jobs"
+  },
+  "description": "List jobs (work orders that pull stock out), most recently updated first, filterable by name prefix and status. Paginated via meta.pagination.has_next. Sortly: GET /api/v1/jobs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "name": {
+     "description": "Jobs whose name starts with this (case-insensitive).",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size, 1-100 (default 20).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "sort_by": {
+     "description": "Sort field. Default updated_at.",
+     "enum": [
+      "name",
+      "status",
+      "start_date",
+      "end_date",
+      "created_by_name",
+      "updated_at"
+     ],
+     "type": "string"
+    },
+    "sort_direction": {
+     "description": "Default desc.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "description": "Only these statuses. Default all.",
+     "items": {
+      "enum": [
+       "not_started",
+       "in_progress",
+       "completed"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_list_jobs",
+  "output_schema": {},
+  "title": "List jobs"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List purchase orders"
+  },
+  "description": "List purchase orders, most recently updated first, filterable by PO number and status. The list leaves out notes, terms, sub_total and line_items — use sortly_get_purchase_order for those. Needs Purchase Orders on the plan (else 402). Sortly: GET /api/v1/purchase_orders.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size, 1-100 (default 20).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "purchase_order_number": {
+     "description": "POs whose number contains this.",
+     "type": "string"
+    },
+    "sort_by": {
+     "description": "Sort field. Default updated_at.",
+     "enum": [
+      "purchase_order_number",
+      "created_by",
+      "submitted_by",
+      "status",
+      "updated_at",
+      "total",
+      "ordered_date",
+      "expected_delivery_date",
+      "received_date"
+     ],
+     "type": "string"
+    },
+    "sort_direction": {
+     "description": "Default desc.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "description": "Only these statuses. Default all.",
+     "items": {
+      "enum": [
+       "draft",
+       "ready_for_review",
+       "approved",
+       "ordered",
+       "partially_received",
+       "received",
+       "voided",
+       "closed"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_list_purchase_orders",
+  "output_schema": {},
+  "title": "List purchase orders"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List recently updated items"
+  },
+  "description": "List items and folders changed since a Unix timestamp — the incremental-sync read ('what moved since yesterday?'). Without updated_since it behaves like sortly_list_items. Sortly: GET /api/v1/items/recent.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "folder_id": {
+     "description": "Only the direct contents of this folder. Omit for the root level.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "include": {
+     "description": "Nested associations to embed: custom_attributes and/or photos.",
+     "items": {
+      "enum": [
+       "custom_attributes",
+       "photos"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "include_subfolders": {
+     "description": "With folder_id: also return everything nested beneath it. Default false.",
+     "type": "boolean"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size, 1-100 (default 10).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "updated_since": {
+     "description": "Unix epoch seconds; only items updated after this.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_list_recently_updated_items",
+  "output_schema": {},
+  "title": "List recently updated items"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List units of measure"
+  },
+  "description": "List the units of measure available to the account (unit_name, unit_type, scale) — the values measured_quantity and purchase-order lines expect. Sortly: GET /api/v1/units.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "sortly_list_units",
+  "output_schema": {},
+  "title": "List units of measure"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Move stock to another folder"
+  },
+  "description": "Move some or all of an item's quantity to another folder (items only — relocate a folder with sortly_update_item parent_id). A partial move splits off a new item with the same sid; a full move relocates the item; a matching item at the destination is merged, and the returned id is the destination's. Undo by moving it back. WRITE. Sortly: POST /api/v1/items/{item_id}/move.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "folder_id": {
+     "description": "Destination folder. Omit to move to the root level.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "item_id": {
+     "description": "The item's numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "leave_zero_quantity": {
+     "description": "Keep a zero-quantity record in the source folder. Default false.",
+     "type": "boolean"
+    },
+    "quantity": {
+     "description": "How much to move.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "item_id",
+    "quantity"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_move_item",
+  "output_schema": {},
+  "title": "Move stock to another folder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Pull items into a job"
+  },
+  "description": "Move quantities of existing items (from any folders) into a job's folder — how usage on a job is recorded. Up to 100 items per call; items are processed independently, so ALWAYS check data.errors (a partial failure still returns 200). Undo with sortly_return_items_from_job. Returns 403 on a completed job. WRITE. Sortly: POST /api/v1/jobs/{job_id}/items.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "items": {
+     "description": "1-100 items.",
+     "items": {
+      "properties": {
+       "item_id": {
+        "description": "Item to move onto the job.",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       },
+       "item_version": {
+        "description": "Version from the last read of the item; stale is rejected.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "leave_zero_quantity": {
+        "description": "Keep a zero-quantity copy in the original folder.",
+        "type": "boolean"
+       },
+       "quantity": {
+        "description": "Quantity to move.",
+        "exclusiveMinimum": 0,
+        "type": "number"
+       }
+      },
+      "required": [
+       "item_id",
+       "quantity"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    },
+    "job_id": {
+     "description": "The job's id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "notes": {
+     "description": "Optional note kept in each item's history.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id",
+    "items"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_pull_items_into_job",
+  "output_schema": {},
+  "title": "Pull items into a job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Return items from a job"
+  },
+  "description": "Move items off a job's folder back into inventory (destination_folder_id, or All Items if omitted). Up to 100 per call; check data.errors — items are processed one by one. WRITE. Sortly: POST /api/v1/jobs/{job_id}/items/return.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "items": {
+     "description": "1-100 items.",
+     "items": {
+      "properties": {
+       "destination_folder_id": {
+        "description": "Folder to return it to; omit for All Items.",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       },
+       "item_id": {
+        "description": "Item on the job to move off it.",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       },
+       "item_version": {
+        "description": "Version from the last read of the item; stale is rejected.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "leave_zero_quantity": {
+        "description": "Keep a zero-quantity copy in the job's folder.",
+        "type": "boolean"
+       },
+       "quantity": {
+        "description": "Quantity to return.",
+        "exclusiveMinimum": 0,
+        "type": "number"
+       }
+      },
+      "required": [
+       "item_id",
+       "quantity"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    },
+    "job_id": {
+     "description": "The job's id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "notes": {
+     "description": "Optional note recorded in the item's history.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id",
+    "items"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_return_items_from_job",
+  "output_schema": {},
+  "title": "Return items from a job"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search inventory"
+  },
+  "description": "Search items and folders by name, optionally limited to items or folders and scoped to specific folders. Read-only despite being a POST. Paginated: send the same arguments with the next page number. Sortly: POST /api/v1/items/search.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "folder_ids": {
+     "description": "Only search in these folders.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "include": {
+     "description": "Nested associations to embed: custom_attributes and/or photos.",
+     "items": {
+      "enum": [
+       "custom_attributes",
+       "photos"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "include_subfolders": {
+     "description": "With folder_ids: also search folders nested under them. Default false.",
+     "type": "boolean"
+    },
+    "name": {
+     "description": "Name (or part of it) to search for.",
+     "maxLength": 190,
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Page size, 1-100 (default 100).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort by name, ascending or descending.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "type": {
+     "description": "Limit to items or folders. Default all.",
+     "enum": [
+      "all",
+      "item",
+      "folder"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "sortly_search_items",
+  "output_schema": {},
+  "title": "Search inventory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Update an item or folder"
+  },
+  "description": "Change fields on an existing item or folder — e.g. set a new quantity after a stock count, rename it, or relocate a folder via parent_id. Only the fields you pass change; pass null to clear a nullable field. Sending tags or custom_attribute_values replaces them. WRITE. Sortly: PUT /api/v1/items/{item_id} (returns 204).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_attribute_values": {
+     "description": "Custom field values. Look up ids with sortly_list_custom_fields first.",
+     "items": {
+      "properties": {
+       "custom_attribute_id": {
+        "description": "Custom field id, from sortly_list_custom_fields.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "value": {
+        "description": "Value to store; null clears it.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "custom_attribute_id",
+       "value"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "item_id": {
+     "description": "The item's or folder's numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "label_url": {
+     "description": "Value encoded in the primary QR code / barcode.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "label_url_extra": {
+     "description": "Value encoded in the secondary code.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "label_url_extra_type": {
+     "anyOf": [
+      {
+       "enum": [
+        "org.gs1.UPC-E",
+        "org.iso.Code39",
+        "org.iso.Code39Mod43",
+        "org.gs1.EAN-13",
+        "org.gs1.EAN-8",
+        "com.intermec.Code93",
+        "org.iso.Code128",
+        "org.iso.PDF417",
+        "org.iso.Aztec",
+        "org.iso.QRCode",
+        "org.ansi.Interleaved2of5",
+        "org.iso.DataMatrix",
+        "com.sortly.textEntry"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Symbology of the secondary code."
+    },
+    "label_url_type": {
+     "anyOf": [
+      {
+       "enum": [
+        "org.gs1.UPC-E",
+        "org.iso.Code39",
+        "org.iso.Code39Mod43",
+        "org.gs1.EAN-13",
+        "org.gs1.EAN-8",
+        "com.intermec.Code93",
+        "org.iso.Code128",
+        "org.iso.PDF417",
+        "org.iso.Aztec",
+        "org.iso.QRCode",
+        "org.ansi.Interleaved2of5",
+        "org.iso.DataMatrix",
+        "com.sortly.textEntry"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Symbology of the primary code."
+    },
+    "measured_quantity": {
+     "description": "New measured amount for a measured item.",
+     "properties": {
+      "value": {
+       "description": "The measured amount (the unit is fixed at creation).",
+       "type": "number"
+      }
+     },
+     "required": [
+      "value"
+     ],
+     "type": "object"
+    },
+    "min_quantity": {
+     "description": "Minimum level; a Quantity alert can fire when stock reaches it.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "name": {
+     "description": "New name.",
+     "maxLength": 190,
+     "minLength": 1,
+     "type": "string"
+    },
+    "notes": {
+     "description": "Free-text notes.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "parent_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Move into this folder (null = root). To move PART of an item's stock use sortly_move_item."
+    },
+    "photo_ids": {
+     "description": "Ids of photos already in the account to attach.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "price": {
+     "description": "Unit price.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "quantity": {
+     "description": "How many you have.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "tags": {
+     "description": "Tag names, e.g. [\"furniture\", \"used\"].",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "item_id"
+   ],
+   "type": "object"
+  },
+  "name": "sortly_update_item",
+  "output_schema": {},
+  "title": "Update an item or folder"
+ }
+]

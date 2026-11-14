@@ -1,0 +1,1958 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Cross a paper to a funded product"
+  },
+  "description": "Turns a paper id (DOI, arXiv, PubMed or OpenAlex) into a research card and a demand check, and returns each step with the Qloo call behind it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "description": "Who serves or stocks it (F5): Address contains. Qloo: filter.address.",
+     "examples": [
+      "Congress Ave"
+     ],
+     "type": "string"
+    },
+    "admin1": {
+     "description": "Where to launch (F3): Exact state or region. Qloo: filter.geocode.admin1_region.",
+     "examples": [
+      "Texas"
+     ],
+     "type": "string"
+    },
+    "admin2": {
+     "description": "Where to launch (F3): Exact county or borough. Qloo: filter.geocode.admin2_region.",
+     "examples": [
+      "Travis County"
+     ],
+     "type": "string"
+    },
+    "age": {
+     "description": "Who wants it (F1): Who: age range(s) the answer is weighted to. Qloo: signal.demographics.age. comma-separated, of: 24_and_younger, 25_to_29, 30_to_34, 35_to_44, 45_to_54, 55_and_older",
+     "examples": [
+      "35_to_44"
+     ],
+     "type": "string"
+    },
+    "audiences": {
+     "description": "Who wants it (F1): Audience segment ids (from /v2/audiences). Qloo: signal.demographics.audiences.",
+     "examples": [
+      "urn:audience:hobbies_and_interests:running"
+     ],
+     "type": "string"
+    },
+    "audiences_weight": {
+     "description": "Who wants it (F1): How much the segments steer the answer. Qloo: signal.demographics.audiences.weight.",
+     "enum": [
+      "low",
+      "medium",
+      "high",
+      "higher"
+     ],
+     "examples": [
+      "high"
+     ],
+     "type": "string"
+    },
+    "born_max": {
+     "description": "Media and people products (F6): Person: born on or before (YYYY-MM-DD). Qloo: filter.date_of_birth.max.",
+     "examples": [
+      "1990-12-31"
+     ],
+     "type": "string"
+    },
+    "born_min": {
+     "description": "Media and people products (F6): Person: born on or after (YYYY-MM-DD). Qloo: filter.date_of_birth.min.",
+     "examples": [
+      "1960-01-01"
+     ],
+     "type": "string"
+    },
+    "business_rating_max": {
+     "description": "At what price, where (F4): Business rating at most. Qloo: filter.properties.business_rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "business_rating_min": {
+     "description": "At what price, where (F4): Business rating at least. Qloo: filter.properties.business_rating.min.",
+     "examples": [
+      3.5
+     ],
+     "type": "number"
+    },
+    "city": {
+     "description": "Where to launch (F3): Exact city or town name. Qloo: filter.geocode.name.",
+     "examples": [
+      "Austin"
+     ],
+     "type": "string"
+    },
+    "content_rating": {
+     "description": "Media and people products (F6): Film/TV content rating(s), MPAA. Qloo: filter.content_rating.",
+     "examples": [
+      "PG-13"
+     ],
+     "type": "string"
+    },
+    "country": {
+     "description": "Where to launch (F3): Two-letter country code. Qloo: filter.geocode.country_code.",
+     "examples": [
+      "US"
+     ],
+     "type": "string"
+    },
+    "died_max": {
+     "description": "Media and people products (F6): Person: died on or before (YYYY-MM-DD). Qloo: filter.date_of_death.max.",
+     "examples": [
+      "2020-12-31"
+     ],
+     "type": "string"
+    },
+    "died_min": {
+     "description": "Media and people products (F6): Person: died on or after (YYYY-MM-DD). Qloo: filter.date_of_death.min.",
+     "examples": [
+      "2000-01-01"
+     ],
+     "type": "string"
+    },
+    "entity_id": {
+     "description": "Look up exact things (F7): Look up exact things: paste a Qloo entity id (Search Entities by ID). Qloo: entity_ids.",
+     "examples": [
+      "B2A5BF4D-6D9A-4A8B-9E50-1A2B3C4D5E6F"
+     ],
+     "type": "string"
+    },
+    "exclude": {
+     "description": "What is underserved (F2): Entity ids to leave out. Qloo: filter.exclude.entities.",
+     "examples": [
+      "4BBEF799-A0C4-4110-AB01-39216993C312"
+     ],
+     "type": "string"
+    },
+    "exclude_geohash": {
+     "description": "Where to launch (F3): Leave out results whose geohash starts with this. Qloo: filter.exclude.location.geohash.",
+     "examples": [
+      "9v6kp"
+     ],
+     "type": "string"
+    },
+    "exclude_location": {
+     "description": "Where to launch (F3): Leave out a WKT area or locality id. Qloo: filter.exclude.location.",
+     "examples": [
+      "POINT(-97.74 30.27)"
+     ],
+     "type": "string"
+    },
+    "exclude_names": {
+     "description": "What is underserved (F2): Leave out things by name (Qloo resolves them; sent as JSON). Qloo: filter.exclude.entities.query. names, or one comma-separated string",
+     "examples": [
+      "Nike, Adidas"
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "exclude_near": {
+     "description": "Where to launch (F3): Leave out an area by name. Qloo: filter.exclude.location.query.",
+     "examples": [
+      "Downtown Austin"
+     ],
+     "type": "string"
+    },
+    "exclude_tags": {
+     "description": "What is underserved (F2): Tag ids to leave out. Qloo: filter.exclude.tags.",
+     "examples": [
+      "urn:tag:genre:media:horror"
+     ],
+     "type": "string"
+    },
+    "exclude_tags_operator": {
+     "description": "What is underserved (F2): Leave out results with any (union) or all (intersection) of those tags. Qloo: operator.exclude.tags.",
+     "enum": [
+      "union",
+      "intersection"
+     ],
+     "examples": [
+      "union"
+     ],
+     "type": "string"
+    },
+    "external": {
+     "description": "Who serves or stocks it (F5): Listed on these (resy, michelin, tablet). Qloo: filter.external.exists. comma-separated, of: resy, michelin, tablet",
+     "examples": [
+      "resy"
+     ],
+     "type": "string"
+    },
+    "external_operator": {
+     "description": "Who serves or stocks it (F5): Any (union) or all (intersection) of those. Qloo: operator.filter.external.exists.",
+     "enum": [
+      "union",
+      "intersection"
+     ],
+     "examples": [
+      "union"
+     ],
+     "type": "string"
+    },
+    "finale_year_max": {
+     "description": "Media and people products (F6): TV: final season up to this year. Qloo: filter.finale_year.max.",
+     "examples": [
+      2024
+     ],
+     "type": "integer"
+    },
+    "finale_year_min": {
+     "description": "Media and people products (F6): TV: final season from this year. Qloo: filter.finale_year.min.",
+     "examples": [
+      2018
+     ],
+     "type": "integer"
+    },
+    "gender": {
+     "description": "Who wants it (F1): Who: gender the answer is weighted to. Qloo: signal.demographics.gender.",
+     "enum": [
+      "male",
+      "female"
+     ],
+     "examples": [
+      "female"
+     ],
+     "type": "string"
+    },
+    "geohash": {
+     "description": "Where to launch (F3): Only results whose geohash starts with this. Qloo: filter.location.geohash.",
+     "examples": [
+      "9v6k"
+     ],
+     "type": "string"
+    },
+    "hide_leader": {
+     "description": "What is underserved (F2): Gaps: hide the market leader (its Qloo id is excluded). Qloo: filter.exclude.entities.",
+     "examples": [
+      true
+     ],
+     "type": "boolean"
+    },
+    "hotel_class": {
+     "description": "At what price, where (F4): Hotel classes 1-5, mapped where they are hot. Qloo: filter.dimensions.hotel_class. comma-separated, of: 1, 2, 3, 4, 5",
+     "examples": [
+      "4,5"
+     ],
+     "type": "string"
+    },
+    "hotel_class_max": {
+     "description": "At what price, where (F4): Hotel class at most (1-5). Qloo: filter.hotel_class.max.",
+     "examples": [
+      5
+     ],
+     "type": "integer"
+    },
+    "hotel_class_min": {
+     "description": "At what price, where (F4): Hotel class at least (1-5). Qloo: filter.hotel_class.min.",
+     "examples": [
+      3
+     ],
+     "type": "integer"
+    },
+    "idea": {
+     "type": "string"
+    },
+    "interests_names": {
+     "description": "Who wants it (F1): Steer the answer by things you name (Qloo resolves them; sent as JSON). Qloo: signal.interests.entities.query. names, or one comma-separated string",
+     "examples": [
+      "Hoka, Salomon"
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "latest_year_max": {
+     "description": "Media and people products (F6): TV: released or updated up to this year. Qloo: filter.latest_known_year.max.",
+     "examples": [
+      2025
+     ],
+     "type": "integer"
+    },
+    "latest_year_min": {
+     "description": "Media and people products (F6): TV: released or updated from this year. Qloo: filter.latest_known_year.min.",
+     "examples": [
+      2020
+     ],
+     "type": "integer"
+    },
+    "location": {
+     "description": "Where to launch (F3): A WKT POINT/POLYGON (longitude first) or a locality id. Qloo: filter.location.",
+     "examples": [
+      "POINT(-97.7431 30.2672)"
+     ],
+     "type": "string"
+    },
+    "lookup": {
+     "description": "Look up exact things (F7): Look up exact things: a name to find (Search Entities). Qloo: query.",
+     "examples": [
+      "Austin"
+     ],
+     "type": "string"
+    },
+    "lookup_near": {
+     "description": "Look up exact things (F7): Search near: lat,lon or WKT. Qloo: filter.location.",
+     "examples": [
+      "30.2672,-97.7431"
+     ],
+     "type": "string"
+    },
+    "lookup_radius": {
+     "description": "Look up exact things (F7): Search radius in miles (0-100). Qloo: filter.radius.",
+     "examples": [
+      10
+     ],
+     "type": "number"
+    },
+    "lookup_sort": {
+     "description": "Look up exact things (F7): Order the search by. Qloo: sort_by.",
+     "enum": [
+      "match",
+      "distance",
+      "popularity"
+     ],
+     "examples": [
+      "match"
+     ],
+     "type": "string"
+    },
+    "lookup_types": {
+     "description": "Look up exact things (F7): What kinds to search. Qloo: types. comma-separated, of: urn:entity:actor, urn:entity:album, urn:entity:artist, urn:entity:author, urn:entity:book, urn:entity:brand, urn:entity:destination, urn:entity:director, urn:entity:locality, urn:entity:movie, urn:entity:person, urn:entity:place, urn:entity:podcast, urn:entity:tv_show, urn:entity:videogame",
+     "examples": [
+      "urn:entity:locality"
+     ],
+     "type": "string"
+    },
+    "near": {
+     "description": "Where to launch (F3): Where: a city or region by name. Qloo: filter.location.query.",
+     "examples": [
+      "Austin"
+     ],
+     "type": "string"
+    },
+    "open_on": {
+     "description": "Who serves or stocks it (F5): Open on this day. Qloo: filter.hours.",
+     "examples": [
+      "Sunday"
+     ],
+     "type": "string"
+    },
+    "person_gender": {
+     "description": "Media and people products (F6): Person: gender. Qloo: filter.gender.",
+     "enum": [
+      "male",
+      "female"
+     ],
+     "examples": [
+      "female"
+     ],
+     "type": "string"
+    },
+    "place": {
+     "type": "string"
+    },
+    "popularity_max": {
+     "description": "What is underserved (F2): Gaps: niche only, popularity at most this percentile (0-1). Qloo: filter.popularity.max.",
+     "examples": [
+      0.5
+     ],
+     "type": "number"
+    },
+    "popularity_min": {
+     "description": "What is underserved (F2): Popularity at least this percentile (0-1). Qloo: filter.popularity.min.",
+     "examples": [
+      0.1
+     ],
+     "type": "number"
+    },
+    "price_from": {
+     "description": "At what price, where (F4): Hotel price range from (0-1,000,000). Qloo: filter.price_range.from.",
+     "examples": [
+      100
+     ],
+     "type": "integer"
+    },
+    "price_level": {
+     "description": "At what price, where (F4): Price tier: 1 (cheap) to 4 (dear), mapped where it is hot. Qloo: filter.dimensions.price_level. comma-separated, of: 1, 2, 3, 4",
+     "examples": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "price_level_max": {
+     "description": "At what price, where (F4): Places at price level at most (1-4). Qloo: filter.price_level.max.",
+     "examples": [
+      3
+     ],
+     "type": "integer"
+    },
+    "price_level_min": {
+     "description": "At what price, where (F4): Places at price level at least (1-4). Qloo: filter.price_level.min.",
+     "examples": [
+      2
+     ],
+     "type": "integer"
+    },
+    "price_to": {
+     "description": "At what price, where (F4): Hotel price range to (0-1,000,000). Qloo: filter.price_range.to.",
+     "examples": [
+      300
+     ],
+     "type": "integer"
+    },
+    "product": {
+     "type": "string"
+    },
+    "product_kind": {
+     "description": "Media and people products (F6): Product kind: what the comparables are. Qloo: filter.type.",
+     "enum": [
+      "film",
+      "tv",
+      "book",
+      "person",
+      "artist",
+      "brand",
+      "podcast",
+      "game",
+      "place",
+      "destination"
+     ],
+     "examples": [
+      "film"
+     ],
+     "type": "string"
+    },
+    "qloo": {
+     "additionalProperties": true,
+     "description": "Anything else in the guide (F8): Any other documented parameter for the call's filter.type, by its Qloo name. Qloo: *.",
+     "examples": [
+      {
+       "bias.trends": "high"
+      }
+     ],
+     "type": "object"
+    },
+    "qloo_calls": {
+     "additionalProperties": true,
+     "description": "Anything else in the guide (F8): Calls to Qloo's other endpoints by path, each with its own documented parameters. Qloo: *.",
+     "examples": [
+      {
+       "/v2/tags": {
+        "feature.semantic_search": "true",
+        "filter.query": "trail running"
+       }
+      }
+     ],
+     "type": "object"
+    },
+    "quality": {
+     "description": "Who serves or stocks it (F5): Lean the ranking toward quality places. Qloo: bias.quality.",
+     "enum": [
+      "low",
+      "medium",
+      "high"
+     ],
+     "examples": [
+      "high"
+     ],
+     "type": "string"
+    },
+    "radius": {
+     "description": "Where to launch (F3): Where: radius around it, in meters (0 = strictly inside). Qloo: filter.location.radius.",
+     "examples": [
+      5000
+     ],
+     "type": "integer"
+    },
+    "rating_max": {
+     "description": "Media and people products (F6): Film/TV Qloo rating at most (0-5). Qloo: filter.rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "rating_min": {
+     "description": "Media and people products (F6): Film/TV Qloo rating at least (0-5). Qloo: filter.rating.min.",
+     "examples": [
+      3.5
+     ],
+     "type": "number"
+    },
+    "ref": {
+     "type": "string"
+    },
+    "references_brand": {
+     "description": "Who serves or stocks it (F5): Who serves it: a brand by name or id; only places tied to it. Qloo: filter.references_brand.",
+     "examples": [
+      "Whole Foods Market"
+     ],
+     "type": "string"
+    },
+    "release_country": {
+     "description": "Media and people products (F6): Film/TV released in these countries. Qloo: filter.release_country.",
+     "examples": [
+      "United States"
+     ],
+     "type": "string"
+    },
+    "release_country_operator": {
+     "description": "Media and people products (F6): Any (union) or all (intersection) of those. Qloo: operator.filter.release_country.",
+     "enum": [
+      "union",
+      "intersection"
+     ],
+     "examples": [
+      "union"
+     ],
+     "type": "string"
+    },
+    "results_query": {
+     "description": "What is underserved (F2): Score only these named things (one name). Qloo: filter.results.entities.query.",
+     "examples": [
+      "Fitbit"
+     ],
+     "type": "string"
+    },
+    "resy_count_max": {
+     "description": "Who serves or stocks it (F5): Resy rating count at most. Qloo: filter.external.resy.count.max.",
+     "examples": [
+      10000
+     ],
+     "type": "integer"
+    },
+    "resy_count_min": {
+     "description": "Who serves or stocks it (F5): Resy rating count at least. Qloo: filter.external.resy.count.min.",
+     "examples": [
+      100
+     ],
+     "type": "integer"
+    },
+    "resy_party_max": {
+     "description": "Who serves or stocks it (F5): Resy party size at most. Qloo: filter.external.resy.party_size.max.",
+     "examples": [
+      8
+     ],
+     "type": "integer"
+    },
+    "resy_party_min": {
+     "description": "Who serves or stocks it (F5): Resy party size at least. Qloo: filter.external.resy.party_size.min.",
+     "examples": [
+      2
+     ],
+     "type": "integer"
+    },
+    "resy_rating_max": {
+     "description": "Who serves or stocks it (F5): Resy rating at most (1-5). Qloo: filter.external.resy.rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "resy_rating_min": {
+     "description": "Who serves or stocks it (F5): Resy rating at least (1-5). Qloo: filter.external.resy.rating.min.",
+     "examples": [
+      4.0
+     ],
+     "type": "number"
+    },
+    "sort": {
+     "description": "Who serves or stocks it (F5): Order places by. Qloo: sort_by.",
+     "enum": [
+      "affinity",
+      "distance",
+      "rating",
+      "quality"
+     ],
+     "examples": [
+      "quality"
+     ],
+     "type": "string"
+    },
+    "tripadvisor_count_max": {
+     "description": "Who serves or stocks it (F5): Tripadvisor reviews at most. Qloo: filter.external.tripadvisor.rating.count.max.",
+     "examples": [
+      5000
+     ],
+     "type": "integer"
+    },
+    "tripadvisor_count_min": {
+     "description": "Who serves or stocks it (F5): Tripadvisor reviews at least. Qloo: filter.external.tripadvisor.rating.count.min.",
+     "examples": [
+      100
+     ],
+     "type": "integer"
+    },
+    "tripadvisor_rating_max": {
+     "description": "Who serves or stocks it (F5): Tripadvisor rating at most. Qloo: filter.external.tripadvisor.rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "tripadvisor_rating_min": {
+     "description": "Who serves or stocks it (F5): Tripadvisor rating at least. Qloo: filter.external.tripadvisor.rating.min.",
+     "examples": [
+      4.0
+     ],
+     "type": "number"
+    },
+    "year_max": {
+     "description": "Media and people products (F6): Released up to this year (film/TV; books: publication year). Qloo: filter.release_year.max.",
+     "examples": [
+      2024
+     ],
+     "type": "integer"
+    },
+    "year_min": {
+     "description": "Media and people products (F6): Released from this year (film/TV; books: publication year). Qloo: filter.release_year.min.",
+     "examples": [
+      2015
+     ],
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "knos_cross",
+  "output_schema": {},
+  "title": "Cross a paper to a funded product"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Crossings on this server"
+  },
+  "description": "Every crossing this server ran, newest first: id, paper or idea, verdict, report hash.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "knos_crossings",
+  "output_schema": {},
+  "title": "Crossings on this server"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Is this product wanted? (Qloo)"
+  },
+  "description": "Checks who wants a product idea with Qloo taste data and returns the verdict with its audience and launch city, each traced to its Qloo call.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "description": "Who serves or stocks it (F5): Address contains. Qloo: filter.address.",
+     "examples": [
+      "Congress Ave"
+     ],
+     "type": "string"
+    },
+    "admin1": {
+     "description": "Where to launch (F3): Exact state or region. Qloo: filter.geocode.admin1_region.",
+     "examples": [
+      "Texas"
+     ],
+     "type": "string"
+    },
+    "admin2": {
+     "description": "Where to launch (F3): Exact county or borough. Qloo: filter.geocode.admin2_region.",
+     "examples": [
+      "Travis County"
+     ],
+     "type": "string"
+    },
+    "age": {
+     "description": "Who wants it (F1): Who: age range(s) the answer is weighted to. Qloo: signal.demographics.age. comma-separated, of: 24_and_younger, 25_to_29, 30_to_34, 35_to_44, 45_to_54, 55_and_older",
+     "examples": [
+      "35_to_44"
+     ],
+     "type": "string"
+    },
+    "audiences": {
+     "description": "Who wants it (F1): Audience segment ids (from /v2/audiences). Qloo: signal.demographics.audiences.",
+     "examples": [
+      "urn:audience:hobbies_and_interests:running"
+     ],
+     "type": "string"
+    },
+    "audiences_weight": {
+     "description": "Who wants it (F1): How much the segments steer the answer. Qloo: signal.demographics.audiences.weight.",
+     "enum": [
+      "low",
+      "medium",
+      "high",
+      "higher"
+     ],
+     "examples": [
+      "high"
+     ],
+     "type": "string"
+    },
+    "born_max": {
+     "description": "Media and people products (F6): Person: born on or before (YYYY-MM-DD). Qloo: filter.date_of_birth.max.",
+     "examples": [
+      "1990-12-31"
+     ],
+     "type": "string"
+    },
+    "born_min": {
+     "description": "Media and people products (F6): Person: born on or after (YYYY-MM-DD). Qloo: filter.date_of_birth.min.",
+     "examples": [
+      "1960-01-01"
+     ],
+     "type": "string"
+    },
+    "business_rating_max": {
+     "description": "At what price, where (F4): Business rating at most. Qloo: filter.properties.business_rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "business_rating_min": {
+     "description": "At what price, where (F4): Business rating at least. Qloo: filter.properties.business_rating.min.",
+     "examples": [
+      3.5
+     ],
+     "type": "number"
+    },
+    "city": {
+     "description": "Where to launch (F3): Exact city or town name. Qloo: filter.geocode.name.",
+     "examples": [
+      "Austin"
+     ],
+     "type": "string"
+    },
+    "content_rating": {
+     "description": "Media and people products (F6): Film/TV content rating(s), MPAA. Qloo: filter.content_rating.",
+     "examples": [
+      "PG-13"
+     ],
+     "type": "string"
+    },
+    "country": {
+     "description": "Where to launch (F3): Two-letter country code. Qloo: filter.geocode.country_code.",
+     "examples": [
+      "US"
+     ],
+     "type": "string"
+    },
+    "died_max": {
+     "description": "Media and people products (F6): Person: died on or before (YYYY-MM-DD). Qloo: filter.date_of_death.max.",
+     "examples": [
+      "2020-12-31"
+     ],
+     "type": "string"
+    },
+    "died_min": {
+     "description": "Media and people products (F6): Person: died on or after (YYYY-MM-DD). Qloo: filter.date_of_death.min.",
+     "examples": [
+      "2000-01-01"
+     ],
+     "type": "string"
+    },
+    "entity_id": {
+     "description": "Look up exact things (F7): Look up exact things: paste a Qloo entity id (Search Entities by ID). Qloo: entity_ids.",
+     "examples": [
+      "B2A5BF4D-6D9A-4A8B-9E50-1A2B3C4D5E6F"
+     ],
+     "type": "string"
+    },
+    "exclude": {
+     "description": "What is underserved (F2): Entity ids to leave out. Qloo: filter.exclude.entities.",
+     "examples": [
+      "4BBEF799-A0C4-4110-AB01-39216993C312"
+     ],
+     "type": "string"
+    },
+    "exclude_geohash": {
+     "description": "Where to launch (F3): Leave out results whose geohash starts with this. Qloo: filter.exclude.location.geohash.",
+     "examples": [
+      "9v6kp"
+     ],
+     "type": "string"
+    },
+    "exclude_location": {
+     "description": "Where to launch (F3): Leave out a WKT area or locality id. Qloo: filter.exclude.location.",
+     "examples": [
+      "POINT(-97.74 30.27)"
+     ],
+     "type": "string"
+    },
+    "exclude_names": {
+     "description": "What is underserved (F2): Leave out things by name (Qloo resolves them; sent as JSON). Qloo: filter.exclude.entities.query. names, or one comma-separated string",
+     "examples": [
+      "Nike, Adidas"
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "exclude_near": {
+     "description": "Where to launch (F3): Leave out an area by name. Qloo: filter.exclude.location.query.",
+     "examples": [
+      "Downtown Austin"
+     ],
+     "type": "string"
+    },
+    "exclude_tags": {
+     "description": "What is underserved (F2): Tag ids to leave out. Qloo: filter.exclude.tags.",
+     "examples": [
+      "urn:tag:genre:media:horror"
+     ],
+     "type": "string"
+    },
+    "exclude_tags_operator": {
+     "description": "What is underserved (F2): Leave out results with any (union) or all (intersection) of those tags. Qloo: operator.exclude.tags.",
+     "enum": [
+      "union",
+      "intersection"
+     ],
+     "examples": [
+      "union"
+     ],
+     "type": "string"
+    },
+    "external": {
+     "description": "Who serves or stocks it (F5): Listed on these (resy, michelin, tablet). Qloo: filter.external.exists. comma-separated, of: resy, michelin, tablet",
+     "examples": [
+      "resy"
+     ],
+     "type": "string"
+    },
+    "external_operator": {
+     "description": "Who serves or stocks it (F5): Any (union) or all (intersection) of those. Qloo: operator.filter.external.exists.",
+     "enum": [
+      "union",
+      "intersection"
+     ],
+     "examples": [
+      "union"
+     ],
+     "type": "string"
+    },
+    "finale_year_max": {
+     "description": "Media and people products (F6): TV: final season up to this year. Qloo: filter.finale_year.max.",
+     "examples": [
+      2024
+     ],
+     "type": "integer"
+    },
+    "finale_year_min": {
+     "description": "Media and people products (F6): TV: final season from this year. Qloo: filter.finale_year.min.",
+     "examples": [
+      2018
+     ],
+     "type": "integer"
+    },
+    "gender": {
+     "description": "Who wants it (F1): Who: gender the answer is weighted to. Qloo: signal.demographics.gender.",
+     "enum": [
+      "male",
+      "female"
+     ],
+     "examples": [
+      "female"
+     ],
+     "type": "string"
+    },
+    "geohash": {
+     "description": "Where to launch (F3): Only results whose geohash starts with this. Qloo: filter.location.geohash.",
+     "examples": [
+      "9v6k"
+     ],
+     "type": "string"
+    },
+    "hide_leader": {
+     "description": "What is underserved (F2): Gaps: hide the market leader (its Qloo id is excluded). Qloo: filter.exclude.entities.",
+     "examples": [
+      true
+     ],
+     "type": "boolean"
+    },
+    "hotel_class": {
+     "description": "At what price, where (F4): Hotel classes 1-5, mapped where they are hot. Qloo: filter.dimensions.hotel_class. comma-separated, of: 1, 2, 3, 4, 5",
+     "examples": [
+      "4,5"
+     ],
+     "type": "string"
+    },
+    "hotel_class_max": {
+     "description": "At what price, where (F4): Hotel class at most (1-5). Qloo: filter.hotel_class.max.",
+     "examples": [
+      5
+     ],
+     "type": "integer"
+    },
+    "hotel_class_min": {
+     "description": "At what price, where (F4): Hotel class at least (1-5). Qloo: filter.hotel_class.min.",
+     "examples": [
+      3
+     ],
+     "type": "integer"
+    },
+    "idea": {
+     "description": "the product idea or a paper's DOI (8-500 characters)",
+     "type": "string"
+    },
+    "interests_names": {
+     "description": "Who wants it (F1): Steer the answer by things you name (Qloo resolves them; sent as JSON). Qloo: signal.interests.entities.query. names, or one comma-separated string",
+     "examples": [
+      "Hoka, Salomon"
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "latest_year_max": {
+     "description": "Media and people products (F6): TV: released or updated up to this year. Qloo: filter.latest_known_year.max.",
+     "examples": [
+      2025
+     ],
+     "type": "integer"
+    },
+    "latest_year_min": {
+     "description": "Media and people products (F6): TV: released or updated from this year. Qloo: filter.latest_known_year.min.",
+     "examples": [
+      2020
+     ],
+     "type": "integer"
+    },
+    "leader": {
+     "description": "the market leader to compare",
+     "type": "string"
+    },
+    "location": {
+     "description": "Where to launch (F3): A WKT POINT/POLYGON (longitude first) or a locality id. Qloo: filter.location.",
+     "examples": [
+      "POINT(-97.7431 30.2672)"
+     ],
+     "type": "string"
+    },
+    "lookup": {
+     "description": "Look up exact things (F7): Look up exact things: a name to find (Search Entities). Qloo: query.",
+     "examples": [
+      "Austin"
+     ],
+     "type": "string"
+    },
+    "lookup_near": {
+     "description": "Look up exact things (F7): Search near: lat,lon or WKT. Qloo: filter.location.",
+     "examples": [
+      "30.2672,-97.7431"
+     ],
+     "type": "string"
+    },
+    "lookup_radius": {
+     "description": "Look up exact things (F7): Search radius in miles (0-100). Qloo: filter.radius.",
+     "examples": [
+      10
+     ],
+     "type": "number"
+    },
+    "lookup_sort": {
+     "description": "Look up exact things (F7): Order the search by. Qloo: sort_by.",
+     "enum": [
+      "match",
+      "distance",
+      "popularity"
+     ],
+     "examples": [
+      "match"
+     ],
+     "type": "string"
+    },
+    "lookup_types": {
+     "description": "Look up exact things (F7): What kinds to search. Qloo: types. comma-separated, of: urn:entity:actor, urn:entity:album, urn:entity:artist, urn:entity:author, urn:entity:book, urn:entity:brand, urn:entity:destination, urn:entity:director, urn:entity:locality, urn:entity:movie, urn:entity:person, urn:entity:place, urn:entity:podcast, urn:entity:tv_show, urn:entity:videogame",
+     "examples": [
+      "urn:entity:locality"
+     ],
+     "type": "string"
+    },
+    "near": {
+     "description": "Where to launch (F3): Where: a city or region by name. Qloo: filter.location.query.",
+     "examples": [
+      "Austin"
+     ],
+     "type": "string"
+    },
+    "open_on": {
+     "description": "Who serves or stocks it (F5): Open on this day. Qloo: filter.hours.",
+     "examples": [
+      "Sunday"
+     ],
+     "type": "string"
+    },
+    "person_gender": {
+     "description": "Media and people products (F6): Person: gender. Qloo: filter.gender.",
+     "enum": [
+      "male",
+      "female"
+     ],
+     "examples": [
+      "female"
+     ],
+     "type": "string"
+    },
+    "picked": {
+     "description": "true when idea is the exact reading picked from the readings a first call returned (which one do you mean?)",
+     "type": "boolean"
+    },
+    "place": {
+     "description": "the launch market",
+     "type": "string"
+    },
+    "popularity_max": {
+     "description": "What is underserved (F2): Gaps: niche only, popularity at most this percentile (0-1). Qloo: filter.popularity.max.",
+     "examples": [
+      0.5
+     ],
+     "type": "number"
+    },
+    "popularity_min": {
+     "description": "What is underserved (F2): Popularity at least this percentile (0-1). Qloo: filter.popularity.min.",
+     "examples": [
+      0.1
+     ],
+     "type": "number"
+    },
+    "price_from": {
+     "description": "At what price, where (F4): Hotel price range from (0-1,000,000). Qloo: filter.price_range.from.",
+     "examples": [
+      100
+     ],
+     "type": "integer"
+    },
+    "price_level": {
+     "description": "At what price, where (F4): Price tier: 1 (cheap) to 4 (dear), mapped where it is hot. Qloo: filter.dimensions.price_level. comma-separated, of: 1, 2, 3, 4",
+     "examples": [
+      "1"
+     ],
+     "type": "string"
+    },
+    "price_level_max": {
+     "description": "At what price, where (F4): Places at price level at most (1-4). Qloo: filter.price_level.max.",
+     "examples": [
+      3
+     ],
+     "type": "integer"
+    },
+    "price_level_min": {
+     "description": "At what price, where (F4): Places at price level at least (1-4). Qloo: filter.price_level.min.",
+     "examples": [
+      2
+     ],
+     "type": "integer"
+    },
+    "price_to": {
+     "description": "At what price, where (F4): Hotel price range to (0-1,000,000). Qloo: filter.price_range.to.",
+     "examples": [
+      300
+     ],
+     "type": "integer"
+    },
+    "product_kind": {
+     "description": "Media and people products (F6): Product kind: what the comparables are. Qloo: filter.type.",
+     "enum": [
+      "film",
+      "tv",
+      "book",
+      "person",
+      "artist",
+      "brand",
+      "podcast",
+      "game",
+      "place",
+      "destination"
+     ],
+     "examples": [
+      "film"
+     ],
+     "type": "string"
+    },
+    "qloo": {
+     "additionalProperties": true,
+     "description": "Anything else in the guide (F8): Any other documented parameter for the call's filter.type, by its Qloo name. Qloo: *.",
+     "examples": [
+      {
+       "bias.trends": "high"
+      }
+     ],
+     "type": "object"
+    },
+    "qloo_calls": {
+     "additionalProperties": true,
+     "description": "Anything else in the guide (F8): Calls to Qloo's other endpoints by path, each with its own documented parameters. Qloo: *.",
+     "examples": [
+      {
+       "/v2/tags": {
+        "feature.semantic_search": "true",
+        "filter.query": "trail running"
+       }
+      }
+     ],
+     "type": "object"
+    },
+    "quality": {
+     "description": "Who serves or stocks it (F5): Lean the ranking toward quality places. Qloo: bias.quality.",
+     "enum": [
+      "low",
+      "medium",
+      "high"
+     ],
+     "examples": [
+      "high"
+     ],
+     "type": "string"
+    },
+    "radius": {
+     "description": "Where to launch (F3): Where: radius around it, in meters (0 = strictly inside). Qloo: filter.location.radius.",
+     "examples": [
+      5000
+     ],
+     "type": "integer"
+    },
+    "rating_max": {
+     "description": "Media and people products (F6): Film/TV Qloo rating at most (0-5). Qloo: filter.rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "rating_min": {
+     "description": "Media and people products (F6): Film/TV Qloo rating at least (0-5). Qloo: filter.rating.min.",
+     "examples": [
+      3.5
+     ],
+     "type": "number"
+    },
+    "references_brand": {
+     "description": "Who serves or stocks it (F5): Who serves it: a brand by name or id; only places tied to it. Qloo: filter.references_brand.",
+     "examples": [
+      "Whole Foods Market"
+     ],
+     "type": "string"
+    },
+    "release_country": {
+     "description": "Media and people products (F6): Film/TV released in these countries. Qloo: filter.release_country.",
+     "examples": [
+      "United States"
+     ],
+     "type": "string"
+    },
+    "release_country_operator": {
+     "description": "Media and people products (F6): Any (union) or all (intersection) of those. Qloo: operator.filter.release_country.",
+     "enum": [
+      "union",
+      "intersection"
+     ],
+     "examples": [
+      "union"
+     ],
+     "type": "string"
+    },
+    "results_query": {
+     "description": "What is underserved (F2): Score only these named things (one name). Qloo: filter.results.entities.query.",
+     "examples": [
+      "Fitbit"
+     ],
+     "type": "string"
+    },
+    "resy_count_max": {
+     "description": "Who serves or stocks it (F5): Resy rating count at most. Qloo: filter.external.resy.count.max.",
+     "examples": [
+      10000
+     ],
+     "type": "integer"
+    },
+    "resy_count_min": {
+     "description": "Who serves or stocks it (F5): Resy rating count at least. Qloo: filter.external.resy.count.min.",
+     "examples": [
+      100
+     ],
+     "type": "integer"
+    },
+    "resy_party_max": {
+     "description": "Who serves or stocks it (F5): Resy party size at most. Qloo: filter.external.resy.party_size.max.",
+     "examples": [
+      8
+     ],
+     "type": "integer"
+    },
+    "resy_party_min": {
+     "description": "Who serves or stocks it (F5): Resy party size at least. Qloo: filter.external.resy.party_size.min.",
+     "examples": [
+      2
+     ],
+     "type": "integer"
+    },
+    "resy_rating_max": {
+     "description": "Who serves or stocks it (F5): Resy rating at most (1-5). Qloo: filter.external.resy.rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "resy_rating_min": {
+     "description": "Who serves or stocks it (F5): Resy rating at least (1-5). Qloo: filter.external.resy.rating.min.",
+     "examples": [
+      4.0
+     ],
+     "type": "number"
+    },
+    "sort": {
+     "description": "Who serves or stocks it (F5): Order places by. Qloo: sort_by.",
+     "enum": [
+      "affinity",
+      "distance",
+      "rating",
+      "quality"
+     ],
+     "examples": [
+      "quality"
+     ],
+     "type": "string"
+    },
+    "tripadvisor_count_max": {
+     "description": "Who serves or stocks it (F5): Tripadvisor reviews at most. Qloo: filter.external.tripadvisor.rating.count.max.",
+     "examples": [
+      5000
+     ],
+     "type": "integer"
+    },
+    "tripadvisor_count_min": {
+     "description": "Who serves or stocks it (F5): Tripadvisor reviews at least. Qloo: filter.external.tripadvisor.rating.count.min.",
+     "examples": [
+      100
+     ],
+     "type": "integer"
+    },
+    "tripadvisor_rating_max": {
+     "description": "Who serves or stocks it (F5): Tripadvisor rating at most. Qloo: filter.external.tripadvisor.rating.max.",
+     "examples": [
+      5.0
+     ],
+     "type": "number"
+    },
+    "tripadvisor_rating_min": {
+     "description": "Who serves or stocks it (F5): Tripadvisor rating at least. Qloo: filter.external.tripadvisor.rating.min.",
+     "examples": [
+      4.0
+     ],
+     "type": "number"
+    },
+    "year_max": {
+     "description": "Media and people products (F6): Released up to this year (film/TV; books: publication year). Qloo: filter.release_year.max.",
+     "examples": [
+      2024
+     ],
+     "type": "integer"
+    },
+    "year_min": {
+     "description": "Media and people products (F6): Released from this year (film/TV; books: publication year). Qloo: filter.release_year.min.",
+     "examples": [
+      2015
+     ],
+     "type": "integer"
+    }
+   },
+   "required": [
+    "idea"
+   ],
+   "type": "object"
+  },
+  "name": "knos_demand_check",
+  "output_schema": {},
+  "title": "Is this product wanted? (Qloo)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Post milestone evidence"
+  },
+  "description": "Posts a milestone's public evidence page, whose verified evidence releases the held devnet test money to the maker; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "commitment": {
+     "type": "string"
+    },
+    "evidence_url": {
+     "type": "string"
+    },
+    "session": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "commitment",
+    "evidence_url"
+   ],
+   "type": "object"
+  },
+  "name": "knos_evidence",
+  "output_schema": {},
+  "title": "Post milestone evidence"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check a proof as IRIS does"
+  },
+  "description": "Applies the rules referee IRIS runs to one proof (a CI check run, a FHIR Observation or an HL7 ORU message) against a brief's milestones, and returns met or not met per milestone with the reason. Nothing is signed and no money moves.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "brief": {
+     "description": "the brief: {milestones: [{key, name, target, verifier}]}",
+     "type": "object"
+    },
+    "kind": {
+     "description": "what the proof is",
+     "enum": [
+      "checkrun",
+      "observation",
+      "oru"
+     ],
+     "type": "string"
+    },
+    "proof": {
+     "description": "the proof itself",
+     "type": [
+      "object",
+      "string"
+     ]
+    }
+   },
+   "required": [
+    "brief",
+    "kind",
+    "proof"
+   ],
+   "type": "object"
+  },
+  "name": "knos_iris_check_proof",
+  "output_schema": {},
+  "title": "Check a proof as IRIS does"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "What the agent remembers about a paper"
+  },
+  "description": "Sibyl, the crossing agent's working memory: the last crossing of a paper or idea (product phrase, verdict, report).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "idea": {
+     "type": "string"
+    },
+    "ref": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "knos_memory_recall",
+  "output_schema": {},
+  "title": "What the agent remembers about a paper"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search everything this Knos remembers"
+  },
+  "description": "FTS5 search (multilingual) over the agents' memory and the Knos Record: papers, crossings, decisions, events.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "q": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "knos_memory_search",
+  "output_schema": {},
+  "title": "Search everything this Knos remembers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "The brief an agent works from"
+  },
+  "description": "Returns the locked intent of a milestone you work on, with its criteria hash and the token budget for answering it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "milestone": {
+     "type": "string"
+    },
+    "project": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "milestone"
+   ],
+   "type": "object"
+  },
+  "name": "knos_milestone_prompt",
+  "output_schema": {},
+  "title": "The brief an agent works from"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Submit to a referee-checked milestone"
+  },
+  "description": "Sends a milestone's proof file to its referee and releases its devnet test money to you when the verdict meets the target; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "brief": {
+     "description": "the locked brief the lab proof answers",
+     "type": "object"
+    },
+    "code": {
+     "description": "the whole train.py",
+     "type": "string"
+    },
+    "kind": {
+     "description": "a lab's proof instead of code: a FHIR Observation or an HL7 ORU message, checked by the rules referee IRIS runs too (the decision only; nothing moves)",
+     "enum": [
+      "observation",
+      "oru"
+     ],
+     "type": "string"
+    },
+    "milestone": {
+     "type": "string"
+    },
+    "project": {
+     "type": "string"
+    },
+    "proof": {
+     "description": "the Observation (an object) or the ORU message (a string)"
+    },
+    "session": {
+     "type": "string"
+    },
+    "wallet": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "knos_milestone_submit",
+  "output_schema": {},
+  "title": "Submit to a referee-checked milestone"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Open milestones"
+  },
+  "description": "Lists every commitment on this server with its held order and its status.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "knos_milestones",
+  "output_schema": {},
+  "title": "Open milestones"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "One NEAR job's progress"
+  },
+  "description": "The step a run of knos_near_run_job is on, and at the end who was paid and every testnet transaction.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "run": {
+     "description": "the run id",
+     "maxLength": 24,
+     "type": "string"
+    }
+   },
+   "required": [
+    "run"
+   ],
+   "type": "object"
+  },
+  "name": "knos_near_job_status",
+  "output_schema": {},
+  "title": "One NEAR job's progress"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Run one NEAR job (test tokens)"
+  },
+  "description": "Funds one job on NEAR testnet from Knos's capped test account (a bid of 1000 test units), lets two agents take it and submit, and has the checker pay only the agent whose output passes the locked test. Capped: one run at a time, 20 a day; past a cap it returns the last run as a replay.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "knos_near_run_job",
+  "output_schema": {},
+  "title": "Run one NEAR job (test tokens)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "One NEAR swarm job"
+  },
+  "description": "Reads one job from the jobs contract on NEAR testnet (jobs.knos-swarm-1105.testnet): its bid, the locked test's hash, which agent took it, what each submitted, and who was paid. Read only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "the job id, such as job-1105164458",
+     "maxLength": 64,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "knos_near_swarm_job",
+  "output_schema": {},
+  "title": "One NEAR swarm job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "This server's OpenAPI document"
+  },
+  "description": "The same API as REST: /openapi.json.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "knos_openapi",
+  "output_schema": {},
+  "title": "This server's OpenAPI document"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Pre-order (your human's passkey signs)"
+  },
+  "description": "Prepares a pre-order of an OPEN report and returns the page where your human's passkey approves it with devnet test money; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "report": {
+     "type": "string"
+    },
+    "session": {
+     "type": "string"
+    },
+    "units": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "report",
+    "units"
+   ],
+   "type": "object"
+  },
+  "name": "knos_preorder",
+  "output_schema": {},
+  "title": "Pre-order (your human's passkey signs)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Attempt a milestone"
+  },
+  "description": "Claims a milestone as its maker and binds the wallet it pays in devnet test money; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "milestone": {
+     "type": "string"
+    },
+    "project": {
+     "type": "string"
+    },
+    "session": {
+     "type": "string"
+    },
+    "wallet": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "milestone"
+   ],
+   "type": "object"
+  },
+  "name": "knos_project_claim",
+  "output_schema": {},
+  "title": "Attempt a milestone"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Open a project from a template"
+  },
+  "description": "Opens a project whose milestones each hold devnet test money until a result and an independent check arrive; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "regulatory": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "session": {
+     "type": "string"
+    },
+    "template": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "template",
+    "title"
+   ],
+   "type": "object"
+  },
+  "name": "knos_project_open",
+  "output_schema": {},
+  "title": "Open a project from a template"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Post a result or an independent check"
+  },
+  "description": "Posts a result or a check page for a milestone, and the referee panel releases its devnet test money when both are in; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "attempt": {
+     "type": "string"
+    },
+    "milestone": {
+     "type": "string"
+    },
+    "project": {
+     "type": "string"
+    },
+    "role": {
+     "type": "string"
+    },
+    "session": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "milestone",
+    "attempt",
+    "url",
+    "role"
+   ],
+   "type": "object"
+  },
+  "name": "knos_project_post",
+  "output_schema": {},
+  "title": "Post a result or an independent check"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Projects and their milestones"
+  },
+  "description": "The newest projects (take, default 10) as summaries: each milestone's state and held units. With id: one project in full, with its milestones (tranches), held orders, AMC commitments, attempts and where the work can be bought.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "take": {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "knos_projects",
+  "output_schema": {},
+  "title": "Projects and their milestones"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Ready to fund"
+  },
+  "description": "Checks a brief before any money locks and returns Ready, or the missing fields with a rewrite template, sending nothing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "brief": {
+     "type": "object"
+    }
+   },
+   "required": [
+    "brief"
+   ],
+   "type": "object"
+  },
+  "name": "knos_ready",
+  "output_schema": {},
+  "title": "Ready to fund"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Read a landmark paper"
+  },
+  "description": "Paper id -> the proven result (quoted), citations, retraction status, Nobel recognition, the product it enables.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "ref": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref"
+   ],
+   "type": "object"
+  },
+  "name": "knos_research_card",
+  "output_schema": {},
+  "title": "Read a landmark paper"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "A session for the money tools"
+  },
+  "description": "Returns a guest session token that the tools moving devnet test money accept; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "label": {
+     "description": "a note on who opened it; never shown (the session shows as Guest and 4 characters of its id)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "label"
+   ],
+   "type": "object"
+  },
+  "name": "knos_sign_in",
+  "output_schema": {},
+  "title": "A session for the money tools"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Submit a milestone's proof"
+  },
+  "description": "Submits a milestone's proof file to its referee and returns the verdict, with devnet test money paid when the proof meets the target; ask your human first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "round": {
+     "type": "string"
+    },
+    "session": {
+     "type": "string"
+    },
+    "wallet": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "round",
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "knos_task_submit",
+  "output_schema": {},
+  "title": "Submit a milestone's proof"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Open work for contributors"
+  },
+  "description": "Open milestones and tasks a person or agent can work on; each is checked by its referee and paid on devnet (test money).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "knos_tasks",
+  "output_schema": {},
+  "title": "Open work for contributors"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Milestone templates"
+  },
+  "description": "Returns the brief templates Knos offers, from AI model evals to regulatory milestones taken from OpenRegulatory's open templates.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "knos_templates",
+  "output_schema": {},
+  "title": "Milestone templates"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "What was asked of Knos"
+  },
+  "description": "Returns how many times each Knos tool was called over MCP since this server started.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "record": {
+     "description": "a goal's measured token use (scripts/goal_usage.py); the operator only",
+     "type": "object"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "knos_usage",
+  "output_schema": {},
+  "title": "What was asked of Knos"
+ }
+]

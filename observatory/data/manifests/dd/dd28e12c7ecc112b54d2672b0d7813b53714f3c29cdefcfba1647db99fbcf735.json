@@ -1,0 +1,496 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://widget/gantt-timeline-v4-1.0.0-c0101539189a510e3502b2f2384207b0190b27a21ffb76118f05bd10b04fd424.html",
+   "openai/toolInvocation/invoked": "Scenarios compared",
+   "openai/toolInvocation/invoking": "Testing what-if scenarios",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://widget/gantt-timeline-v4-1.0.0-c0101539189a510e3502b2f2384207b0190b27a21ffb76118f05bd10b04fd424.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Compare timeline what-ifs"
+  },
+  "description": "Use this when the user asks what happens to a project schedule if a task slips, takes longer or shorter, or starts later: for example \"if Design slips 5 days, when do we finish?\" or \"does the critical path change?\". Takes the same task list and calendar as plan_project_timeline plus 1 to 4 scenarios, each with changes (extra_days, a new duration, or a new start-no-earlier-than date). Returns the baseline and each scenario's end date, the delay in working and calendar days, the new critical path, tasks that became or stopped being critical, and how much of each slip was absorbed by float. Does not change or save the plan. Do not use for the first schedule of a project (use plan_project_timeline).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "calendar": {
+     "description": "business_days (default) counts Monday to Friday and skips public holidays of country; calendar_days counts every day.",
+     "enum": [
+      "business_days",
+      "calendar_days"
+     ],
+     "type": "string"
+    },
+    "country": {
+     "description": "Country whose public holidays are skipped in business_days mode, as a 2-letter code or name, e.g. US, GB, DE, PL.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "duration_unit": {
+     "description": "Default unit for every task duration: days (default) or weeks.",
+     "enum": [
+      "days",
+      "weeks"
+     ],
+     "type": "string"
+    },
+    "non_working_dates": {
+     "description": "Extra days off such as a company shutdown, YYYY-MM-DD, e.g. [\"2026-12-28\", \"2026-12-29\"].",
+     "items": {
+      "maxLength": 40,
+      "type": "string"
+     },
+     "maxItems": 200,
+     "type": "array"
+    },
+    "project_name": {
+     "description": "Project title for the chart and files, e.g. \"Website relaunch\".",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "scenarios": {
+     "description": "1 to 4 what-if scenarios compared with the baseline plan, e.g. [{\"label\":\"Design +5\",\"changes\":[{\"task\":\"Design\",\"extra_days\":5}]}].",
+     "items": {
+      "properties": {
+       "changes": {
+        "description": "Changes to apply, e.g. [{\"task\":\"Design\",\"extra_days\":5}].",
+        "items": {
+         "properties": {
+          "duration": {
+           "description": "New duration in days instead of extra_days, e.g. 12.",
+           "type": "number"
+          },
+          "extra_days": {
+           "description": "Working days added to the task's duration (a slip), e.g. 5; negative to shorten it, e.g. -2.",
+           "type": "number"
+          },
+          "start_no_earlier_than": {
+           "description": "New earliest start date YYYY-MM-DD, e.g. 2026-11-30 (a late delivery).",
+           "maxLength": 40,
+           "type": "string"
+          },
+          "task": {
+           "description": "Task id or name to change, e.g. \"Design\".",
+           "maxLength": 90,
+           "type": "string"
+          }
+         },
+         "required": [
+          "task"
+         ],
+         "type": "object"
+        },
+        "maxItems": 10,
+        "type": "array"
+       },
+       "label": {
+        "description": "Short scenario name, e.g. \"Design slips a week\".",
+        "maxLength": 40,
+        "type": "string"
+       }
+      },
+      "required": [
+       "changes"
+      ],
+      "type": "object"
+     },
+     "maxItems": 4,
+     "type": "array"
+    },
+    "start_date": {
+     "description": "Project start date YYYY-MM-DD, e.g. 2026-11-02. Defaults to today. Convert relative dates (\"next Monday\") to a date first.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "subdivision": {
+     "description": "State or region code for regional holidays, e.g. CA for California or BY for Bavaria.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "tasks": {
+     "description": "Tasks in any order (1 to 150), e.g. [{\"id\":\"A\",\"name\":\"Design\",\"duration\":5},{\"id\":\"B\",\"name\":\"Build\",\"duration\":10,\"depends_on\":[\"A\"]}].",
+     "items": {
+      "properties": {
+       "depends_on": {
+        "anyOf": [
+         {
+          "items": {
+           "maxLength": 90,
+           "type": "string"
+          },
+          "maxItems": 40,
+          "type": "array"
+         },
+         {
+          "maxLength": 400,
+          "type": "string"
+         }
+        ],
+        "description": "Tasks that must finish before this one starts (finish-to-start), by id, name or row number, e.g. [\"A\", \"Design\"]. Add a lag with +N or a lead with -N working days, e.g. \"Design+2\"."
+       },
+       "duration": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "maxLength": 30,
+          "type": "string"
+         }
+        ],
+        "description": "Length in working days (calendar days in calendar_days mode), e.g. 5. Use 0 for a milestone. For weeks set duration_unit to weeks (e.g. 2) or pass \"2 weeks\"."
+       },
+       "duration_unit": {
+        "description": "Unit of duration for this task: days (default) or weeks (5 working days, or 7 days in calendar_days mode).",
+        "enum": [
+         "days",
+         "weeks"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Optional short unique id used in depends_on, e.g. \"A\" or \"design\". Defaults to the task name.",
+        "maxLength": 40,
+        "type": "string"
+       },
+       "milestone": {
+        "description": "true for a zero-length checkpoint such as Launch or Sign-off, drawn as a diamond.",
+        "type": "boolean"
+       },
+       "name": {
+        "description": "Task name, e.g. \"Design mockups\".",
+        "maxLength": 80,
+        "type": "string"
+       },
+       "owner": {
+        "description": "Person or team responsible, e.g. \"Ana\". Shown in the chart and CSV.",
+        "maxLength": 40,
+        "type": "string"
+       },
+       "start_no_earlier_than": {
+        "description": "Earliest allowed start date YYYY-MM-DD, e.g. 2026-11-16 (a fixed kickoff or delivery date).",
+        "maxLength": 40,
+        "type": "string"
+       }
+      },
+      "required": [
+       "name"
+      ],
+      "type": "object"
+     },
+     "maxItems": 150,
+     "type": "array"
+    }
+   },
+   "required": [
+    "tasks",
+    "scenarios"
+   ],
+   "type": "object"
+  },
+  "name": "compare_timeline_scenarios",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "baseline": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "latest_finish": {
+     "type": "string"
+    },
+    "project_name": {
+     "type": "string"
+    },
+    "scenarios": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "warnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "project_name",
+    "baseline",
+    "scenarios",
+    "latest_finish",
+    "warnings"
+   ],
+   "type": "object"
+  },
+  "title": "Compare timeline what-ifs"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://widget/gantt-timeline-v4-1.0.0-c0101539189a510e3502b2f2384207b0190b27a21ffb76118f05bd10b04fd424.html",
+   "openai/toolInvocation/invoked": "Timeline ready",
+   "openai/toolInvocation/invoking": "Scheduling tasks",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://widget/gantt-timeline-v4-1.0.0-c0101539189a510e3502b2f2384207b0190b27a21ffb76118f05bd10b04fd424.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Plan project timeline"
+  },
+  "description": "Use this when the user wants a Gantt chart, project timeline, project schedule or project plan with milestones from a task list, wants to find the critical path and project duration, or asks for early start, early finish, late start, late finish, total float or free float (critical path method). Takes tasks with durations (days or weeks), finish-to-start dependencies with optional lags, optional start-no-earlier-than dates, owners and milestones, plus a start date and a business-day calendar with country public holidays or calendar days. Returns every task's dates and float, the critical path, milestones and the end date, an interactive Gantt chart, and CSV, .ics and SVG downloads. Detects dependency loops and unknown task names. Does not save projects, sync with project tools, track progress, or level resources. Do not use for a single date difference or for daily to-do planning.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "calendar": {
+     "description": "business_days (default) counts Monday to Friday and skips public holidays of country; calendar_days counts every day.",
+     "enum": [
+      "business_days",
+      "calendar_days"
+     ],
+     "type": "string"
+    },
+    "country": {
+     "description": "Country whose public holidays are skipped in business_days mode, as a 2-letter code or name, e.g. US, GB, DE, PL.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "duration_unit": {
+     "description": "Default unit for every task duration: days (default) or weeks.",
+     "enum": [
+      "days",
+      "weeks"
+     ],
+     "type": "string"
+    },
+    "non_working_dates": {
+     "description": "Extra days off such as a company shutdown, YYYY-MM-DD, e.g. [\"2026-12-28\", \"2026-12-29\"].",
+     "items": {
+      "maxLength": 40,
+      "type": "string"
+     },
+     "maxItems": 200,
+     "type": "array"
+    },
+    "project_name": {
+     "description": "Project title for the chart and files, e.g. \"Website relaunch\".",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "start_date": {
+     "description": "Project start date YYYY-MM-DD, e.g. 2026-11-02. Defaults to today. Convert relative dates (\"next Monday\") to a date first.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "subdivision": {
+     "description": "State or region code for regional holidays, e.g. CA for California or BY for Bavaria.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "tasks": {
+     "description": "Tasks in any order (1 to 150), e.g. [{\"id\":\"A\",\"name\":\"Design\",\"duration\":5},{\"id\":\"B\",\"name\":\"Build\",\"duration\":10,\"depends_on\":[\"A\"]}].",
+     "items": {
+      "properties": {
+       "depends_on": {
+        "anyOf": [
+         {
+          "items": {
+           "maxLength": 90,
+           "type": "string"
+          },
+          "maxItems": 40,
+          "type": "array"
+         },
+         {
+          "maxLength": 400,
+          "type": "string"
+         }
+        ],
+        "description": "Tasks that must finish before this one starts (finish-to-start), by id, name or row number, e.g. [\"A\", \"Design\"]. Add a lag with +N or a lead with -N working days, e.g. \"Design+2\"."
+       },
+       "duration": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "maxLength": 30,
+          "type": "string"
+         }
+        ],
+        "description": "Length in working days (calendar days in calendar_days mode), e.g. 5. Use 0 for a milestone. For weeks set duration_unit to weeks (e.g. 2) or pass \"2 weeks\"."
+       },
+       "duration_unit": {
+        "description": "Unit of duration for this task: days (default) or weeks (5 working days, or 7 days in calendar_days mode).",
+        "enum": [
+         "days",
+         "weeks"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Optional short unique id used in depends_on, e.g. \"A\" or \"design\". Defaults to the task name.",
+        "maxLength": 40,
+        "type": "string"
+       },
+       "milestone": {
+        "description": "true for a zero-length checkpoint such as Launch or Sign-off, drawn as a diamond.",
+        "type": "boolean"
+       },
+       "name": {
+        "description": "Task name, e.g. \"Design mockups\".",
+        "maxLength": 80,
+        "type": "string"
+       },
+       "owner": {
+        "description": "Person or team responsible, e.g. \"Ana\". Shown in the chart and CSV.",
+        "maxLength": 40,
+        "type": "string"
+       },
+       "start_no_earlier_than": {
+        "description": "Earliest allowed start date YYYY-MM-DD, e.g. 2026-11-16 (a fixed kickoff or delivery date).",
+        "maxLength": 40,
+        "type": "string"
+       }
+      },
+      "required": [
+       "name"
+      ],
+      "type": "object"
+     },
+     "maxItems": 150,
+     "type": "array"
+    }
+   },
+   "required": [
+    "tasks"
+   ],
+   "type": "object"
+  },
+  "name": "plan_project_timeline",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "calendar": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "calendar_days": {
+     "type": "number"
+    },
+    "critical_path": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "downloads": {
+     "additionalProperties": false,
+     "properties": {
+      "csv": {
+       "type": "string"
+      },
+      "ics": {
+       "type": "string"
+      },
+      "svg": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "end_date": {
+     "type": "string"
+    },
+    "milestones": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "project_name": {
+     "type": "string"
+    },
+    "request": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "start_date": {
+     "type": "string"
+    },
+    "tasks": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "warnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "working_days": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "project_name",
+    "start_date",
+    "end_date",
+    "working_days",
+    "calendar_days",
+    "calendar",
+    "critical_path",
+    "milestones",
+    "tasks",
+    "request",
+    "warnings",
+    "downloads"
+   ],
+   "type": "object"
+  },
+  "title": "Plan project timeline"
+ }
+]

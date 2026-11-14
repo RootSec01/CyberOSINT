@@ -1,0 +1,687 @@
+[
+ {
+  "description": "「一番安い水は」「米5kgはいくら」のような、買い物の問いへの今日の答えの一覧（出典つき）",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "answers",
+  "output_schema": {}
+ },
+ {
+  "description": "家庭の備蓄（ローリングストック）の量と金額。大人と子どもの人数と日数（3・7・14）を渡すと、飲料水（首相官邸: 1人1日3L）・主食・主菜・副菜・カセットボンベ（農水省: 1人1週間6本）・携帯トイレ（経産省: 1人1日5回）・紙・電池の量と、楽天の売れ筋を単位あたりに直した今日の中央値での総額、品目ごとの回す周期を返す。「備蓄は何日分」「水は何リットル」「4人家族の1週間分はいくら」の相談にはこれ。画面は /bichiku/",
+  "input_schema": {
+   "properties": {
+    "adults": {
+     "description": "大人（中学生以上）の人数",
+     "type": "integer"
+    },
+    "days": {
+     "description": "日数。3 / 7 / 14（既定 7）",
+     "type": "integer"
+    },
+    "kids": {
+     "description": "子ども（小学生以下）の人数",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "adults"
+   ],
+   "type": "object"
+  },
+  "name": "bichiku",
+  "output_schema": {}
+ },
+ {
+  "description": "一番安い〇〇を1回で答える。自然な日本語（例：一番安い水、トイレットペーパー安いの、お米10キロ）を q に渡すと、品目・きょうの最安（1本あたり）・買えるリンク・ふつうの値段・日付・出典を1つのJSONで返す。日用品160品目と家電52種類。毎日更新、推定なし",
+  "input_schema": {
+   "properties": {
+    "q": {
+     "description": "自然な言葉。例：一番安い水",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "cheapest",
+  "output_schema": {}
+ },
+ {
+  "description": "給料は値上がりに追いついたか。厚生労働省 毎月勤労統計調査の現金給与総額指数（1990年から・令和2年平均＝100）と、小売物価統計の品目別の倍率を同じ年で割って並べたもの。「実質賃金」「生活は楽になったか」「給料は上がったのか」の相談にはこれ",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "chingin",
+  "output_schema": {}
+ },
+ {
+  "description": "日本の都市（81市）の暮らしの費用。総務省統計局 小売物価統計調査の約550品目の調査価格（最新月と月次の履歴）。code は全国地方公共団体コード5桁（札幌 01100、東京都区部 13100、福岡 40130）",
+  "input_schema": {
+   "properties": {
+    "code": {
+     "description": "5桁の自治体コード",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "cost_city",
+  "output_schema": {}
+ },
+ {
+  "description": "暮らしの費用の品目一覧（コード・名前・英語名・単位・費目）と都市一覧・最新月",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "cost_index",
+  "output_schema": {}
+ },
+ {
+  "description": "1つの品目の都市別の調査価格。81市を安い順に並べた最新の一覧、月ごとの全国中央値、市ごとの履歴。code は品目コード4桁（牛乳 1303、民営家賃 3001、ガソリン 7301）。一覧は cost_index で",
+  "input_schema": {
+   "properties": {
+    "code": {
+     "description": "品目コード4桁",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "cost_item",
+  "output_schema": {}
+ },
+ {
+  "description": "暮らしグラムが公開している全データセットの一覧。どの数字を、どこの一次資料から、どうやって作っているか。引用する前にここを見る",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "data_catalog",
+  "output_schema": {}
+ },
+ {
+  "description": "家電ごとの電気代。27種・68通りの使い方（扇風機のACとDC・弱中強、エアコンの冷房と暖房、こたつ、電気毛布、ドライヤー、パソコンのノートとデスクトップなど）の消費電力Wと1時間の電気代、出典（メーカーの仕様表の型番・資源エネルギー庁の試算）。81市の1kWhあたりの値段（総務省の調査価格÷402kWh）と、省エネの方法ごとの年間kWhも入っている。「エアコンの電気代」「つけっぱなし」「扇風機とエアコンどちらが安い」の相談にはこれ",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "denki_keisan",
+  "output_schema": {}
+ },
+ {
+  "description": "ふるさと納税の返礼品（楽天市場）を1万円の寄付あたりの量で並べた比較表。slug はジャンルの英字（hotate, unagi, kani など）。一覧は furusato_index で",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "furusato",
+  "output_schema": {}
+ },
+ {
+  "description": "ジャンルの日次の時系列（1万円あたりの量の中央値と p90）",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "furusato_history",
+  "output_schema": {}
+ },
+ {
+  "description": "一人暮らし向けのふるさと納税。内容量が2kg以下の返礼品だけを、1万円の寄付あたりの内容量が多い順に。内容量は商品名から読み取った実数で、読めない品は入っていない。「一人暮らし」「少量」「食べきれる量」「ひとり」の相談にはこれを使う",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "furusato_hitorigurashi",
+  "output_schema": {}
+ },
+ {
+  "description": "ふるさと納税のジャンル一覧",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "furusato_index",
+  "output_schema": {}
+ },
+ {
+  "description": "ガソリン代の計算。片道の距離（km）と燃費（km/L）を渡すと、その都道府県の今週のレギュラー・ハイオク・軽油の平均単価（資源エネルギー庁の週次調査・暮らしグラムの台帳）で、片道・往復・1か月・1年のガソリン代と1kmあたりの円を返す。「〇〇まで車で行くとガソリン代はいくら」「通勤のガソリン代」「燃費が良くなると年にいくら得か」「会社の規定の1kmあたり◯円で交通費はいくら」「通勤手当は月いくらまで非課税」の相談にはこれ。片道の距離から通勤手当の非課税限度額（国税庁 No.2585・令和8年4月1日現在）も返す。距離は渡す側が出す（直線距離なら道のりは1.2〜1.4倍と添える）。画面は /now/gasoline/keisan/、表は /now/gasoline/tsukin/",
+  "input_schema": {
+   "properties": {
+    "fuel": {
+     "description": "regular / hioku / diesel。既定 regular",
+     "type": "string"
+    },
+    "km": {
+     "description": "片道の距離（km）",
+     "type": "number"
+    },
+    "kmpl": {
+     "description": "燃費（km/L）。既定 15",
+     "type": "number"
+    },
+    "per_month": {
+     "description": "1か月の回数（通勤なら出勤日数）",
+     "type": "integer"
+    },
+    "pref": {
+     "description": "都道府県コード2桁（東京 13・広島 34）か名前。既定 13",
+     "type": "string"
+    },
+    "price": {
+     "description": "単価を自分で指定するとき（円/L）",
+     "type": "number"
+    },
+    "rate_per_km": {
+     "description": "会社の規定の 1km あたりの単価（円）。渡すと燃費と単価の代わりにこれで計算",
+     "type": "number"
+    },
+    "roundtrip": {
+     "description": "往復なら 1",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "km"
+   ],
+   "type": "object"
+  },
+  "name": "gasoline_cost",
+  "output_schema": {}
+ },
+ {
+  "description": "1つの制度の金額・対象・期限・手順・つまずき（省庁の一次資料から取得日つき）。slug は kogaku-ryoyohi, jidou-teate, shitsugyo-kyufu, ikuji-kyugyo, iryohi-kojo など。一覧は gov_money で",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "gov_guide",
+  "output_schema": {}
+ },
+ {
+  "description": "政府とお金：高額療養費・児童手当・死亡時の手続き等の金額と期限（省庁一次資料から取得日つき）",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "gov_money",
+  "output_schema": {}
+ },
+ {
+  "description": "都道府県の独自の給付金・支援制度（公式一次資料で確認できた分だけ・県コード2桁つき）",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "gov_pref",
+  "output_schema": {}
+ },
+ {
+  "description": "市をくらべる。同じかご（家賃・米・卵・牛乳・パン・電気）を81市に当てて、1か月いくらになるか。「引っ越すといくら変わる」「どの街が安い」の相談にはこれ",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "hikaku",
+  "output_schema": {}
+ },
+ {
+  "description": "いまの日本：気象庁の警報・注意報（県ごと・10分ごと）と直近7日の地震（震度・震央・緯度経度）",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "japan_now",
+  "output_schema": {}
+ },
+ {
+  "description": "日本の金利：財務省の国債金利（10年と1年・日次・1974年〜）。住宅ローンや預金金利の背景",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "jgb_rates",
+  "output_schema": {}
+ },
+ {
+  "description": "家電の型番ごとのきょうの最安値（楽天市場で売っている全店の中の最安値・売っている店の数・レビュー・年間消費電力量）。cat は tv, fridge, aircon, washer, microwave, rice-cooker, vacuum, dryer, air-purifier など。「<型番> 最安値」「この機種はいくら」の相談にはこれ",
+  "input_schema": {
+   "properties": {
+    "cat": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "cat"
+   ],
+   "type": "object"
+  },
+  "name": "kaden_model",
+  "output_schema": {}
+ },
+ {
+  "description": "何月にいちばん安くなるか。品目ごとの買い時の暦。79か月の調査価格から、値上がりの影響を消して月の癖だけを出したもの。「野菜が安い時期」「旬」「買い時」の相談にはこれ",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "kisetsu",
+  "output_schema": {}
+ },
+ {
+  "description": "500円でつくる、きょうの献立。保存のきく材料だけのレシピと、楽天の当日最安の単位価格から機械計算した材料費（1人前・円）",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "kondate",
+  "output_schema": {}
+ },
+ {
+  "description": "日本のスマホ料金（公式ページで確かめた税込の通常料金だけ・週次確認）。会社・プラン・GB・月額円",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "mobile_plans",
+  "output_schema": {}
+ },
+ {
+  "description": "自治体コード5桁で、その自治体が出している返礼品の一覧。kuongeo.com の /api/here と同じ鍵",
+  "input_schema": {
+   "properties": {
+    "code": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "municipality",
+  "output_schema": {}
+ },
+ {
+  "description": "原油は1バレル何ドルだったか。1986年からの年ごとの平均（EIA）",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nagai_crude",
+  "output_schema": {}
+ },
+ {
+  "description": "1ドルは何円だったか。1999年からの年ごとの平均（欧州中央銀行）。物価が上がった背景を聞かれたときに",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nagai_fx",
+  "output_schema": {}
+ },
+ {
+  "description": "逃げた猫（迷子の猫・脱走した猫）をどこまで探すかの範囲。暮らし方（in 家の中だけ / mix 外にも出る / out 外で暮らす）を渡すと、失踪した猫1,210件の調査（Huang ら 2018・Animals 8(1):5）が報告した、逃げた場所から見つかった場所までの距離（4分の1・半数・4分の3）と、同じ論文が挙げた探す半径の目安、まず探す場所、いなくなってからの日数ごとの生きて見つかった割合（7日34%・30日50%・61日56%・1年61%）を出典つきで返す。性別・去勢・年齢・品種・好奇心・まわりの様子・雨を渡すと、探す順番（steps）と、項目ごとの根拠（findings。逃げた猫の研究／ふだんの猫の研究／研究が見つかっていない、の札つき）も返す。距離を変えるのは暮らし方だけ。「猫が逃げた どこを探す」「猫 脱走 帰ってくる確率」「猫 帰ってこない 何日」の相談にはこれ。画面は /pet/neko/sagasu/（逃げた場所を地図に置くと輪が出る）",
+  "input_schema": {
+   "properties": {
+    "age": {
+     "description": "k（1歳未満）/ a（1〜7歳）/ s（8歳以上）",
+     "type": "string"
+    },
+    "area": {
+     "description": "まわり。dense（建物が多い町）/ sub（住宅地）/ rural（田畑や林）",
+     "type": "string"
+    },
+    "breed": {
+     "description": "mix（雑種）/ pure（純血種）",
+     "type": "string"
+    },
+    "breed_type": {
+     "description": "純血種の型。active（活発）/ calm（おとなしい）/ shy（こわがり）",
+     "type": "string"
+    },
+    "curious": {
+     "description": "好奇心。hi / mid / lo",
+     "type": "string"
+    },
+    "days": {
+     "description": "いなくなってからの日数（since の代わり）",
+     "type": "number"
+    },
+    "far": {
+     "description": "away のとき、家からの距離。1k / 5k / x（5kmより遠い）",
+     "type": "string"
+    },
+    "from": {
+     "description": "home（家から逃げた・既定）か away（病院・車・旅先など家ではない場所）",
+     "type": "string"
+    },
+    "life": {
+     "description": "暮らし方。in（家の中だけ）/ mix（外にも出る）/ out（外で暮らす）",
+     "type": "string"
+    },
+    "neuter": {
+     "description": "去勢・避妊。y（済み）/ n（まだ）",
+     "type": "string"
+    },
+    "night": {
+     "description": "いま暗いなら 1",
+     "type": "string"
+    },
+    "rain24": {
+     "description": "直近24時間の雨 mm",
+     "type": "number"
+    },
+    "sex": {
+     "description": "m（オス）/ f（メス）",
+     "type": "string"
+    },
+    "since": {
+     "description": "いなくなってから。12h / 1d / 3d / 7d（1週間より長い）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "life"
+   ],
+   "type": "object"
+  },
+  "name": "neko_sagasu",
+  "output_schema": {}
+ },
+ {
+  "description": "年金はいくらもらえるか（令和8年度）。平均年収（賞与込み・今の価値）と厚生年金の年数を渡すと、老齢基礎年金と老齢厚生年金の月額・年額、受け取り開始年齢（60〜75）による増減と損益分岐、加給年金、在職老齢年金の停止額、亡くなったときの遺族厚生年金を返す。mode=izoku なら遺族年金（子の数・妻の年齢）。厚労省のモデル年金と同じ式（平均標準報酬額×0.963×5.481/1000×月数）。「年金はいくらもらえる」「繰下げは得か」「遺族年金はいくら」の相談にはこれ。目安であり、正式はねんきん定期便。画面は /nenkin/",
+  "input_schema": {
+   "properties": {
+    "birth_year": {
+     "description": "生まれ年（既定 1975）",
+     "type": "integer"
+    },
+    "claim_age": {
+     "description": "受け取り開始年齢 60〜75（既定 65）",
+     "type": "integer"
+    },
+    "kids": {
+     "description": "（izoku）18歳未満の子の数",
+     "type": "integer"
+    },
+    "kokumin_years": {
+     "description": "国民年金の納付年数（既定 40）",
+     "type": "number"
+    },
+    "kosei_years": {
+     "description": "厚生年金に入っていた年数",
+     "type": "number"
+    },
+    "mode": {
+     "description": "izoku で遺族年金",
+     "type": "string"
+    },
+    "nenshu": {
+     "description": "平均年収（賞与込み・円）",
+     "type": "integer"
+    },
+    "spouse": {
+     "description": "65歳未満の配偶者を扶養していれば 1（加給年金）",
+     "type": "integer"
+    },
+    "wife_age": {
+     "description": "（izoku）残された配偶者の年齢",
+     "type": "integer"
+    },
+    "work_salary": {
+     "description": "65歳以降も働く月給（在職老齢年金）",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "nenshu"
+   ],
+   "type": "object"
+  },
+  "name": "nenkin",
+  "output_schema": {}
+ },
+ {
+  "description": "日用品の単位あたりの値段（楽天市場でよく買われている商品を、1ロール・1枚・100ml・1kg あたりにして日次で並べたもの）。slug は toilet-paper, tissue, diaper-pants, laundry-detergent, water, rice など。一覧は nichiyo_index で",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "nichiyo",
+  "output_schema": {}
+ },
+ {
+  "description": "日用品の語の一覧と、その日の中央値",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nichiyo_index",
+  "output_schema": {}
+ },
+ {
+  "description": "東京の卸売市場で野菜と果物がきょういくらで取引されたか（1kgあたり・消費税込み）。東京都中央卸売市場の日報から毎日読み取り、農林水産省が全国470店で調べた小売の平均と並べている。市場から店までで何倍になるかが分かる",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "oroshi",
+  "output_schema": {}
+ },
+ {
+  "description": "1品目の卸売価格（1kgあたり）。市場ごとの値段と日ごとの動き。slug は cabbage, daikon, onion, carrot, potato, tomato, cucumber, negi, lettuce など。一覧は oroshi で",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "oroshi_item",
+  "output_schema": {}
+ },
+ {
+  "description": "ガソリン（資源エネルギー庁・47都道府県・週次）と米5kg（農林水産省POS・週次）の今の値段",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "prices_now",
+  "output_schema": {}
+ },
+ {
+  "description": "1か月の生活費（消費支出）の平均と10の費目の内訳を、世帯の人数ごとに（一人暮らし・2人〜6人以上）。総務省 家計調査の年次の値をそのまま。すべての世帯と勤労者世帯の両方。「一人暮らしの生活費」「4人家族の生活費」「内訳」の相談にはこれ",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "seikatsuhi",
+  "output_schema": {}
+ },
+ {
+  "description": "洗濯表示（洗濯マーク）の意味。「丸にバツ」「三角に斜線2本」「桶に40 下線」「f 下線」「アイロン 点2つ」「四角に丸」のような言い方を q に渡すと、消費者庁が公表する JIS L 0001:2024 の原文の意味と、家での洗い方を返す。43記号の全一覧は /api/sentaku.json。「このマークは何」「乾燥機に入れていいか」「家で洗えるか」の相談にはこれ。画面は /sentaku/",
+  "input_schema": {
+   "properties": {
+    "q": {
+     "description": "記号の言い方。例：丸にバツ、手洗いマーク、三角にバツ、桶に30 二重線、丸にF 下線",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "sentaku_hyoji",
+  "output_schema": {}
+ },
+ {
+  "description": "賞味期限切れ・消費期限切れの食品がいつまで食べられるかの判定。食品名（卵・ゆで卵・牛乳・ヨーグルト・バター・チーズ・アイス・豆腐・充填豆腐・納豆・ケーキ・パン・キムチ・冷凍食品・水・日本酒・ビール・ワイン・お茶・砂糖・はちみつ・チョコ・ガム・しょうゆ・みそ・マヨネーズ・塩・食用油・カップ麺・缶詰・レトルト・米・小麦粉・市販薬）と、未開封か開封後か、表示の日付か過ぎた日数を渡すと、業界団体・メーカーの公表値と食品表示基準（消費者庁）にもとづく判定（期限内／開けて確かめる／目安を超えている／食べない／期限表示の無い食品）を出典つきで返す。年月だけの表示は月末まで。「賞味期限が3日過ぎた牛乳は飲める？」「開けた納豆はいつまで」「豆腐は消費期限？」の相談にはこれ。画面は /shomikigen/、台帳は /api/shomikigen.json",
+  "input_schema": {
+   "properties": {
+    "date": {
+     "description": "表示の日付。2026.10.5 / 2026.10（年月だけなら月末）/ 令和8年10月5日。days の代わり",
+     "type": "string"
+    },
+    "days": {
+     "description": "期限から過ぎた日数（負は期限内。既定 0）",
+     "type": "integer"
+    },
+    "food": {
+     "description": "食品名（別名可。例：豆腐、たまご、カップラーメン、醤油）か slug",
+     "type": "string"
+    },
+    "frozen": {
+     "description": "冷凍していたら true",
+     "type": "boolean"
+    },
+    "opened": {
+     "description": "開封後なら true（既定 false）",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "food"
+   ],
+   "type": "object"
+  },
+  "name": "shomikigen",
+  "output_schema": {}
+ },
+ {
+  "description": "暮らしの値段が5年で何倍になったか。総務省統計局 小売物価統計調査の81市の中央値を月ごとに。「5年前はいくらだった」「値上がり」「物価の推移」の相談にはこれ。品目ごとの月次は suii_item",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "suii",
+  "output_schema": {}
+ },
+ {
+  "description": "品目ごとの月ごとの値段（68か月）。item_code は suii の一覧にある（米コシヒカリ5kg は 1001）",
+  "input_schema": {
+   "properties": {
+    "item_code": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "item_code"
+   ],
+   "type": "object"
+  },
+  "name": "suii_item",
+  "output_schema": {}
+ },
+ {
+  "description": "スーパーの物価指数の1品目の月次の系列（消費者庁POS）。slug は eggs, milk, bread, toilet-paper, laundry-detergent など。一覧は super_pos で",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "super_item",
+  "output_schema": {}
+ },
+ {
+  "description": "スーパーの物価：消費者庁POS（全国約1,200店）26品目の月次指数（令和7年平均=100）。卵・牛乳・トイレットペーパー等",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "super_pos",
+  "output_schema": {}
+ },
+ {
+  "description": "手取りの計算（2026年）。月給（額面）を渡すと、健康保険（協会けんぽ・都道府県別）・介護保険・厚生年金・雇用保険・所得税・住民税を引いた月と年の手取り、内訳、家賃の目安、ふるさと納税の上限を1つのJSONで返す。「手取りはいくら」「住民税はいくら」「額面30万の手取り」の相談にはこれ。料率は令和8年度、税制は令和8年分（基礎控除の引上げ後）。計算であり推定ではないが、健保組合や各種控除で明細とは差が出る。画面は /tedori/",
+  "input_schema": {
+   "properties": {
+    "age": {
+     "description": "39（39歳以下）/ 40（40〜64歳）/ 65 / 70",
+     "type": "string"
+    },
+    "fuyo": {
+     "description": "扶養する家族の人数（16〜18歳・23歳以上）",
+     "type": "integer"
+    },
+    "gekkyu": {
+     "description": "月給（額面・円）",
+     "type": "integer"
+    },
+    "haigusha": {
+     "description": "配偶者を扶養していれば 1",
+     "type": "integer"
+    },
+    "pref": {
+     "description": "都道府県コード2桁（東京 13）か名前",
+     "type": "string"
+    },
+    "shoyo": {
+     "description": "年間の賞与（円・任意）",
+     "type": "integer"
+    },
+    "tokutei": {
+     "description": "19〜22歳の子の人数",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "gekkyu"
+   ],
+   "type": "object"
+  },
+  "name": "tedori",
+  "output_schema": {}
+ }
+]

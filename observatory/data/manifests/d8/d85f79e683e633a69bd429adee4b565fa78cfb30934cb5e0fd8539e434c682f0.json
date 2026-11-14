@@ -1,0 +1,30 @@
+[
+ {
+  "description": "Search the Dodo Payments documentation using semantic search across API Reference, SDK docs, BillingSDK, and guides.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "description": "Number of results to return (default: 10, max: 20)",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "number"
+    },
+    "query": {
+     "description": "Search query - describe what you want to find in the documentation. Be specific and mention the framework/language or any other relevant information in query for precise retrieval",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_docs",
+  "output_schema": {},
+  "title": "Search Dodo Payments Documentation"
+ }
+]

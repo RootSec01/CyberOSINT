@@ -1,0 +1,230 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Titles that recently arrived on or left Korean OTT subscription services, newest first. For departures, subscriptionPlatforms shows where the title can still be watched.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "days": {
+     "description": "How many days back. Default 7, max 14",
+     "maximum": 14,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "limit": {
+     "description": "Per list. Default 20, max 50",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "platform": {
+     "description": "Only this service. One of: netflix, disney_plus, tving, wavve, coupang_play, apple_tv_plus, watcha, amazon_prime",
+     "enum": [
+      "netflix",
+      "disney_plus",
+      "tving",
+      "wavve",
+      "coupang_play",
+      "apple_tv_plus",
+      "watcha",
+      "amazon_prime"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "arrivals_and_departures",
+  "output_schema": {},
+  "title": "Recently added and removed"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The cheapest set of Korean OTT subscriptions and bundles (KRW per month) that covers every title in a list, which service to watch each title on, and up to two alternatives. Pass StreamPick ids or titles.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "titles": {
+     "description": "StreamPick ids such as 'tmdb-tv-93405' or titles in Korean or English",
+     "items": {
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 15,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "titles"
+   ],
+   "type": "object"
+  },
+  "name": "cheapest_plan_for",
+  "output_schema": {},
+  "title": "Cheapest subscriptions for a watchlist"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Movies, series and new seasons released in South Korea in a given month, with the release date and the OTT services they are on. Covers the current month, past months back to 2026-10, and up to two months ahead.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Default 30, max 100",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "month": {
+     "description": "YYYY-MM in Korean time. Default: the current month",
+     "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+     "type": "string"
+    },
+    "platform": {
+     "description": "Only titles on this service. One of: netflix, disney_plus, tving, wavve, coupang_play, apple_tv_plus, watcha, amazon_prime",
+     "enum": [
+      "netflix",
+      "disney_plus",
+      "tving",
+      "wavve",
+      "coupang_play",
+      "apple_tv_plus",
+      "watcha",
+      "amazon_prime"
+     ],
+     "type": "string"
+    },
+    "sort": {
+     "description": "date (default) or buzz for the most talked-about first",
+     "enum": [
+      "date",
+      "buzz"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "new_releases",
+  "output_schema": {},
+  "title": "New on Korean OTT this month"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find movies and series by title (Korean or English, typos tolerated). Returns StreamPick ids, release year and the Korean subscription services each title is on. Use the id with where_to_watch for prices and details.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Default 5, max 10",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Title or part of a title, e.g. 'Squid Game' or '오징어 게임'",
+     "maxLength": 80,
+     "minLength": 1,
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "movie",
+      "series"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_titles",
+  "output_schema": {},
+  "title": "Search titles"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What is trending in South Korea right now by the StreamPick Korean Buzz score (Naver search trend and volume, YouTube views, TMDB popularity, recency). Optionally limit to one OTT service.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Default 10, max 20",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "platform": {
+     "description": "One of: netflix, disney_plus, tving, wavve, coupang_play, apple_tv_plus, watcha, amazon_prime",
+     "enum": [
+      "netflix",
+      "disney_plus",
+      "tving",
+      "wavve",
+      "coupang_play",
+      "apple_tv_plus",
+      "watcha",
+      "amazon_prime"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "trending",
+  "output_schema": {},
+  "title": "Trending in Korea"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Where a movie or series can be watched in South Korea: subscription, rental and purchase services, the cheapest monthly plan or bundle (KRW), when the next episode airs, and a StreamPick link. Pass an id from search_titles, or a title.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "StreamPick id such as 'tmdb-tv-93405'",
+     "pattern": "^tmdb-(movie|tv)-\\d+$",
+     "type": "string"
+    },
+    "title": {
+     "description": "Title in Korean or English, used when no id is given",
+     "maxLength": 80,
+     "minLength": 1,
+     "type": "string"
+    },
+    "year": {
+     "description": "Release year to pick the right title among remakes",
+     "maximum": 2100,
+     "minimum": 1900,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "where_to_watch",
+  "output_schema": {},
+  "title": "Where to watch in Korea"
+ }
+]

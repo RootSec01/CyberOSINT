@@ -1,0 +1,130 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Official NDMA/IMD hazard warnings currently active across India (the authoritative channel). Optionally filter by a region/state name (matched against the headline).",
+  "input_schema": {
+   "properties": {
+    "region": {
+     "description": "Optional state/region name to filter by.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "active_warnings",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "What the sky is doing at a place in India RIGHT NOW (not a forecast): air quality (CPCB AQI + pollutants + AQLI years-of-life-lost), heat (feels-like, wet-bulb, WBGT), cold, rain, wind, fog/visibility, dust, fire-smoke, UV, and any official NDMA warning over that spot, plus an Ambient read naming the single worst hazard and the readings in order of risk (ambient.order). Separately, where it stands out, today's modelled daily high (the model's estimate for the whole local day, so partly forecast early in the day) against the 1991-2020 normal there. Pass `persona` to weight it for a vulnerable person. To target a specific ward, hospital, forest, river or boundary, resolve it with a geo source (e.g. the bharatlas MCP) first, then pass the coordinate here. Surface the returned `attribution` and `disclaimer`.",
+  "input_schema": {
+   "properties": {
+    "persona": {
+     "description": "Weight the read for who is affected (default everyone).",
+     "enum": [
+      "everyone",
+      "asthma",
+      "elderly",
+      "child",
+      "outdoor",
+      "heart"
+     ],
+     "type": "string"
+    },
+    "place": {
+     "description": "A place in India: a name (\"Bengaluru\", \"Indiranagar\") or a coordinate \"lat,lon\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "place"
+   ],
+   "type": "object"
+  },
+  "name": "conditions_at",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The national picture right now: the worst-air, hottest, and dustiest spots in India. Filter with `kind` (air | heat | dust).",
+  "input_schema": {
+   "properties": {
+    "kind": {
+     "description": "Which leaderboard (default all).",
+     "enum": [
+      "all",
+      "air",
+      "heat",
+      "dust"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "national_now",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The nearest real (measured) air-quality monitoring stations to a place, with distance and current AQI. Use to judge how close hard measurement is. Conditions can be modelled when no station is near.",
+  "input_schema": {
+   "properties": {
+    "n": {
+     "description": "How many stations (default 5).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "place": {
+     "description": "A place name or \"lat,lon\" in India.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "place"
+   ],
+   "type": "object"
+  },
+  "name": "nearest_stations",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Resolve an Indian place name to candidates (name, detail, coordinate). Use to disambiguate before conditions_at. Covers cities, districts and air-monitoring stations. For sub-city wards, hospitals, forests, rivers or boundaries, use a geo source like the bharatlas MCP instead.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "A place name or partial name in India.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_place",
+  "output_schema": {}
+ }
+]

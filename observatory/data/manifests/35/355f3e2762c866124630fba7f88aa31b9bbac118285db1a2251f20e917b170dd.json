@@ -1,0 +1,878 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Get full metadata for one or more arXiv papers by ID. Use when you have known IDs from citations, prior search results, or memory. Looks up 10 IDs per call; any further IDs come back in remaining_ids for the next call.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "paper_ids": {
+     "description": "arXiv paper IDs, up to 100. The first 10 distinct well-formed IDs are looked up; the rest come back in remaining_ids to pass to the next call. An ID repeated in any accepted spelling is looked up once, while different versions of one paper stay separate lookups. Accepted forms: \"2401.12345\", \"2401.12345v2\" (a pinned version), or a pre-2007 ID like \"hep-th/9901001\" (archive spelled as arXiv issued it), each optionally prefixed \"arXiv:\", or an arxiv.org abs, pdf, or html URL, with or without https:// or a ?query or #fragment. An ID in any other form is reported in not_found with reason invalid_id and is not looked up.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "paper_ids"
+   ],
+   "type": "object"
+  },
+  "name": "arxiv_get_metadata",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "papers",
+      "totalSucceeded"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `invalid_id`: None of the requested IDs is an arXiv identifier in an accepted form. `no_match`: None of the requested IDs returned data from arXiv. `version_unavailable`: Every requested ID pinned a version the local mirror does not hold, and live arXiv fallback is disabled. `version_not_served`: Every requested ID pinned a superseded version of a pre-2007 paper that arXiv's API answers HTTP 500 for. The version exists, but its metadata cannot be returned. `rate_limited`: arXiv has throttled requests (HTTP 429 or \"Rate exceeded.\" body). `invalid_request`: arXiv rejected the request (HTTP 4xx other than 429). Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "invalid_id",
+          "no_match",
+          "version_unavailable",
+          "version_not_served",
+          "rate_limited",
+          "invalid_request"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "not_found": {
+     "description": "Per-input explanations for inputs that could not be returned. Absent when nothing failed.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A requested ID that could not be returned, with the reason it was missed.",
+      "properties": {
+       "detail": {
+        "description": "Additional human-readable context, when available",
+        "type": "string"
+       },
+       "id": {
+        "description": "Requested ID that returned no data — in canonical form when it was looked up, as sent when it is not an arXiv ID.",
+        "type": "string"
+       },
+       "reason": {
+        "description": "Why the paper ID could not be returned.",
+        "enum": [
+         "not_in_arxiv",
+         "version_not_in_mirror",
+         "version_not_served",
+         "live_lookup_failed",
+         "invalid_id"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "reason"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "papers": {
+     "description": "Papers found, in request order, one per distinct ID. Fewer than requested when an ID repeats an earlier one, is malformed, absent from arXiv, a version arXiv will not serve, one whose live lookup failed behind the local mirror, or past the first 10 distinct well-formed IDs.",
+     "items": {
+      "additionalProperties": false,
+      "description": "arXiv paper metadata — identifier, title, authors, abstract, categories, and links.",
+      "properties": {
+       "abstract": {
+        "description": "Full abstract text.",
+        "type": "string"
+       },
+       "abstract_url": {
+        "description": "arXiv abstract page URL.",
+        "type": "string"
+       },
+       "authors": {
+        "description": "Author names.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "categories": {
+        "description": "All arXiv categories assigned to this paper.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "comment": {
+        "description": "Author comment (e.g., page count, conference).",
+        "type": "string"
+       },
+       "doi": {
+        "description": "DOI if available.",
+        "type": "string"
+       },
+       "id": {
+        "description": "arXiv paper ID (e.g., \"2401.12345v1\").",
+        "type": "string"
+       },
+       "journal_ref": {
+        "description": "Journal reference if published.",
+        "type": "string"
+       },
+       "pdf_url": {
+        "description": "Direct PDF download URL.",
+        "type": "string"
+       },
+       "primary_category": {
+        "description": "Primary arXiv category (e.g., \"cs.CL\").",
+        "type": "string"
+       },
+       "published": {
+        "description": "Original submission instant, ISO 8601 UTC (e.g., \"2018-10-11T00:50:01Z\").",
+        "type": "string"
+       },
+       "title": {
+        "description": "Paper title.",
+        "type": "string"
+       },
+       "updated": {
+        "description": "Last update instant, ISO 8601 UTC (e.g., \"2018-10-11T00:50:01Z\").",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "authors",
+       "abstract",
+       "primary_category",
+       "categories",
+       "published",
+       "updated",
+       "pdf_url",
+       "abstract_url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "remaining_ids": {
+     "description": "Distinct well-formed IDs past the first 10, in canonical form and request order, that this call did not look up. Pass them as paper_ids in the next call. Absent when every well-formed ID was looked up.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "totalSucceeded": {
+     "description": "Number of successful items in 'papers'",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Arxiv Get Metadata"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "List arXiv category codes and names. Useful for discovering valid category filters for arxiv_search_papers. Lists subject classes only; arxiv_search_papers also accepts a bare archive code (the part before the dot, e.g. \"astro-ph\" or \"cs\") to search a whole archive at once.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "group": {
+     "description": "Filter by top-level group (e.g., \"cs\", \"math\", \"physics\"). Returns all categories if omitted.",
+     "enum": [
+      "cs",
+      "econ",
+      "eess",
+      "math",
+      "physics",
+      "q-bio",
+      "q-fin",
+      "stat"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "arxiv_list_categories",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "categories",
+      "totalCount"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "categories": {
+     "description": "arXiv categories matching the filter.",
+     "items": {
+      "additionalProperties": false,
+      "description": "arXiv category — subject code, full name, and top-level group.",
+      "properties": {
+       "code": {
+        "description": "Category code (e.g., \"cs.AI\").",
+        "type": "string"
+       },
+       "group": {
+        "description": "Top-level group (e.g., \"cs\").",
+        "type": "string"
+       },
+       "name": {
+        "description": "Full name (e.g., \"Artificial Intelligence\").",
+        "type": "string"
+       }
+      },
+      "required": [
+       "code",
+       "name",
+       "group"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode.",
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "notice": {
+     "description": "Guidance when the group filter returns no categories.",
+     "type": "string"
+    },
+    "totalCount": {
+     "description": "Total number of categories returned.",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Arxiv List Categories"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Fetch the full text of an arXiv paper. Tries arxiv.org/html first, falls back to ar5iv.labs.arxiv.org, and falls back again to text extracted from the PDF when neither has an HTML render — check the source field to know which one answered. Page through long papers with start and max_characters, or pass max_characters null to get the entire body in one call. To read one section, take the outline from the first page (start 0) and pass an entry's start.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "max_characters": {
+     "anyOf": [
+      {
+       "maximum": 9007199254740991,
+       "minimum": 1,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": 100000,
+     "description": "Maximum characters of paper body to return, counted after boilerplate stripping. Defaults to 100,000; pass null to return the entire body in one call. Whole-paper reads can exceed a client tool-result size cap — math-heavy bodies run 300KB-1MB+ — so prefer the default plus start-based paging unless the full text is needed. When truncated, a notice and the total character count are included."
+    },
+    "paper_id": {
+     "description": "arXiv paper ID: \"2401.12345\", \"2401.12345v2\" (a pinned version), or a pre-2007 ID like \"hep-th/9901001\" (archive spelled as arXiv issued it), optionally prefixed \"arXiv:\", or an arxiv.org abs, pdf, or html URL, with or without https:// or a ?query or #fragment.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "start": {
+     "default": 0,
+     "description": "Character offset into the cleaned body to begin reading from. Defaults to 0. Use with max_characters to page through long papers — e.g., start=100000 with max_characters=100000 returns chars 100,000–199,999 — or pass an outline entry's start to read from that heading. The total length is reported as body_characters in the response.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "paper_id"
+   ],
+   "type": "object"
+  },
+  "name": "arxiv_read_paper",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "paper_id",
+      "title",
+      "content",
+      "source",
+      "truncated",
+      "start",
+      "total_characters",
+      "body_characters",
+      "pdf_url",
+      "abstract_url"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "abstract_url": {
+     "description": "arXiv abstract page URL for attribution.",
+     "type": "string"
+    },
+    "body_characters": {
+     "description": "Character count of the full cleaned body. Use with start and max_characters to page. Typically 2-8× smaller than total_characters for HTML papers, most for math-heavy ones.",
+     "type": "number"
+    },
+    "content": {
+     "description": "Paper body for the requested slice — the article as cleaned HTML, with relative image, object, and link URLs made absolute (in-page #fragment links stay as written), when source is arxiv_html or ar5iv; plain text when source is pdf_text. Empty when start is past body_characters.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `invalid_id`: paper_id is not an arXiv identifier in an accepted form. `no_match`: arXiv has no paper with this ID, or no such version when the ID pins one. `content_unavailable`: Paper exists but neither arxiv.org/html nor ar5iv has an HTML rendering and arXiv served no PDF either. `pdf_extraction_failed`: Paper has no HTML rendering and its PDF yields no text: the PDF carries no text layer (an image-only or scanned submission), or the PDF parser cannot read the file (damaged, truncated, or not a PDF). `version_unavailable`: A version-pinned paper_id was requested, arXiv is unreachable, and the local mirror holds only a different version — a version the mirror does not hold needs the live API. `version_not_served`: paper_id pins a superseded version of a pre-2007 paper that arXiv's API answers HTTP 500 for. The version exists, but its metadata cannot be returned. `rate_limited`: arXiv has throttled requests (HTTP 429 or \"Rate exceeded.\" body). `invalid_request`: arXiv rejected the metadata lookup (HTTP 4xx other than 429). Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "invalid_id",
+          "no_match",
+          "content_unavailable",
+          "pdf_extraction_failed",
+          "version_unavailable",
+          "version_not_served",
+          "rate_limited",
+          "invalid_request"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "outline": {
+     "description": "Section headings of the whole cleaned body in document order, each with the start that reads from it. Returned only when start is 0. Empty for pdf_text, whose text carries no reliable headings. At most 200 entries — see outline_omitted_levels and outline_continues_at.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A part, chapter, section, subsection, subsubsection, paragraph, appendix, or bibliography heading.",
+      "properties": {
+       "level": {
+        "description": "Heading depth from its tag number minus one: h2 = 1, h3 = 2, and so on to h6 = 5.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "start": {
+        "description": "Offset of the heading in the cleaned body. Pass as start to read from it.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "title": {
+        "description": "Heading text with markup removed, e.g. \"3.1 Encoder and Decoder Stacks\"; cut at 120 characters.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "level",
+       "title",
+       "start"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "outline_continues_at": {
+     "description": "Present when the shallowest heading level alone has more than 200 headings, so outline stops at its first 200: the start of the first heading left out. Pass it as start to read on from there.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "outline_omitted_levels": {
+     "description": "Heading levels left out of outline because the paper has more than 200 headings, deepest first. Present only when levels were left out.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "paper_id": {
+     "description": "arXiv paper ID.",
+     "type": "string"
+    },
+    "pdf_url": {
+     "description": "Direct PDF download URL.",
+     "type": "string"
+    },
+    "revision_unconfirmed": {
+     "const": true,
+     "description": "Present, true, when source is ar5iv: ar5iv keeps one render per paper whatever version is asked for, so the body may be another revision than paper_id, while pdf_url is exactly the paper_id revision. Absent for every other source, and for an unversioned read where the arXiv API reported v1 as the only version of the paper.",
+     "type": "boolean"
+    },
+    "source": {
+     "description": "Which upstream artifact the body was read from. arxiv_html and ar5iv are HTML renders; pdf_text is text extracted from the PDF, where prose is reliable but math, tables, and heading structure are flattened. ar5iv keeps one render per paper, so an ar5iv body can be another revision than paper_id (see revision_unconfirmed).",
+     "enum": [
+      "arxiv_html",
+      "ar5iv",
+      "pdf_text"
+     ],
+     "type": "string"
+    },
+    "start": {
+     "description": "Character offset of the first character in content within the cleaned body.",
+     "type": "number"
+    },
+    "title": {
+     "description": "Paper title (from metadata, not parsed from HTML).",
+     "type": "string"
+    },
+    "total_characters": {
+     "description": "Character count of the body before cleaning — the article HTML, without the site header and footer, for arxiv_html and ar5iv; equal to body_characters for pdf_text, which needs no cleaning.",
+     "type": "number"
+    },
+    "truncated": {
+     "description": "True when more body content exists past this slice (start + content.length < body_characters).",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Arxiv Read Paper"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Search arXiv papers by query with category and sort filters. Returns paper metadata including title, authors, abstract, categories, and links.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Restrict results to an arXiv category. A leaf code (\"cs.CL\", \"math.AG\") matches exactly. An alias code matches the papers of the canonical code arXiv lists in its place: \"cs.NA\" matches math.NA, \"cs.SY\" eess.SY, \"math.IT\" cs.IT, \"math.MP\" math-ph, \"stat.TH\" math.ST, \"q-fin.EC\" econ.GN. A bare archive code (\"astro-ph\", \"cond-mat\", \"cs\", \"math\") matches the whole archive — its subject classes plus the legacy flat papers filed before the archive was subdivided — and the canonical codes of the aliases in it, so \"cs\" also matches math.NA and eess.SY. Note \"physics\" is the general-physics archive (physics.*), not the wider physics group: astro-ph, cond-mat, hep-*, quant-ph and the rest are separate archive codes. Use arxiv_list_categories to discover subject classes.",
+     "type": "string"
+    },
+    "max_results": {
+     "default": 10,
+     "description": "Maximum results to return. Default 10. At most 50 are returned per call: a larger value returns the first 50, and when more matches exist the response says how to reach them — the start of the next page, or date windows once paging cannot reach them all. arXiv serves only the first 10000 results of a query, so a page reaching past result 10000 can come back cut short at it, and the response says so. Each result includes title, authors, abstract, and metadata — keep low to limit response size.",
+     "maximum": 10000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Search query. Field prefixes: ti: (title), au: (author — search the surname and narrow a common one with a category or topic: au:hinton AND cat:cs.LG; a quoted name such as au:\"geoffrey hinton\" matches when one author's name holds every quoted word, in any order, and an initial does not match a spelled-out first name), abs: (abstract), cat: (category — a leaf code matches exactly, an alias code such as cat:cs.NA matches its canonical code, math.NA, and a bare archive code such as cat:astro-ph matches its whole subtree), co: (comment), jr: (journal ref), all: (all fields). Boolean operators, uppercase only: AND, OR, ANDNOT. Space-separated terms are joined with OR, so \"quantum computing\" matches papers with either word; AND requires every term (\"quantum AND computing\"). The operators share one precedence and group to the right (\"a AND b OR c\" reads as \"a AND (b OR c)\"), so use parentheses for any other grouping. Quote a multi-word topic to match it as a phrase, and put alternatives in parentheses before a filter so the filter applies to all of them: '\"graph neural networks\" AND cat:cs.LG', '(ti:transformer OR ti:attention) AND cat:cs.CL'. arXiv ignores common words such as of, the, and, for, in, so leave them out or keep them inside a quoted phrase. Examples: \"au:bengio AND ti:attention\", \"all:transformer AND cat:cs.CL\".",
+     "maxLength": 1000,
+     "minLength": 1,
+     "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]*$",
+     "type": "string"
+    },
+    "sort_by": {
+     "default": "relevance",
+     "description": "Sort criterion. Use \"submitted\" for newest papers, \"relevance\" for best query matches.",
+     "enum": [
+      "relevance",
+      "submitted",
+      "updated"
+     ],
+     "type": "string"
+    },
+    "sort_order": {
+     "default": "descending",
+     "description": "Sort direction. \"descending\" returns newest/most relevant first.",
+     "enum": [
+      "ascending",
+      "descending"
+     ],
+     "type": "string"
+    },
+    "start": {
+     "default": 0,
+     "description": "Pagination offset (0-10000). Use with max_results to page through results. E.g., start=10 with max_results=10 returns results 11-20. arXiv serves only the first 10000 results of a query, so a page reaching past result 10000 can come back cut short at it and a start of 10000 can be refused. To reach later matches, carve the search into submitted_from/submitted_to windows and page within each.",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "submitted_from": {
+     "description": "Earliest submission date to include, inclusive, as a UTC YYYY-MM-DD date. Omit for no lower bound.",
+     "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$",
+     "type": "string"
+    },
+    "submitted_to": {
+     "description": "Latest submission date to include, inclusive, as a UTC YYYY-MM-DD date. Omit for no upper bound. Both bounds are inclusive, so consecutive windows (\"2024-01-01\"..\"2024-01-15\" then \"2024-01-16\"..\"2024-01-31\") cover the matches with no gap; a paper submitted at exactly the midnight seam between two windows appears in both, so de-duplicate collected results by paper id. That is the way to reach matches past the start ceiling: split the date range, then page within each window.",
+     "pattern": "^(\\d{4}-\\d{2}-\\d{2})?$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "arxiv_search_papers",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "papers",
+      "effectiveQuery",
+      "totalFound",
+      "pageStart"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "cap": {
+     "description": "The page size applied: max_results, or 50 when max_results asks for more — fewer when the page was cut short at result 10000, the last one arXiv serves.",
+     "type": "number"
+    },
+    "effectiveQuery": {
+     "description": "The query as actually searched, carrying every filter applied — the category subtree and submitted-date window folded into arXiv syntax alongside the supplied terms. Replaying it as `query` with no other filters reproduces this exact result set.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `unknown_category`: Provided category code is not part of the arXiv taxonomy. `rate_limited`: arXiv has throttled requests (HTTP 429 or \"Rate exceeded.\" body). `invalid_request`: arXiv rejected the request (HTTP 4xx other than 429), typically malformed query syntax. `unsupported_query_syntax`: The mirror search engine rejected the FTS5 expression the query translated to. Every query the translator accepts is meant to parse, so this marks a translator defect. `invalid_date_range`: submitted_from or submitted_to is not a real UTC calendar date, or the window starts after it ends. `start_beyond_result_limit`: start is 10000 or more on a search arXiv answers, past the first 10000 results it serves for any query. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "unknown_category",
+          "rate_limited",
+          "invalid_request",
+          "unsupported_query_syntax",
+          "invalid_date_range",
+          "start_beyond_result_limit"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "notice": {
+     "description": "Recovery guidance when results are empty or paging overshot. Absent on successful pages.",
+     "type": "string"
+    },
+    "pageStart": {
+     "description": "Pagination offset of this result page.",
+     "type": "number"
+    },
+    "papers": {
+     "description": "Matching papers with full metadata.",
+     "items": {
+      "additionalProperties": false,
+      "description": "arXiv paper metadata — identifier, title, authors, abstract, categories, and links.",
+      "properties": {
+       "abstract": {
+        "description": "Full abstract text.",
+        "type": "string"
+       },
+       "abstract_url": {
+        "description": "arXiv abstract page URL.",
+        "type": "string"
+       },
+       "authors": {
+        "description": "Author names.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "categories": {
+        "description": "All arXiv categories assigned to this paper.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "comment": {
+        "description": "Author comment (e.g., page count, conference).",
+        "type": "string"
+       },
+       "doi": {
+        "description": "DOI if available.",
+        "type": "string"
+       },
+       "id": {
+        "description": "arXiv paper ID (e.g., \"2401.12345v1\").",
+        "type": "string"
+       },
+       "journal_ref": {
+        "description": "Journal reference if published.",
+        "type": "string"
+       },
+       "pdf_url": {
+        "description": "Direct PDF download URL.",
+        "type": "string"
+       },
+       "primary_category": {
+        "description": "Primary arXiv category (e.g., \"cs.CL\").",
+        "type": "string"
+       },
+       "published": {
+        "description": "Original submission instant, ISO 8601 UTC (e.g., \"2018-10-11T00:50:01Z\").",
+        "type": "string"
+       },
+       "title": {
+        "description": "Paper title.",
+        "type": "string"
+       },
+       "updated": {
+        "description": "Last update instant, ISO 8601 UTC (e.g., \"2018-10-11T00:50:01Z\").",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "authors",
+       "abstract",
+       "primary_category",
+       "categories",
+       "published",
+       "updated",
+       "pdf_url",
+       "abstract_url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "shown": {
+     "description": "Papers returned on this page.",
+     "type": "number"
+    },
+    "totalFound": {
+     "description": "Total matching papers before pagination. Exact, except for a search the local mirror answers with no free-text term that spans several category codes (a whole archive such as cat:cs, or two categories) or filters by submitted date alone: the mirror stops counting such a search at 50,000, and a total of 50,000 there carries totalFoundIsLowerBound and means 50,000 or more.",
+     "type": "number"
+    },
+    "totalFoundIsLowerBound": {
+     "const": true,
+     "description": "Present when totalFound is a floor: at least that many papers match. Absent when totalFound is exact.",
+     "type": "boolean"
+    },
+    "truncated": {
+     "description": "True when more matching papers exist beyond this page (totalFound > start + shown).",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Arxiv Search Papers"
+ }
+]

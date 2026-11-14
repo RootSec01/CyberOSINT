@@ -1,0 +1,291 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns the current BeeIMG free-plan limits, premium perks, and upgrade links. Call this when an upload fails with a rate limit, storage limit, or file-too-large error to advise the user about upgrading.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "type": "object"
+  },
+  "name": "beeimg_premium_info",
+  "output_schema": {},
+  "title": "Premium Plan Info"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Create a new album. Returns the album ID to use with upload_url/upload_file albumid parameter.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "apikey": {
+     "description": "Your BeeIMG API key.",
+     "type": "string"
+    },
+    "privacy": {
+     "description": "Privacy setting. Public (default), unlisted (hidden from search), private/truly-private (Premium only).",
+     "enum": [
+      "public",
+      "unlisted",
+      "private",
+      "truly-private"
+     ],
+     "type": "string"
+    },
+    "title": {
+     "description": "Album title.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "title",
+    "apikey"
+   ],
+   "type": "object"
+  },
+  "name": "create_album",
+  "output_schema": {},
+  "title": "Create Album"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Create a sub-folder in an album. Returns the folder ID (9 chars) to use with upload_url/upload_file albumid parameter.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "apikey": {
+     "description": "Your BeeIMG API key.",
+     "type": "string"
+    },
+    "main_album_id": {
+     "description": "Parent album ID (5 chars).",
+     "type": "string"
+    },
+    "name": {
+     "description": "Folder name (default \"New Folder\").",
+     "type": "string"
+    },
+    "parent_id": {
+     "description": "Folder or album ID (5 or 9 chars) to place the folder in.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "main_album_id",
+    "parent_id",
+    "apikey"
+   ],
+   "type": "object"
+  },
+  "name": "create_folder",
+  "output_schema": {},
+  "title": "Create Folder in Album"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Delete an image hosted on BeeIMG using its image ID, your API key, and the delete key returned at upload time. Returns OK or ERROR.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "apikey": {
+     "description": "Your BeeIMG API key.",
+     "type": "string"
+    },
+    "delete_key": {
+     "description": "The deletion key returned with the upload response.",
+     "type": "string"
+    },
+    "image_id": {
+     "description": "The image ID to delete (the value of \"name\" in the upload response).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "image_id",
+    "apikey",
+    "delete_key"
+   ],
+   "type": "object"
+  },
+  "name": "delete_image",
+  "output_schema": {},
+  "title": "Delete Image"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get album details, folders, and images. Use folder IDs from the folders array with upload_url/upload_file albumid parameter.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "apikey": {
+     "description": "Your BeeIMG API key.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Album ID (5 chars) or folder ID (9 chars).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "apikey"
+   ],
+   "type": "object"
+  },
+  "name": "get_album",
+  "output_schema": {},
+  "title": "Get Album Details"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List all albums owned by the authenticated user. Returns album IDs, titles, privacy, and view counts. Use album IDs with upload_url/upload_file albumid parameter.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "apikey": {
+     "description": "Your BeeIMG API key.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "apikey"
+   ],
+   "type": "object"
+  },
+  "name": "list_albums",
+  "output_schema": {},
+  "title": "List Albums"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Upload an image file to BeeIMG from base64 or a data URI. Returns the hosted image URL, thumbnail, view page, and delete URL.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "albumid": {
+     "description": "Album or folder ID to place the image in. Accepts both 5-char master album IDs and 9-char folder IDs.",
+     "type": "string"
+    },
+    "apikey": {
+     "description": "Your BeeIMG API key. Required for album uploads and all delete requests. Get it at https://beeimg.com/api/newkey",
+     "type": "string"
+    },
+    "filename": {
+     "description": "Optional original filename (used to detect the extension and default title).",
+     "type": "string"
+    },
+    "image": {
+     "description": "The image as a data URI (e.g. data:image/png;base64,....) or raw base64.",
+     "type": "string"
+    },
+    "privacy": {
+     "description": "public (default), private (unlisted - hidden from search but accessible via link), or truly-private (only you and admins can see it - Premium feature).",
+     "enum": [
+      "public",
+      "private",
+      "truly-private"
+     ],
+     "type": "string"
+    },
+    "title": {
+     "description": "Optional title for the image.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "image"
+   ],
+   "type": "object"
+  },
+  "name": "upload_file",
+  "output_schema": {},
+  "title": "Upload Image File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Upload an image to BeeIMG by fetching it from a remote URL. Returns the hosted image URL, thumbnail, view page, and delete URL.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "albumid": {
+     "description": "Album or folder ID to place the image in. Accepts both 5-char master album IDs and 9-char folder IDs.",
+     "type": "string"
+    },
+    "apikey": {
+     "description": "Your BeeIMG API key. Required for album uploads and all delete requests. Get it at https://beeimg.com/api/newkey",
+     "type": "string"
+    },
+    "privacy": {
+     "description": "public (default), private (unlisted - hidden from search but accessible via link), or truly-private (only you and admins can see it - Premium feature).",
+     "enum": [
+      "public",
+      "private",
+      "truly-private"
+     ],
+     "type": "string"
+    },
+    "title": {
+     "description": "Optional title for the image.",
+     "type": "string"
+    },
+    "url": {
+     "description": "Remote image URL to fetch and host.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "upload_url",
+  "output_schema": {},
+  "title": "Upload Image by URL"
+ }
+]

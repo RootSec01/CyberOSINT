@@ -1,0 +1,582 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create a customer"
+  },
+  "description": "WRITE: create a new customer. Each call creates a new record (not idempotent). Craftboxx API: POST /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_number": {
+     "description": "Your own customer number.",
+     "type": "string"
+    },
+    "info": {
+     "description": "Free-text note.",
+     "type": "string"
+    },
+    "name": {
+     "description": "Customer name (required).",
+     "minLength": 1,
+     "type": "string"
+    },
+    "name_addon": {
+     "description": "Name addition, such as a second line.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "craftboxx_create_customer",
+  "output_schema": {},
+  "title": "Create a customer"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create a project"
+  },
+  "description": "WRITE: create a new project for an existing customer. Each call creates a new record (not idempotent). Craftboxx API: POST /projects.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_id": {
+     "description": "Id of the customer (required, see craftboxx_list_customers).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "project_nr": {
+     "description": "Your own project number.",
+     "type": "string"
+    },
+    "title": {
+     "description": "Project title (required).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "title",
+    "customer_id"
+   ],
+   "type": "object"
+  },
+  "name": "craftboxx_create_project",
+  "output_schema": {},
+  "title": "Create a project"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an assignment"
+  },
+  "description": "Get one assignment by id. Craftboxx API: GET /assignments/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "assignment_id": {
+     "description": "The assignment id.",
+     "type": [
+      "string",
+      "number"
+     ]
+    }
+   },
+   "required": [
+    "assignment_id"
+   ],
+   "type": "object"
+  },
+  "name": "craftboxx_get_assignment",
+  "output_schema": {},
+  "title": "Get an assignment"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get my company"
+  },
+  "description": "Get the company of the signed-in account (name, address, contact data). Craftboxx API: GET /my/company.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "craftboxx_get_company",
+  "output_schema": {},
+  "title": "Get my company"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a customer"
+  },
+  "description": "Get one customer by id. Craftboxx API: GET /customers/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_id": {
+     "description": "The customer id.",
+     "type": [
+      "string",
+      "number"
+     ]
+    }
+   },
+   "required": [
+    "customer_id"
+   ],
+   "type": "object"
+  },
+  "name": "craftboxx_get_customer",
+  "output_schema": {},
+  "title": "Get a customer"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an employee"
+  },
+  "description": "Get one employee by id. Craftboxx API: GET /employees/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "employee_id": {
+     "description": "The employee id.",
+     "type": [
+      "string",
+      "number"
+     ]
+    }
+   },
+   "required": [
+    "employee_id"
+   ],
+   "type": "object"
+  },
+  "name": "craftboxx_get_employee",
+  "output_schema": {},
+  "title": "Get an employee"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a project"
+  },
+  "description": "Get one project by id. Craftboxx API: GET /projects/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "project_id": {
+     "description": "The project id.",
+     "type": [
+      "string",
+      "number"
+     ]
+    }
+   },
+   "required": [
+    "project_id"
+   ],
+   "type": "object"
+  },
+  "name": "craftboxx_get_project",
+  "output_schema": {},
+  "title": "Get a project"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List absence types"
+  },
+  "description": "List absence reasons (holiday, sick, ...). Craftboxx API: GET /absences/types.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_absence_types",
+  "output_schema": {},
+  "title": "List absence types"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List absences"
+  },
+  "description": "List absences such as holiday or sick leave (employee, type, start, end). Craftboxx API: GET /absences.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "employees": {
+     "description": "Only absences of these employee ids.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "end": {
+     "description": "Filter by end date-time (ISO 8601).",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "start": {
+     "description": "Filter by start date-time (ISO 8601).",
+     "type": "string"
+    },
+    "type_id": {
+     "description": "Only this absence type id (see craftboxx_list_absence_types).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_absences",
+  "output_schema": {},
+  "title": "List absences"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List articles"
+  },
+  "description": "List articles in the material catalog (name, manufacturer, unit price, VAT rate). Craftboxx API: GET /articles.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "manufacturer": {
+     "description": "Filter by exact manufacturer.",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search across the relevant fields.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_articles",
+  "output_schema": {},
+  "title": "List articles"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List assignments"
+  },
+  "description": "List assignments (planned jobs/appointments: title, project, start, end, state, planned time). Filter by date range or employee. Craftboxx API: GET /assignments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "employees": {
+     "description": "Only assignments of these employee ids.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "end": {
+     "description": "Filter by end date-time (ISO 8601).",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search across the relevant fields.",
+     "type": "string"
+    },
+    "show_archived": {
+     "description": "true = include archived items (hidden by default).",
+     "type": "boolean"
+    },
+    "start": {
+     "description": "Filter by start date-time (ISO 8601, e.g. 2026-11-01T00:00:00+01:00).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_assignments",
+  "output_schema": {},
+  "title": "List assignments"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List customers"
+  },
+  "description": "List customers (name, customer number, info). Craftboxx API: GET /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_number": {
+     "description": "Filter by customer number.",
+     "type": "string"
+    },
+    "name": {
+     "description": "Filter by exact name.",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search across the relevant fields.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_customers",
+  "output_schema": {},
+  "title": "List customers"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List documentations"
+  },
+  "description": "List job documentations (reports written on assignments: title, state, type, author). Craftboxx API: GET /documentations.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "assignment_id": {
+     "description": "Only documentations of this assignment.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "author_id": {
+     "description": "Only documentations written by this employee.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search across the relevant fields.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_documentations",
+  "output_schema": {},
+  "title": "List documentations"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List employees"
+  },
+  "description": "List employees (name, email, phone, group, skills, inactive flag). Craftboxx API: GET /employees.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "email": {
+     "description": "Filter by exact email.",
+     "type": "string"
+    },
+    "group_id": {
+     "description": "Only employees of this group.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "last_name": {
+     "description": "Filter by exact last name.",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search across the relevant fields.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_employees",
+  "output_schema": {},
+  "title": "List employees"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List projects"
+  },
+  "description": "List projects (title, project number, customer, sales volume). Craftboxx API: GET /projects.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_id": {
+     "description": "Only projects of this customer.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "project_nr": {
+     "description": "Filter by project number.",
+     "type": "string"
+    },
+    "q": {
+     "description": "Free-text search across the relevant fields.",
+     "type": "string"
+    },
+    "show_archived": {
+     "description": "true = include archived items (hidden by default).",
+     "type": "boolean"
+    },
+    "title": {
+     "description": "Filter by exact title.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_projects",
+  "output_schema": {},
+  "title": "List projects"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List timesheets"
+  },
+  "description": "List timesheets (employee, start, end, working time, break time). Craftboxx API: GET /timesheets.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "employee_id": {
+     "description": "Only timesheets of this employee.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "end": {
+     "description": "Filter by end date-time (ISO 8601).",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "start": {
+     "description": "Filter by start date-time (ISO 8601).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "craftboxx_list_timesheets",
+  "output_schema": {},
+  "title": "List timesheets"
+ }
+]

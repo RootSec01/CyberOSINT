@@ -1,0 +1,340 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Delete job"
+  },
+  "description": "WRITE: permanently delete a finished (transcribed or failed) job with its media and transcript. This cannot be undone. A job still in progress cannot be deleted. DELETE /jobs/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "job_id": {
+     "description": "Rev.ai job id (the `id` from revai_submit_job or revai_list_jobs).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "revai_delete_job",
+  "output_schema": {},
+  "title": "Delete job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get account and balance"
+  },
+  "description": "The Rev.ai account behind the token: email, free, purchased, total and invoiced balance (USD) and whether HIPAA is on. GET /account.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "revai_get_account",
+  "output_schema": {},
+  "title": "Get account and balance"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get captions"
+  },
+  "description": "Captions for a transcribed job as SRT (default) or WebVTT. Long files are paged by character: repeat with next_offset until it is null. For multichannel jobs pass speaker_channel. GET /jobs/{id}/captions.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "format": {
+     "description": "srt (default) or vtt.",
+     "enum": [
+      "srt",
+      "vtt"
+     ],
+     "type": "string"
+    },
+    "job_id": {
+     "description": "Rev.ai job id (the `id` from revai_submit_job or revai_list_jobs).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "max_chars": {
+     "description": "Most characters to return in one reply, 1000-20000 (default 15000).",
+     "maximum": 20000,
+     "minimum": 1000,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Start position from the previous reply's next_offset (default 0).",
+     "maximum": 100000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "speaker_channel": {
+     "description": "Channel to caption, for jobs submitted with speaker_channels_count.",
+     "maximum": 32,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "revai_get_captions",
+  "output_schema": {},
+  "title": "Get captions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get job status"
+  },
+  "description": "One transcription job by id: status (in_progress, transcribed, failed), timestamps, duration, language, failure reason. Poll this until status is transcribed. GET /jobs/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "job_id": {
+     "description": "Rev.ai job id (the `id` from revai_submit_job or revai_list_jobs).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "revai_get_job",
+  "output_schema": {},
+  "title": "Get job status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get transcript summary"
+  },
+  "description": "The summary of a transcribed job. It exists only if the job was submitted with summarization_type. Paged by character like revai_get_transcript. GET /jobs/{id}/transcript/summary.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "job_id": {
+     "description": "Rev.ai job id (the `id` from revai_submit_job or revai_list_jobs).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "max_chars": {
+     "description": "Most characters to return in one reply, 1000-20000 (default 15000).",
+     "maximum": 20000,
+     "minimum": 1000,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Start position from the previous reply's next_offset (default 0).",
+     "maximum": 100000000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "revai_get_summary",
+  "output_schema": {},
+  "title": "Get transcript summary"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get transcript"
+  },
+  "description": "The transcript of a transcribed job. format=text (default) is plain text with speaker labels and timestamps; format=segments is a list of {speaker, start, end, text} per speaker turn (seconds). Long transcripts are paged: repeat with next_offset until it is null. GET /jobs/{id}/transcript.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "format": {
+     "description": "text (default) or segments.",
+     "enum": [
+      "text",
+      "segments"
+     ],
+     "type": "string"
+    },
+    "group_channels_by": {
+     "description": "Multichannel jobs only: how to group words into turns.",
+     "enum": [
+      "speaker",
+      "sentence",
+      "word"
+     ],
+     "type": "string"
+    },
+    "job_id": {
+     "description": "Rev.ai job id (the `id` from revai_submit_job or revai_list_jobs).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "max_chars": {
+     "description": "Most characters to return in one reply, 1000-20000 (default 15000).",
+     "maximum": 20000,
+     "minimum": 1000,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "text: character position; segments: segment index. Use the previous reply's next_offset (default 0).",
+     "maximum": 100000000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "revai_get_transcript",
+  "output_schema": {},
+  "title": "Get transcript"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List transcription jobs"
+  },
+  "description": "List transcription jobs from the last 30 days, newest first: id, status (in_progress, transcribed, failed), name, duration, language, failure reason. Page with starting_after = the previous reply's next_starting_after. GET /jobs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Jobs per page, 1-100 (default 20).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "starting_after": {
+     "description": "Return jobs older than this job id (exclusive), from next_starting_after.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "revai_list_jobs",
+  "output_schema": {},
+  "title": "List transcription jobs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Submit transcription job"
+  },
+  "description": "WRITE: start an asynchronous machine transcription job for an audio or video file at a public URL. It uses Rev.ai credit (free credit first). Returns the job with status in_progress; then poll revai_get_job and read the result with revai_get_transcript. Human transcription is not offered. POST /jobs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "delete_after_seconds": {
+     "description": "Delete the job and its data this many seconds after it completes.",
+     "maximum": 2592000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "filter_profanity": {
+     "description": "Mask profanity in the transcript.",
+     "type": "boolean"
+    },
+    "forced_alignment": {
+     "description": "More accurate per-word timestamps (en, fr, it, de, es).",
+     "type": "boolean"
+    },
+    "language": {
+     "description": "Spoken language as an ISO 639-1 code (en, en-us, en-gb, es, fr, de, ...). Default en.",
+     "pattern": "^[a-z]{2,3}(-[a-z]{2})?(\\/[a-z]{2})?$|^auto$",
+     "type": "string"
+    },
+    "media_url": {
+     "description": "Direct download URL of the audio or video file. Rev.ai fetches it; it must be reachable without login.",
+     "maxLength": 4096,
+     "pattern": "^https?:\\/\\/\\S+$",
+     "type": "string"
+    },
+    "metadata": {
+     "description": "A note stored with the job and returned with it (for example your own reference).",
+     "maxLength": 512,
+     "type": "string"
+    },
+    "remove_disfluencies": {
+     "description": "Drop 'ums' and similar fillers.",
+     "type": "boolean"
+    },
+    "skip_diarization": {
+     "description": "Do not label speakers.",
+     "type": "boolean"
+    },
+    "skip_punctuation": {
+     "description": "Return words without punctuation.",
+     "type": "boolean"
+    },
+    "speaker_channels_count": {
+     "description": "Number of audio channels with one speaker each. Billed per channel.",
+     "maximum": 8,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "speakers_count": {
+     "description": "Number of speakers, if known (English, Spanish, French); improves speaker labels.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "summarization_type": {
+     "description": "Also create a summary, read later with revai_get_summary.",
+     "enum": [
+      "paragraph",
+      "bullets"
+     ],
+     "type": "string"
+    },
+    "verbatim": {
+     "description": "Keep every false start and disfluency (default true for machine jobs).",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "media_url"
+   ],
+   "type": "object"
+  },
+  "name": "revai_submit_job",
+  "output_schema": {},
+  "title": "Submit transcription job"
+ }
+]

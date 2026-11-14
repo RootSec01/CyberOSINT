@@ -1,0 +1,123 @@
+[
+ {
+  "description": "FREE: preflight target URL safety and pricing",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "check_url",
+  "output_schema": {}
+ },
+ {
+  "description": "PAID $0.05 USDC (x402, Base): Compare Polymarket rules with a bookmaker market description. Over MCP this returns payment requirements; settle by calling POST /v1/market-rules/compare with x402 payment headers.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "bookmakerDescription": {
+     "type": "string"
+    },
+    "polymarketRules": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "polymarketRules",
+    "bookmakerDescription"
+   ],
+   "type": "object"
+  },
+  "name": "compare_market_rules",
+  "output_schema": {}
+ },
+ {
+  "description": "PAID $0.02 USDC (x402, Base): URL plus JSON schema to structured JSON. Over MCP this returns payment requirements; settle by calling POST /v1/extract with x402 payment headers.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "schema": {
+     "additionalProperties": {},
+     "type": "object"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "schema"
+   ],
+   "type": "object"
+  },
+  "name": "extract_structured",
+  "output_schema": {}
+ },
+ {
+  "description": "PAID $0.003 USDC (x402, Base): Whether a page changed since a hash or timestamp. Over MCP this returns payment requirements; settle by calling POST /v1/page/changed with x402 payment headers.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "since": {
+     "type": "string"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "page_changed",
+  "output_schema": {}
+ },
+ {
+  "description": "PAID $0.001 USDC (x402, Base): URL to clean markdown. Over MCP this returns payment requirements; settle by calling POST /v1/scrape/markdown with x402 payment headers.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "scrape_markdown",
+  "output_schema": {}
+ }
+]

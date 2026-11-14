@@ -1,0 +1,230 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Count matches over time"
+  },
+  "description": "Counts how many passages (and chapters/lectures) match a German full-text query, grouped by year, by volume or by place. Useful for questions such as when Steiner spoke most about a topic. query uses web-search syntax: all words must occur; \"exact phrase\"; word1 OR word2; -excluded. The reply text begins with the fixed phrase \"Steiner hat gesagt:\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "date_from": {
+     "description": "Only lectures on or after this date (YYYY, YYYY-MM or YYYY-MM-DD)",
+     "type": "string"
+    },
+    "date_to": {
+     "description": "Only lectures on or before this date",
+     "type": "string"
+    },
+    "ga": {
+     "description": "Limit to one volume, e.g. \"GA 327\"",
+     "type": "string"
+    },
+    "group_by": {
+     "description": "Grouping (default year)",
+     "enum": [
+      "year",
+      "volume",
+      "place"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "description": "German search words, e.g.  Ahriman  or  \"soziale Dreigliederung\"",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "count_matches",
+  "output_schema": {},
+  "title": "Count matches over time"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Volume details"
+  },
+  "description": "Details for one volume plus its table of contents (chapters/lectures with number, heading, date, place and pages). The reply text begins with the fixed phrase \"Steiner hat gesagt:\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "ga": {
+     "description": "e.g. \"GA 327\"",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ga"
+   ],
+   "type": "object"
+  },
+  "name": "get_work",
+  "output_schema": {},
+  "title": "Volume details"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List volumes"
+  },
+  "description": "Catalogue of all volumes in the Gesamtausgabe with title, section and whether the full text is available. Filter by title words, section and the year lectures were held. The reply text begins with the fixed phrase \"Steiner hat gesagt:\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "has_text": {
+     "description": "Only volumes with (true) or without (false) full text",
+     "type": "boolean"
+    },
+    "limit": {
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "minimum": 0,
+     "type": "integer"
+    },
+    "section": {
+     "description": "e.g. Schriften, Vorträge, Landwirtschaft, Medizin",
+     "type": "string"
+    },
+    "title": {
+     "description": "Words that must appear in the title (German)",
+     "type": "string"
+    },
+    "year": {
+     "description": "Volumes with lectures held in this year",
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_works",
+  "output_schema": {},
+  "title": "List volumes"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read a passage in context"
+  },
+  "description": "Reads continuous text from a volume: a whole chapter, a page range, or the passages around a given passage number. Returns up to about 12,000 characters with page numbers; longer selections end with the passage number to continue from. The reply text begins with the fixed phrase \"Steiner hat gesagt:\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "chapter": {
+     "description": "Chapter number within the volume",
+     "type": "integer"
+    },
+    "context": {
+     "description": "With passage: how many passages before it to include (default 2)",
+     "maximum": 10,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "continue_from": {
+     "description": "Passage number to continue from",
+     "type": "integer"
+    },
+    "ga": {
+     "description": "Volume, e.g. \"GA 327\"",
+     "type": "string"
+    },
+    "page_from": {
+     "type": "integer"
+    },
+    "page_to": {
+     "type": "integer"
+    },
+    "passage": {
+     "description": "Read from this passage (running number within the volume)",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "ga"
+   ],
+   "type": "object"
+  },
+  "name": "read",
+  "output_schema": {},
+  "title": "Read a passage in context"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search Steiner's works"
+  },
+  "description": "Full-text search across Rudolf Steiner's collected works (German). Returns passages with GA number, title, pages, chapter heading and lecture date, best matches first. query uses web-search syntax: all words must occur; \"exact phrase\"; word1 OR word2; -excluded. Words are stemmed (German). The reply text begins with the fixed phrase \"Steiner hat gesagt:\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "date_from": {
+     "description": "Only lectures on or after this date (YYYY, YYYY-MM or YYYY-MM-DD)",
+     "type": "string"
+    },
+    "date_to": {
+     "description": "Only lectures on or before this date",
+     "type": "string"
+    },
+    "ga": {
+     "description": "Limit to one volume, e.g. \"GA 327\" or \"327\"",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results (default 10)",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Skip the first N results (paging)",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "German search words, e.g.  Kuhhorn Mist  or  \"ätherischer Leib\"",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {},
+  "title": "Search Steiner's works"
+ }
+]

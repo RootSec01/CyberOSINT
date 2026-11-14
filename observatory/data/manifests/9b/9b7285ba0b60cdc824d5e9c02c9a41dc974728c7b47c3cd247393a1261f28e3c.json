@@ -1,0 +1,653 @@
+[
+ {
+  "description": "Dry-run a payment BEFORE executing it: checks on-chain whether the agent's smart account would allow it (permission granted, within financial cap, destination approved if a whitelist exists). Returns { allowed, reason }.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent (its smart account address)",
+     "type": "string"
+    },
+    "amount_eth": {
+     "description": "Amount in ETH, e.g. '0.001'",
+     "type": "string"
+    },
+    "destination": {
+     "description": "Destination address to pay",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address",
+    "destination",
+    "amount_eth"
+   ],
+   "type": "object"
+  },
+  "name": "check_payment_allowed",
+  "output_schema": {}
+ },
+ {
+  "description": "Read a single logged agent action from the Tracea ActionLog contract by its numeric ID. Returns agent, action type, payload and timestamp.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "action_id": {
+     "description": "Numeric action ID",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "action_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_action",
+  "output_schema": {}
+ },
+ {
+  "description": "List all on-chain action IDs logged for a given agent on Tracea.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_agent_actions",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the raw Tracea registry record for an agent: owner, permission scope, financial cap, active status, timestamps.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_agent_info",
+  "output_schema": {}
+ },
+ {
+  "description": "Get this agent's full Tracea identity (activity apiKey +, for v2 agents, its EOA private key and ERC-4337 smart account address) using a one-time activation code from the owner. The private key is returned ONLY ONCE — save it securely.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "activation_code": {
+     "description": "One-time activation code (or use ?code= / x-activation-code)",
+     "type": "string"
+    },
+    "agent_address": {
+     "description": "Ethereum address of this agent",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_my_identity",
+  "output_schema": {}
+ },
+ {
+  "description": "List all agent addresses registered on Tracea by a given owner address.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "owner_address": {
+     "description": "Ethereum address of the owner",
+     "type": "string"
+    }
+   },
+   "required": [
+    "owner_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_owner_agents",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the list of owner-approved payment destination addresses for an agent (anti-injection guardrail). Non-empty list = the agent's smart account can ONLY pay these addresses. Empty = all allowed.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_payment_whitelist",
+  "output_schema": {}
+ },
+ {
+  "description": "Fetch the ERC-8004 compatible registration file for a Tracea-registered agent, including the KYA legal principal block.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_registration_file",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the public URL of an agent's Tracea KYA verification card — the shareable page that presents the mandant entity, the permission scope, the financial cap and a proof hash, with a bilingual FR/EN transparency statement. Use it to hand a verifier a link. Returns the ready-to-share link plus the machine-readable JSON endpoints. Defaults to the 'standard' disclosure level, which is what the API exposes publicly.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent (0x...)",
+     "type": "string"
+    },
+    "lang": {
+     "description": "Card language; the card also auto-detects the visitor's browser language",
+     "enum": [
+      "fr",
+      "en"
+     ],
+     "type": "string"
+    },
+    "niveau": {
+     "description": "Disclosure level: minimum | standard (default) | complet",
+     "enum": [
+      "minimum",
+      "standard",
+      "complet"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "get_verification_card",
+  "output_schema": {}
+ },
+ {
+  "description": "Check whether an agent's mandate has been revoked on Tracea (immediate, scheduled or partial revocation).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "is_agent_revoked",
+  "output_schema": {}
+ },
+ {
+  "description": "Log an agent action on-chain via Tracea (immutable audit trail, court-ready). Requires TRACEA_API_KEY env var. The action is signed by the account's wallet.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "action_type": {
+     "description": "Short action type, e.g. 'email_sent', 'payment_initiated'",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "agent_address": {
+     "description": "Ethereum address of the acting agent",
+     "type": "string"
+    },
+    "data": {
+     "description": "Optional human-readable payload (JSON string recommended)",
+     "maxLength": 2000,
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address",
+    "action_type"
+   ],
+   "type": "object"
+  },
+  "name": "log_action",
+  "output_schema": {}
+ },
+ {
+  "description": "Verify a x402 payment ON-CHAIN (the USDC transfer to your address, exact amount) and mark the session fulfilled. The blockchain is the ONLY source of truth — the payment_sessions table is never trusted alone. Returns { status: 'fulfilled', resource } if verified, or an error if not yet paid/expired.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "payment_id": {
+     "description": "The paymentId returned by payment_required (pay_...)",
+     "type": "string"
+    },
+    "tx_hash": {
+     "description": "The on-chain transaction hash of the USDC transfer / payX402 call",
+     "type": "string"
+    }
+   },
+   "required": [
+    "payment_id",
+    "tx_hash"
+   ],
+   "type": "object"
+  },
+  "name": "payment_incoming",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a x402 payment request (HTTP 402) for a resource you sell to another agent. Returns a paymentId, the USDC amount in units, the destination address and the TraceaPayments contract to call. The paying agent must then call TraceaPayments.payX402(destination, amount, paymentId) on-chain — the contract enforces financial cap + whitelist on-chain. Deliver the resource only after payment_incoming confirms fulfilment.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent": {
+     "description": "Address of the paying agent, if known",
+     "type": "string"
+    },
+    "amount_usdc": {
+     "description": "Amount in USDC, e.g. '0.50' or '2'",
+     "type": "string"
+    },
+    "destination": {
+     "description": "Address that receives the USDC payment (yours)",
+     "type": "string"
+    },
+    "resource": {
+     "description": "Identifier/URL of the resource to unlock after payment",
+     "type": "string"
+    },
+    "ttl_seconds": {
+     "description": "Validity of the payment session (30-3600s, default 300)",
+     "type": "number"
+    }
+   },
+   "required": [
+    "destination",
+    "amount_usdc"
+   ],
+   "type": "object"
+  },
+  "name": "payment_required",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the status of a x402 payment session (pending | paid | fulfilled | expired), with destination, amount and tx hash. Useful to poll while waiting for the paying agent's on-chain transaction.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "payment_id": {
+     "description": "The paymentId returned by payment_required (pay_...)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "payment_id"
+   ],
+   "type": "object"
+  },
+  "name": "payment_status",
+  "output_schema": {}
+ },
+ {
+  "description": "Report an action the agent just performed to its owner's Tracea activity feed (off-chain, free, instant). Call this AFTER every significant action (email sent, message posted, file modified, payment, purchase, booking...). Auth via the Tracea MCP URL (?key=...) from the agent's identity page, OR self-activate with a one-time activation code (?code=... or x-activation-code header) — the tool then receives its apiKey automatically.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of this agent",
+     "type": "string"
+    },
+    "category": {
+     "description": "Action category",
+     "enum": [
+      "email",
+      "payment",
+      "document",
+      "message",
+      "purchase",
+      "social",
+      "data_access",
+      "rdv",
+      "code",
+      "other"
+     ],
+     "type": "string"
+    },
+    "details": {
+     "description": "Optional JSON string with extra context",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "in_permission": {
+     "description": "false if this action is OUTSIDE the granted permissions (flagged red)",
+     "type": "boolean"
+    },
+    "permission_label": {
+     "description": "Which owner-granted permission this action falls under",
+     "type": "string"
+    },
+    "summary": {
+     "description": "Short human-readable summary of what was done",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address",
+    "category",
+    "summary"
+   ],
+   "type": "object"
+  },
+  "name": "report_activity",
+  "output_schema": {}
+ },
+ {
+  "description": "Seal a validated file as an immutable on-chain proof (Tracea Online, Base). Call this ONLY after tracea_check_demarche returned ok:true — it re-checks everything before anchoring. Requires the caller to be an authorized harness. Returns the proof fingerprint and the record hash.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent": {
+     "description": "Ethereum address (0x...) of the agent smart account that judged the file compliant",
+     "type": "string"
+    },
+    "donnees": {
+     "additionalProperties": {},
+     "description": "Same data object that passed tracea_check_demarche",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "id": {
+     "description": "Procedure id (e.g. 15776)",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id",
+    "donnees",
+    "agent"
+   ],
+   "type": "object"
+  },
+  "name": "tracea_anchor_demarche",
+  "output_schema": {}
+ },
+ {
+  "description": "THE anti-rejection check. Submit the data you collected; it validates every field against the official procedure schema AND cross-checks critical values against official French registries (e.g. SIRET against INSEE Sirene). Returns { ok: true, recordHash } or { ok: false, errors: [{ field, message }] }. ALWAYS call this BEFORE telling the user the file is ready, and fix the exact fields reported.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "donnees": {
+     "additionalProperties": {},
+     "description": "Collected data as a flat object, field names exactly as in tracea_demarche_schema",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "id": {
+     "description": "Procedure id (e.g. 15776)",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id",
+    "donnees"
+   ],
+   "type": "object"
+  },
+  "name": "tracea_check_demarche",
+  "output_schema": {}
+ },
+ {
+  "description": "Prepare le document officiel d'une demarche (CERFA ou demarche libre) et le rend signable. Appelle le generateur du backend Tracea, enregistre le dossier pour l'agent du visiteur et renvoie la reference + le chemin du PDF. A appeler APRES tracea_check_demarche (ok:true) et AVANT tracea_signature. Si des champs manquent, renvoie ok:false + champsManquants : ne fabrique jamais un document partiel.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent": {
+     "description": "Adresse Ethereum (0x...) de l'agent du visiteur, celle de l'identite de la conversation. Ne jamais l'inventer.",
+     "type": "string"
+    },
+    "donnees": {
+     "additionalProperties": {},
+     "description": "Donnees validees, memes champs que tracea_demarche_schema",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "id": {
+     "description": "Procedure id (ex: 26002)",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id",
+    "donnees",
+    "agent"
+   ],
+   "type": "object"
+  },
+  "name": "tracea_demarche_document",
+  "output_schema": {}
+ },
+ {
+  "description": "Verify an existing proof: was this file really anchored, when, by which operator, and under which rule version? Use the recordHash returned by tracea_check_demarche / tracea_anchor_demarche. Read-only and free.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "hash": {
+     "description": "recordHash (0x... 32 bytes) returned by tracea_check_demarche or tracea_anchor_demarche",
+     "type": "string"
+    }
+   },
+   "required": [
+    "hash"
+   ],
+   "type": "object"
+  },
+  "name": "tracea_demarche_preuve",
+  "output_schema": {}
+ },
+ {
+  "description": "Return exactly which fields a given administrative procedure requires (name, type, required, format/pattern, bounds, example). Call this after tracea_list_demarches so you ask the user ONLY for the real fields, in the right format. Prevents hallucinated fields.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "description": "Procedure id returned by tracea_list_demarches (e.g. 15776)",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tracea_demarche_schema",
+  "output_schema": {}
+ },
+ {
+  "description": "List the administrative procedures Tracea supports. ALWAYS call this first: it returns the exact procedure IDs so the AI never has to guess which form (CERFA) applies. `schemaPret: true` means guided mode (anti-rejection check available) is ready for that procedure.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "tracea_list_demarches",
+  "output_schema": {}
+ },
+ {
+  "description": "DEPOSE REELLEMENT le document prepare dans Tracea Sign : cree les signataires, place la zone de signature, produit un lien de signature par personne et envoie les invitations. Exige pdfPath et signataires. Sans eux, aucun lien n'est renvoye.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "box": {
+     "description": "Zone de signature 'x,y,w,h' (defaut: detection sur le PDF)",
+     "type": "string"
+    },
+    "envoyer": {
+     "description": "Envoyer les invitations (defaut: true)",
+     "type": "boolean"
+    },
+    "id": {
+     "description": "Procedure id (informatif)",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "niveau": {
+     "description": "Environnement — demo par defaut",
+     "enum": [
+      "demo",
+      "prod"
+     ],
+     "type": "string"
+    },
+    "pdfPath": {
+     "description": "Chemin du PDF prepare, ex: /root/workspaces/<id>/attestation.pdf",
+     "type": "string"
+    },
+    "signataires": {
+     "description": "Adresses e-mail des signataires",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "titre": {
+     "description": "Titre du document vu par le signataire",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "tracea_signature",
+  "output_schema": {}
+ },
+ {
+  "description": "Verify an AI agent's on-chain legal identity on Tracea (Base Sepolia). Returns registration status, financial cap, permission scope, revocation status, and KYA legal identity (mandant) when available. Use this BEFORE trusting or delegating work to an agent.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "agent_address": {
+     "description": "Ethereum address of the agent (0x...)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_address"
+   ],
+   "type": "object"
+  },
+  "name": "verify_agent",
+  "output_schema": {}
+ }
+]

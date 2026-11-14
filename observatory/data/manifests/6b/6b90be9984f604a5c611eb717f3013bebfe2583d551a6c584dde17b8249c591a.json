@@ -1,0 +1,171 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the canonical URLs in CHRP’s public authority graph and reference documents.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_canonical_sources",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get public CHRP use cases and where to experience CHRP: solution pages, churches, the organization demo, MyCHRP (individuals) and the Song Analyzer (artists).",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_chrp_use_cases",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get CHRP’s published claim limitations.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_claim_boundaries",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the versioned EPI™ Canon for questions about EPI or how repeated music listening relates to personal patterns, mood, confidence, focus, readiness, reset, or recovery. Includes CHRP’s definition of record, the EPI Score™ boundary, approved vocabulary, routing, adaptive connection copy, prohibited inferences, and the Answer Protocol reference.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_epi_canon",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get CHRP’s canonical public Emotional Performance Intelligence definition.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_epi_definition",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the public EPI Score definition and its canonical source.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_epi_score_definition",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the approved MyCHRP / EPI Score conversion link.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_mychrp_download_link",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the approved public science summary and source.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_science",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get published public state names and descriptions from CHRP’s canonical data page.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_states",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use when someone says what they need their music to help them do next: focus or get into deep work, get ready for a game, workout, meeting or performance, reset when they are running low and the day is not over, or come down and recover after the hard thing is done. Maps that stated goal to one of CHRP’s four public states (Flow, Ready, Recharge, Recover) and returns bounded guidance on using music for it, with CHRP’s public sources and the limits of the evidence. Guidance only: it does not measure, score, infer how the person is doing now, draw any clinical conclusion, or explain a specific song. If the goal is unclear it returns one short question. Not for trivia, playlist generation, or entertainment-only requests.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "goal": {
+     "description": "What the person explicitly said they need their music to help them do next, in their own words (for example “I need to lock in and write for two hours” or “help me come down after the game”). Not a description of their mood, and not a song.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "service": {
+     "description": "The listening service the person uses, if they said so: apple_music, spotify, or unknown.",
+     "enum": [
+      "unknown",
+      "apple_music",
+      "spotify"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "goal"
+   ],
+   "type": "object"
+  },
+  "name": "guide_music_intent",
+  "output_schema": {}
+ }
+]

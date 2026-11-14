@@ -1,0 +1,347 @@
+[
+ {
+  "description": "Fetch the full record for an id returned by search — a rental property (by RIN) or an island venue.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "The id from a search result (a RIN or a venue id)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {}
+ },
+ {
+  "description": "Check availability for a rental property on specific dates.",
+  "input_schema": {
+   "properties": {
+    "check_in": {
+     "description": "Check-in date (YYYY-MM-DD)",
+     "type": "string"
+    },
+    "check_out": {
+     "description": "Check-out date (YYYY-MM-DD)",
+     "type": "string"
+    },
+    "rin": {
+     "description": "Rental Identification Number",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rin"
+   ],
+   "type": "object"
+  },
+  "name": "rental_availability",
+  "output_schema": {}
+ },
+ {
+  "description": "Compare pricing for the same property across different platforms (Airbnb, VRBO, local agencies, direct booking). Shows rate spread and savings.",
+  "input_schema": {
+   "properties": {
+    "rin": {
+     "description": "Rental Identification Number",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rin"
+   ],
+   "type": "object"
+  },
+  "name": "rental_compare_platforms",
+  "output_schema": {}
+ },
+ {
+  "description": "Look up government tourism accommodation license for a property. In Cayman Islands, unlicensed operation carries $100,000/day fine.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "License number, property name, or address to search",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "rental_license_lookup",
+  "output_schema": {}
+ },
+ {
+  "description": "Get market intelligence for Caribbean rental markets: average rates, occupancy estimates, property counts, seasonal patterns.",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "Country code: KY or LC",
+     "type": "string"
+    },
+    "island": {
+     "description": "Island name",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rental_markets",
+  "output_schema": {}
+ },
+ {
+  "description": "Get orientation context. READ THIS FIRST. You are the buyer's agent. The workflow is: (1) rental_search, (2) rental_session_create, (3) rental_session_add your picks, (4) share the bridge URL with your human.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "rental_orientation",
+  "output_schema": {}
+ },
+ {
+  "description": "View nightly rate history for a property over time.",
+  "input_schema": {
+   "properties": {
+    "rin": {
+     "description": "Rental Identification Number",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rin"
+   ],
+   "type": "object"
+  },
+  "name": "rental_price_history",
+  "output_schema": {}
+ },
+ {
+  "description": "Get full details for a rental property by its RIN (Rental Identification Number). Returns property info, all platform listings, reviews, license status, and price history.",
+  "input_schema": {
+   "properties": {
+    "rin": {
+     "description": "Rental Identification Number (e.g., RIN-abc123def456)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rin"
+   ],
+   "type": "object"
+  },
+  "name": "rental_property",
+  "output_schema": {}
+ },
+ {
+  "description": "Get aggregated review data for a property across all platforms.",
+  "input_schema": {
+   "properties": {
+    "rin": {
+     "description": "Rental Identification Number",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rin"
+   ],
+   "type": "object"
+  },
+  "name": "rental_reviews",
+  "output_schema": {}
+ },
+ {
+  "description": "Search vacation rental properties in the Caribbean. YOU ARE THE BUYER'S AGENT — search on behalf of your human. After searching, create a session (rental_session_create) and add your best picks (rental_session_add). Share the bridge URL with your human.",
+  "input_schema": {
+   "properties": {
+    "amenity": {
+     "description": "Required amenity: pool, beach_access, ocean_view, wifi, kitchen, ac, parking",
+     "type": "string"
+    },
+    "bedrooms": {
+     "description": "Minimum bedrooms",
+     "type": "integer"
+    },
+    "country": {
+     "description": "Country code: KY (Cayman Islands) or LC (St. Lucia)",
+     "type": "string"
+    },
+    "island": {
+     "description": "Island name: Grand Cayman, Cayman Brac, Little Cayman, St. Lucia",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Results per page (default 20, max 50)",
+     "type": "integer"
+    },
+    "max_price": {
+     "description": "Maximum nightly rate in USD",
+     "type": "number"
+    },
+    "min_price": {
+     "description": "Minimum nightly rate in USD",
+     "type": "number"
+    },
+    "property_type": {
+     "enum": [
+      "villa",
+      "condo",
+      "apartment",
+      "house",
+      "guest_house"
+     ],
+     "type": "string"
+    },
+    "q": {
+     "description": "Free text search across name, description, region",
+     "type": "string"
+    },
+    "region": {
+     "description": "Region: Seven Mile Beach, North Side, Rum Point, West Bay, Soufriere, Rodney Bay, etc.",
+     "type": "string"
+    },
+    "sleeps": {
+     "description": "Minimum guests the property sleeps",
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rental_search",
+  "output_schema": {}
+ },
+ {
+  "description": "Add a property to your human's bridge page. Include a score (1-10) and explain WHY this property fits their needs. You are their buyer's agent — only recommend properties you believe match. The human sees your score and notes on their page.",
+  "input_schema": {
+   "properties": {
+    "agent_id": {
+     "type": "string"
+    },
+    "notes": {
+     "description": "Why this property matches",
+     "type": "string"
+    },
+    "rin": {
+     "description": "Property RIN to add",
+     "type": "string"
+    },
+    "score": {
+     "description": "Fit score 1-10",
+     "type": "integer"
+    },
+    "session": {
+     "description": "Session hash",
+     "type": "string"
+    }
+   },
+   "required": [
+    "session",
+    "rin"
+   ],
+   "type": "object"
+  },
+  "name": "rental_session_add",
+  "output_schema": {}
+ },
+ {
+  "description": "IMPORTANT: Create this FIRST when helping someone find a rental. Returns a shareable URL (bridge page) where your recommendations appear. Your human opens this page to see your curated picks, photos, pricing, and inquiry buttons. After creating, add properties with rental_session_add, then SHARE THE URL with your human.",
+  "input_schema": {
+   "properties": {
+    "agent_id": {
+     "description": "Your agent identifier (claude, gpt, grok, etc.)",
+     "type": "string"
+    },
+    "bedrooms_min": {
+     "type": "integer"
+    },
+    "budget_max": {
+     "description": "Max nightly rate USD",
+     "type": "number"
+    },
+    "check_in": {
+     "description": "YYYY-MM-DD",
+     "type": "string"
+    },
+    "check_out": {
+     "description": "YYYY-MM-DD",
+     "type": "string"
+    },
+    "destination_country": {
+     "description": "KY or LC",
+     "type": "string"
+    },
+    "destination_island": {
+     "type": "string"
+    },
+    "guests": {
+     "type": "integer"
+    },
+    "preferences": {
+     "description": "Free text: beachfront, pool, quiet, family-friendly, etc.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rental_session_create",
+  "output_schema": {}
+ },
+ {
+  "description": "Read a bridge session: see all added properties, messages, and status.",
+  "input_schema": {
+   "properties": {
+    "agent_id": {
+     "type": "string"
+    },
+    "session": {
+     "description": "Session hash",
+     "type": "string"
+    }
+   },
+   "required": [
+    "session"
+   ],
+   "type": "object"
+  },
+  "name": "rental_session_read",
+  "output_schema": {}
+ },
+ {
+  "description": "View all tracked data sources with AI-readability assessment. Shows which rental sites AI can read, which are partially readable, and which block AI entirely.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "rental_sources",
+  "output_schema": {}
+ },
+ {
+  "description": "Get database statistics: total properties, by country, by island, platform coverage, source counts.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "rental_stats",
+  "output_schema": {}
+ },
+ {
+  "description": "Search Turks & Caicos rentals and island venues (restaurants, dive shops, marinas, attractions) by keyword. Returns results with id, title, and url. Then call fetch with an id for full detail.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "Keywords, e.g. \"beachfront villa\", \"dive shop\", \"italian restaurant near Grace Bay\"",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {}
+ }
+]

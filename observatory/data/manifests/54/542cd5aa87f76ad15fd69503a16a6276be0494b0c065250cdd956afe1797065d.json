@@ -1,0 +1,357 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Flag a wrong funder detail"
+  },
+  "description": "Report that a field on a funder profile is wrong or out of date, with the correction. Reviewed by All Too Human before any change is applied.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "correction": {
+     "description": "What the correct value is, and where you saw it if possible",
+     "maxLength": 2000,
+     "minLength": 3,
+     "type": "string"
+    },
+    "field": {
+     "enum": [
+      "name",
+      "website_url",
+      "description",
+      "eligible_types",
+      "eligible_regions",
+      "eligible_purposes",
+      "ineligible_purposes",
+      "min_amount",
+      "max_amount",
+      "typical_range",
+      "required_documents",
+      "application_method",
+      "application_url",
+      "deadlines",
+      "funder_priorities",
+      "language_tips",
+      "common_mistakes",
+      "success_factors",
+      "difficulty"
+     ],
+     "type": "string"
+    },
+    "funder_slug": {
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "funder_slug",
+    "field",
+    "correction"
+   ],
+   "type": "object"
+  },
+  "name": "flag_funder_detail",
+  "output_schema": {},
+  "title": "Flag a wrong funder detail"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get full funder profile"
+  },
+  "description": "Full profile for one funder by slug: what they prioritise, language tips, common mistakes, success factors, required documents, application sections, the extracted application form questions, and upcoming funding rounds. Use this before preparing or drafting an application.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "Funder slug from search_funders",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_funder",
+  "output_schema": {},
+  "title": "Get full funder profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List valid search filters"
+  },
+  "description": "Returns the exact region slugs, organisation type values and difficulty levels accepted by search_funders. Call this first if you are unsure which value to use.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_filters",
+  "output_schema": {},
+  "title": "List valid search filters"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Report an application outcome"
+  },
+  "description": "Tell us how an application to a funder went. Outcomes are stored for All Too Human to analyse which funders say yes and are never published as-is.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amount_received": {
+     "description": "Whole NZ dollars received, if funded",
+     "maximum": 50000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "funder_slug": {
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    },
+    "notes": {
+     "description": "Anything useful: what they asked for, timing, feedback received",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "outcome": {
+     "description": "approved = funded in full, partial = funded less than asked, declined, waiting = no decision yet",
+     "enum": [
+      "approved",
+      "partial",
+      "declined",
+      "waiting"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "funder_slug",
+    "outcome"
+   ],
+   "type": "object"
+  },
+  "name": "report_outcome",
+  "output_schema": {},
+  "title": "Report an application outcome"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Funding rounds closing soon"
+  },
+  "description": "Funding rounds whose closing date falls within the next N days (default 30, max 180), soonest first. Optional region filter (slug from list_filters). Dates are New Zealand dates. Always confirm the date on the funder's own site before relying on it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "default": 30,
+     "maximum": 180,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "region": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rounds_closing_soon",
+  "output_schema": {},
+  "title": "Funding rounds closing soon"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Funding rounds opening soon"
+  },
+  "description": "Funding rounds whose opening date falls within the next N days (default 60, max 180), soonest first. Optional region filter (slug from list_filters). Useful for planning applications ahead of time. Dates are New Zealand dates. Always confirm the date on the funder's own site before relying on it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "default": 60,
+     "maximum": 180,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "region": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rounds_opening_soon",
+  "output_schema": {},
+  "title": "Funding rounds opening soon"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search grant funders"
+  },
+  "description": "Search New Zealand community grant funders. Returns up to 25 compact rows per call with a total count; use offset to page. Combine filters: region (slug from list_filters), org_type, purpose keywords, max_amount in NZD, difficulty. Use get_funder for the full profile of a result.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "difficulty": {
+     "enum": [
+      "simple",
+      "moderate",
+      "detailed"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_amount": {
+     "description": "Only funders whose minimum grant is at or below this NZD amount",
+     "exclusiveMinimum": 0,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "org_type": {
+     "description": "Applicant organisation type, e.g. charitable_trust",
+     "type": "string"
+    },
+    "purpose": {
+     "description": "Keyword matched against eligible purposes and priorities, e.g. youth, environment, marae",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "query": {
+     "description": "Free text matched against funder name and description",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "region": {
+     "description": "Region slug, e.g. tasman. Funders tagged national always match.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_funders",
+  "output_schema": {},
+  "title": "Search grant funders"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Suggest a missing funder"
+  },
+  "description": "Suggest a New Zealand grant funder that is not in the database. All Too Human researches and reviews suggestions before adding them. Check search_funders first to avoid duplicates. Documentation: https://www.alltoohuman.nz/grants/connect",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "maxLength": 200,
+     "minLength": 3,
+     "type": "string"
+    },
+    "notes": {
+     "description": "What they fund, who is eligible, deadlines, anything you know",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "region": {
+     "description": "Region slug if the funder is regional",
+     "type": "string"
+    },
+    "url": {
+     "description": "The funder's website or funding page",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "suggest_funder",
+  "output_schema": {},
+  "title": "Suggest a missing funder"
+ }
+]

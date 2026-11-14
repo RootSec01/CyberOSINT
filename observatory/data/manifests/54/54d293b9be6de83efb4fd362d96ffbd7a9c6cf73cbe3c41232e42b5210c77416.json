@@ -1,0 +1,203 @@
+[
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Sports stats explainers"
+  },
+  "description": "Use when the user asks what a sports stats or odds term means or how it works: alt lines, implied probability, the vig, bankroll and unit sizing, closing line value, tilt, responsible play. Returns DARIMARKET Academy articles and glossary definitions with links.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "topic": {
+     "description": "A term or topic, e.g. 'implied probability', 'alt lines', 'bankroll'. Empty lists the categories.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_learn_article",
+  "output_schema": {},
+  "title": "Sports stats explainers"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Player stat hit rates"
+  },
+  "description": "Use when the user asks how often an NFL, NBA, NHL, MLB, WNBA or college football player has reached a stat number recently, e.g. 'how often has Cade Cunningham scored more than 24.5 points in his last 10 games'. Returns last-5 and last-10 counts for a player's stat lines, the last-5 values and the average. Pass `line` to check any number against recent games. Describes past games only. It is not a prediction or a recommendation.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "line": {
+     "description": "A number to check, e.g. 24.5",
+     "type": "number"
+    },
+    "player": {
+     "description": "Slug from search_player, e.g. 'nba-4432158-cade-cunningham'",
+     "maxLength": 120,
+     "minLength": 3,
+     "type": "string"
+    },
+    "side": {
+     "description": "Above or below the number",
+     "enum": [
+      "over",
+      "under"
+     ],
+     "type": "string"
+    },
+    "stat": {
+     "description": "Stat key or words, e.g. 'pts', 'points', 'rec_yds', 'receiving yards', 'shots'",
+     "maxLength": 40,
+     "type": "string"
+    }
+   },
+   "required": [
+    "player"
+   ],
+   "type": "object"
+  },
+  "name": "get_player_hit_rates",
+  "output_schema": {},
+  "title": "Player stat hit rates"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Today's games"
+  },
+  "description": "Use when the user asks what games are on today or tonight in the NFL, college football, NBA, WNBA, MLB or NHL, or wants a matchup and its start time (Eastern). Links to each sport's stats page on darimarket.us.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "sport": {
+     "description": "One league, or leave empty for all",
+     "enum": [
+      "NFL",
+      "CFB",
+      "NBA",
+      "MLB",
+      "NHL",
+      "WNBA"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_todays_games",
+  "output_schema": {},
+  "title": "Today's games"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search players"
+  },
+  "description": "Find an athlete DARIMARKET tracks and get the slug the stats tools need. Use when the user names an NFL, college football, NBA, WNBA, MLB or NHL player and you need their recent stats, team or next game. Sports: NFL (NFL), CFB (College football), NHL (NHL), MLB (MLB), NBA (NBA), WNBA (WNBA).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "query": {
+     "description": "Player name, e.g. 'Cade Cunningham' or 'St. Brown'",
+     "maxLength": 80,
+     "minLength": 2,
+     "type": "string"
+    },
+    "sport": {
+     "description": "Narrow to one league",
+     "enum": [
+      "NFL",
+      "CFB",
+      "NBA",
+      "MLB",
+      "NHL",
+      "WNBA"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_player",
+  "output_schema": {},
+  "title": "Search players"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Today's most consistent players"
+  },
+  "description": "Use when the user asks which players in today's or tonight's NFL, college football, NBA, WNBA, MLB or NHL games have been the most consistent lately, e.g. reached a stat number in 9 or 10 of their last 10 games. Covers games that haven't started and leaves injured players out. Returns last-10 and last-5 counts and the average. Past results only, not predictions.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "sport": {
+     "description": "One league, or leave empty for every sport with games today",
+     "enum": [
+      "NFL",
+      "CFB",
+      "NBA",
+      "MLB",
+      "NHL",
+      "WNBA"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "todays_most_consistent_players",
+  "output_schema": {},
+  "title": "Today's most consistent players"
+ }
+]

@@ -1,0 +1,296 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "8-K corporate events"
+  },
+  "description": "List SEC 8-K corporate events classified by official item code, newest first — e.g. 2.02 results of operations, 5.02 executive/director changes, 1.01 material agreements, 7.01 Reg FD. Filter by item code, issuer ticker or CIK, or since-date. Returns a {data, total, limit, offset} envelope.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cik": {
+     "description": "SEC CIK number, digits only (leading zeros optional).",
+     "pattern": "^\\d{1,10}$",
+     "type": "string"
+    },
+    "item": {
+     "description": "Official 8-K item code, e.g. 2.02 or 5.02.",
+     "pattern": "^\\d\\.\\d{2}$",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Rows to return (max 25 on this endpoint).",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Rows to skip — page through 'total' with limit+offset.",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "since": {
+     "description": "Only filings filed on/after this date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "ticker": {
+     "description": "Issuer ticker symbol, e.g. KMI. 8-K headers carry no ticker, so it is resolved to a CIK via this dataset's Form 4 filings — an issuer with no Form 4 yet needs 'cik' instead.",
+     "type": "string"
+    },
+    "until": {
+     "description": "Only filings filed on/before this date (YYYY-MM-DD) — with since, a fixed reproducible window.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_corporate_events",
+  "output_schema": {},
+  "title": "8-K corporate events"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Dataset coverage and freshness"
+  },
+  "description": "Row counts, latest ingest timestamps, and earliest covered filing date for each dataset (Form 4, 8-K, registrations). Call this to learn what date range a query can be answered from.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_dataset_status",
+  "output_schema": {},
+  "title": "Dataset coverage and freshness"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "One insider ownership filing"
+  },
+  "description": "Fetch one insider ownership filing (Form 3/4/5) by SEC accession number (e.g. 0001653558-26-000110), with all transaction legs, holdings, and footnotes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "accession": {
+     "description": "SEC accession number — dashed (0001653558-26-000110) or dashless archive-URL form, both accepted.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "accession"
+   ],
+   "type": "object"
+  },
+  "name": "get_insider_filing",
+  "output_schema": {},
+  "title": "One insider ownership filing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Insider ownership filings (Forms 3/4/5)"
+  },
+  "description": "List normalized SEC insider ownership filings (Form 4 transactions, plus Form 3 initial statements and Form 5 annual statements — 3/5 live-forward since 2026-09-23), newest first: non-derivative and derivative transaction legs, holdings, owner roles (director/officer/10% owner), footnotes, and amendment (/A) links. Numeric values are strings exactly as filed; every object carries 'accession' and 'filed_date'. Filter by issuer ticker, issuer CIK, reporting-owner CIK (owner_cik — one insider's filings across every issuer), form_type, or since-date. Returns a {data, total, limit, offset} envelope for paging. For day- or market-wide sweeps, set compact=true: one summary row per filing (issuer, owners with roles, leg counts, open-market purchase/sale share + as-filed dollar aggregates) and up to 100 rows per call instead of 25 — then fetch any filing's full detail with get_insider_filing. Hosted and already normalized — no EDGAR crawling, parsing, or local install needed.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cik": {
+     "description": "SEC CIK number, digits only (leading zeros optional).",
+     "pattern": "^\\d{1,10}$",
+     "type": "string"
+    },
+    "compact": {
+     "default": false,
+     "description": "true returns one compact survey row per filing — issuer, owners with roles, non-derivative/derivative leg counts, and open-market (code P/S) share + as-filed dollar aggregates computed from the filed numbers — and raises the row cap to 100. Sized for day- or market-wide sweeps; fetch full detail per filing with get_insider_filing.",
+     "type": "boolean"
+    },
+    "form_type": {
+     "description": "3 = initial ownership, 4 = transactions, 5 = annual statement; /A = amendment. Forms 3/5 are live-forward since 2026-09-23.",
+     "enum": [
+      "3",
+      "3/A",
+      "4",
+      "4/A",
+      "5",
+      "5/A"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Rows to return — max 25 for full filing objects, 100 with compact=true.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Rows to skip — page through 'total' with limit+offset.",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "owner_cik": {
+     "description": "Reporting owner (insider) CIK, digits only — one person or entity's filings across every issuer. Owner CIKs appear in each filing's reporting_owners[].",
+     "pattern": "^\\d{1,10}$",
+     "type": "string"
+    },
+    "since": {
+     "description": "Only filings filed on/after this date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "ticker": {
+     "description": "Issuer ticker symbol, e.g. KMI. Case-insensitive; matches each symbol of a multi-listed filing ('WSO; WSOB' matches WSO).",
+     "type": "string"
+    },
+    "until": {
+     "description": "Only filings filed on/before this date (YYYY-MM-DD) — with since, a fixed reproducible window.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_insider_trades",
+  "output_schema": {},
+  "title": "Insider ownership filings (Forms 3/4/5)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "S-1/IPO registration lifecycle"
+  },
+  "description": "List S-1/F-1 registration lifecycle events, newest first: registration statements, amendments, notices of effectiveness, and priced prospectuses (424B1/424B4), threaded across stages by SEC file number (e.g. 333-297472). Issuer objects include SIC code, state of incorporation, and former names. Coverage is live-forward since 2026-08-01. Returns a {data, total, limit, offset} envelope.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cik": {
+     "description": "SEC CIK number, digits only (leading zeros optional).",
+     "pattern": "^\\d{1,10}$",
+     "type": "string"
+    },
+    "file_number": {
+     "description": "SEC file number, e.g. 333-297472 — follows one offering across stages.",
+     "pattern": "^[\\d-]{1,20}$",
+     "type": "string"
+    },
+    "form_type": {
+     "enum": [
+      "S-1",
+      "S-1/A",
+      "F-1",
+      "F-1/A",
+      "EFFECT",
+      "424B1",
+      "424B4"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Rows to return (max 25 on this endpoint).",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Rows to skip — page through 'total' with limit+offset.",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "since": {
+     "description": "Only filings filed on/after this date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "stage": {
+     "description": "Lifecycle stage to filter on.",
+     "enum": [
+      "registration",
+      "amendment",
+      "effectiveness",
+      "prospectus"
+     ],
+     "type": "string"
+    },
+    "until": {
+     "description": "Only filings filed on/before this date (YYYY-MM-DD) — with since, a fixed reproducible window.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_ipo_registrations",
+  "output_schema": {},
+  "title": "S-1/IPO registration lifecycle"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "One registration event"
+  },
+  "description": "Fetch one S-1/IPO registration lifecycle event by SEC accession number.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "accession": {
+     "description": "SEC accession number — dashed or dashless archive-URL form, both accepted.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "accession"
+   ],
+   "type": "object"
+  },
+  "name": "get_registration_event",
+  "output_schema": {},
+  "title": "One registration event"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Normalized schema reference"
+  },
+  "description": "The frozen schema-v1 contract for FilingPulse objects: field-by-field documentation for form4 / event_8k / registration_event, the list envelope, design rules (strings-as-filed, null-never-missing, additive-only), and the Form 4 transaction-code table.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "section": {
+     "default": "overview",
+     "enum": [
+      "overview",
+      "form4",
+      "event_8k",
+      "registration_event",
+      "list_envelope",
+      "transaction_codes"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_schema",
+  "output_schema": {},
+  "title": "Normalized schema reference"
+ }
+]

@@ -1,0 +1,333 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Map a natural-language symptom (e.g. 'my app is slow', 'hardcoded password', 'infinite react loop') to the relevant Code Auditor rule(s) and their fixes. Call this when a user describes a problem rather than naming a rule.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "symptom": {
+     "description": "A plain-language description of the problem.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symptom"
+   ],
+   "type": "object"
+  },
+  "name": "explain_symptom",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "hint": {
+     "type": "string"
+    },
+    "matches": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "category": {
+        "type": "string"
+       },
+       "config": {
+        "type": "string"
+       },
+       "description": {
+        "type": "string"
+       },
+       "method": {
+        "type": "string"
+       },
+       "rule": {
+        "type": "string"
+       },
+       "severity": {
+        "enum": [
+         "critical",
+         "severe",
+         "high"
+        ],
+        "type": "string"
+       },
+       "threshold": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "rule",
+       "category",
+       "severity",
+       "description",
+       "method"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "matches"
+   ],
+   "type": "object"
+  },
+  "title": "Explain Symptom"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the exact install commands for Code Auditor for a given AI agent. Call this when a user asks how to install Code Auditor, or asks for the command for a specific agent (claude, cursor, codex, gemini, agents, zcode, or all).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "agent": {
+     "description": "The AI agent to install for (e.g. claude, cursor, codex, all).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent"
+   ],
+   "type": "object"
+  },
+  "name": "get_install_commands",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "agent": {
+     "type": "string"
+    },
+    "commands": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "displayName": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent",
+    "displayName",
+    "commands"
+   ],
+   "type": "object"
+  },
+  "title": "Get Install Commands"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the rule kind, description, default severity, detection method, and threshold for a given Code Auditor rule or analyzer. Call this when a user asks what a specific rule does (e.g. import-ban, sql-injection, n+1).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "rule_id": {
+     "description": "Rule or analyzer id, e.g. import-ban, sql-injection, n+1.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rule_id"
+   ],
+   "type": "object"
+  },
+  "name": "lookup_rule",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "anyOf": [
+    {
+     "additionalProperties": false,
+     "properties": {
+      "category": {
+       "type": "string"
+      },
+      "config": {
+       "type": "string"
+      },
+      "description": {
+       "type": "string"
+      },
+      "method": {
+       "type": "string"
+      },
+      "rule": {
+       "type": "string"
+      },
+      "severity": {
+       "enum": [
+        "critical",
+        "severe",
+        "high"
+       ],
+       "type": "string"
+      },
+      "threshold": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "rule",
+      "category",
+      "severity",
+      "description",
+      "method"
+     ],
+     "type": "object"
+    },
+    {
+     "additionalProperties": false,
+     "properties": {
+      "error": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "error"
+     ],
+     "type": "object"
+    }
+   ],
+   "type": "object"
+  },
+  "title": "Look Up Rule"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Request a new Code Auditor rule. Call lookup_rule or explain_symptom first to confirm no existing rule covers it. Provide a minimal example that should be flagged and a corrected example that should not. Reduce both to the smallest code that shows the difference, and remove secrets and proprietary identifiers. Returns a receipt id.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cleanExample": {
+     "items": {
+      "properties": {
+       "content": {
+        "minLength": 1,
+        "type": "string"
+       },
+       "path": {
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "maxItems": 6,
+     "minItems": 1,
+     "type": "array"
+    },
+    "firingExample": {
+     "items": {
+      "properties": {
+       "content": {
+        "minLength": 1,
+        "type": "string"
+       },
+       "path": {
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "maxItems": 6,
+     "minItems": 1,
+     "type": "array"
+    },
+    "languages": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 8,
+     "minItems": 1,
+     "type": "array"
+    },
+    "signal": {
+     "maxLength": 2000,
+     "minLength": 40,
+     "type": "string"
+    },
+    "symptom": {
+     "maxLength": 2000,
+     "minLength": 40,
+     "type": "string"
+    },
+    "title": {
+     "maxLength": 120,
+     "minLength": 10,
+     "type": "string"
+    },
+    "toolVersion": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "title",
+    "symptom",
+    "signal",
+    "languages",
+    "firingExample",
+    "cleanExample"
+   ],
+   "type": "object"
+  },
+  "name": "request_rule",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "duplicateSubmission": {
+     "type": "boolean"
+    },
+    "existingRuleMatches": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "duplicateSubmission",
+    "existingRuleMatches"
+   ],
+   "type": "object"
+  },
+  "title": "Request Rule"
+ }
+]

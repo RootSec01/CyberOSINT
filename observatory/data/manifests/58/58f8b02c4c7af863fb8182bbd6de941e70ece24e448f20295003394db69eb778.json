@@ -1,0 +1,53 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Read one documentation page as markdown. Paths: /, /developers, /about, /contact, /privacy, /trust, /changelog, /auth.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "path": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "read_doc",
+  "output_schema": {},
+  "title": "Read a doc"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find documentation pages and sections matching a query. Returns paths to pass to read_doc.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "query": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_docs",
+  "output_schema": {},
+  "title": "Search the docs"
+ }
+]

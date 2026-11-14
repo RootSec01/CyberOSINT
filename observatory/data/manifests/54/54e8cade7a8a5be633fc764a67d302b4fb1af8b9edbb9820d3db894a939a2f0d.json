@@ -1,0 +1,394 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create check"
+  },
+  "description": "CREATES a new check — this MODIFIES live monitoring config. Provide a `timeout` (simple period-based check) OR a `schedule` + `tz` (cron-based check); the two are mutually exclusive. Use `unique` to avoid creating duplicates. Assign notifications via `channels`. Healthchecks: POST /checks/. Returns the created check (201) or the existing match (200).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "channels": {
+     "description": "Integrations to assign: \"*\" for all, or a comma-separated list of integration ids.",
+     "type": "string"
+    },
+    "desc": {
+     "description": "Free-form description of the check.",
+     "type": "string"
+    },
+    "grace": {
+     "description": "Grace time in seconds after the deadline before the check goes down.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "manual_resume": {
+     "description": "If true, a paused check does not auto-resume on the next ping (resume manually).",
+     "type": "boolean"
+    },
+    "methods": {
+     "description": "Allowed ping HTTP methods: \"\" (any) or \"POST\" (POST-only).",
+     "type": "string"
+    },
+    "name": {
+     "description": "Human-readable name for the check.",
+     "type": "string"
+    },
+    "schedule": {
+     "description": "Cron expression for the expected ping schedule (e.g. \"15 5 * * *\"). Mutually exclusive with `timeout`; requires `tz`.",
+     "type": "string"
+    },
+    "slug": {
+     "description": "URL slug (used for slug-based ping URLs).",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Space-separated list of tags, e.g. \"prod db backups\".",
+     "type": "string"
+    },
+    "timeout": {
+     "description": "Expected period between pings, in seconds (60..31536000). Mutually exclusive with `schedule`.",
+     "maximum": 31536000,
+     "minimum": 60,
+     "type": "integer"
+    },
+    "tz": {
+     "description": "Server's timezone for the cron `schedule`, e.g. \"Europe/Riga\".",
+     "type": "string"
+    },
+    "unique": {
+     "description": "Dedupe fields — if a check already matches on these (e.g. [\"name\"]), it is returned instead of created.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "healthchecksio_create_check",
+  "output_schema": {},
+  "title": "Create check"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Delete check"
+  },
+  "description": "PERMANENTLY DELETES a check by UUID — this MODIFIES live monitoring config and cannot be undone. Healthchecks: DELETE /checks/{uuid}. Returns the deleted check's last known state.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The check's UUID to delete.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_delete_check",
+  "output_schema": {},
+  "title": "Delete check"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get check"
+  },
+  "description": "Get a single check using uuid or unique_key returned by healthchecksio_list_checks with this project's API key. Do not pass a check name, slug or ping URL. Returns status, timeout/schedule, grace, tags and last ping; read-only keys omit sensitive fields. Healthchecks: GET /checks/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The exact uuid or unique_key returned by healthchecksio_list_checks for this project; not a name, slug or ping URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_get_check",
+  "output_schema": {},
+  "title": "Get check"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get ping body"
+  },
+  "description": "Get the logged request body of a single ping, returned as PLAIN TEXT (verbatim, not JSON). Requires a read-write project API key and the check's uuid from healthchecksio_list_checks; a read-only unique_key is not supported. Get n from healthchecksio_list_pings; not every ping has a saved body. Healthchecks: GET /checks/{uuid}/pings/{n}/body.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "n": {
+     "description": "The ping's sequence number (the `n` field from list_pings).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "uuid": {
+     "description": "The check's uuid returned by healthchecksio_list_checks with a read-write project key; not unique_key, a slug or a ping URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid",
+    "n"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_get_ping_body",
+  "output_schema": {},
+  "title": "Get ping body"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List badges"
+  },
+  "description": "List the project's status-badge URLs per tag (plus \"*\" for the overall status) — {badges:{...}}. Healthchecks: GET /badges/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "healthchecksio_list_badges",
+  "output_schema": {},
+  "title": "List badges"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List checks"
+  },
+  "description": "List all checks in the API key's project, optionally filtered by slug and/or tags. Returns {checks:[...]} with status, schedule and last ping. A read-write key also returns uuid and ping_url; a read-only key returns unique_key instead. Pass a returned uuid or unique_key to get_check/list_flips. Ping history and writes need a read-write key and uuid. Healthchecks: GET /checks/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "slug": {
+     "description": "Filter to checks with this exact slug.",
+     "type": "string"
+    },
+    "tag": {
+     "description": "Filter to checks carrying ALL of these tags (each is sent as a separate `tag` query param).",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "healthchecksio_list_checks",
+  "output_schema": {},
+  "title": "List checks"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List flips"
+  },
+  "description": "List a check's status changes (\"flips\") over time — [{timestamp, up}]. Works with a read-only or read-write project key: use the unique_key or uuid returned by healthchecksio_list_checks for that project. Optionally scope by a lookback window or an explicit start/end range. Healthchecks: GET /checks/{uuid}/flips/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "end": {
+     "description": "Return only flips at/before this Unix timestamp.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "seconds": {
+     "description": "Return only flips from the last N seconds.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "start": {
+     "description": "Return only flips at/after this Unix timestamp.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "uuid": {
+     "description": "The exact uuid or unique_key returned by healthchecksio_list_checks for this project; not a name, slug or ping URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_list_flips",
+  "output_schema": {},
+  "title": "List flips"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List integrations"
+  },
+  "description": "List the project's notification integrations (\"channels\") — {channels:[{id, name, kind}]}. The ids are what you assign to a check's `channels` field. Needs a read-write API key: a read-only key gets HTTP 401. Healthchecks: GET /channels/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "healthchecksio_list_integrations",
+  "output_schema": {},
+  "title": "List integrations"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List pings"
+  },
+  "description": "List a check's logged pings (100 on the free plan, 1000 on paid), most recent first. Requires a read-write project API key and the uuid returned by healthchecksio_list_checks. A read-only key and its unique_key cannot read ping history; use list_flips for status changes or reconnect with a read-write key. Each ping: type, date, n, scheme, remote_addr, method, ua, rid, duration, body_url. Healthchecks: GET /checks/{uuid}/pings/.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The check's uuid returned by healthchecksio_list_checks with a read-write project key; not unique_key, a slug or a ping URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_list_pings",
+  "output_schema": {},
+  "title": "List pings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Pause check"
+  },
+  "description": "PAUSES a check — disables monitoring without deleting it (it stops going down for missed pings until it next receives a ping or is resumed). This MODIFIES live monitoring config. Healthchecks: POST /checks/{uuid}/pause (empty body).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The check's UUID to pause.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_pause_check",
+  "output_schema": {},
+  "title": "Pause check"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Resume check"
+  },
+  "description": "RESUMES a paused check — re-enables monitoring. This MODIFIES live monitoring config. Returns HTTP 409 (surfaced cleanly) if the check is not currently paused. Healthchecks: POST /checks/{uuid}/resume (empty body).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The check's UUID to resume.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_resume_check",
+  "output_schema": {},
+  "title": "Resume check"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Update check"
+  },
+  "description": "UPDATES an existing check by UUID — this MODIFIES live monitoring config. Send only the fields you want to change (timeout and schedule remain mutually exclusive). Healthchecks: POST /checks/{uuid}. Returns the updated check.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "channels": {
+     "description": "Integrations to assign: \"*\" for all, or a comma-separated list of integration ids.",
+     "type": "string"
+    },
+    "desc": {
+     "description": "Free-form description of the check.",
+     "type": "string"
+    },
+    "grace": {
+     "description": "Grace time in seconds after the deadline before the check goes down.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "manual_resume": {
+     "description": "If true, a paused check does not auto-resume on the next ping (resume manually).",
+     "type": "boolean"
+    },
+    "methods": {
+     "description": "Allowed ping HTTP methods: \"\" (any) or \"POST\" (POST-only).",
+     "type": "string"
+    },
+    "name": {
+     "description": "Human-readable name for the check.",
+     "type": "string"
+    },
+    "schedule": {
+     "description": "Cron expression for the expected ping schedule (e.g. \"15 5 * * *\"). Mutually exclusive with `timeout`; requires `tz`.",
+     "type": "string"
+    },
+    "slug": {
+     "description": "URL slug (used for slug-based ping URLs).",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Space-separated list of tags, e.g. \"prod db backups\".",
+     "type": "string"
+    },
+    "timeout": {
+     "description": "Expected period between pings, in seconds (60..31536000). Mutually exclusive with `schedule`.",
+     "maximum": 31536000,
+     "minimum": 60,
+     "type": "integer"
+    },
+    "tz": {
+     "description": "Server's timezone for the cron `schedule`, e.g. \"Europe/Riga\".",
+     "type": "string"
+    },
+    "unique": {
+     "description": "Dedupe fields — if a check already matches on these (e.g. [\"name\"]), it is returned instead of created.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "uuid": {
+     "description": "The check's UUID to update.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "healthchecksio_update_check",
+  "output_schema": {},
+  "title": "Update check"
+ }
+]

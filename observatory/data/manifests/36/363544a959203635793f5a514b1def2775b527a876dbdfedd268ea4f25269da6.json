@@ -1,0 +1,508 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "UK Artist's Resale Right on a resale"
+  },
+  "description": "UK Artist's Resale Right on a resale. The royalty owed to an artist on a UK resale through a gallery, dealer or auction house, by band, with the cap and who collects it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "price": {
+     "description": "Resale price in pounds.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "price"
+   ],
+   "type": "object"
+  },
+  "name": "calculate_resale_royalty",
+  "output_schema": {},
+  "title": "UK Artist's Resale Right on a resale"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check an art listing before buying"
+  },
+  "description": "Check an art listing before buying. Whether a link is an independent artist in the index or a marketplace with buyer protection, reverse image search links for the picture, and the checks that catch stolen images, AI work sold as hand-made and payment scams.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "image": {
+     "description": "The address of the artwork's picture.",
+     "type": "string"
+    },
+    "url": {
+     "description": "The listing or shop address.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "check_art_listing",
+  "output_schema": {},
+  "title": "Check an art listing before buying"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check an artist's artworks.json"
+  },
+  "description": "Check an artist's artworks.json. Reads an artist's artworks.json (the open format at artspotter.pages.dev/artworks that lets assistants find work sold direct) and lists anything to fix.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "The https address of the artworks.json file.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "check_artworks_feed",
+  "output_schema": {},
+  "title": "Check an artist's artworks.json"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "What an artist keeps on each selling platform"
+  },
+  "description": "What an artist keeps on each selling platform. For a sale price, what the artist keeps after fees on Etsy, eBay, Saatchi Art, Artfinder, Singulart, their own Shopify shop and direct card payments, sorted by money kept, with print-on-demand options for prints. US and UK fee tables.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "currency": {
+     "description": "USD or GBP.",
+     "enum": [
+      "USD",
+      "GBP"
+     ],
+     "type": "string"
+    },
+    "kind": {
+     "description": "Kind: original (the default) or print.",
+     "enum": [
+      "original",
+      "print"
+     ],
+     "type": "string"
+    },
+    "price": {
+     "description": "The price the buyer pays.",
+     "type": "number"
+    },
+    "shipping": {
+     "description": "Shipping charged to the buyer, if any.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "price"
+   ],
+   "type": "object"
+  },
+  "name": "compare_where_to_sell",
+  "output_schema": {},
+  "title": "What an artist keeps on each selling platform"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Grants, buyer finance, royalties and copyright for artists"
+  },
+  "description": "Grants, buyer finance, royalties and copyright for artists. For the UK: arts council grants, Own Art 0% buyer finance and the Artist's Resale Right. For the US: grants and the $85 group copyright registration for 2 to 20 artworks.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "description": "GB or US.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_artist_funding",
+  "output_schema": {},
+  "title": "Grants, buyer finance, royalties and copyright for artists"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Fair price for a new artwork by size and medium"
+  },
+  "description": "Fair price for a new artwork by size and medium. What original work or prints of about this size and kind sell for in independent artists' own shops: the typical price, the middle half of prices and the price per square inch, from comparable works for sale.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "currency": {
+     "description": "Currency for the answer, for example USD or GBP.",
+     "type": "string"
+    },
+    "height": {
+     "description": "Height, in unit.",
+     "type": "number"
+    },
+    "kind": {
+     "description": "Kind of work. Defaults to painting.",
+     "enum": [
+      "painting",
+      "print",
+      "printmaking",
+      "photography",
+      "drawing",
+      "watercolour",
+      "ceramics",
+      "sculpture",
+      "textile",
+      "illustration",
+      "other"
+     ],
+     "type": "string"
+    },
+    "original": {
+     "description": "Set to true for originals (the default), false for prints.",
+     "type": "boolean"
+    },
+    "unit": {
+     "description": "Unit: in or cm.",
+     "enum": [
+      "in",
+      "cm"
+     ],
+     "type": "string"
+    },
+    "width": {
+     "description": "Width, in unit.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "width",
+    "height"
+   ],
+   "type": "object"
+  },
+  "name": "get_fair_art_price",
+  "output_schema": {},
+  "title": "Fair price for a new artwork by size and medium"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Open calls, prizes and residencies for artists"
+  },
+  "description": "Open calls, prizes and residencies for artists. Recurring open exhibitions, prizes, residencies and listing sites in the UK, US and Canada, with entry fees, usual closing month, media and official links.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "description": "UK, US or CA.",
+     "type": "string"
+    },
+    "kind": {
+     "description": "Kind: open call, prize, residency or listing hub.",
+     "type": "string"
+    },
+    "media": {
+     "description": "For example painting, watercolour, print or photography.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_open_calls",
+  "output_schema": {},
+  "title": "Open calls, prizes and residencies for artists"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "A free artwork passport for an artist's work"
+  },
+  "description": "A free artwork passport for an artist's work. Makes a certificate for a work (title, artist, year, medium, size, edition) with a fingerprint of its picture, as printable text and schema.org data the artist can publish, so anyone can later check the picture is unchanged.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "artist": {
+     "description": "Artist's name.",
+     "type": "string"
+    },
+    "edition": {
+     "description": "For example 3/25, for prints.",
+     "type": "string"
+    },
+    "image": {
+     "description": "The https address of the work's picture.",
+     "type": "string"
+    },
+    "medium": {
+     "description": "For example oil on canvas.",
+     "type": "string"
+    },
+    "size": {
+     "description": "For example 60 x 90 cm.",
+     "type": "string"
+    },
+    "title": {
+     "description": "Title of the work.",
+     "type": "string"
+    },
+    "year": {
+     "description": "Year made.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "image",
+    "title",
+    "artist"
+   ],
+   "type": "object"
+  },
+  "name": "make_artwork_passport",
+  "output_schema": {},
+  "title": "A free artwork passport for an artist's work"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Price and terms for commissioning a piece"
+  },
+  "description": "Price and terms for commissioning a piece. A price guide for a commissioned piece by size and the artist's level, what similar finished originals sell for, the usual deposit, revision rounds, cancellation fees, copyright and a contract checklist for buyer and artist.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "height": {
+     "description": "Height, in unit.",
+     "type": "number"
+    },
+    "level": {
+     "description": "Level: emerging (the default), mid or established.",
+     "enum": [
+      "emerging",
+      "mid",
+      "established"
+     ],
+     "type": "string"
+    },
+    "medium": {
+     "description": "Kind of work, for example painting or drawing.",
+     "type": "string"
+    },
+    "unit": {
+     "description": "Unit: in or cm.",
+     "enum": [
+      "in",
+      "cm"
+     ],
+     "type": "string"
+    },
+    "width": {
+     "description": "Width, in unit.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "width",
+    "height"
+   ],
+   "type": "object"
+  },
+  "name": "price_commission",
+  "output_schema": {},
+  "title": "Price and terms for commissioning a piece"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Find art for sale from independent artists"
+  },
+  "description": "Find art for sale from independent artists. Searches works in independent artists' own shops and eBay art by words (subject, style, place, artist), kind, original or print, price, size and colour. Results show title, artist, size, price, where it ships from, an image and a link to buy straight from the artist.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "colour": {
+     "description": "A main colour, for example blue or ochre.",
+     "type": "string"
+    },
+    "country": {
+     "description": "Buyer's two-letter country code, for eBay and currency, for example US or GB.",
+     "type": "string"
+    },
+    "currency": {
+     "description": "Currency for prices, for example USD, GBP or EUR.",
+     "type": "string"
+    },
+    "kind": {
+     "description": "Kind: painting, print, printmaking, photography, drawing, watercolour, ceramics, sculpture, textile, illustration or other.",
+     "enum": [
+      "painting",
+      "print",
+      "printmaking",
+      "photography",
+      "drawing",
+      "watercolour",
+      "ceramics",
+      "sculpture",
+      "textile",
+      "illustration",
+      "other"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "How many results, 1 to 20.",
+     "type": "integer"
+    },
+    "max_price": {
+     "description": "Highest price, in the currency given (or the buyer's local currency).",
+     "type": "number"
+    },
+    "max_size": {
+     "description": "Largest longest side, in unit.",
+     "type": "number"
+    },
+    "min_price": {
+     "description": "Lowest price.",
+     "type": "number"
+    },
+    "min_size": {
+     "description": "Smallest longest side, in unit.",
+     "type": "number"
+    },
+    "original": {
+     "description": "Set to true for one-off originals only, false for prints only.",
+     "type": "boolean"
+    },
+    "q": {
+     "description": "What to look for, for example abstract blue, linocut bird, Scottish landscape or a dog portrait.",
+     "type": "string"
+    },
+    "ships_from": {
+     "description": "Only artists based in this two-letter country.",
+     "type": "string"
+    },
+    "unit": {
+     "description": "Unit: in or cm. Defaults to in.",
+     "enum": [
+      "in",
+      "cm"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "search_art",
+  "output_schema": {},
+  "title": "Find art for sale from independent artists"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "What size art fits a wall and how high to hang it"
+  },
+  "description": "What size art fits a wall and how high to hang it. Art width for the furniture or wall, the hanging height, the gap above furniture and gallery wall spacing, with a ready search for works in that size range.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "furniture_width": {
+     "description": "Width of the sofa, bed or sideboard below the art.",
+     "type": "number"
+    },
+    "unit": {
+     "description": "Unit: in or cm.",
+     "enum": [
+      "in",
+      "cm"
+     ],
+     "type": "string"
+    },
+    "wall_width": {
+     "description": "Width of the wall, if there's no furniture below.",
+     "type": "number"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "size_art_for_wall",
+  "output_schema": {},
+  "title": "What size art fits a wall and how high to hang it"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check a picture matches an artwork passport"
+  },
+  "description": "Check a picture matches an artwork passport. Recomputes the picture's fingerprint and says whether it matches the one in the passport.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "image": {
+     "description": "The https address of the picture.",
+     "type": "string"
+    },
+    "sha256": {
+     "description": "The fingerprint from the passport.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "image",
+    "sha256"
+   ],
+   "type": "object"
+  },
+  "name": "verify_artwork_passport",
+  "output_schema": {},
+  "title": "Check a picture matches an artwork passport"
+ }
+]

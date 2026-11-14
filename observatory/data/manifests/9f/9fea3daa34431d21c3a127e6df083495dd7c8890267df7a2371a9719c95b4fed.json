@@ -1,0 +1,3385 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check CVE IDs against the CISA Known Exploited Vulnerabilities catalog — up to 200 per call, served from a cached catalog snapshot at no upstream cost. Returns, per CVE, whether it is in KEV and if so the date added, the federal remediation due date, days remaining or days overdue, which binding operational directive the entry cites, the required action text, whether it is linked to ransomware campaigns, whether it falls in the three-day forensic-triage tier, CISA's own vendor and product labels, associated CWEs, and the reference URLs parsed from the entry's notes. A CVE that is not in KEV is a normal result, not an error. For a large batch, detail \"summary\" keeps only the triage fields — the deadline and overdue status, directive, ransomware and forensic-triage flags, and vendor and product labels — and drops the descriptive text, CWEs, and references, so a full batch stays compact. The CWE IDs returned chain directly into the cwe filter of cisa_search_kev and cisa_search_ics_advisories, and the parsed NVD reference gives the canonical record for scoring detail. For the reverse direction — which ICS advisories cover a CVE — pass it as cve to cisa_search_ics_advisories, or set inKev there to list the advisories covering any KEV CVE.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "cveIds": {
+     "description": "CVE identifiers to check, up to 1,000 accepted and 200 processed per call. Oversized batches return normalized unprocessedIds for a follow-up call unless normalization is disabled. The whole batch costs zero upstream requests — pair a large batch with detail \"summary\".",
+     "items": {
+      "description": "One CVE identifier, e.g. CVE-2025-39964. Case and surrounding whitespace are normalized.",
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+      "type": "string"
+     },
+     "maxItems": 1000,
+     "minItems": 1,
+     "type": "array"
+    },
+    "detail": {
+     "default": "full",
+     "description": "full returns every field of each in-KEV entry. summary returns only cveId, inKev, dateAdded, dueDate, daysUntilDue, overdue, directive, vendorProject, product, knownRansomwareCampaignUse, and forensicTriage — the triage view for a large batch. Not-in-KEV results are the same under both.",
+     "enum": [
+      "full",
+      "summary"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "cveIds"
+   ],
+   "type": "object"
+  },
+  "name": "cisa_check_cve_status",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "results",
+      "foundCount",
+      "notFoundCount",
+      "catalog",
+      "asOf"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "asOf": {
+     "description": "The UTC date daysUntilDue and overdue were computed against, YYYY-MM-DD.",
+     "type": "string"
+    },
+    "catalog": {
+     "additionalProperties": false,
+     "description": "Which catalog snapshot answered this call.",
+     "properties": {
+      "catalogVersion": {
+       "description": "Version string of the loaded catalog snapshot.",
+       "type": "string"
+      },
+      "count": {
+       "description": "Entries in the loaded snapshot.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "dateReleased": {
+       "description": "Release timestamp the snapshot carries.",
+       "type": "string"
+      },
+      "fetchedAt": {
+       "description": "When this server fetched the snapshot, ISO 8601.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "catalogVersion",
+      "dateReleased",
+      "count",
+      "fetchedAt"
+     ],
+     "type": "object"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `read_limit_exceeded`: The batch exceeds the per-call cap and input normalization is disabled. `catalog_unavailable`: No KEV catalog snapshot is held and the fetch from cisa.gov failed. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "read_limit_exceeded",
+          "catalog_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "foundCount": {
+     "description": "How many of the processed CVEs are in the catalog.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "notFoundCount": {
+     "description": "How many of the processed CVEs are not in the catalog.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "notice": {
+     "description": "Guidance for oversized batches or when none of the processed CVEs are in the catalog.",
+     "type": "string"
+    },
+    "results": {
+     "description": "One result per processed CVE, in the order supplied.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One KEV catalog entry, or a not-in-KEV result carrying only cveId and inKev. Under detail \"summary\" in cisa_check_cve_status or cisa_search_kev, an entry carries only cveId, inKev, the dates and deadline status, directive, vendor and product labels, and the ransomware and forensic-triage flags.",
+      "properties": {
+       "cveId": {
+        "description": "The CVE identifier that was looked up.",
+        "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+        "type": "string"
+       },
+       "cwes": {
+        "description": "Associated CWEs. Empty on some entries, and a CWE filter excludes those. Absent under detail \"summary\".",
+        "items": {
+         "description": "One CWE identifier.",
+         "pattern": "^CWE-[0-9]+$",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "dateAdded": {
+        "description": "Date CISA added the entry to the catalog, YYYY-MM-DD.",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       "daysUntilDue": {
+        "description": "Whole days from the echoed asOf date to the due date; negative once overdue.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "directive": {
+        "anyOf": [
+         {
+          "enum": [
+           "BOD 26-04",
+           "BOD 22-01"
+          ],
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "The binding operational directive the entry cites, or null when it cites neither — most entries name none, and none is never inferred from age."
+       },
+       "dueDate": {
+        "description": "Federal remediation deadline CISA assigned, YYYY-MM-DD.",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       "forensicTriage": {
+        "description": "Whether the entry falls in the BOD 26-04 three-day forensic-triage tier.",
+        "enum": [
+         "Yes",
+         "No"
+        ],
+        "type": "string"
+       },
+       "inKev": {
+        "description": "Whether the CVE is in the KEV catalog. False is a normal result, not an error.",
+        "type": "boolean"
+       },
+       "kevUrl": {
+        "description": "Absolute URL of the KEV catalog page for this CVE. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "knownRansomwareCampaignUse": {
+        "description": "Whether CISA has linked the vulnerability to a ransomware campaign. Unknown means no link on record, not that none exists.",
+        "enum": [
+         "Known",
+         "Unknown"
+        ],
+        "type": "string"
+       },
+       "notesCommentary": {
+        "description": "The prose segments of the notes field, verbatim with any URLs they contain; present when the notes carry prose. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "overdue": {
+        "description": "True when the due date is strictly before the echoed asOf date.",
+        "type": "boolean"
+       },
+       "product": {
+        "description": "CISA's own product label — free text, not a CPE.",
+        "type": "string"
+       },
+       "references": {
+        "description": "Every reference URL in the notes field, in notes order, each classified by kind. Absent under detail \"summary\".",
+        "items": {
+         "additionalProperties": false,
+         "description": "One reference URL parsed from the entry notes.",
+         "properties": {
+          "kind": {
+           "description": "What the link points at: the NVD detail record, a cisa.gov page, BOD 26-04 guidance, the forensic-triage requirements, a vendor page, or an unclassifiable URL.",
+           "enum": [
+            "nvd",
+            "cisa",
+            "bod_guidance",
+            "forensic_triage",
+            "vendor",
+            "other"
+           ],
+           "type": "string"
+          },
+          "label": {
+           "description": "CISA's own label for the segment, when the notes entry carried one.",
+           "type": "string"
+          },
+          "url": {
+           "description": "Absolute reference URL, verbatim from the notes field.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "kind",
+          "url"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "requiredAction": {
+        "description": "CISA's required-action text for the entry, verbatim. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "shortDescription": {
+        "description": "CISA's one-paragraph description. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "vendorProject": {
+        "description": "CISA's own vendor label — free text, not a CPE vendor component.",
+        "type": "string"
+       },
+       "vulnerabilityName": {
+        "description": "CISA's short name for the vulnerability. Absent under detail \"summary\".",
+        "type": "string"
+       }
+      },
+      "required": [
+       "cveId",
+       "inKev"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "summaryNote": {
+     "description": "Present only under detail \"summary\": which fields each in-KEV result omits and how to restore them.",
+     "type": "string"
+    },
+    "unprocessedIds": {
+     "description": "Normalized CVE IDs not processed; send these in a follow-up call.",
+     "items": {
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_check_cve_status"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read one CISA industrial control system advisory: product definitions and relationship component references; per-CVE CVSS score, vector, and CWE; vendor remediations, flags, and threats; sectors; and revision history. Large advisories return a section outline with byte sizes and vulnerability CVE IDs. Re-call with sections, cves for named vulnerabilities, or productIds for exact product definitions referenced by vulnerability status, scores, remediations, flags, or threats. Product IDs are case-sensitive; relationship selection does not expand components. Every response carries source URLs and attribution. Find advisory IDs with cisa_search_ics_advisories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "advisoryId": {
+     "description": "Advisory identifier, e.g. ICSA-26-260-07 or ICSMA-26-253-02, with an optional revision suffix: a single letter A-F or a numeric -N. Case, surrounding whitespace, and a trailing .json are normalized.",
+     "pattern": "^ICS(A|MA)-\\d{2}-\\d{3}-\\d{2}(?:[A-Z]|-\\d+)?$",
+     "type": "string"
+    },
+    "cves": {
+     "description": "Narrow the vulnerabilities section to these CVE IDs; the outline lists the ones the advisory holds. Alone, it selects the vulnerabilities section; with sections, that list must include \"vulnerabilities\".",
+     "items": {
+      "description": "One CVE identifier the advisory covers, e.g. CVE-2023-3935. Case and surrounding whitespace are normalized.",
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "productIds": {
+     "description": "Narrow products to these IDs from vulnerability status, score, remediation, flag, or threat references. Alone selects products; combined with cves selects both sections. Explicit sections must include products.",
+     "items": {
+      "description": "Exact case-sensitive CSAF product ID; surrounding whitespace is trimmed.",
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "sections": {
+     "description": "Sections to return. Omit for the whole document, or for its outline when the document overflows the inline budget.",
+     "items": {
+      "description": "One section name, as the outline reports it.",
+      "enum": [
+       "advisory",
+       "summary",
+       "products",
+       "vulnerabilities",
+       "revisionHistory",
+       "references",
+       "acknowledgments"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "advisoryId"
+   ],
+   "type": "object"
+  },
+  "name": "cisa_get_advisory",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "found"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "acknowledgments": {
+     "description": "Acknowledgment entries.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One acknowledgment entry.",
+      "properties": {
+       "names": {
+        "description": "Acknowledged people.",
+        "items": {
+         "description": "One acknowledged person.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "organization": {
+        "description": "Acknowledged organization, when named.",
+        "type": "string"
+       },
+       "summary": {
+        "description": "What the acknowledgment records.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "names"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "advisory": {
+     "additionalProperties": false,
+     "description": "Advisory identity, dates, and attribution. Always kept, including on a section selection.",
+     "properties": {
+      "advisoryId": {
+       "description": "The advisory identifier.",
+       "pattern": "^ICS(A|MA)-\\d{2}-\\d{3}-\\d{2}(?:[A-Z]|-\\d+)?$",
+       "type": "string"
+      },
+      "attribution": {
+       "description": "Who authored the text and under what terms it may be redistributed.",
+       "type": "string"
+      },
+      "csafUrl": {
+       "description": "Absolute URL of the raw CSAF JSON document.",
+       "type": "string"
+      },
+      "csafVersion": {
+       "description": "CSAF schema version the document declares.",
+       "type": "string"
+      },
+      "published": {
+       "description": "Initial release date, ISO 8601.",
+       "type": "string"
+      },
+      "publisherCategory": {
+       "description": "coordinator for CISA-authored, other for a republished vendor advisory.",
+       "type": "string"
+      },
+      "publisherName": {
+       "description": "Publisher name as the document records it.",
+       "type": "string"
+      },
+      "revised": {
+       "description": "Current release date, ISO 8601.",
+       "type": "string"
+      },
+      "revision": {
+       "description": "Document revision number.",
+       "type": "string"
+      },
+      "series": {
+       "description": "Advisory series.",
+       "enum": [
+        "ICSA",
+        "ICSMA"
+       ],
+       "type": "string"
+      },
+      "status": {
+       "description": "CSAF tracking status, e.g. final or interim.",
+       "type": "string"
+      },
+      "title": {
+       "description": "The advisory title.",
+       "type": "string"
+      },
+      "url": {
+       "description": "Absolute URL of the cisa.gov web version of the advisory.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "advisoryId",
+      "title",
+      "series",
+      "status",
+      "csafVersion",
+      "published",
+      "revised",
+      "revision",
+      "publisherCategory",
+      "publisherName",
+      "url",
+      "csafUrl",
+      "attribution"
+     ],
+     "type": "object"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `product_ids_need_products_section`: productIds is nonempty but explicit sections omits products. `unknown_product_id`: productIds names an ID with no definition in this advisory. `mirror_busy`: A transient SQLite lock prevents the advisory index from opening. `mirror_not_ready`: The advisory index has never completed a full sync. `mirror_unavailable`: The advisory index store cannot be opened: its location is not writable, is read-only, runs through a missing directory or a file, or holds a file that is not a SQLite database. `unknown_section`: A requested section is one this advisory does not carry. `cves_need_vulnerabilities_section`: cves is set but sections does not include \"vulnerabilities\", so there is nothing for cves to narrow. `unknown_cve`: A cves entry names a CVE this advisory does not cover. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "product_ids_need_products_section",
+          "unknown_product_id",
+          "mirror_busy",
+          "mirror_not_ready",
+          "mirror_unavailable",
+          "unknown_section",
+          "cves_need_vulnerabilities_section",
+          "unknown_cve"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "found": {
+     "description": "Whether an advisory with that ID is in the index.",
+     "type": "boolean"
+    },
+    "guidance": {
+     "description": "What to do instead, present when found is false: indexed IDs with the same base, if any, how current the index is, and whether the advisory may be newer than it.",
+     "type": "string"
+    },
+    "indexCheckpoint": {
+     "description": "Present when found is false: the newest revision timestamp the index holds, or null if none.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "indexLastSyncedAt": {
+     "description": "Present when found is false: when the index last completed a sync, ISO 8601, or null if never.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "kind": {
+     "description": "full when the document is returned; outline when only the section listing is.",
+     "enum": [
+      "full",
+      "outline"
+     ],
+     "type": "string"
+    },
+    "outlineNotice": {
+     "description": "Outline arm — how to call cisa_get_advisory for specific sections.",
+     "type": "string"
+    },
+    "products": {
+     "additionalProperties": false,
+     "description": "Affected products and version ranges.",
+     "properties": {
+      "productCount": {
+       "description": "Flattened product entries in the whole product tree.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "selected": {
+       "description": "True when productIds selects only requested definitions; whole-document totals are retained.",
+       "type": "boolean"
+      },
+      "shownProducts": {
+       "description": "Product definitions returned — equal to productCount except under productIds selection or on a legacy truncated copy.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "truncated": {
+       "description": "True only on a copy stored by an older index build that capped product rows; the index re-ingests on its next start and then returns every row. Absent otherwise.",
+       "type": "boolean"
+      },
+      "vendorCount": {
+       "description": "Distinct vendors in the product tree.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "vendors": {
+       "description": "Vendors flattened out of the CSAF product tree.",
+       "items": {
+        "additionalProperties": false,
+        "description": "One vendor and its products.",
+        "properties": {
+         "name": {
+          "description": "Vendor label as the advisory spells it.",
+          "type": "string"
+         },
+         "products": {
+          "description": "Products under this vendor.",
+          "items": {
+           "additionalProperties": false,
+           "description": "One product under the vendor.",
+           "properties": {
+            "family": {
+             "description": "Product family, when the tree names one.",
+             "type": "string"
+            },
+            "name": {
+             "description": "Product name.",
+             "type": "string"
+            },
+            "versions": {
+             "description": "Product definitions grouped under this product label.",
+             "items": {
+              "additionalProperties": false,
+              "description": "One branch, standalone, or relationship product definition.",
+              "properties": {
+               "identificationHelper": {
+                "description": "Lossless JSON text of upstream CSAF product identification metadata, when supplied.",
+                "type": "string"
+               },
+               "kind": {
+                "description": "CSAF branch category, or full_product_name or relationship for definitions outside branches.",
+                "type": "string"
+               },
+               "name": {
+                "description": "Exact full product name supplied upstream.",
+                "type": "string"
+               },
+               "productId": {
+                "description": "Exact opaque CSAF product ID referenced by vulnerability entries; case-sensitive and not restricted to CSAFPID tokens.",
+                "type": "string"
+               },
+               "productReference": {
+                "description": "First relationship component ID; not automatically expanded.",
+                "type": "string"
+               },
+               "relatesToProductReference": {
+                "description": "Second relationship component ID; not automatically expanded.",
+                "type": "string"
+               },
+               "relationshipCategory": {
+                "description": "CSAF relationship category supplied upstream.",
+                "type": "string"
+               },
+               "value": {
+                "description": "Version/range expression for a branch row, or full name for a standalone or relationship definition.",
+                "type": "string"
+               }
+              },
+              "required": [
+               "kind",
+               "value",
+               "productId"
+              ],
+              "type": "object"
+             },
+             "type": "array"
+            }
+           },
+           "required": [
+            "name",
+            "versions"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "name",
+         "products"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "vendorCount",
+      "productCount",
+      "vendors",
+      "shownProducts"
+     ],
+     "type": "object"
+    },
+    "references": {
+     "description": "Document-level references.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One CSAF reference.",
+      "properties": {
+       "category": {
+        "description": "CSAF reference category, e.g. self or external.",
+        "type": "string"
+       },
+       "summary": {
+        "description": "Reference summary, when present.",
+        "type": "string"
+       },
+       "url": {
+        "description": "The reference URL.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "category",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "revisionHistory": {
+     "description": "Revision history, oldest first as published.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One revision-history entry.",
+      "properties": {
+       "date": {
+        "description": "Revision date, ISO 8601.",
+        "type": "string"
+       },
+       "legacyVersion": {
+        "description": "Legacy version label, when the entry carries one.",
+        "type": "string"
+       },
+       "number": {
+        "description": "Revision number.",
+        "type": "string"
+       },
+       "summary": {
+        "description": "What changed in this revision.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "number",
+       "date",
+       "summary"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "sections": {
+     "description": "Outline arm — the sections available, largest first, with their byte sizes and, for vulnerabilities, its CVE IDs.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One section this advisory carries, with its serialized byte size.",
+      "properties": {
+       "bytes": {
+        "description": "Serialized byte size of the section",
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+       },
+       "cves": {
+        "description": "On the vulnerabilities section only: the CVE IDs it holds, in document order. Pass any of them in cves to cisa_get_advisory to read just those entries.",
+        "items": {
+         "description": "One CVE identifier.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "name": {
+        "description": "Section identifier — pass in `sections` to retrieve it",
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "bytes"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "summary": {
+     "additionalProperties": false,
+     "description": "Narrative notes and sector classification.",
+     "properties": {
+      "countriesDeployed": {
+       "description": "The countries/areas-deployed note.",
+       "type": "string"
+      },
+      "exploitability": {
+       "description": "The exploitability note, when present.",
+       "type": "string"
+      },
+      "headquarters": {
+       "description": "The company-headquarters-location note.",
+       "type": "string"
+      },
+      "riskEvaluation": {
+       "description": "The risk-evaluation note, when present.",
+       "type": "string"
+      },
+      "sectors": {
+       "description": "Normalized sector names. Empty when the advisory carries no sector note.",
+       "items": {
+        "description": "One canonical sector name.",
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "sectorsRaw": {
+       "description": "The sector note verbatim, when present.",
+       "type": "string"
+      },
+      "summaryText": {
+       "description": "The advisory summary or overview note.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "sectors"
+     ],
+     "type": "object"
+    },
+    "vulnerabilities": {
+     "description": "Vulnerabilities the advisory covers, with scores, remediations, and product status.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One vulnerability the advisory covers.",
+      "properties": {
+       "cve": {
+        "description": "The CVE identifier.",
+        "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+        "type": "string"
+       },
+       "cvssV4Vector": {
+        "description": "The unambiguous CVSS v4 vector from a FIRST calculator reference, when present.",
+        "type": "string"
+       },
+       "cweId": {
+        "description": "CWE identifier, when the entry carries one.",
+        "type": "string"
+       },
+       "cweName": {
+        "description": "CWE name, when the entry carries one.",
+        "type": "string"
+       },
+       "flags": {
+        "description": "Vulnerability flags; absent on rows awaiting re-ingest.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One scoped vulnerability flag.",
+         "properties": {
+          "groupIds": {
+           "description": "Upstream group references, including unresolved groups.",
+           "items": {
+            "description": "One verbatim group reference.",
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "label": {
+           "description": "CSAF flag label, verbatim.",
+           "type": "string"
+          },
+          "productIds": {
+           "description": "Direct product IDs and resolved group members.",
+           "items": {
+            "description": "One exact product ID.",
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "label",
+          "productIds"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "notes": {
+        "description": "Notes attached to the vulnerability. CVSS v4 appears here as prose — it is never parsed into a score field.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One note attached to the vulnerability.",
+         "properties": {
+          "category": {
+           "description": "CSAF note category.",
+           "type": "string"
+          },
+          "text": {
+           "description": "Note text, verbatim.",
+           "type": "string"
+          },
+          "title": {
+           "description": "Note title, when present.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "category",
+          "text"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "productStatus": {
+        "additionalProperties": false,
+        "description": "Per-product status buckets, as CSAF names them.",
+        "properties": {
+         "fixed": {
+          "description": "Products already fixed.",
+          "items": {
+           "description": "One CSAFPID token.",
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "known_affected": {
+          "description": "Products known to be affected.",
+          "items": {
+           "description": "One CSAFPID token.",
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "known_not_affected": {
+          "description": "Products known not to be affected.",
+          "items": {
+           "description": "One CSAFPID token.",
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "recommended": {
+          "description": "Products recommended by the publisher.",
+          "items": {
+           "description": "One CSAFPID token.",
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "known_affected",
+         "fixed",
+         "known_not_affected",
+         "recommended"
+        ],
+        "type": "object"
+       },
+       "references": {
+        "description": "Vulnerability references in source order. Absent on rows awaiting re-ingest.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One CSAF reference.",
+         "properties": {
+          "category": {
+           "description": "CSAF reference category, e.g. self or external.",
+           "type": "string"
+          },
+          "summary": {
+           "description": "Reference summary, when present.",
+           "type": "string"
+          },
+          "url": {
+           "description": "The reference URL.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "category",
+          "url"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "remediations": {
+        "description": "Remediations for this vulnerability.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One remediation entry.",
+         "properties": {
+          "category": {
+           "description": "CSAF remediation category: mitigation, vendor_fix, workaround, none_available, or no_fix_planned.",
+           "type": "string"
+          },
+          "details": {
+           "description": "The remediation instructions, verbatim.",
+           "type": "string"
+          },
+          "groupIds": {
+           "description": "Upstream group references, including unresolved groups.",
+           "items": {
+            "description": "One verbatim CSAF group reference.",
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "productIds": {
+           "description": "Products this remediation applies to.",
+           "items": {
+            "description": "One CSAFPID token.",
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "restartRequired": {
+           "description": "Restart category the remediation requires, when stated.",
+           "type": "string"
+          },
+          "url": {
+           "description": "Vendor link for the remediation, when present.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "category",
+          "details",
+          "productIds"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "scores": {
+        "description": "CVSS scores. Empty on the 431 vulnerability objects that carry none.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One CVSS score.",
+         "properties": {
+          "baseScore": {
+           "description": "CVSS base score, 0.0 through 10.0.",
+           "type": "number"
+          },
+          "baseSeverity": {
+           "description": "Severity band for the score.",
+           "type": "string"
+          },
+          "productIds": {
+           "description": "Products this score applies to.",
+           "items": {
+            "description": "One CSAFPID token.",
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "severityDerived": {
+           "description": "True when the band was derived here rather than published upstream.",
+           "type": "boolean"
+          },
+          "vectorString": {
+           "description": "The full CVSS vector string.",
+           "type": "string"
+          },
+          "version": {
+           "description": "CVSS version of this score.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "version",
+          "baseScore",
+          "baseSeverity",
+          "severityDerived",
+          "vectorString",
+          "productIds"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "threats": {
+        "description": "Vulnerability threats; absent on rows awaiting re-ingest.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One scoped vulnerability threat.",
+         "properties": {
+          "category": {
+           "description": "CSAF threat category, verbatim.",
+           "type": "string"
+          },
+          "details": {
+           "description": "Threat details, verbatim.",
+           "type": "string"
+          },
+          "groupIds": {
+           "description": "Upstream group references, including unresolved groups.",
+           "items": {
+            "description": "One verbatim group reference.",
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "productIds": {
+           "description": "Direct product IDs and resolved group members.",
+           "items": {
+            "description": "One exact product ID.",
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "category",
+          "details",
+          "productIds"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "title": {
+        "description": "Vulnerability title, when the entry carries one.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "cve",
+       "scores",
+       "remediations",
+       "productStatus",
+       "notes"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_get_advisory"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "List recent CISA publications from the combined advisories, alerts, or ICS advisories feed. Cursors continue within the available 30-item rolling window. Upstream provides no pagination, history, or date-range query. See window.oldest and window.newest for the dates the window covers. For ICS advisory history beyond the window, use cisa_search_ics_advisories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Opaque continuation cursor from this feed. Resumes after the last returned GUID within the available window; omit to restart.",
+     "type": "string"
+    },
+    "detail": {
+     "default": "summary",
+     "description": "Use summary for capped descriptions or full for complete feed descriptions where no advisory ID is available. A capped item with an advisory ID can be read with cisa_get_advisory.",
+     "enum": [
+      "summary",
+      "full"
+     ],
+     "type": "string"
+    },
+    "feed": {
+     "default": "advisories",
+     "description": "Publication feed to read. Choose advisories for combined advisories, alerts for CISA alerts, or ics for ICS advisories. See window.oldest and window.newest for coverage dates.",
+     "enum": [
+      "advisories",
+      "alerts",
+      "ics"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 30,
+     "description": "Maximum items to return; values above 30 use 30 when input clamping is enabled. The upstream window contains at most 30 items.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since": {
+     "description": "Keep only items published on or after this date, YYYY-MM-DD. Filters within the fetched window; it cannot reach back beyond it.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "cisa_get_alerts",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "hasMore",
+      "stale",
+      "fetchedAt",
+      "feed",
+      "feedUrl",
+      "feedTitle",
+      "items",
+      "window",
+      "windowCaveat"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "cap": {
+     "description": "The limit that was applied.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "cursor": {
+     "description": "Continuation cursor for this feed; absent on the last page or when the anchor is unavailable.",
+     "type": "string"
+    },
+    "effectiveQuery": {
+     "description": "The since filter as applied, and how many window items it excluded.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `read_limit_exceeded`: limit exceeds the per-call cap and input clamping is disabled. `invalid_cursor`: The cursor is malformed or belongs to a different feed. `feed_unavailable`: The feed fetch failed or returned a body that carried no RSS channel. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "read_limit_exceeded",
+          "invalid_cursor",
+          "feed_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "feed": {
+     "description": "The feed that was read.",
+     "enum": [
+      "advisories",
+      "alerts",
+      "ics"
+     ],
+     "type": "string"
+    },
+    "feedTitle": {
+     "description": "The channel title the feed declares.",
+     "type": "string"
+    },
+    "feedUrl": {
+     "description": "The absolute feed URL this window came from.",
+     "type": "string"
+    },
+    "fetchedAt": {
+     "description": "UTC timestamp when this window was successfully fetched.",
+     "type": "string"
+    },
+    "hasMore": {
+     "description": "Whether more matching items remain after this page within the available window.",
+     "type": "boolean"
+    },
+    "items": {
+     "description": "Items from the fetched window, newest first as published; stale identifies cached fallback.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One feed item.",
+      "properties": {
+       "advisoryId": {
+        "description": "Present for ICS advisory items; chains straight into cisa_get_advisory.",
+        "pattern": "^ICS(A|MA)-\\d{2}-\\d{3}-\\d{2}(?:[A-Z]|-\\d+)?$",
+        "type": "string"
+       },
+       "guid": {
+        "description": "The upstream guid — a node path such as /node/25513, not a URL and not a permalink.",
+        "type": "string"
+       },
+       "guidance": {
+        "description": "Advisory lookup to use when the description remains capped in full detail.",
+        "type": "string"
+       },
+       "link": {
+        "description": "Absolute URL of the canonical page for the item.",
+        "type": "string"
+       },
+       "pubDate": {
+        "description": "Publication timestamp, ISO 8601. Upstream publishes RFC 822 with a two-digit year.",
+        "type": "string"
+       },
+       "summary": {
+        "description": "Item description with HTML stripped and entities decoded. Capped at 1,200 characters unless detail is full and the item has no advisoryId.",
+        "type": "string"
+       },
+       "summaryTruncated": {
+        "description": "True when the summary was capped.",
+        "type": "boolean"
+       },
+       "title": {
+        "description": "Item title, trimmed — upstream carries trailing whitespace.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "title",
+       "link",
+       "pubDate",
+       "summary",
+       "summaryTruncated",
+       "guid"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "notice": {
+     "description": "Safe retry guidance on refresh failure, or guidance when the since filter excluded every item.",
+     "type": "string"
+    },
+    "shown": {
+     "description": "Items returned.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "stale": {
+     "description": "True when refresh failed and this response uses the last cached window.",
+     "type": "boolean"
+    },
+    "truncated": {
+     "description": "True when the limit capped the returned items.",
+     "type": "boolean"
+    },
+    "window": {
+     "additionalProperties": false,
+     "description": "What the fetched window covers.",
+     "properties": {
+      "itemCount": {
+       "description": "Items returned after limit and since were applied.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "newest": {
+       "description": "Publication date of the newest item in the fetched window; null when empty.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "oldest": {
+       "description": "Publication date of the oldest item in the fetched window; null when empty.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "upstreamWindowSize": {
+       "description": "Items the upstream feed serves — a fixed ceiling, not a server choice.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "itemCount",
+      "oldest",
+      "newest",
+      "upstreamWindowSize"
+     ],
+     "type": "object"
+    },
+    "windowCaveat": {
+     "description": "Limits of continuation within the upstream rolling window.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_get_alerts"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Fetch the SSVC decision points CISA publishes per CVE as a CVE Authorized Data Publisher — Exploitation, Automatable, and Technical Impact — along with the CVSS score and CWE CISA contributes where present, and compute the BOD 26-04 remediation timeline those values imply for the asset exposure you supply. The computed timeline applies CISA's published decision table to CISA's published decision points and your stated exposure; it is not a compliance determination and it is not CISA's own due-date assignment, which is reported separately when the CVE is in KEV and can differ. Not every CVE is enriched — a miss returns found false with guidance rather than an error. Call cisa_list_reference with topic ssvc_values for the decision-point vocabulary.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "assetExposure": {
+     "default": "unknown",
+     "description": "Whether the affected asset is reachable by unauthenticated or untrusted entities over public networks. The one BOD 26-04 decision point CISA cannot publish. \"unknown\" returns both arms so the spread is visible without guessing.",
+     "enum": [
+      "publicly_exposed",
+      "not_publicly_exposed",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "cveIds": {
+     "description": "CVE identifiers to look up, up to 1,000 accepted and 50 processed per call. Oversized batches return normalized unprocessedIds for a follow-up call unless normalization is disabled. Each uncached CVE needs its own live enrichment lookup rather than a cached batch check.",
+     "items": {
+      "description": "One CVE identifier, e.g. CVE-2025-39964. Case and surrounding whitespace are normalized.",
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+      "type": "string"
+     },
+     "maxItems": 1000,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "cveIds"
+   ],
+   "type": "object"
+  },
+  "name": "cisa_get_ssvc",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "results",
+      "foundCount",
+      "notFoundCount",
+      "failedCount",
+      "echo"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "echo": {
+     "additionalProperties": false,
+     "description": "The request as the server parsed it.",
+     "properties": {
+      "assetExposure": {
+       "description": "The asset exposure the server applied.",
+       "type": "string"
+      },
+      "requested": {
+       "description": "How many CVE IDs were requested.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "assetExposure",
+      "requested"
+     ],
+     "type": "object"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `read_limit_exceeded`: The batch exceeds the per-call cap and input normalization is disabled. `enrichment_source_unavailable`: Every processed per-CVE fetch failed, including rejected HTTP responses. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "read_limit_exceeded",
+          "enrichment_source_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "failedCount": {
+     "description": "How many processed CVE lookups failed; absence is unknown.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "foundCount": {
+     "description": "How many CVEs carry published SSVC decision points.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "notFoundCount": {
+     "description": "How many processed CVEs have confirmed absence of SSVC decision points.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "notice": {
+     "description": "Guidance when nothing was enriched, or when a decision timestamp predates KEV.",
+     "type": "string"
+    },
+    "results": {
+     "description": "One result per processed CVE, in the order supplied.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One SSVC lookup result.",
+      "properties": {
+       "assignmentAgrees": {
+        "description": "Whether CISA's assigned day count and forensic-triage requirement both match the computed timeline. Requires a comparable timeline, stated exposure, and a KEV entry citing BOD 26-04.",
+        "type": "boolean"
+       },
+       "automatable": {
+        "description": "The SSVC Automatable value (yes or no). Unsupported values are passed through verbatim.",
+        "type": "string"
+       },
+       "bod2604": {
+        "additionalProperties": false,
+        "description": "The BOD 26-04 timeline implied by supported published decision points.",
+        "properties": {
+         "basis": {
+          "description": "The decision table the timeline was resolved against.",
+          "type": "string"
+         },
+         "caveat": {
+          "description": "What the computation is and is not. Fixed text on every result.",
+          "type": "string"
+         },
+         "timelines": {
+          "description": "One timeline per exposure arm — one when the caller stated an exposure, both when it is unknown.",
+          "items": {
+           "additionalProperties": false,
+           "description": "One computed remediation timeline.",
+           "properties": {
+            "assetExposure": {
+             "description": "The exposure arm this timeline applies to.",
+             "enum": [
+              "publicly_exposed",
+              "not_publicly_exposed"
+             ],
+             "type": "string"
+            },
+            "forensicTriageRequired": {
+             "description": "Whether a forensic triage of the asset is also required.",
+             "type": "boolean"
+            },
+            "remediationTimelineDays": {
+             "anyOf": [
+              {
+               "maximum": 9007199254740991,
+               "minimum": -9007199254740991,
+               "type": "integer"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "description": "Calendar days allowed, or null for \"Fix on system upgrade\"."
+            },
+            "tableRow": {
+             "description": "BOD 26-04 Table 1 row number, 1 to 16.",
+             "maximum": 9007199254740991,
+             "minimum": -9007199254740991,
+             "type": "integer"
+            },
+            "timelineLabel": {
+             "description": "The agency timeline in the directive's own wording.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "assetExposure",
+            "tableRow",
+            "timelineLabel",
+            "remediationTimelineDays",
+            "forensicTriageRequired"
+           ],
+           "type": "object"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "timelines",
+         "basis",
+         "caveat"
+        ],
+        "type": "object"
+       },
+       "cveId": {
+        "description": "The CVE identifier that was looked up.",
+        "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+        "type": "string"
+       },
+       "cvss": {
+        "additionalProperties": false,
+        "description": "The CVSS score CISA contributed through its ADP container, when present.",
+        "properties": {
+         "baseScore": {
+          "description": "CVSS base score, 0.0 through 10.0.",
+          "type": "number"
+         },
+         "baseSeverity": {
+          "description": "Qualitative severity band as published.",
+          "type": "string"
+         },
+         "vectorString": {
+          "description": "The full CVSS vector string.",
+          "type": "string"
+         },
+         "version": {
+          "description": "CVSS version of the contributed score.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "version",
+         "baseScore",
+         "baseSeverity",
+         "vectorString"
+        ],
+        "type": "object"
+       },
+       "cwes": {
+        "description": "CWEs CISA contributed. Empty when none were published.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One CWE from the CISA-authored container.",
+         "properties": {
+          "cweId": {
+           "description": "CWE identifier.",
+           "pattern": "^CWE-[0-9]+$",
+           "type": "string"
+          },
+          "description": {
+           "description": "CWE name as published.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "cweId",
+          "description"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "exploitation": {
+        "description": "The SSVC Exploitation value (none, poc, or active). Values outside that set are passed through verbatim.",
+        "type": "string"
+       },
+       "found": {
+        "description": "Whether CISA has published SSVC decision points for this CVE; outcome explains a false value.",
+        "type": "boolean"
+       },
+       "guidance": {
+        "description": "Guidance for a miss, a failed lookup, unsupported decision points, or a KEV entry that does not cite BOD 26-04 when a comparison would otherwise apply.",
+        "type": "string"
+       },
+       "inKev": {
+        "description": "Whether the CVE is in this server's KEV catalog snapshot.",
+        "type": "boolean"
+       },
+       "kevAssigned": {
+        "additionalProperties": false,
+        "description": "CISA's own assignment for this CVE, reported alongside the computation.",
+        "properties": {
+         "dateAdded": {
+          "description": "Date CISA added the CVE to the KEV catalog.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "type": "string"
+         },
+         "daysFromAdd": {
+          "description": "Calendar days from dateAdded to dueDate.",
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+         },
+         "directive": {
+          "anyOf": [
+           {
+            "enum": [
+             "BOD 26-04",
+             "BOD 22-01"
+            ],
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "description": "The directive the KEV entry cites, or null when it cites neither."
+         },
+         "dueDate": {
+          "description": "Federal remediation deadline CISA assigned.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "type": "string"
+         },
+         "forensicTriage": {
+          "description": "Whether the KEV entry is in the three-day forensic-triage tier.",
+          "enum": [
+           "Yes",
+           "No"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "dateAdded",
+         "dueDate",
+         "daysFromAdd",
+         "forensicTriage",
+         "directive"
+        ],
+        "type": "object"
+       },
+       "outcome": {
+        "description": "The lookup outcome, distinguishing confirmed absence from fetch failure.",
+        "enum": [
+         "ssvc",
+         "not_found",
+         "no_cisa_container",
+         "no_ssvc_metric",
+         "fetch_failed"
+        ],
+        "type": "string"
+       },
+       "sourceUrl": {
+        "description": "The Vulnrichment record URL this result was read from.",
+        "type": "string"
+       },
+       "ssvcRole": {
+        "description": "The SSVC role CISA recorded, e.g. CISA Coordinator.",
+        "type": "string"
+       },
+       "ssvcTimestamp": {
+        "description": "When CISA published these decision points, ISO 8601.",
+        "type": "string"
+       },
+       "ssvcVersion": {
+        "description": "SSVC schema version CISA published against.",
+        "type": "string"
+       },
+       "technicalImpact": {
+        "description": "The SSVC Technical Impact value (partial or total). Unsupported values are passed through verbatim.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "cveId",
+       "found",
+       "outcome",
+       "cwes",
+       "inKev",
+       "sourceUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "unprocessedIds": {
+     "description": "Normalized CVE IDs not processed; send these in a follow-up call.",
+     "items": {
+      "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_get_ssvc"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Decode the vocabulary the other CISA tools take as input. Topics cover the BOD 26-04 remediation timeline table and what each tier means, the KEV record fields and their value domains, the SSVC decision points CISA publishes, the critical-infrastructure sector names as the advisory corpus spells them, advisory ID formats, CVSS severity bands, and the freshness of the data this server currently holds. Call this before constructing filters for cisa_search_kev or cisa_search_ics_advisories, and whenever another tool's recovery hint points here.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "topic": {
+     "description": "Which reference block to return: directives (BOD 26-04 Table 1 and its definitions), kev_fields, ssvc_values, sectors, advisory_id_formats, severity_bands, or sources (what this server currently holds).",
+     "enum": [
+      "directives",
+      "kev_fields",
+      "ssvc_values",
+      "sectors",
+      "advisory_id_formats",
+      "severity_bands",
+      "sources"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic"
+   ],
+   "type": "object"
+  },
+  "name": "cisa_list_reference",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "topic",
+      "title",
+      "summary",
+      "entries"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "definitions": {
+     "description": "Topic directives only — supporting definitions from the directive text.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One supporting definition from the directive text.",
+      "properties": {
+       "definition": {
+        "description": "The directive's own definition of the term.",
+        "type": "string"
+       },
+       "term": {
+        "description": "The defined term.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "term",
+       "definition"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "entries": {
+     "description": "The decoded terms for this topic.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One decoded term within the topic.",
+      "properties": {
+       "description": {
+        "description": "What the term means and how it affects a query.",
+        "type": "string"
+       },
+       "key": {
+        "description": "Stable identifier for the term.",
+        "type": "string"
+       },
+       "label": {
+        "description": "Human-readable name for the term.",
+        "type": "string"
+       },
+       "values": {
+        "description": "The value domain, when the term has a closed or enumerated one.",
+        "items": {
+         "description": "One accepted value.",
+         "type": "string"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "key",
+       "label",
+       "description"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode.",
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "sources": {
+     "additionalProperties": false,
+     "description": "Topic sources only — what this server currently holds, read from in-process state.",
+     "properties": {
+      "csafMirror": {
+       "additionalProperties": false,
+       "description": "The local ICS advisory index.",
+       "properties": {
+        "checkpoint": {
+         "description": "Durable high-water mark — the newest current_release_date ingested.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "documentCount": {
+         "anyOf": [
+          {
+           "maximum": 9007199254740991,
+           "minimum": -9007199254740991,
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "description": "Advisories currently held in the index, including partial updates; null before the first sync completes or when the store cannot be read."
+        },
+        "failedDocumentCount": {
+         "anyOf": [
+          {
+           "maximum": 9007199254740991,
+           "minimum": -9007199254740991,
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "description": "Changed documents that failed in the last manifest application; zero after a successful sync, null when the store cannot be read."
+        },
+        "lastCompletedAt": {
+         "description": "When a full sync last completed, ISO 8601; null if never.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "lastSuccessfulCheckpoint": {
+         "description": "Newest current_release_date at the last wholly successful sync; unchanged after partial updates, null before completion.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "ready": {
+         "description": "True once a full sync has ever completed; stays true during a refresh.",
+         "type": "boolean"
+        },
+        "syncStatus": {
+         "description": "Lifecycle state: pending, in_progress, complete, partial, error, busy, or unavailable. A partial refresh keeps applied rows and retries unresolved documents on the next refresh.",
+         "type": "string"
+        },
+        "unavailableReason": {
+         "description": "Present only when the index cannot be opened: its location is not writable, is read-only, has a missing directory, runs through a file, or holds a file that is not a SQLite database. Fixed by CISA_CSAF_MIRROR_PATH, not by waiting.",
+         "enum": [
+          "not_writable",
+          "read_only",
+          "missing_directory",
+          "not_a_directory",
+          "not_a_database"
+         ],
+         "type": "string"
+        }
+       },
+       "required": [
+        "ready",
+        "documentCount",
+        "failedDocumentCount",
+        "lastSuccessfulCheckpoint",
+        "checkpoint",
+        "syncStatus",
+        "lastCompletedAt"
+       ],
+       "type": "object"
+      },
+      "feeds": {
+       "additionalProperties": false,
+       "description": "The RSS feed tier.",
+       "properties": {
+        "cached": {
+         "description": "Feed windows currently held in memory; empty before any feed is read.",
+         "items": {
+          "additionalProperties": false,
+          "description": "One cached feed window.",
+          "properties": {
+           "feed": {
+            "description": "Which feed this cached window belongs to.",
+            "enum": [
+             "advisories",
+             "alerts",
+             "ics"
+            ],
+            "type": "string"
+           },
+           "fetchedAt": {
+            "description": "When this window was fetched, ISO 8601.",
+            "type": "string"
+           },
+           "newest": {
+            "description": "Publication date of the newest item in the cached window.",
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "oldest": {
+            "description": "Publication date of the oldest item in the cached window.",
+            "type": [
+             "string",
+             "null"
+            ]
+           }
+          },
+          "required": [
+           "feed",
+           "oldest",
+           "newest",
+           "fetchedAt"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "windowItems": {
+         "description": "Items each feed serves — a fixed upstream ceiling, not a server choice.",
+         "maximum": 9007199254740991,
+         "minimum": -9007199254740991,
+         "type": "integer"
+        }
+       },
+       "required": [
+        "windowItems",
+        "cached"
+       ],
+       "type": "object"
+      },
+      "kev": {
+       "additionalProperties": false,
+       "description": "The in-memory KEV catalog snapshot.",
+       "properties": {
+        "catalogVersion": {
+         "description": "Catalog version of the loaded snapshot; null before the first load lands.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "count": {
+         "anyOf": [
+          {
+           "maximum": 9007199254740991,
+           "minimum": -9007199254740991,
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "description": "Entry count the loaded snapshot carries; null before the first load."
+        },
+        "dateReleased": {
+         "description": "Release timestamp the loaded snapshot carries; null before the first load.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "lastCheckedAt": {
+         "description": "When the refresh poll last reached the origin, ISO 8601; null if never.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "lastModified": {
+         "description": "Upstream Last-Modified of the loaded snapshot, used for the conditional poll.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "refreshCron": {
+         "description": "Cron expression the refresh poll runs on, or off when it is disabled.",
+         "type": "string"
+        }
+       },
+       "required": [
+        "catalogVersion",
+        "dateReleased",
+        "count",
+        "lastCheckedAt",
+        "lastModified",
+        "refreshCron"
+       ],
+       "type": "object"
+      },
+      "vulnrichment": {
+       "additionalProperties": false,
+       "description": "The per-CVE SSVC enrichment tier.",
+       "properties": {
+        "cacheTtlSeconds": {
+         "description": "TTL for a cached record; negative results use one sixth of it.",
+         "maximum": 9007199254740991,
+         "minimum": -9007199254740991,
+         "type": "integer"
+        },
+        "mode": {
+         "const": "on_demand",
+         "description": "Access mode — fetched per CVE on demand; the repository is not mirrored.",
+         "type": "string"
+        }
+       },
+       "required": [
+        "mode",
+        "cacheTtlSeconds"
+       ],
+       "type": "object"
+      }
+     },
+     "required": [
+      "kev",
+      "csafMirror",
+      "vulnrichment",
+      "feeds"
+     ],
+     "type": "object"
+    },
+    "summary": {
+     "description": "What this topic covers and when to reach for it.",
+     "type": "string"
+    },
+    "supersedes": {
+     "description": "Topic directives only — the directives BOD 26-04 supersedes and revokes.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One directive that BOD 26-04 supersedes and revokes.",
+      "properties": {
+       "directive": {
+        "description": "The superseded directive identifier.",
+        "type": "string"
+       },
+       "issued": {
+        "description": "Issue date, YYYY-MM-DD.",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       "note": {
+        "description": "What the superseded directive covered.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "directive",
+       "issued",
+       "note"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "timelineTable": {
+     "description": "Topic directives only — all sixteen rows of BOD 26-04 Appendix A, Table 1.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One row of BOD 26-04 Appendix A, Table 1.",
+      "properties": {
+       "automatable": {
+        "description": "The SSVC Automatable decision point for this row.",
+        "type": "boolean"
+       },
+       "forensicTriageRequired": {
+        "description": "Whether the row additionally requires a forensic triage of the asset.",
+        "type": "boolean"
+       },
+       "inKev": {
+        "description": "Whether the CVE is in the CISA KEV catalog.",
+        "type": "boolean"
+       },
+       "publiclyExposed": {
+        "description": "Whether the asset is reachable by unauthenticated or untrusted entities.",
+        "type": "boolean"
+       },
+       "remediationTimelineDays": {
+        "anyOf": [
+         {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Calendar days allowed, or null for the \"Fix on system upgrade\" rows."
+       },
+       "row": {
+        "description": "Table 1 row number, 1 through 16.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "technicalImpact": {
+        "description": "The SSVC Technical Impact decision point for this row.",
+        "enum": [
+         "partial",
+         "total"
+        ],
+        "type": "string"
+       },
+       "timelineLabel": {
+        "description": "The agency timeline in the directive's own wording.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "row",
+       "publiclyExposed",
+       "inKev",
+       "automatable",
+       "technicalImpact",
+       "timelineLabel",
+       "remediationTimelineDays",
+       "forensicTriageRequired"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "title": {
+     "description": "Human-readable title for the topic.",
+     "type": "string"
+    },
+    "topic": {
+     "description": "The topic that was decoded.",
+     "enum": [
+      "directives",
+      "kev_fields",
+      "ssvc_values",
+      "sectors",
+      "advisory_id_formats",
+      "severity_bands",
+      "sources"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_list_reference"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search the CISA industrial control system advisory corpus — every CSAF 2.0 advisory covering PLC, HMI, SCADA, building-automation, and medical-device products from 2010 onward. Filter by vendor, product, CVE, CWE, CVSS range, severity band, critical-infrastructure sector, advisory series, publication date, revision date, or whether an advisory covers a CVE in the CISA Known Exploited Vulnerabilities catalog, and run full-text search over advisory titles, vendor and product names, and originating vendor advisory reference summaries. Sector filtering reaches only advisories that carry a sector note, which begins in 2017; the response reports how many documents a sector filter can never match. Returns advisory IDs for cisa_get_advisory, the CVEs each advisory covers and which of them are in KEV, and the source URL and attribution every advisory response carries.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Opaque pagination cursor from a previous call. Omit for the first page.",
+     "type": "string"
+    },
+    "cve": {
+     "description": "Exact CVE membership, e.g. CVE-2021-44228. Case and surrounding whitespace are normalized.",
+     "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+     "type": "string"
+    },
+    "cvssMax": {
+     "description": "Maximum value of the advisory's maximum CVSS base score, inclusive.",
+     "maximum": 10,
+     "minimum": 0,
+     "type": "number"
+    },
+    "cvssMin": {
+     "description": "Minimum value of the advisory's maximum CVSS base score, inclusive.",
+     "maximum": 10,
+     "minimum": 0,
+     "type": "number"
+    },
+    "cwe": {
+     "description": "Exact CWE identifier, e.g. CWE-787, matched against every vulnerability entry in the advisory. Case and surrounding whitespace are normalized. A parent class does not match its children.",
+     "pattern": "^CWE-[0-9]+$",
+     "type": "string"
+    },
+    "inKev": {
+     "description": "true selects advisories covering at least one CVE in the CISA Known Exploited Vulnerabilities catalog; false selects advisories covering none. Checked against every CVE an advisory covers, not only the twenty listed per result.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 20,
+     "description": "Maximum advisories per page; requests above 50 use 50 when input clamping is enabled.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "order": {
+     "default": "desc",
+     "description": "Sort direction. Under relevance, desc means most relevant first.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "product": {
+     "description": "Case-insensitive literal substring of a product name. Surrounding whitespace is trimmed before the two-character minimum.",
+     "minLength": 2,
+     "type": "string"
+    },
+    "publishedFrom": {
+     "description": "Earliest initial release date, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "publishedTo": {
+     "description": "Latest initial release date, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "publisher": {
+     "description": "coordinator selects CISA-authored advisories; other selects vendor advisories CISA republished, over a quarter of the corpus.",
+     "enum": [
+      "coordinator",
+      "other"
+     ],
+     "type": "string"
+    },
+    "q": {
+     "description": "Full-text search over advisory titles, vendor and product names, and originating vendor advisory reference summaries. Tokens are AND-combined; FTS5 operators in the input are neutralized rather than honored, and a token with no letter or digit is ignored. Needs at least one word or number.",
+     "minLength": 2,
+     "type": "string"
+    },
+    "revisedFrom": {
+     "description": "Earliest current release date, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "revisedTo": {
+     "description": "Latest current release date, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "sector": {
+     "description": "Critical-infrastructure sector, matched against the normalized sector set. Multiple is the sentinel the corpus uses for an advisory affecting many sectors.",
+     "enum": [
+      "Chemical",
+      "Commercial Facilities",
+      "Communications",
+      "Critical Manufacturing",
+      "Dams",
+      "Defense Industrial Base",
+      "Emergency Services",
+      "Energy",
+      "Financial Services",
+      "Food and Agriculture",
+      "Government Facilities",
+      "Healthcare and Public Health",
+      "Information Technology",
+      "Nuclear Reactors, Materials, and Waste",
+      "Transportation Systems",
+      "Water and Wastewater Systems",
+      "Multiple"
+     ],
+     "type": "string"
+    },
+    "series": {
+     "description": "Advisory series: ICSA industrial control system advisories, or ICSMA medical-device advisories, a small minority of the corpus.",
+     "enum": [
+      "ICSA",
+      "ICSMA"
+     ],
+     "type": "string"
+    },
+    "severity": {
+     "description": "Severity band of the advisory's maximum CVSS score.",
+     "enum": [
+      "NONE",
+      "LOW",
+      "MEDIUM",
+      "HIGH",
+      "CRITICAL"
+     ],
+     "type": "string"
+    },
+    "sortBy": {
+     "default": "revised",
+     "description": "Field to sort by. relevance requires q and ranks by FTS5 bm25.",
+     "enum": [
+      "relevance",
+      "published",
+      "revised",
+      "maxCvss"
+     ],
+     "type": "string"
+    },
+    "vendor": {
+     "description": "Case-insensitive literal substring of a vendor label. Surrounding whitespace is trimmed before the two-character minimum. Vendor names are unnormalized upstream — the same company can appear under several spellings.",
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "cisa_search_ics_advisories",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "results",
+      "hasMore",
+      "totalCount",
+      "appliedFilters",
+      "mirror"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "appliedFilters": {
+     "additionalProperties": {
+      "description": "The filter value as the server parsed it.",
+      "type": "string"
+     },
+     "description": "The filters the server actually applied.",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "cap": {
+     "description": "The page limit that was applied.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "cursor": {
+     "description": "Opaque cursor for the next page. Absent when this is the last page.",
+     "type": "string"
+    },
+    "cvssCoverage": {
+     "description": "Disclosure of derived-band and no-score coverage under a score filter.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `read_limit_exceeded`: limit exceeds the per-call cap and input clamping is disabled. `mirror_busy`: A transient SQLite lock prevents the advisory index from opening. `mirror_not_ready`: The advisory index has never completed a full sync. `mirror_unavailable`: The advisory index store cannot be opened: its location is not writable, is read-only, runs through a missing directory or a file, or holds a file that is not a SQLite database. `invalid_cvss_range`: cvssMin exceeds cvssMax. `invalid_date_range`: A From bound is later than its matching To bound. `relevance_sort_without_query`: sortBy is relevance but no q was supplied, so there is no bm25 rank to sort by. `empty_search_text`: q contains no word or number once quotes and punctuation are removed, so there is nothing to search for. `catalog_unavailable`: inKev is set, no KEV catalog snapshot is held, and the fetch from cisa.gov failed. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "read_limit_exceeded",
+          "mirror_busy",
+          "mirror_not_ready",
+          "mirror_unavailable",
+          "invalid_cvss_range",
+          "invalid_date_range",
+          "relevance_sort_without_query",
+          "empty_search_text",
+          "catalog_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "hasMore": {
+     "description": "Whether more matches exist beyond this page.",
+     "type": "boolean"
+    },
+    "mirror": {
+     "additionalProperties": false,
+     "description": "Which index state answered this call.",
+     "properties": {
+      "checkpoint": {
+       "description": "Newest current_release_date ingested, or \"none\".",
+       "type": "string"
+      },
+      "documentCount": {
+       "description": "Advisories held in the local index.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "lastRefreshedAt": {
+       "description": "When a full sync last completed, or \"never\".",
+       "type": "string"
+      }
+     },
+     "required": [
+      "documentCount",
+      "checkpoint",
+      "lastRefreshedAt"
+     ],
+     "type": "object"
+    },
+    "notice": {
+     "description": "Guidance when nothing matched — the filter that matches no advisory on its own and what dropping it restores, or the filters whose removal restores results and how many — when a page was capped, when KEV membership was not evaluated, or when a cwe result may be incomplete.",
+     "type": "string"
+    },
+    "results": {
+     "description": "Matching advisories for this page.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One matching advisory.",
+      "properties": {
+       "advisoryId": {
+        "description": "The advisory identifier, e.g. ICSA-26-260-07. Pass it to cisa_get_advisory.",
+        "pattern": "^ICS(A|MA)-\\d{2}-\\d{3}-\\d{2}(?:[A-Z]|-\\d+)?$",
+        "type": "string"
+       },
+       "attribution": {
+        "description": "Who authored the text and under what terms it may be redistributed.",
+        "type": "string"
+       },
+       "csafUrl": {
+        "description": "Absolute URL of the raw CSAF JSON document.",
+        "type": "string"
+       },
+       "cveCount": {
+        "description": "Distinct CVEs the advisory covers.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "cves": {
+        "description": "Up to twenty CVEs; cveCount carries the full count.",
+        "items": {
+         "description": "One CVE identifier.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "kevCves": {
+        "description": "Every CVE this advisory covers that is in the KEV catalog, drawn from its full CVE list rather than the twenty in cves. Empty when none is; absent when KEV membership could not be evaluated.",
+        "items": {
+         "description": "One CVE identifier.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "maxCvss": {
+        "additionalProperties": false,
+        "description": "Highest CVSS score across the advisory. Absent when the advisory carries no CVSS score.",
+        "properties": {
+         "score": {
+          "description": "Highest CVSS base score in the advisory.",
+          "type": "number"
+         },
+         "severity": {
+          "description": "Severity band for that score.",
+          "enum": [
+           "NONE",
+           "LOW",
+           "MEDIUM",
+           "HIGH",
+           "CRITICAL"
+          ],
+          "type": "string"
+         },
+         "severityDerived": {
+          "description": "True when the band was derived from a CVSS v2 score rather than published upstream.",
+          "type": "boolean"
+         },
+         "version": {
+          "description": "CVSS version the highest score was published under.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "score",
+         "severity",
+         "version",
+         "severityDerived"
+        ],
+        "type": "object"
+       },
+       "productCount": {
+        "description": "Flattened product entries in the product tree.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "published": {
+        "description": "Initial release date, ISO 8601.",
+        "type": "string"
+       },
+       "publisherCategory": {
+        "description": "coordinator for CISA-authored, other for a republished vendor advisory.",
+        "type": "string"
+       },
+       "revised": {
+        "description": "Current release date, ISO 8601.",
+        "type": "string"
+       },
+       "revision": {
+        "description": "Document revision number.",
+        "type": "string"
+       },
+       "sectors": {
+        "description": "Normalized sector names. Empty when the advisory carries no sector note.",
+        "items": {
+         "description": "One canonical sector name.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "sectorsRaw": {
+        "description": "The sector note verbatim, when the advisory carries one.",
+        "type": "string"
+       },
+       "series": {
+        "description": "Advisory series.",
+        "enum": [
+         "ICSA",
+         "ICSMA"
+        ],
+        "type": "string"
+       },
+       "title": {
+        "description": "The advisory title.",
+        "type": "string"
+       },
+       "url": {
+        "description": "Absolute URL of the cisa.gov web version of the advisory.",
+        "type": "string"
+       },
+       "vendorAdvisories": {
+        "description": "Originating vendor advisory references on republished advisories, in source order.",
+        "items": {
+         "additionalProperties": false,
+         "description": "One originating vendor advisory reference.",
+         "properties": {
+          "summary": {
+           "description": "The originating vendor reference summary.",
+           "type": "string"
+          },
+          "url": {
+           "description": "The originating vendor advisory URL.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "url"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "vendorCount": {
+        "description": "Distinct vendors named in the product tree.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "vendors": {
+        "description": "Up to ten vendor labels; vendorCount carries the full count.",
+        "items": {
+         "description": "One vendor label.",
+         "type": "string"
+        },
+        "type": "array"
+       }
+      },
+      "required": [
+       "advisoryId",
+       "title",
+       "series",
+       "vendors",
+       "vendorCount",
+       "productCount",
+       "cves",
+       "cveCount",
+       "sectors",
+       "published",
+       "revised",
+       "revision",
+       "publisherCategory",
+       "url",
+       "csafUrl",
+       "attribution"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "sectorCoverage": {
+     "description": "Disclosure of how many advisories a sector filter can never match.",
+     "type": "string"
+    },
+    "shown": {
+     "description": "Advisories returned on this page.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "totalCount": {
+     "description": "Total matches before paging.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "truncated": {
+     "description": "True when the page limit capped this result.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_search_ics_advisories"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search the CISA Known Exploited Vulnerabilities catalog across every entry in the cached snapshot. Filter by vendor or product using CISA's own labels, by name substring, by CWE, by the date an entry was added, by due date, by overdue status, by ransomware linkage, by the three-day forensic-triage tier, or by which binding operational directive the entry cites. Results are paged and sortable by due date or date added. Use detail \"summary\" to list and triage entries. Vendor and product are CISA's free-text labels — call cisa_list_reference for the field vocabulary. The catalog records additions and carries no per-record modified timestamp, so dateAddedFrom finds newly added entries while due-date revisions cannot be detected from the feed.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Opaque pagination cursor from a previous call. Omit for the first page.",
+     "type": "string"
+    },
+    "cveIdPrefix": {
+     "description": "Year scope for the CVE ID, e.g. CVE-2026. Case and surrounding whitespace are normalized.",
+     "pattern": "^CVE-[0-9]{4}$",
+     "type": "string"
+    },
+    "cwe": {
+     "description": "Exact CWE identifier, e.g. CWE-362. Case and surrounding whitespace are normalized. Entries with no CWEs never match.",
+     "pattern": "^CWE-[0-9]+$",
+     "type": "string"
+    },
+    "dateAddedFrom": {
+     "description": "Earliest date added, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "dateAddedTo": {
+     "description": "Latest date added, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "detail": {
+     "default": "full",
+     "description": "full returns every field. Use summary to list and triage entries by CVE ID, dates, deadline status, directive, vendor, product, and ransomware and forensic-triage flags. Each request chooses its own detail, including when following a cursor.",
+     "enum": [
+      "full",
+      "summary"
+     ],
+     "type": "string"
+    },
+    "directive": {
+     "description": "Which directive the entry cites. \"none\" selects the entries citing neither.",
+     "enum": [
+      "BOD 26-04",
+      "BOD 22-01",
+      "none"
+     ],
+     "type": "string"
+    },
+    "dueAfter": {
+     "description": "Earliest due date, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "dueBefore": {
+     "description": "Latest due date, inclusive, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "forensicTriage": {
+     "description": "True selects the BOD 26-04 three-day forensic-triage tier.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 25,
+     "description": "Maximum entries per page; requests above 100 use 100 when input clamping is enabled.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "nameContains": {
+     "description": "Strict token match over the vulnerability name and short description: every token must appear. Matching folds case and accents, spells letters such as ß, æ, ø, þ, and ł as ss, ae, o, th, and l, and keeps only the letters a-z and the digits 0-9; a word carrying any other letter or digit, such as one in another script, loses those characters and the response names it, and a value left with none of them is rejected. No fuzzy fallback.",
+     "minLength": 2,
+     "type": "string"
+    },
+    "order": {
+     "default": "desc",
+     "description": "Sort direction.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "overdue": {
+     "description": "True selects entries whose due date is strictly before the echoed asOf date.",
+     "type": "boolean"
+    },
+    "product": {
+     "description": "Case-insensitive substring of CISA's own product label; surrounding whitespace is trimmed, with at least two characters after trimming.",
+     "minLength": 2,
+     "type": "string"
+    },
+    "ransomware": {
+     "description": "True selects entries CISA has linked to ransomware campaigns.",
+     "type": "boolean"
+    },
+    "sortBy": {
+     "default": "dateAdded",
+     "description": "Field to sort by.",
+     "enum": [
+      "dueDate",
+      "dateAdded"
+     ],
+     "type": "string"
+    },
+    "vendorProject": {
+     "description": "Case-insensitive substring of CISA's own vendor label; surrounding whitespace is trimmed, with at least two characters after trimming.",
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "cisa_search_kev",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "results",
+      "hasMore",
+      "totalCount",
+      "catalog",
+      "asOf",
+      "appliedFilters"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "appliedFilters": {
+     "additionalProperties": {
+      "description": "The filter value as the server parsed it.",
+      "type": "string"
+     },
+     "description": "The filters the server actually applied, as it parsed them.",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "asOf": {
+     "description": "The UTC date overdue and daysUntilDue were computed against, YYYY-MM-DD.",
+     "type": "string"
+    },
+    "cap": {
+     "description": "The page limit that was applied.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "catalog": {
+     "additionalProperties": false,
+     "description": "Which catalog snapshot answered this call.",
+     "properties": {
+      "catalogVersion": {
+       "description": "Version string of the loaded catalog snapshot.",
+       "type": "string"
+      },
+      "count": {
+       "description": "Entries in the loaded snapshot.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "dateReleased": {
+       "description": "Release timestamp the snapshot carries.",
+       "type": "string"
+      },
+      "fetchedAt": {
+       "description": "When this server fetched the snapshot, ISO 8601.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "catalogVersion",
+      "dateReleased",
+      "count",
+      "fetchedAt"
+     ],
+     "type": "object"
+    },
+    "cursor": {
+     "description": "Opaque cursor for the next page. Absent when this is the last page.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `read_limit_exceeded`: limit exceeds the per-call cap and input clamping is disabled. `catalog_unavailable`: No KEV catalog snapshot is held and the fetch from cisa.gov failed. `invalid_date_range`: A From bound is later than its matching To bound. `empty_search_text`: nameContains holds no letter a-z or digit 0-9 once case, accents, and letters such as ß and ø are folded and punctuation is removed, so there is nothing to search for. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "read_limit_exceeded",
+          "catalog_unavailable",
+          "invalid_date_range",
+          "empty_search_text"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "hasMore": {
+     "description": "Whether more matches exist beyond this page.",
+     "type": "boolean"
+    },
+    "notice": {
+     "description": "Guidance when nothing matched, when a page was capped, or when nameContains dropped characters it cannot match.",
+     "type": "string"
+    },
+    "results": {
+     "description": "Matching KEV entries for this page.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One KEV catalog entry, or a not-in-KEV result carrying only cveId and inKev. Under detail \"summary\" in cisa_check_cve_status or cisa_search_kev, an entry carries only cveId, inKev, the dates and deadline status, directive, vendor and product labels, and the ransomware and forensic-triage flags.",
+      "properties": {
+       "cveId": {
+        "description": "The CVE identifier that was looked up.",
+        "pattern": "^CVE-[0-9]{4}-[0-9]{4,19}$",
+        "type": "string"
+       },
+       "cwes": {
+        "description": "Associated CWEs. Empty on some entries, and a CWE filter excludes those. Absent under detail \"summary\".",
+        "items": {
+         "description": "One CWE identifier.",
+         "pattern": "^CWE-[0-9]+$",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "dateAdded": {
+        "description": "Date CISA added the entry to the catalog, YYYY-MM-DD.",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       "daysUntilDue": {
+        "description": "Whole days from the echoed asOf date to the due date; negative once overdue.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "directive": {
+        "anyOf": [
+         {
+          "enum": [
+           "BOD 26-04",
+           "BOD 22-01"
+          ],
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "The binding operational directive the entry cites, or null when it cites neither — most entries name none, and none is never inferred from age."
+       },
+       "dueDate": {
+        "description": "Federal remediation deadline CISA assigned, YYYY-MM-DD.",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       "forensicTriage": {
+        "description": "Whether the entry falls in the BOD 26-04 three-day forensic-triage tier.",
+        "enum": [
+         "Yes",
+         "No"
+        ],
+        "type": "string"
+       },
+       "inKev": {
+        "description": "Whether the CVE is in the KEV catalog. False is a normal result, not an error.",
+        "type": "boolean"
+       },
+       "kevUrl": {
+        "description": "Absolute URL of the KEV catalog page for this CVE. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "knownRansomwareCampaignUse": {
+        "description": "Whether CISA has linked the vulnerability to a ransomware campaign. Unknown means no link on record, not that none exists.",
+        "enum": [
+         "Known",
+         "Unknown"
+        ],
+        "type": "string"
+       },
+       "notesCommentary": {
+        "description": "The prose segments of the notes field, verbatim with any URLs they contain; present when the notes carry prose. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "overdue": {
+        "description": "True when the due date is strictly before the echoed asOf date.",
+        "type": "boolean"
+       },
+       "product": {
+        "description": "CISA's own product label — free text, not a CPE.",
+        "type": "string"
+       },
+       "references": {
+        "description": "Every reference URL in the notes field, in notes order, each classified by kind. Absent under detail \"summary\".",
+        "items": {
+         "additionalProperties": false,
+         "description": "One reference URL parsed from the entry notes.",
+         "properties": {
+          "kind": {
+           "description": "What the link points at: the NVD detail record, a cisa.gov page, BOD 26-04 guidance, the forensic-triage requirements, a vendor page, or an unclassifiable URL.",
+           "enum": [
+            "nvd",
+            "cisa",
+            "bod_guidance",
+            "forensic_triage",
+            "vendor",
+            "other"
+           ],
+           "type": "string"
+          },
+          "label": {
+           "description": "CISA's own label for the segment, when the notes entry carried one.",
+           "type": "string"
+          },
+          "url": {
+           "description": "Absolute reference URL, verbatim from the notes field.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "kind",
+          "url"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "requiredAction": {
+        "description": "CISA's required-action text for the entry, verbatim. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "shortDescription": {
+        "description": "CISA's one-paragraph description. Absent under detail \"summary\".",
+        "type": "string"
+       },
+       "vendorProject": {
+        "description": "CISA's own vendor label — free text, not a CPE vendor component.",
+        "type": "string"
+       },
+       "vulnerabilityName": {
+        "description": "CISA's short name for the vulnerability. Absent under detail \"summary\".",
+        "type": "string"
+       }
+      },
+      "required": [
+       "cveId",
+       "inKev"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "shown": {
+     "description": "Entries returned on this page.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "snapshotCaveat": {
+     "description": "Disclosure that additions are queryable but revisions are not detectable.",
+     "type": "string"
+    },
+    "summaryNote": {
+     "description": "Present only under detail \"summary\": which fields the results omit and how to restore them.",
+     "type": "string"
+    },
+    "totalCount": {
+     "description": "Total matches before paging.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "truncated": {
+     "description": "True when the page limit capped this result.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "cisa_search_kev"
+ }
+]

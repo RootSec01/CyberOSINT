@@ -1,0 +1,879 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns an invoice PDF. Not available until phase 2, and this build returns no file.",
+  "input_schema": {
+   "properties": {
+    "invoiceId": {
+     "description": "Invoice id. Ignored until phase 2.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "invoiceId"
+   ],
+   "type": "object"
+  },
+  "name": "download_invoice_pdf",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns the public EAC Partners business card: name, emails, phone, address, time zone, and website.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_business_card",
+  "output_schema": {
+   "properties": {
+    "address": {
+     "type": "string"
+    },
+    "displayName": {
+     "type": "string"
+    },
+    "emails": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "principal": {
+     "properties": {
+      "email": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "name",
+      "email"
+     ],
+     "type": "object"
+    },
+    "supportEmail": {
+     "type": "string"
+    },
+    "tagline": {
+     "type": "string"
+    },
+    "timezone": {
+     "type": "string"
+    },
+    "websiteUrl": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "displayName",
+    "tagline",
+    "principal",
+    "emails",
+    "phone",
+    "address",
+    "timezone",
+    "websiteUrl",
+    "supportEmail"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns one Insights article by vertical and slug, or by canonical URL. Summary and URL only unless full text is enabled.",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "default": null,
+     "description": "Article slug. Required together with verticalSlug.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "url": {
+     "default": null,
+     "description": "Canonical article URL. Alternative to verticalSlug and slug.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "verticalSlug": {
+     "default": null,
+     "description": "Vertical slug. Required together with slug.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_insight",
+  "output_schema": {
+   "properties": {
+    "bodyMarkdown": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "published": {
+     "type": "string"
+    },
+    "summary": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "title",
+    "published",
+    "url",
+    "summary",
+    "bodyMarkdown"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns one invoice. Not available until phase 2, and this build returns no record.",
+  "input_schema": {
+   "properties": {
+    "invoiceId": {
+     "description": "Invoice id. Ignored until phase 2.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "invoiceId"
+   ],
+   "type": "object"
+  },
+  "name": "get_invoice",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns the Concierge privacy notice. Host AI vendors may see tool calls and tool results.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_privacy_notice",
+  "output_schema": {
+   "properties": {
+    "markdown": {
+     "type": "string"
+    },
+    "sitePrivacyUrl": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "markdown",
+    "sitePrivacyUrl"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Queues a short note from a prospective customer. Web addresses are rejected.",
+  "input_schema": {
+   "properties": {
+    "email": {
+     "description": "Caller email.",
+     "type": "string"
+    },
+    "name": {
+     "description": "Caller name.",
+     "type": "string"
+    },
+    "note": {
+     "description": "Note, up to 4000 characters, plain text, no web address.",
+     "type": "string"
+    },
+    "organization": {
+     "default": null,
+     "description": "Optional organization.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "name",
+    "email",
+    "note"
+   ],
+   "type": "object"
+  },
+  "name": "leave_lead_note",
+  "output_schema": {
+   "properties": {
+    "noteId": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "noteId",
+    "status"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Lists billed time. Not available until phase 2, and this build returns no records.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_billed_time",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Lists Insights articles with title, summary, date, and canonical URL. Full article text is not included.",
+  "input_schema": {
+   "properties": {
+    "vertical": {
+     "default": null,
+     "description": "Optional vertical slug.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_insights",
+  "output_schema": {
+   "properties": {
+    "articles": {
+     "items": {
+      "properties": {
+       "minutes": {
+        "type": "integer"
+       },
+       "published": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "summary": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       },
+       "verticalSlug": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "verticalSlug",
+       "slug",
+       "title",
+       "summary",
+       "published",
+       "url",
+       "minutes"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "verticals": {
+     "items": {
+      "properties": {
+       "slug": {
+        "type": "string"
+       },
+       "summary": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "title",
+       "summary"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "verticals",
+    "articles"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Lists customer invoices. Not available until phase 2, and this build returns no records.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_invoices",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Lists EAC Partners offerings, including a footnote of small demonstrations built by EAC Partners. The ERP title comes from configuration.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "default": null,
+     "description": "Optional category filter.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_offerings",
+  "output_schema": {
+   "properties": {
+    "offerings": {
+     "items": {
+      "properties": {
+       "category": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "links": {
+        "items": {
+         "properties": {
+          "title": {
+           "type": "string"
+          },
+          "url": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "title",
+          "url"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "mainLine": {
+        "type": "boolean"
+       },
+       "priority": {
+        "type": "integer"
+       },
+       "summary": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "summary",
+       "category",
+       "priority",
+       "mainLine",
+       "links"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "offerings"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Lists open appointment slots in America/New_York for discovery, project review, or support. Phase 1 uses a deterministic schedule stub.",
+  "input_schema": {
+   "properties": {
+    "days": {
+     "default": null,
+     "description": "Number of days to look ahead, from 1 to 21. Defaults to 10.",
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "from": {
+     "default": null,
+     "description": "Optional ISO date to start from.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "meetingType": {
+     "description": "discovery, project_review, or support.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "meetingType"
+   ],
+   "type": "object"
+  },
+  "name": "list_open_slots",
+  "output_schema": {
+   "properties": {
+    "slots": {
+     "items": {
+      "properties": {
+       "endLocal": {
+        "type": "string"
+       },
+       "meetingType": {
+        "type": "string"
+       },
+       "slotId": {
+        "type": "string"
+       },
+       "startLocal": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slotId",
+       "startLocal",
+       "endLocal",
+       "meetingType"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "timezone": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "timezone",
+    "slots"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Lists subscriptions. Not available until phase 2, and this build returns no records.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_subscriptions",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Matches a short need to offerings in the published catalog only. Does not invent services.",
+  "input_schema": {
+   "properties": {
+    "need": {
+     "description": "What the caller needs, from 1 to 500 characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "need"
+   ],
+   "type": "object"
+  },
+  "name": "match_need",
+  "output_schema": {
+   "properties": {
+    "disclaimer": {
+     "type": "string"
+    },
+    "matches": {
+     "items": {
+      "properties": {
+       "offeringId": {
+        "type": "string"
+       },
+       "rationale": {
+        "type": "string"
+       },
+       "suggestDiscoveryCall": {
+        "type": "boolean"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "offeringId",
+       "title",
+       "rationale",
+       "suggestDiscoveryCall"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "matches",
+    "disclaimer"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Opens a support request. Not available until phase 2, and this build does not store one.",
+  "input_schema": {
+   "properties": {
+    "summary": {
+     "description": "Short summary. Ignored until phase 2.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "summary"
+   ],
+   "type": "object"
+  },
+  "name": "open_support_request",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Queues an appointment request for a slotId previously returned by list_open_slots. Status is pending confirmation. Nothing is sent or held automatically.",
+  "input_schema": {
+   "properties": {
+    "agenda": {
+     "description": "What the meeting is about, up to 2000 characters. Plain text, no web address.",
+     "type": "string"
+    },
+    "email": {
+     "description": "Caller email.",
+     "type": "string"
+    },
+    "meetingType": {
+     "description": "discovery, project_review, or support. Must match the slot.",
+     "type": "string"
+    },
+    "name": {
+     "description": "Caller name.",
+     "type": "string"
+    },
+    "organization": {
+     "default": null,
+     "description": "Optional organization.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "slotId": {
+     "description": "slotId from list_open_slots.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slotId",
+    "name",
+    "email",
+    "meetingType",
+    "agenda"
+   ],
+   "type": "object"
+  },
+  "name": "request_appointment",
+  "output_schema": {
+   "properties": {
+    "message": {
+     "type": "string"
+    },
+    "requestId": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "requestId",
+    "status",
+    "message"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Searches Insights titles and summaries. Returns a summary and canonical URL.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": null,
+     "description": "Maximum hits, from 1 to 20. Defaults to 5.",
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "query": {
+     "description": "Search text, from 1 to 200 characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_insights",
+  "output_schema": {
+   "properties": {
+    "hits": {
+     "items": {
+      "properties": {
+       "published": {
+        "type": "string"
+       },
+       "score": {
+        "type": "integer"
+       },
+       "summary": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "score",
+       "title",
+       "summary",
+       "url",
+       "published"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "hits"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Queues a partner referral for staff review. Nothing is sent automatically.",
+  "input_schema": {
+   "properties": {
+    "notes": {
+     "default": null,
+     "description": "Optional note, up to 2000 characters. Plain text, no web address.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "prospectEmail": {
+     "default": null,
+     "description": "Optional email of the prospect.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "prospectName": {
+     "description": "Name of the prospect.",
+     "type": "string"
+    },
+    "prospectOrg": {
+     "default": null,
+     "description": "Optional organization of the prospect.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "referrerEmail": {
+     "description": "Email of the person making the referral.",
+     "type": "string"
+    },
+    "referrerName": {
+     "description": "Name of the person making the referral.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "referrerName",
+    "referrerEmail",
+    "prospectName"
+   ],
+   "type": "object"
+  },
+  "name": "submit_referral",
+  "output_schema": {
+   "properties": {
+    "referralId": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "referralId",
+    "status"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Reports the signed-in customer. Sign-in is not enabled, and this build returns no customer record.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "whoami",
+  "output_schema": {}
+ }
+]

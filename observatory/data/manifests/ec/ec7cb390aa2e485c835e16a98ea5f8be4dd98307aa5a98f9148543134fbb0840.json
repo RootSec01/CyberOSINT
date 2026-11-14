@@ -1,0 +1,154 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "What Sifter is"
+  },
+  "description": "What Sifter (sifter.finance) is, who built it, who it is for, what it costs and which pages answer which questions. Use it when someone asks what Sifter is, who it is for, what it costs or what it offers.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "about_sifter",
+  "output_schema": {},
+  "title": "What Sifter is"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "What is on the finance jobs board right now"
+  },
+  "description": "A summary of the Sifter jobs board today: how many internships and full-time roles are open, how many close this week, the count for each summer, each area of finance, and the firms and cities with the most open roles. Use it for broad questions such as \"what finance internships are open\", \"which banks are hiring interns\" or \"is recruiting for summer 2028 open yet\", and to choose filters for search_finance_internships.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "finance_internships_overview",
+  "output_schema": {},
+  "title": "What is on the finance jobs board right now"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read a chapter of the Sifter textbook"
+  },
+  "description": "The full text of one chapter of Sifter's free textbook, by chapter id (from search_textbook) or chapter number.",
+  "input_schema": {
+   "properties": {
+    "chapter": {
+     "description": "A chapter id such as \"ch03-twr\", or a chapter number such as \"3\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "chapter"
+   ],
+   "type": "object"
+  },
+  "name": "read_textbook_chapter",
+  "output_schema": {},
+  "title": "Read a chapter of the Sifter textbook"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search open finance internships and first jobs"
+  },
+  "description": "Open internships and entry-level roles for students at banks, asset managers, research shops, trading firms and wealth managers, from the Sifter jobs board (updated daily). Results come in the order they close, each with the firm's own application link. Use it for questions such as \"which finance internships close this week\", \"summer 2028 investment banking internships\" or \"is Evercore hiring interns\". Returns a short list; the full board is at sifter.finance/jobs.",
+  "input_schema": {
+   "properties": {
+    "area": {
+     "description": "Area of finance.",
+     "enum": [
+      "investment_banking",
+      "sales_trading",
+      "asset_management",
+      "equity_research",
+      "wealth_management",
+      "quant",
+      "credit",
+      "corporate",
+      "other"
+     ],
+     "type": "string"
+    },
+    "class_year": {
+     "description": "Graduation year the firm asked for, e.g. \"2029\".",
+     "type": "string"
+    },
+    "closing_within_days": {
+     "description": "Only roles whose application closes within this many days.",
+     "maximum": 120,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "firm": {
+     "description": "A firm name, e.g. \"JPMorgan\", \"Evercore\".",
+     "type": "string"
+    },
+    "kind": {
+     "description": "Internships, or full-time roles for new graduates.",
+     "enum": [
+      "internship",
+      "full_time"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "How many to return (default 10, at most 15).",
+     "maximum": 15,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "location": {
+     "description": "A city or state, e.g. \"New York\", \"Chicago\", \"TX\".",
+     "type": "string"
+    },
+    "query": {
+     "description": "Plain words, e.g. \"equity research intern NYC\" or \"investment banking for sophomores\". Matched against the firm, role, area and location. Years, \"this week\" and class standing (sophomore, junior) are understood.",
+     "type": "string"
+    },
+    "summer": {
+     "description": "The summer an internship is for, as a year, e.g. \"2028\".",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_finance_internships",
+  "output_schema": {},
+  "title": "Search open finance internships and first jobs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search the Sifter textbook"
+  },
+  "description": "Find chapters in Sifter's free textbook for student investors, written by university professors. It covers measuring a portfolio (time-weighted and money-weighted return, beta and alpha, tracking error, attribution), risk, valuation including DCF, and building an investing record. Returns matching chapters with a summary and a link; use read_textbook_chapter for the full text.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "The topic, e.g. \"time-weighted return\", \"tracking error\", \"DCF\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_textbook",
+  "output_schema": {},
+  "title": "Search the Sifter textbook"
+ }
+]

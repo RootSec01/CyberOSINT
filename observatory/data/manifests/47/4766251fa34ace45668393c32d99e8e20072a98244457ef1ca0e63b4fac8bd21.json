@@ -1,0 +1,218 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read a Wisty UI item"
+  },
+  "description": "Read one Wisty UI item to choose and compose it: its install command, examples by name, When to use, When not to use, Usage, Rules, API reference.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "The item's name, like \"lookup\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sections": {
+     "description": "Only these parts, under the title and install command. Without it, the parts above; the rest, on how the item already behaves, come only when named here.",
+     "items": {
+      "enum": [
+       "When to use",
+       "When not to use",
+       "Usage",
+       "SLDS mapping",
+       "Keyboard interactions",
+       "Accessibility",
+       "Motion",
+       "Responsive behavior",
+       "Performance",
+       "Rules",
+       "Examples",
+       "API reference"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "source": {
+     "default": false,
+     "description": "Add the installable files, for reading or copying by hand. Rarely needed: install with the shadcn command.",
+     "type": "boolean"
+    },
+    "style": {
+     "description": "The \"style\" in the project's components.json, like \"radix-nova\" or \"base-nova\": it picks the Radix or Base UI version. Leave it out for the Radix version.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "get_component",
+  "output_schema": {},
+  "title": "Read a Wisty UI item"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read a Wisty UI example"
+  },
+  "description": "Get one example's code for a Wisty UI item, for the project's base: a complete, working use to adapt.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "example": {
+     "description": "The example's name, like \"default\", as get_component lists them. Leave it out for the first, which shows the job the item is for.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "name": {
+     "description": "The item's name, like \"lookup\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "style": {
+     "description": "The \"style\" in the project's components.json, like \"radix-nova\" or \"base-nova\": it picks the Radix or Base UI version. Leave it out for the Radix version.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "get_example",
+  "output_schema": {},
+  "title": "Read a Wisty UI example"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Install a Wisty UI item"
+  },
+  "description": "Get the steps to install one Wisty UI item: the shadcn command, and the theme and icon steps it needs. First read style and tailwind.css from the project's components.json, and whether it has a src/ folder; a project without components.json runs npx shadcn@latest init first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "The item's name, like \"lookup\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "srcDir": {
+     "description": "Whether the project has a src/ folder. Left out, a tailwindCss under src/ means yes.",
+     "type": "boolean"
+    },
+    "style": {
+     "description": "The \"style\" in the project's components.json, like \"radix-nova\" or \"base-nova\": it picks the Radix or Base UI version.",
+     "type": "string"
+    },
+    "tailwindCss": {
+     "description": "The \"tailwind.css\" path as components.json gives it, like \"src/index.css\", for the exact theme import lines.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "themed": {
+     "description": "True when the stylesheet already has Wisty UI's theme (--color-page in its @theme inline, or a tokens.css import), to leave the theme step out.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "name",
+    "style"
+   ],
+   "type": "object"
+  },
+  "name": "get_install_command",
+  "output_schema": {},
+  "title": "Install a Wisty UI item"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List Wisty UI"
+  },
+  "description": "List every Wisty UI item by kind, with its first sentence. Primitives are shadcn's own components with the Salesforce look; components are what shadcn lacks, like lookup; blocks are finished Salesforce sections over sample data; helpers turn records into a block's props. Prefer search_components when you know the job.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "description": "Only items of this kind.",
+     "enum": [
+      "primitive",
+      "component",
+      "block",
+      "helper"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_components",
+  "output_schema": {},
+  "title": "List Wisty UI"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search Wisty UI"
+  },
+  "description": "Find Wisty UI items by the job they do, best first. Each match gives its name, kind (primitive, component, block, helper) and description. A block is a finished section built from components and primitives over sample data, to install and edit: when the job is a whole section, start from its block, not its parts. Read a match with get_component.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "description": "Only items of this kind.",
+     "enum": [
+      "primitive",
+      "component",
+      "block",
+      "helper"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 8,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "One to three keywords for the job, like \"record picker\", \"picklist\" or \"confirm delete\", not a sentence.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_components",
+  "output_schema": {},
+  "title": "Search Wisty UI"
+ }
+]

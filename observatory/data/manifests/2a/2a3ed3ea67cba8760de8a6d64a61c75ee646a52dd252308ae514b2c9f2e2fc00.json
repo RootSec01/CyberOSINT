@@ -1,0 +1,862 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Add internal booking note"
+  },
+  "description": "WRITE: add an internal restaurant note to a booking (for example `Birthday, bring a candle`). The guest does not see it and nothing is sent. At most 50 notes per booking; notes cannot be deleted through the API. Not retried: after a timeout read the booking first, or the note may be added twice. POST /bookings/{id}/restaurantNote.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "booking_id": {
+     "description": "resOS booking id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "text": {
+     "description": "The note text, up to 2000 characters.",
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id",
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "resos_add_booking_note",
+  "output_schema": {},
+  "title": "Add internal booking note"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Cancel booking"
+  },
+  "description": "WRITE: cancel a booking (status canceled, with a canceled-at time). resOS may e-mail or text the GUEST a cancellation notice. The booking stays in resOS and can be read afterwards. Not retried: after a timeout read the booking first. PUT /bookings/{id}/cancel.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "booking_id": {
+     "description": "resOS booking id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_cancel_booking",
+  "output_schema": {},
+  "title": "Cancel booking"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create booking"
+  },
+  "description": "WRITE: create a booking for a guest. It is a real booking in the restaurant's book. If notify_email or notify_sms is true, resOS e-mails or texts the GUEST (a confirmation); both default to false. Date and time are in the restaurant's local timezone. Check resos_get_available_times first: resOS may refuse a slot that is full or closed. It is not retried: if the call times out, read the bookings before you try again, or you may book twice. resOS may silently throttle the same e-mail, phone or IP creating more than 10 bookings in 24 hours. POST /bookings.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "area_id": {
+     "description": "Seating area; resOS then picks tables from this area.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "comment": {
+     "description": "A comment from the guest, e.g. `Window seat preferred`.",
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "date": {
+     "description": "Local date, yyyy-mm-dd.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "duration": {
+     "description": "Duration in minutes.",
+     "maximum": 1440,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "guest_email": {
+     "description": "The guest's e-mail address.",
+     "maxLength": 320,
+     "type": "string"
+    },
+    "guest_name": {
+     "description": "The guest's name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "guest_phone": {
+     "description": "The guest's phone number with the country code.",
+     "maxLength": 30,
+     "minLength": 5,
+     "pattern": "^\\+?[0-9 ()./-]+$",
+     "type": "string"
+    },
+    "language_code": {
+     "description": "Language of the guest's messages.",
+     "enum": [
+      "da",
+      "de",
+      "el",
+      "en",
+      "es",
+      "fi",
+      "fr",
+      "it",
+      "nl",
+      "no",
+      "pl",
+      "pt",
+      "sq",
+      "sv",
+      "uk"
+     ],
+     "type": "string"
+    },
+    "note": {
+     "description": "An internal restaurant note, not shown to the guest.",
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "notify_email": {
+     "description": "Send the guest an e-mail (needs guest_email). Default false.",
+     "type": "boolean"
+    },
+    "notify_sms": {
+     "description": "Send the guest a text message (needs guest_phone). Default false.",
+     "type": "boolean"
+    },
+    "people": {
+     "description": "Number of guests.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Initial status (default: the resOS default for new bookings).",
+     "enum": [
+      "request",
+      "approved",
+      "waitlist",
+      "confirm"
+     ],
+     "type": "string"
+    },
+    "table_ids": {
+     "description": "Specific table ids to assign.",
+     "items": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    },
+    "time": {
+     "description": "Local time, HH:mm, 24-hour.",
+     "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "people",
+    "date",
+    "time",
+    "guest_name"
+   ],
+   "type": "object"
+  },
+  "name": "resos_create_booking",
+  "output_schema": {},
+  "title": "Create booking"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get available dates"
+  },
+  "description": "Dates in a range on which the restaurant is open for bookings (default: the next 30 days). GET /bookingFlow/dates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "from_date": {
+     "description": "Start date, inclusive, yyyy-mm-dd (default today).",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "to_date": {
+     "description": "End date, inclusive, yyyy-mm-dd (default 30 days after from_date).",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "resos_get_available_dates",
+  "output_schema": {},
+  "title": "Get available dates"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get available tables"
+  },
+  "description": "The tables and table combinations that are free for a party size in a time window (UTC). Use it before assigning tables to a booking. GET /bookingFlow/availableTables.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "area_id": {
+     "description": "Only this seating area.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "exclude_booking_id": {
+     "description": "Ignore this booking when counting what is taken (to re-assign its tables).",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "from_date_time": {
+     "description": "Start of the window: ISO 8601 with a timezone, e.g. 2026-10-15T18:00:00Z.",
+     "type": "string"
+    },
+    "only_bookable_online": {
+     "description": "Only areas that guests can book online (resOS default true).",
+     "type": "boolean"
+    },
+    "people": {
+     "description": "Number of guests.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "return_all_tables": {
+     "description": "Also list occupied tables.",
+     "type": "boolean"
+    },
+    "to_date_time": {
+     "description": "End of the window: ISO 8601 with a timezone.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "people",
+    "from_date_time",
+    "to_date_time"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_available_tables",
+  "output_schema": {},
+  "title": "Get available tables"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get available times"
+  },
+  "description": "Booking times that are free on a date for a party size, optionally for one seating area. GET /bookingFlow/times.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "area_id": {
+     "description": "Only this seating area (id from resos_list_seating_areas).",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "date": {
+     "description": "Date, yyyy-mm-dd (default today).",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "only_bookable_online": {
+     "description": "Only areas that guests can book online (resOS default true).",
+     "type": "boolean"
+    },
+    "people": {
+     "description": "Number of guests.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "people"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_available_times",
+  "output_schema": {},
+  "title": "Get available times"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get booking"
+  },
+  "description": "One booking by id, with the guest's contact data, tables, custom fields, payment, the comment thread (guest and restaurant messages) and the internal restaurant notes. GET /bookings/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "booking_id": {
+     "description": "resOS booking id (the _id of a booking).",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_booking",
+  "output_schema": {},
+  "title": "Get booking"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get custom field"
+  },
+  "description": "One custom booking field by id. GET /customFields/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_field_id": {
+     "description": "resOS custom field id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "custom_field_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_custom_field",
+  "output_schema": {},
+  "title": "Get custom field"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get customer"
+  },
+  "description": "One customer (guest profile) by id: contact data, tags, notes, flags, booking count and latest booking. GET /customers/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_id": {
+     "description": "resOS customer id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "customer_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_customer",
+  "output_schema": {},
+  "title": "Get customer"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get guest feedback"
+  },
+  "description": "One guest feedback entry by id. GET /guestFeedback/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "feedback_id": {
+     "description": "resOS guest feedback id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "feedback_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_guest_feedback",
+  "output_schema": {},
+  "title": "Get guest feedback"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get opening hour"
+  },
+  "description": "One opening-hour entry by id. GET /openingHours/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "opening_hour_id": {
+     "description": "resOS opening hour id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "opening_hour_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_get_opening_hour",
+  "output_schema": {},
+  "title": "Get opening hour"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List bookings"
+  },
+  "description": "List bookings, newest or oldest first as you sort, with date, time, party size, status, the guest's name, e-mail and phone, assigned tables and custom-field answers. Filter by date range, status, party size or guest name. The comment thread and sent-message log are not included (use resos_get_booking for the thread). Pages of at most 100; pass next_skip to read on. GET /bookings.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_query": {
+     "description": "Extra filter, comma-separated `field<op>value`: `:` equals, `>` greater, `<` less, `;` contains. Example: `guest.phone:+15550100001`.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    },
+    "from_date_time": {
+     "description": "Start of the range, inclusive: ISO 8601 with a timezone, e.g. 2026-10-01T00:00:00Z.",
+     "type": "string"
+    },
+    "guest_name_contains": {
+     "description": "Only bookings whose guest name contains this text.",
+     "maxLength": 100,
+     "minLength": 1,
+     "pattern": "^[\\p{L}\\p{N} '-]+$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Records to return, 1-100 (default 25).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "only_confirmed": {
+     "description": "Only approved, arrived, seated or left bookings.",
+     "type": "boolean"
+    },
+    "people": {
+     "description": "Only bookings for exactly this many guests.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "skip": {
+     "description": "Records to skip (default 0). Pass the previous reply's next_skip.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort, `field:direction[,field2:direction]`, direction 1 ascending or -1 descending, e.g. `dateTime:-1`.",
+     "pattern": "^[A-Za-z0-9_.]+:-?1(,[A-Za-z0-9_.]+:-?1)*$",
+     "type": "string"
+    },
+    "status": {
+     "description": "Only bookings with this status.",
+     "enum": [
+      "request",
+      "declined",
+      "approved",
+      "arrived",
+      "seated",
+      "left",
+      "no_show",
+      "canceled",
+      "deleted",
+      "waitlist",
+      "confirm",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "to_date_time": {
+     "description": "End of the range, inclusive: ISO 8601 with a timezone, e.g. 2026-10-31T23:59:59Z.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "resos_list_bookings",
+  "output_schema": {},
+  "title": "List bookings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List custom fields"
+  },
+  "description": "List the custom booking fields (name, label, type, required, choices). Use the ids to read or set custom-field answers. GET /customFields.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "resos_list_custom_fields",
+  "output_schema": {},
+  "title": "List custom fields"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List customers"
+  },
+  "description": "List the restaurant's customers (guest profiles): name, e-mails, phones, city and country, tags, notes, flags, booking count and newsletter consent. The street address is not returned. Filter by name. Pages of at most 100. GET /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_query": {
+     "description": "Extra filter, comma-separated `field<op>value`: `:` equals, `>` greater, `<` less, `;` contains. Example: `guest.phone:+15550100001`.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "description": "Records to return, 1-100 (default 25).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "name_contains": {
+     "description": "Only customers whose name contains this text.",
+     "maxLength": 100,
+     "minLength": 1,
+     "pattern": "^[\\p{L}\\p{N} '-]+$",
+     "type": "string"
+    },
+    "skip": {
+     "description": "Records to skip (default 0). Pass the previous reply's next_skip.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "resos_list_customers",
+  "output_schema": {},
+  "title": "List customers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List guest feedback"
+  },
+  "description": "List guest feedback (ratings for food, service, value and atmosphere, whether they recommend, and the message). Filter by date range, or only submitted feedback. Pages of at most 100. GET /guestFeedback.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_query": {
+     "description": "Extra filter, comma-separated `field<op>value`: `:` equals, `>` greater, `<` less, `;` contains. Example: `guest.phone:+15550100001`.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    },
+    "from_date_time": {
+     "description": "Start of the range, inclusive: ISO 8601 with a timezone.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Records to return, 1-100 (default 25).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "only_submitted": {
+     "description": "Only feedback the guest has submitted.",
+     "type": "boolean"
+    },
+    "skip": {
+     "description": "Records to skip (default 0). Pass the previous reply's next_skip.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort, `field:direction[,field2:direction]`, direction 1 ascending or -1 descending, e.g. `dateTime:-1`.",
+     "pattern": "^[A-Za-z0-9_.]+:-?1(,[A-Za-z0-9_.]+:-?1)*$",
+     "type": "string"
+    },
+    "to_date_time": {
+     "description": "End of the range, inclusive: ISO 8601 with a timezone.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "resos_list_guest_feedback",
+  "output_schema": {},
+  "title": "List guest feedback"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List opening hours"
+  },
+  "description": "List the opening hours: regular weekly hours (day 1 Monday to 7 Sunday) and special date-specific hours, each with id, name, open and close times and whether the restaurant is open. GET /openingHours.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "only_special": {
+     "description": "Only special (date-specific) hours.",
+     "type": "boolean"
+    },
+    "show_deleted": {
+     "description": "Include deleted hours.",
+     "type": "boolean"
+    },
+    "sort": {
+     "description": "Sort, `field:direction[,field2:direction]`, direction 1 ascending or -1 descending, e.g. `dateTime:-1`.",
+     "pattern": "^[A-Za-z0-9_.]+:-?1(,[A-Za-z0-9_.]+:-?1)*$",
+     "type": "string"
+    },
+    "type": {
+     "description": "Opening-hour mode, e.g. `restaurant` or `shop`.",
+     "maxLength": 50,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "resos_list_opening_hours",
+  "output_schema": {},
+  "title": "List opening hours"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List seating areas and tables"
+  },
+  "description": "List the seating areas with their tables (id, name, minimum and maximum seats) and table combinations. Use the ids for bookings and availability. GET /tables.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "resos_list_seating_areas",
+  "output_schema": {},
+  "title": "List seating areas and tables"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Post booking comment to guest"
+  },
+  "description": "WRITE: post a comment from the restaurant on a booking's guest thread. The guest can see it. If send_notification is true, resOS e-mails or texts the GUEST the message now: you must choose true or false. At most 25 comments per booking and 5 per minute. Cannot be deleted through the API. Not retried: after a timeout read the booking first, or the guest may get it twice. POST /bookings/{id}/comment.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "booking_id": {
+     "description": "resOS booking id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "send_notification": {
+     "description": "true = notify the guest by e-mail or text now; false = only add it to the thread.",
+     "type": "boolean"
+    },
+    "text": {
+     "description": "The message, up to 2000 characters.",
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id",
+    "text",
+    "send_notification"
+   ],
+   "type": "object"
+  },
+  "name": "resos_send_booking_comment",
+  "output_schema": {},
+  "title": "Post booking comment to guest"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update booking"
+  },
+  "description": "WRITE: change fields of an existing booking: date, time, party size, tables, duration, status, or the guest's name, e-mail or phone. Only the fields you pass change. A status change or a new time can make resOS e-mail or text the GUEST (for example on approved or declined). To cancel use resos_cancel_booking. It is not retried: after a timeout read the booking again before you try again. PUT /bookings/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "booking_id": {
+     "description": "resOS booking id.",
+     "maxLength": 64,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_-]+$",
+     "type": "string"
+    },
+    "date": {
+     "description": "New local date, yyyy-mm-dd (send with time).",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "duration": {
+     "description": "New duration in minutes.",
+     "maximum": 1440,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "guest_email": {
+     "description": "New guest e-mail.",
+     "maxLength": 320,
+     "type": "string"
+    },
+    "guest_name": {
+     "description": "New guest name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "guest_phone": {
+     "description": "New guest phone with the country code.",
+     "maxLength": 30,
+     "minLength": 5,
+     "pattern": "^\\+?[0-9 ()./-]+$",
+     "type": "string"
+    },
+    "people": {
+     "description": "New number of guests.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "New status. Use resos_cancel_booking to cancel.",
+     "enum": [
+      "request",
+      "declined",
+      "approved",
+      "arrived",
+      "seated",
+      "left",
+      "no_show",
+      "waitlist",
+      "confirm",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "table_ids": {
+     "description": "Tables to assign (replaces the current ones).",
+     "items": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    },
+    "time": {
+     "description": "New local time, HH:mm (send with date).",
+     "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id"
+   ],
+   "type": "object"
+  },
+  "name": "resos_update_booking",
+  "output_schema": {},
+  "title": "Update booking"
+ }
+]

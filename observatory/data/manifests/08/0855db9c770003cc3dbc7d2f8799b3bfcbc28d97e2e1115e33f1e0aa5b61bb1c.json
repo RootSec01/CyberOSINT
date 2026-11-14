@@ -1,0 +1,401 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Classement des communes d'un département"
+  },
+  "description": "Classe les communes d'UN département selon un critère public : meilleur rendement locatif brut des appartements (rendement_locatif), prix au m² des appartements les plus bas (prix_bas) ou les plus élevés (prix_eleve). Mêmes communes, mêmes seuils et même ordre que les classements publiés sur pillr.fr : communes de 2 000 habitants et plus comptant au moins 10 ventes, prix mesurés sur les ventes DVF pour les classements de prix, 30 communes au plus, avec le nombre total de communes classées. À utiliser pour trouver des communes sans les nommer (« où investir en Gironde », « les communes les moins chères du Nord »). Pour comparer des communes déjà nommées, utiliser comparaison_communes. Paris, les Bouches-du-Rhône et le Rhône ne sont pas classés : leurs arrondissements faussent le classement. Aucun score Pillr.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "critere": {
+     "description": "rendement_locatif : rendement brut des appartements, du plus haut au plus bas ; prix_bas : prix au m² des appartements, du moins cher au plus cher ; prix_eleve : l'inverse.",
+     "enum": [
+      "rendement_locatif",
+      "prix_bas",
+      "prix_eleve"
+     ],
+     "type": "string"
+    },
+    "departement": {
+     "description": "Code du département (« 33 », « 2A », « 974 ») ou son nom (« Gironde », « Côtes-d'Armor »).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "departement",
+    "critere"
+   ],
+   "type": "object"
+  },
+  "name": "classement_departement",
+  "output_schema": {},
+  "title": "Classement des communes d'un département"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Comparaison de communes"
+  },
+  "description": "Compare de 2 à 5 communes françaises côte à côte, sur les mêmes indicateurs publics : prix au m² appartement et maison avec leur provenance, loyer médian au m², rendement brut théorique appartement et maison, évolution des prix sur 1 et 3 ans, zone ABC de tension locative, population. À utiliser dès que la question met plusieurs communes en balance (« Rennes ou Nantes pour investir ? »). Pour le détail d'une seule commune, utiliser marche_commune ; pour trouver des communes sans les nommer, classement_departement. Aucun score Pillr.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "communes": {
+     "description": "De 2 à 5 communes, chacune écrite comme le paramètre commune des autres outils (nom, « Lyon 7e » ou code INSEE).",
+     "items": {
+      "description": "Nom de la commune (« Bordeaux », « Saint-Étienne ») ou code INSEE à 5 chiffres. Un arrondissement de Paris, Lyon ou Marseille s'écrit « Paris 11e », « Lyon 7e », « Marseille 8e » (ou « Lyon 7 », « Lyon 7ème », « 7e arrondissement de Lyon ») ; le nom seul (« Lyon ») rend l'agrégat de ses arrondissements. Un code postal est accepté en dernier recours : cinq chiffres désignent d'abord le code INSEE qui les porte.",
+      "type": "string"
+     },
+     "maxItems": 5,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "communes"
+   ],
+   "type": "object"
+  },
+  "name": "comparaison_communes",
+  "output_schema": {},
+  "title": "Comparaison de communes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Formalité d'urbanisme d'un projet"
+  },
+  "description": "Quelle formalité d'urbanisme pour un projet de travaux (aucune, déclaration préalable, permis de construire, d'aménager ou de démolir), quel formulaire Cerfa, un architecte est-il obligatoire, quelles pièces, quel délai d'instruction. Chaque conclusion porte sa règle et sa source, et la base de règles porte sa date. Un fait manquant revient en question, jamais en supposition. Sans adresse : ce connecteur ne lit ni le PLU ni les servitudes, les protections du terrain sont à déclarer en paramètres. Aucune donnée de marché : pour les prix et les loyers, les autres outils. Information générale, ni conseil juridique ni décision de la mairie.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "abords_monument_historique": {
+     "description": "Le terrain est-il dans les abords d'un monument historique ?",
+     "type": "boolean"
+    },
+    "bassin_m2": {
+     "description": "Surface du bassin d'une piscine, en m².",
+     "minimum": 0,
+     "type": "number"
+    },
+    "changement": {
+     "description": "Pour un changement de destination : porte-t-il sur la destination ou sur une sous-destination ?",
+     "enum": [
+      "destination",
+      "sous_destination"
+     ],
+     "type": "string"
+    },
+    "coeur_parc_national": {
+     "description": "Le terrain est-il en cœur de parc national ?",
+     "type": "boolean"
+    },
+    "demandeur": {
+     "description": "Qui dépose la demande (compte pour l'obligation d'architecte).",
+     "enum": [
+      "personne_physique",
+      "exploitation_agricole",
+      "societe"
+     ],
+     "type": "string"
+    },
+    "document_urbanisme": {
+     "description": "Document d'urbanisme de la commune, si connu.",
+     "enum": [
+      "plu",
+      "carte_communale",
+      "rnu"
+     ],
+     "type": "string"
+    },
+    "duree_installation_jours": {
+     "description": "Jours par an d'installation d'une piscine démontable en espace protégé.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "duree_installation_mois": {
+     "description": "Mois par an d'installation d'une piscine démontable.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "element_protege_plu": {
+     "description": "Le bâtiment est-il protégé par le PLU (art. L151-19 ou L151-23) ?",
+     "type": "boolean"
+    },
+    "emprise_au_sol_creee_m2": {
+     "description": "Emprise au sol créée par le projet, en m².",
+     "minimum": 0,
+     "type": "number"
+    },
+    "emprise_au_sol_existante_m2": {
+     "description": "Emprise au sol du bâtiment existant, en m².",
+     "minimum": 0,
+     "type": "number"
+    },
+    "equipements_communs": {
+     "description": "La division crée-t-elle des voies, espaces ou équipements communs ?",
+     "type": "boolean"
+    },
+    "erp_ou_igh": {
+     "description": "S'agit-il d'un établissement recevant du public ou d'un immeuble de grande hauteur ?",
+     "type": "boolean"
+    },
+    "hauteur_couverture_m": {
+     "description": "Hauteur de la couverture d'une piscine, en mètres (0 si non couverte).",
+     "minimum": 0,
+     "type": "number"
+    },
+    "hauteur_m": {
+     "description": "Hauteur du projet, en mètres (hauteur du mur pour un mur).",
+     "minimum": 0,
+     "type": "number"
+    },
+    "inclut_demolition": {
+     "description": "Le projet inclut-il une démolition ?",
+     "type": "boolean"
+    },
+    "maison_individuelle": {
+     "description": "S'agit-il d'une maison individuelle ?",
+     "type": "boolean"
+    },
+    "modifie_aspect_exterieur": {
+     "description": "Les travaux modifient-ils l'aspect extérieur ?",
+     "type": "boolean"
+    },
+    "modifie_volume": {
+     "description": "Les travaux modifient-ils le volume du bâtiment ?",
+     "type": "boolean"
+    },
+    "monument_historique": {
+     "description": "Les travaux portent-ils sur un monument historique ?",
+     "type": "boolean"
+    },
+    "pac_visible": {
+     "description": "L'unité extérieure de la pompe à chaleur est-elle visible depuis l'espace public ?",
+     "type": "boolean"
+    },
+    "piscine_demontable": {
+     "description": "La piscine est-elle démontable ?",
+     "type": "boolean"
+    },
+    "ravalement_change_couleurs": {
+     "description": "Le ravalement change-t-il les couleurs de la façade ?",
+     "type": "boolean"
+    },
+    "reparation_a_l_identique": {
+     "description": "S'agit-il d'une réparation à l'identique (mêmes matériaux, mêmes couleurs) ?",
+     "type": "boolean"
+    },
+    "reserve_naturelle": {
+     "description": "Le terrain est-il en réserve naturelle ?",
+     "type": "boolean"
+    },
+    "site_classe": {
+     "description": "Le terrain est-il en site classé ?",
+     "type": "boolean"
+    },
+    "site_inscrit": {
+     "description": "Le terrain est-il en site inscrit ?",
+     "type": "boolean"
+    },
+    "spr": {
+     "description": "Le terrain est-il en site patrimonial remarquable ?",
+     "type": "boolean"
+    },
+    "surface_plancher_creee_m2": {
+     "description": "Surface de plancher créée, en m² (0 pour un carport ouvert).",
+     "minimum": 0,
+     "type": "number"
+    },
+    "surface_plancher_existante_m2": {
+     "description": "Surface de plancher du bâtiment existant, en m².",
+     "minimum": 0,
+     "type": "number"
+    },
+    "travaux_structure_ou_facade": {
+     "description": "Des travaux touchent-ils les structures porteuses ou la façade ?",
+     "type": "boolean"
+    },
+    "type_travaux": {
+     "description": "Nature du projet. Obligatoire.",
+     "enum": [
+      "construction_nouvelle",
+      "travaux_existant",
+      "transformation_garage",
+      "piscine",
+      "cloture",
+      "mur",
+      "aspect_exterieur",
+      "pompe_a_chaleur",
+      "ravalement",
+      "changement_destination",
+      "division",
+      "demolition"
+     ],
+     "type": "string"
+    },
+    "visible_espace_public": {
+     "description": "Le projet est-il visible depuis l'espace public ?",
+     "type": "boolean"
+    },
+    "zone_urbaine": {
+     "description": "Le terrain est-il en zone urbaine du PLU, si connu ?",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "type_travaux"
+   ],
+   "type": "object"
+  },
+  "name": "demarche_urbanisme_projet",
+  "output_schema": {},
+  "title": "Formalité d'urbanisme d'un projet"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Loyer d'un logement"
+  },
+  "description": "Loyer mensuel estimé d'UN logement décrit par sa commune, sa typologie (T1 à T5, ou maison) et sa surface : loyer hors charges, fourchette à 95 %, loyer au m² et segment de la Carte des loyers (ANIL et DHUP) utilisé, les mêmes montants que la page /loyer de Pillr. Avec un prix d'achat, ajoute le rendement brut de ce logement. À utiliser pour « combien louer un T2 de 40 m² à Nantes » ou « quel rendement pour ce T3 à 180 000 € ». Pour le loyer médian et le rendement de marché de la commune entière, utiliser marche_commune. C'est un loyer d'annonce modélisé, ni un loyer constaté ni un plafond légal : l'encadrement des loyers n'est pas servi.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "commune": {
+     "description": "Nom de la commune (« Bordeaux », « Saint-Étienne ») ou code INSEE à 5 chiffres. Un arrondissement de Paris, Lyon ou Marseille s'écrit « Paris 11e », « Lyon 7e », « Marseille 8e » (ou « Lyon 7 », « Lyon 7ème », « 7e arrondissement de Lyon ») ; le nom seul (« Lyon ») rend l'agrégat de ses arrondissements. Un code postal est accepté en dernier recours : cinq chiffres désignent d'abord le code INSEE qui les porte.",
+     "type": "string"
+    },
+    "prix_achat": {
+     "description": "Prix d'achat du logement, en euros, frais compris ou non : sert au seul rendement brut.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "surface_m2": {
+     "description": "Surface habitable, en m². Absente : la surface d'exemple de la typologie, dite dans la réponse.",
+     "exclusiveMinimum": 0,
+     "maximum": 1000,
+     "type": "number"
+    },
+    "typologie": {
+     "description": "Typologie du logement : T1 (studio) à T5 (T5 et plus), ou maison.",
+     "enum": [
+      "T1",
+      "T2",
+      "T3",
+      "T4",
+      "T5",
+      "maison"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "commune",
+    "typologie"
+   ],
+   "type": "object"
+  },
+  "name": "loyer_logement",
+  "output_schema": {},
+  "title": "Loyer d'un logement"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Synthèse de marché d'une commune"
+  },
+  "description": "Synthèse complète du marché d'UNE commune, pour juger s'il faut y acheter ou y investir : prix au m² appartement et maison, loyer médian au m² (DHUP), loyer par type de logement du T1 à la maison (Carte des loyers, à une surface d'exemple, avec sa fourchette à 95 %, les mêmes montants que la page /loyer de Pillr), rendement brut théorique (la maison sur le loyer des maisons), évolution des prix sur 1 et 3 ans, zone ABC de tension locative, et le marché en vente du dernier mois calculé, agrégé par commune à partir des annonces de vente collectées par Pillr (annonces en ligne en fin de mois, nouvelles annonces, prix affiché médian au m², part des annonces baissées, délai médian en ligne des annonces retirées, variation sur un mois ; un mois de mise à jour de la collecte ne rend que les nouvelles annonces et le prix affiché, et le dit), avec ses limites et sa date de calcul, non servi au-delà de 45 jours. Aucune annonce individuelle n'est rendue. Pour le seul prix au m², prix_m2_commune répond plus court ; pour le loyer d'un logement précis, loyer_logement ; pour comparer des communes, comparaison_communes. Le score Pillr sur 100, ses sous-scores et l'analyse complète ne sont pas servis par ce connecteur, ils sont sur pillr.fr.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "commune": {
+     "description": "Nom de la commune (« Bordeaux », « Saint-Étienne ») ou code INSEE à 5 chiffres. Un arrondissement de Paris, Lyon ou Marseille s'écrit « Paris 11e », « Lyon 7e », « Marseille 8e » (ou « Lyon 7 », « Lyon 7ème », « 7e arrondissement de Lyon ») ; le nom seul (« Lyon ») rend l'agrégat de ses arrondissements. Un code postal est accepté en dernier recours : cinq chiffres désignent d'abord le code INSEE qui les porte.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "commune"
+   ],
+   "type": "object"
+  },
+  "name": "marche_commune",
+  "output_schema": {},
+  "title": "Synthèse de marché d'une commune"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Prix au m² d'une commune"
+  },
+  "description": "Prix de référence au mètre carré d'UNE commune française, appartement et maison, et rien d'autre : valeur, provenance (mesurée sur les ventes DVF ou estimée ; pour Paris, Lyon et Marseille, le compte des arrondissements mesurés et estimés), millésime et date de reconstruction. À utiliser quand la question porte seulement sur le prix d'une commune. Pour son loyer, son rendement, l'évolution de ses prix ou sa tension locative, utiliser marche_commune ; pour les prix quartier par quartier, prix_m2_quartiers ; pour plusieurs communes, comparaison_communes. Un prix absent est dit absent, jamais deviné. C'est un repère de marché communal, pas l'estimation d'un bien précis.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "commune": {
+     "description": "Nom de la commune (« Bordeaux », « Saint-Étienne ») ou code INSEE à 5 chiffres. Un arrondissement de Paris, Lyon ou Marseille s'écrit « Paris 11e », « Lyon 7e », « Marseille 8e » (ou « Lyon 7 », « Lyon 7ème », « 7e arrondissement de Lyon ») ; le nom seul (« Lyon ») rend l'agrégat de ses arrondissements. Un code postal est accepté en dernier recours : cinq chiffres désignent d'abord le code INSEE qui les porte.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "commune"
+   ],
+   "type": "object"
+  },
+  "name": "prix_m2_commune",
+  "output_schema": {},
+  "title": "Prix au m² d'une commune"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Prix au m² par quartier"
+  },
+  "description": "Prix au m² des appartements et des maisons quartier par quartier (IRIS de l'INSEE) dans UNE commune, du plus cher au moins cher : prix, nombre de ventes DVF, provenance (mesuré sur les ventes du quartier ou rapproché du prix de la commune) et part portée par les ventes du quartier. Seuls les quartiers d'au moins 5 ventes sont publiés, 40 au plus par type de bien. À utiliser pour « quel quartier est le moins cher à Lille » ou pour situer un quartier dans sa commune. Pour le prix de la commune entière, utiliser prix_m2_commune. Une commune que l'INSEE ne découpe pas en quartiers n'a pas de prix de quartier ; Paris, Lyon et Marseille se lisent mieux par arrondissement (« Lyon 3e »).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "commune": {
+     "description": "Nom de la commune (« Bordeaux », « Saint-Étienne ») ou code INSEE à 5 chiffres. Un arrondissement de Paris, Lyon ou Marseille s'écrit « Paris 11e », « Lyon 7e », « Marseille 8e » (ou « Lyon 7 », « Lyon 7ème », « 7e arrondissement de Lyon ») ; le nom seul (« Lyon ») rend l'agrégat de ses arrondissements. Un code postal est accepté en dernier recours : cinq chiffres désignent d'abord le code INSEE qui les porte.",
+     "type": "string"
+    },
+    "type_bien": {
+     "description": "Ne lister qu'un type de bien. Absent : les deux.",
+     "enum": [
+      "appartement",
+      "maison"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "commune"
+   ],
+   "type": "object"
+  },
+  "name": "prix_m2_quartiers",
+  "output_schema": {},
+  "title": "Prix au m² par quartier"
+ }
+]

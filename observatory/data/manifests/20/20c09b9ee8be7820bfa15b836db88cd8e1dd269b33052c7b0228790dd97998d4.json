@@ -1,0 +1,175 @@
+[
+ {
+  "description": "The columns, which of them are numeric, the row count and the provenance banner of the Soapvo dataset. Call this first to learn the schema.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "dataset_columns",
+  "output_schema": {},
+  "title": "Dataset columns and shape"
+ },
+ {
+  "description": "The rows of the Soapvo dataset whose column is any of the given values, in the order given, for \"X vs Y\" questions.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "values": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 10,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "column",
+    "values"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_compare",
+  "output_schema": {},
+  "title": "Compare rows side by side"
+ },
+ {
+  "description": "The source, the date it was computed, the licence and the citation for the Soapvo dataset. Read this to attribute a figure correctly.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "dataset_provenance",
+  "output_schema": {},
+  "title": "Where this data comes from, and how to cite it"
+ },
+ {
+  "description": "The rows of the Soapvo dataset where a column equals a value exactly (case-insensitive).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "value": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "column",
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_row",
+  "output_schema": {},
+  "title": "Look a row up by an exact key"
+ },
+ {
+  "description": "Rows of the Soapvo dataset whose cells contain the query (case-insensitive), up to 50.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "text to look for in any cell",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_search",
+  "output_schema": {},
+  "title": "Search the dataset"
+ },
+ {
+  "description": "count, min, max, mean, median and sum of a numeric column of the Soapvo dataset (grouping commas and currency are handled; non-numeric rows are excluded and counted).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "column"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_stats",
+  "output_schema": {},
+  "title": "Summary statistics for a numeric column"
+ },
+ {
+  "description": "The highest (or lowest) rows of the Soapvo dataset by a numeric column: \"which is the most/least X\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "ascending": {
+     "description": "true for the lowest first; default highest first",
+     "type": "boolean"
+    },
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "column"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_top",
+  "output_schema": {},
+  "title": "Rank rows by a numeric column"
+ }
+]

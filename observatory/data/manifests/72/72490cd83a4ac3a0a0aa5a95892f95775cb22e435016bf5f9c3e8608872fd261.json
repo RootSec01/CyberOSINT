@@ -1,0 +1,712 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.03/호출 — 현재 무료 모드] 2~5개 단지를 같은 기간으로 나란히 비교한다: 세대수·사용승인·면적타입별 매매 건수/중위가/평당가·전세 중위 보증금·전세가율, 그리고 두 단지 이상에 공통인 면적타입 교차표. 다른 시군구 단지끼리도 가능. Compare 2-5 complexes side by side.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "areaMax": {
+     "description": "전용면적 상한(㎡)",
+     "type": "number"
+    },
+    "areaMin": {
+     "description": "전용면적 하한(㎡)",
+     "type": "number"
+    },
+    "items": {
+     "description": "비교할 단지 2~5개",
+     "items": {
+      "properties": {
+       "aptName": {
+        "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+        "minLength": 1,
+        "type": "string"
+       },
+       "region": {
+        "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "region",
+       "aptName"
+      ],
+      "type": "object"
+     },
+     "maxItems": 5,
+     "minItems": 2,
+     "type": "array"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 6, 최대 12)",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "propertyType": {
+     "description": "아파트(기본) 또는 오피스텔. 오피스텔은 K-apt 기본정보가 없어 실거래 안에서만 이름을 찾는다",
+     "enum": [
+      "apt",
+      "officetel"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "items"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_compare",
+  "output_schema": {},
+  "title": "단지 비교"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.02/호출 — 현재 무료 모드] 단지의 매매 실거래를 면적타입별로 집계한다: 건수·최저/최고/평균/중위·최근 거래·최고가·평당가·기간 전후반 변화율, 월별 추이. Price summary by area type for a complex.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "areaMax": {
+     "description": "전용면적 상한(㎡)",
+     "type": "number"
+    },
+    "areaMin": {
+     "description": "전용면적 하한(㎡)",
+     "type": "number"
+    },
+    "from": {
+     "description": "시작 계약년월 YYYY-MM",
+     "type": "string"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 6, 최대 24). from/to와 함께 쓰면 무시",
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "propertyType": {
+     "description": "아파트(기본) 또는 오피스텔. 오피스텔은 K-apt 기본정보가 없어 실거래 안에서만 이름을 찾는다",
+     "enum": [
+      "apt",
+      "officetel"
+     ],
+     "type": "string"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "to": {
+     "description": "종료 계약년월 YYYY-MM (기본 이번 달)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "region",
+    "aptName"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_price_summary",
+  "output_schema": {},
+  "title": "단지 매매 시세 요약"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.01/호출 — 현재 무료 모드] 단지 기본정보: 세대수·동수·사용승인일·시공사·분양/임대·난방·복도형식·관리방식·면적 구성·주차·승강기·CCTV·지하철역/도보·버스·교육/편의/복지시설. kaptCode를 알면 region/aptName 대신 직접 지정. Complex profile from K-apt.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "kaptCode": {
+     "description": "K-apt 단지코드 (kr_apt_search 결과)",
+     "type": "string"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "kr_apt_profile",
+  "output_schema": {},
+  "title": "단지 기본정보"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.02/호출 — 현재 무료 모드] 단지의 전월세 실거래를 면적타입별로 집계하고(전세 중위 보증금, 월세 보증금/월세 중위, 갱신 비중) 같은 기간 매매 중위가 대비 전세가율(%)을 계산한다. Rent summary with jeonse-to-price ratio.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "areaMax": {
+     "description": "전용면적 상한(㎡)",
+     "type": "number"
+    },
+    "areaMin": {
+     "description": "전용면적 하한(㎡)",
+     "type": "number"
+    },
+    "from": {
+     "description": "시작 계약년월 YYYY-MM",
+     "type": "string"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 6, 최대 24). from/to와 함께 쓰면 무시",
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "propertyType": {
+     "description": "아파트(기본) 또는 오피스텔. 오피스텔은 K-apt 기본정보가 없어 실거래 안에서만 이름을 찾는다",
+     "enum": [
+      "apt",
+      "officetel"
+     ],
+     "type": "string"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "to": {
+     "description": "종료 계약년월 YYYY-MM (기본 이번 달)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "region",
+    "aptName"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_rent_summary",
+  "output_schema": {},
+  "title": "단지 전월세 요약 + 전세가율"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.01/호출 — 현재 무료 모드] 단지명과 기간으로 아파트 전월세 실거래 목록을 돌려준다(전세/월세 구분, 보증금·월세 만원, 신규/갱신, 갱신요구권, 종전 계약 조건). Jeonse/monthly-rent transactions for a complex.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "areaMax": {
+     "description": "전용면적 상한(㎡)",
+     "type": "number"
+    },
+    "areaMin": {
+     "description": "전용면적 하한(㎡)",
+     "type": "number"
+    },
+    "from": {
+     "description": "시작 계약년월 YYYY-MM",
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 300,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 6, 최대 24). from/to와 함께 쓰면 무시",
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "propertyType": {
+     "description": "아파트(기본) 또는 오피스텔. 오피스텔은 K-apt 기본정보가 없어 실거래 안에서만 이름을 찾는다",
+     "enum": [
+      "apt",
+      "officetel"
+     ],
+     "type": "string"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "rentType": {
+     "enum": [
+      "전세",
+      "월세"
+     ],
+     "type": "string"
+    },
+    "to": {
+     "description": "종료 계약년월 YYYY-MM (기본 이번 달)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "region",
+    "aptName"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_rents",
+  "output_schema": {},
+  "title": "단지 전월세 실거래 목록"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.05/호출 — 현재 무료 모드] 단지 종합 리포트 한 번에: 기본정보(K-apt) + 최근 N개월(기본 12) 매매 요약 + 전월세 요약 + 전세가율 + 최근 거래 10건 + 같은 시군구 시장 맥락(월별 거래량·평당가). 여러 공공 API를 결합한 상위 도구. All-in-one complex report.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 12)",
+     "maximum": 24,
+     "minimum": 3,
+     "type": "integer"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "region",
+    "aptName"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_report",
+  "output_schema": {},
+  "title": "단지 종합 리포트"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[무료] 지역 + 단지명 키워드로 K-apt(공동주택관리정보시스템) 등록 단지 후보를 찾는다. 단지코드(kaptCode)·법정동·유사도 점수를 돌려주므로 유료 도구 호출 전에 정확한 단지명을 확정하는 데 쓴다. Search apartment complexes by region and name keyword.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "name": {
+     "description": "단지명 키워드",
+     "minLength": 1,
+     "type": "string"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "region",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_search",
+  "output_schema": {},
+  "title": "단지 검색"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.01/호출 — 현재 무료 모드] 단지명과 기간으로 아파트 매매 실거래 목록을 돌려준다(지역코드 변환·단지명 유사도 매칭·다개월 결합·금액/면적 정규화 포함). 금액 단위 만원, 평당가 포함. Apartment sale transactions for a complex over a period.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "areaMax": {
+     "description": "전용면적 상한(㎡)",
+     "type": "number"
+    },
+    "areaMin": {
+     "description": "전용면적 하한(㎡)",
+     "type": "number"
+    },
+    "from": {
+     "description": "시작 계약년월 YYYY-MM",
+     "type": "string"
+    },
+    "includeCancelled": {
+     "description": "해제(취소)된 거래 포함 여부 (기본 false)",
+     "type": "boolean"
+    },
+    "limit": {
+     "maximum": 300,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 6, 최대 24). from/to와 함께 쓰면 무시",
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "propertyType": {
+     "description": "아파트(기본) 또는 오피스텔. 오피스텔은 K-apt 기본정보가 없어 실거래 안에서만 이름을 찾는다",
+     "enum": [
+      "apt",
+      "officetel"
+     ],
+     "type": "string"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "to": {
+     "description": "종료 계약년월 YYYY-MM (기본 이번 달)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "region",
+    "aptName"
+   ],
+   "type": "object"
+  },
+  "name": "kr_apt_trades",
+  "output_schema": {},
+  "title": "단지 매매 실거래 목록"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.02/호출 — 현재 무료 모드] 아파트 분양권·입주권 전매 실거래. 단지명을 주면 그 단지, 생략하면 시군구 전체(단지별 집계). 권리구분(분양권/입주권)·면적타입별 건수·중위가·평당가와 거래 목록. Presale/occupancy-right resale transactions.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "aptName": {
+     "description": "아파트 단지명 (띄어쓰기·'아파트' 접미사 무관, 부분 일치 가능). 예) '래미안퍼스티지'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "areaMax": {
+     "description": "전용면적 상한(㎡)",
+     "type": "number"
+    },
+    "areaMin": {
+     "description": "전용면적 하한(㎡)",
+     "type": "number"
+    },
+    "from": {
+     "description": "시작 계약년월 YYYY-MM",
+     "type": "string"
+    },
+    "includeCancelled": {
+     "type": "boolean"
+    },
+    "limit": {
+     "maximum": 300,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "months": {
+     "description": "최근 N개월 (기본 6, 최대 24). from/to와 함께 쓰면 무시",
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "to": {
+     "description": "종료 계약년월 YYYY-MM (기본 이번 달)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "region"
+   ],
+   "type": "object"
+  },
+  "name": "kr_presale_trades",
+  "output_schema": {},
+  "title": "분양권·입주권 전매 실거래"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[무료] 이 서버의 도구 목록·건당 가격·결제 방식(x402, USDC)·데이터 출처와 갱신 주기·면책을 반환한다. Returns tool catalog, per-call prices and data sources.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "kr_pricing",
+  "output_schema": {},
+  "title": "요금·데이터 출처 안내"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[무료] 지역명('분당', '서울 강남구', '역삼동', '수원')을 실거래가 API용 법정동코드 5자리(lawdCd)로 변환한다. 구가 있는 시는 구 코드 목록(lawdCds)으로 펼친다. Map a Korean region name to the 5-digit legal district code.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "description": "최대 후보 수 (기본 10)",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "kr_region_lookup",
+  "output_schema": {},
+  "title": "지역명 → 법정동코드"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.03/호출 — 현재 무료 모드] 시군구 단위 매매 시장 스냅샷: 월별 거래량·해제 건수·직거래 비중·중위가·평당가, 법정동별 집계, 면적대 분포, 거래 많은 단지 Top N, 평당가 높은 단지 Top N. Market snapshot for a district.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "months": {
+     "description": "최근 N개월 (기본 3, 최대 12)",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "region": {
+     "description": "지역: 시군구 이름 또는 법정동코드 5자리. 예) '강남구', '서울 강남구', '분당', '성남시 분당구', '역삼동', '11680'",
+     "minLength": 1,
+     "type": "string"
+    },
+    "topN": {
+     "maximum": 30,
+     "minimum": 3,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "region"
+   ],
+   "type": "object"
+  },
+  "name": "kr_region_market",
+  "output_schema": {},
+  "title": "시군구 시장 스냅샷"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.02/호출 — 현재 무료 모드] 청약 공고 1건의 상세: 주택형별 공급세대·분양가(최고가, 만원)·순위/거주지역별 접수건수와 경쟁률·특별공급 신청현황·당첨가점(최저/최고/평균). houseManageNo를 모르면 name으로 검색해 단일 공고일 때만 진행. Competition rates and prices for one subscription notice.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "houseManageNo": {
+     "description": "주택관리번호 (kr_subscription_search 결과)",
+     "type": "string"
+    },
+    "name": {
+     "description": "단지명 키워드 (houseManageNo 대신)",
+     "type": "string"
+    },
+    "pblancNo": {
+     "description": "공고번호",
+     "type": "string"
+    },
+    "region": {
+     "description": "name 검색 시 시도 필터",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "kr_subscription_competition",
+  "output_schema": {},
+  "title": "청약 경쟁률 상세"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "[평소 $0.01/호출 — 현재 무료 모드] APT 청약(분양) 공고를 지역·공고일 기간·단지명으로 검색한다. 접수 일정(특별공급/1·2순위), 공급세대, 당첨자 발표, 계약, 입주예정, 시공사, 규제지역·분양가상한제 플래그, 공고 URL 포함. 기본 기간: 최근 90일 공고. Search apartment subscription notices.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "announcedFrom": {
+     "description": "모집공고일 시작 YYYY-MM-DD",
+     "type": "string"
+    },
+    "announcedTo": {
+     "description": "모집공고일 종료 YYYY-MM-DD",
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "name": {
+     "description": "단지명 키워드 (부분 일치)",
+     "type": "string"
+    },
+    "region": {
+     "description": "시도: 서울, 경기, 인천, 부산 … (청약홈 공급지역 기준)",
+     "type": "string"
+    },
+    "upcomingOnly": {
+     "description": "접수 시작일이 오늘 이후인 공고만",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "kr_subscription_search",
+  "output_schema": {},
+  "title": "청약 공고 검색"
+ }
+]

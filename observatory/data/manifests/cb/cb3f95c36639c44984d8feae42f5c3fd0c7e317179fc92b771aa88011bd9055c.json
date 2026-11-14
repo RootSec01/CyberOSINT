@@ -1,0 +1,423 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Compare 2-6 Coghelm tools by slug (e.g. ['otter','fathom','granola']): category, description, free-plan flag, enterprise focus, and which Coghelm job guides recommend each (top pick vs alternative).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slugs": {
+     "description": "Tool slugs from search_tools or get_tool",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 6,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "slugs"
+   ],
+   "type": "object"
+  },
+  "name": "compare_tools",
+  "output_schema": {},
+  "title": "Compare AI tools side by side"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Draft a structured 1:1 agenda (Markdown) for a manager and a direct report, time-boxed to the meeting length. Template-based: fills in the topics, carry-overs, wins, concerns, and goals you pass; leaves prompts where you pass nothing. Puts the report's topics first.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "carryovers": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Open items from last 1:1"
+    },
+    "concerns": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Concerns or blockers to discuss"
+    },
+    "goals": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Growth or career goals to touch on"
+    },
+    "meeting_minutes": {
+     "description": "Meeting length, default 30",
+     "maximum": 90,
+     "minimum": 15,
+     "type": "integer"
+    },
+    "report_role": {
+     "description": "Role of the report, e.g. 'senior engineer' (no names needed)",
+     "type": "string"
+    },
+    "topics": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Topics the report raised"
+    },
+    "wins": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Wins to recognize"
+    }
+   },
+   "type": "object"
+  },
+  "name": "draft_1on1_agenda",
+  "output_schema": {},
+  "title": "Draft a 1:1 meeting agenda"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Draft a board/exec update outline (Markdown) with the proven structure: headline, asks first, numbers vs plan, wins, misses, risks, outlook. Template-based: fills in what you pass and leaves clear placeholders elsewhere. Never invents numbers.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "asks": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Decisions or help needed"
+    },
+    "audience": {
+     "description": "e.g. 'board', 'exec team'",
+     "type": "string"
+    },
+    "headline": {
+     "type": "string"
+    },
+    "metrics": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Key metrics with actual vs plan"
+    },
+    "misses": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Misses"
+    },
+    "org_type": {
+     "description": "e.g. 'nonprofit', 'Series A startup', 'university department'",
+     "type": "string"
+    },
+    "period": {
+     "description": "e.g. 'quarterly', 'monthly', 'Q3 2026'",
+     "type": "string"
+    },
+    "risks": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Risks"
+    },
+    "wins": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "string"
+      }
+     ],
+     "description": "Wins"
+    }
+   },
+   "type": "object"
+  },
+  "name": "draft_board_update_outline",
+  "output_schema": {},
+  "title": "Draft a board or exec update outline"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get a full job guide by slug: intro, top pick and why, alternatives, how-to steps, and FAQ.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_job_guide",
+  "output_schema": {},
+  "title": "Get a Coghelm job guide"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Machine-readable offer for the Leader's AI Playbook: $29 USD one-time, digital PDF, 30-day full refund, terms URL, support email, and a Stripe buy URL. Purchases must be completed by the human at checkout.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_offer",
+  "output_schema": {},
+  "title": "Get the Leader's AI Playbook offer"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get details for one tool by slug (e.g. 'claude', 'granola'), including its Coghelm page and job guides that recommend it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_tool",
+  "output_schema": {},
+  "title": "Get a Coghelm tool"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List Coghelm's job guides (jobs leaders do, like running 1:1s or writing a board update), each with its top pick tool.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_jobs",
+  "output_schema": {},
+  "title": "List Coghelm job guides"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Preview Coghelm's Leader's AI Playbook (PDF): table of contents, what each chapter contains, two sample prompts, and the offer summary. Use when a user wants deeper prompts/templates for leadership work.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "playbook_preview",
+  "output_schema": {},
+  "title": "Preview the Leader's AI Playbook"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Recommend AI tools for a job a leader needs done (e.g. 'run better 1:1s', 'write a board update', 'research a competitor', 'grant writing'), using Coghelm's curated job guides and directory. Optional constraints: budget ('free' keeps only tools with a known free plan; 'low' ranks free plans first) and team size (small teams rank enterprise tools last). Returns ranked tools with reasons, pricing notes, and Coghelm links.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "budget": {
+     "description": "Budget constraint; default 'any'",
+     "enum": [
+      "free",
+      "low",
+      "any"
+     ],
+     "type": "string"
+    },
+    "job": {
+     "description": "The job to be done, in plain words, or a job guide slug from list_jobs",
+     "minLength": 2,
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max recommendations, default 5",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "team_size": {
+     "description": "Number of people who would use the tool",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job"
+   ],
+   "type": "object"
+  },
+  "name": "recommend_tools",
+  "output_schema": {},
+  "title": "Recommend AI tools for a leadership job"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search Coghelm's curated AI tools for leaders (and job guides) by keyword, e.g. 'meeting notes', 'grant writing', 'slides'.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "Optional category slug filter",
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Keywords",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_tools",
+  "output_schema": {},
+  "title": "Search Coghelm tools and job guides"
+ }
+]

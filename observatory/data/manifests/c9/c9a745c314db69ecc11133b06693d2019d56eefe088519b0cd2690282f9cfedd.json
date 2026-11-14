@@ -1,0 +1,509 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns one upcoming LexGO event by integer id, id-slug, url, or click_url. click_url is the link to the event on LexGO.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Integer id, id-slug, or an allowlisted lexgo.be/lu event URL",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_event",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": true,
+   "properties": {
+    "click_url": {
+     "type": "string"
+    },
+    "company": {
+     "type": "object"
+    },
+    "domain": {
+     "type": "string"
+    },
+    "event_ends_at": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "event_starts_at": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "id": {
+     "type": "integer"
+    },
+    "languages": {
+     "type": "array"
+    },
+    "summaries": {
+     "additionalProperties": true,
+     "properties": {
+      "en": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "fr": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "nl": {
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    },
+    "titles": {
+     "additionalProperties": true,
+     "properties": {
+      "en": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "fr": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "nl": {
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get LexGO event"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns one vacancy with its full sanitized description and structured facets, by integer id, id-slug, url, or click_url from search_jobs. click_url is the link to the vacancy on LexGO.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Integer id, id-slug, or an allowlisted lexgo.be/lu job URL (url or click_url)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_job",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": true,
+   "properties": {
+    "click_url": {
+     "type": "string"
+    },
+    "descriptions": {
+     "type": "object"
+    },
+    "id": {
+     "type": "integer"
+    },
+    "salary": {
+     "type": "object"
+    },
+    "summaries": {
+     "type": "object"
+    },
+    "titles": {
+     "type": "object"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get LexGO job detail"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List upcoming scheduled legal trainings and events on LexGO. On-demand webinars are excluded.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cursor": {
+     "type": "string"
+    },
+    "domain": {
+     "enum": [
+      "be",
+      "lu"
+     ],
+     "type": "string"
+    },
+    "language": {
+     "enum": [
+      "nl",
+      "fr",
+      "en"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_events",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": true,
+   "properties": {
+    "events": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "click_url": {
+        "type": "string"
+       },
+       "company": {
+        "type": "object"
+       },
+       "domain": {
+        "type": "string"
+       },
+       "event_ends_at": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "event_starts_at": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "id": {
+        "type": "integer"
+       },
+       "languages": {
+        "type": "array"
+       },
+       "summaries": {
+        "additionalProperties": true,
+        "properties": {
+         "en": {
+          "type": [
+           "string",
+           "null"
+          ]
+         },
+         "fr": {
+          "type": [
+           "string",
+           "null"
+          ]
+         },
+         "nl": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "type": "object"
+       },
+       "titles": {
+        "additionalProperties": true,
+        "properties": {
+         "en": {
+          "type": [
+           "string",
+           "null"
+          ]
+         },
+         "fr": {
+          "type": [
+           "string",
+           "null"
+          ]
+         },
+         "nl": {
+          "type": [
+           "string",
+           "null"
+          ]
+         }
+        },
+        "type": "object"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "next_cursor": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "List LexGO events"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List LexGO job function names (lawyer, in-house counsel, paralegal, notary, …) for use as function_id filters. Names only; no SEO HTML. list_taxonomies holds the full vocabulary.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_functions",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": true,
+   "properties": {
+    "functions": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "en_name": {
+        "type": "string"
+       },
+       "fr_name": {
+        "type": "string"
+       },
+       "id": {
+        "type": "integer"
+       },
+       "nl_name": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List LexGO job functions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List function, discipline, region, and work-environment ids plus experience, contract, and work-arrangement enums. search_jobs accepts function_id, discipline_id, work_environment_id, region_id, experience_id, contract, and remote (boolean). work_arrangement ids are labels, not filters. Names only; no SEO HTML.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_taxonomies",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": true,
+   "properties": {
+    "contract": {
+     "type": "array"
+    },
+    "disciplines": {
+     "type": "array"
+    },
+    "experience": {
+     "type": "array"
+    },
+    "functions": {
+     "type": "array"
+    },
+    "regions": {
+     "type": "array"
+    },
+    "work_arrangement": {
+     "type": "array"
+    },
+    "work_environments": {
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List LexGO job filters"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search live Belgian or Luxembourg legal jobs on LexGO by keywords and filters. q works best with one to three keywords, such as advocaat, juriste Bruxelles or M&A. Every word has to match a job's title, employer, practice area, function, city or region, in Dutch, French or English, and generic words such as jobs, vacature or legal are ignored. Returns 10 compact results without descriptions unless limit says otherwise. get_job returns a vacancy's full description. click_url is the link to the vacancy on LexGO.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "contract": {
+     "enum": [
+      "permanent",
+      "temporary",
+      "self_employed"
+     ],
+     "type": "string"
+    },
+    "cursor": {
+     "type": "string"
+    },
+    "discipline_id": {
+     "description": "Practice-area id from GET /api/v1/taxonomies.",
+     "type": "integer"
+    },
+    "domain": {
+     "enum": [
+      "be",
+      "lu"
+     ],
+     "type": "string"
+    },
+    "experience_id": {
+     "description": "Experience band id from GET /api/v1/taxonomies (0 unknown, 1 0-3 years, 2 3-6, 3 +6).",
+     "type": "integer"
+    },
+    "function_id": {
+     "type": "integer"
+    },
+    "language": {
+     "description": "Posting content locale (nl/fr/en), not required spoken languages.",
+     "enum": [
+      "nl",
+      "fr",
+      "en"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "q": {
+     "description": "One to three keywords, such as advocaat, juriste Bruxelles or M&A. Every word has to match a job's title, employer name, practice area, function, city or region, in Dutch, French or English. Simple plurals match, and generic words such as jobs, vacature, legal or Belgium are ignored; with nothing left, q is ignored. A word in no job gives no results. LIKE wildcards are treated as characters.",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "region_id": {
+     "description": "Region id: 1 Brussels, 2 Antwerp, 3 Flemish Brabant, 4 East Flanders, 5 West Flanders, 6 Limburg, 7 Walloon Brabant, 8 Namur, 9 Hainaut, 10 Liège, 11 Luxembourg, 12 Luxembourg (country), 13 Netherlands, 14 France, 15 Other country. 11 is the Belgian province, 12 the country. A province also matches jobs posted for a whole area (Flanders, Wallonia, Belgium), which list every province they cover in regions.",
+     "type": "integer"
+    },
+    "remote": {
+     "type": "boolean"
+    },
+    "work_environment_id": {
+     "description": "Employer-type id from GET /api/v1/taxonomies.",
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "search_jobs",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": true,
+   "properties": {
+    "jobs": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "click_url": {
+        "type": "string"
+       },
+       "id": {
+        "type": "integer"
+       },
+       "summaries": {
+        "type": "object"
+       },
+       "titles": {
+        "type": "object"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "next_cursor": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Search LexGO jobs"
+ }
+]

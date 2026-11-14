@@ -1,0 +1,100 @@
+[
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Search ImageKit documentation using semantic search.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "Natural language search query about ImageKit features, APIs, SDKs, etc.",
+     "type": "string"
+    },
+    "sources": {
+     "anyOf": [
+      {
+       "items": {
+        "enum": [
+         "imagekit_api_references",
+         "imagekit_community",
+         "imagekit_guides",
+         "imagekit_sdk"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Optional list of documentation sources to search within.\n     If not provided, sources are auto-detected from the query."
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_docs",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object",
+   "x-fastmcp-wrap-result": true
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Build an ImageKit image/video transformation URL from a natural language description.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "fetch_url_to_check": {
+     "default": true,
+     "description": "Whether to verify the generated URL is accessible via CDN.",
+     "type": "boolean"
+    },
+    "query": {
+     "description": "Natural language description of the desired transformation\n   (e.g. \"resize to 800x600\", \"add blur and grayscale\", \"remove background\").",
+     "type": "string"
+    },
+    "src": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Optional source image URL. If not provided, a default sample image is used."
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "transformation_builder",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ }
+]

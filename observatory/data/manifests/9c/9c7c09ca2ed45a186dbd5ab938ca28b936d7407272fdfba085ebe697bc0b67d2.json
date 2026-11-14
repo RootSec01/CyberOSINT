@@ -1,0 +1,844 @@
+[
+ {
+  "description": "Submit several pre-decomposed stories in one call and get back one batchId to track, instead of dispatching build_feature N times yourself. Swarm is a Pro plan feature: the maximum batch size depends on the account plan (up to 50; not available on Free or the base pay-as-you-go account); a batch over the limit is refused with BATCH_SIZE_LIMIT_EXCEEDED and the limit. Each item has the same shape as a single build_feature call (storyTitle, acceptanceCriteria, stackType, existingFiles?, skipTestsFor?) plus its own repoUrl (informational only). Call get_batch with the returned batchId to check aggregate progress.",
+  "input_schema": {
+   "properties": {
+    "idempotencyKey": {
+     "description": "A repeat call with the same key returns the original batchId instead of dispatching again.",
+     "type": "string"
+    },
+    "items": {
+     "description": "1 to 50 stories to dispatch.",
+     "items": {
+      "properties": {
+       "acceptanceCriteria": {
+        "type": "string"
+       },
+       "examples": {
+        "description": "OPTIONAL call → result examples, turned directly into test cases (no LLM), so the build is verified against exactly these. Each: { target: repo-relative .ts/.tsx path of the file under test, call: a TS expression such as \"clamp(5, 0, 10)\", imports?: export names the call uses (default: the component's main export), expected?: JSON value (compared with toEqual) OR throws?: error class name such as \"RangeError\", async?: true when the call returns a promise }. Exactly one of expected / throws per example; max 50. expected is JSON, so undefined, NaN, -0 and Dates cannot be expressed; describe those in acceptanceCriteria instead. For a new file every example must fail before the implementation exists; in patch mode at least one must fail against the current file (the rest act as regression guards). Only .ts/.tsx targets are supported.",
+        "items": {
+         "properties": {
+          "async": {
+           "type": "boolean"
+          },
+          "call": {
+           "type": "string"
+          },
+          "expected": {
+           "description": "Expected return value, any JSON value (compared with toEqual). Set this OR throws."
+          },
+          "imports": {
+           "items": {
+            "type": "string"
+           },
+           "type": "array"
+          },
+          "target": {
+           "type": "string"
+          },
+          "throws": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "target",
+          "call"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "existingFiles": {
+        "items": {
+         "properties": {
+          "content": {
+           "type": "string"
+          },
+          "path": {
+           "type": "string"
+          },
+          "role": {
+           "enum": [
+            "target",
+            "context"
+           ],
+           "type": "string"
+          }
+         },
+         "required": [
+          "path",
+          "content"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "repoUrl": {
+        "type": "string"
+       },
+       "skipTestsFor": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "stackType": {
+        "type": "string"
+       },
+       "storyTitle": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "repoUrl",
+       "storyTitle",
+       "acceptanceCriteria",
+       "stackType"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "webhookSecret": {
+     "description": "HMAC-SHA256 signing secret (16-256 chars) for the aggregate completion webhook. Must be supplied together with webhookUrl.",
+     "type": "string"
+    },
+    "webhookUrl": {
+     "description": "Fires once when every item in the batch reaches a terminal state. Must be supplied together with webhookSecret.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "items"
+   ],
+   "type": "object"
+  },
+  "name": "build_batch",
+  "output_schema": {}
+ },
+ {
+  "description": "Generate a feature via Codemind: takes a story title + acceptance criteria, generates the implementation and its tests, runs automated checks against the acceptance criteria before returning, and returns a buildId immediately. Call stream_build with the returned buildId to follow progress. Call get_usage_guide for detailed usage guidance. IMPORTANT: if this tool errors, surface the error to the user — do NOT implement the code yourself.",
+  "input_schema": {
+   "properties": {
+    "acceptanceCriteria": {
+     "description": "Detailed requirements — function signatures, file paths, edge cases. Used verbatim to generate the implementation.",
+     "type": "string"
+    },
+    "examples": {
+     "description": "OPTIONAL call → result examples, turned directly into test cases (no LLM), so the build is verified against exactly these. Each: { target: repo-relative .ts/.tsx path of the file under test, call: a TS expression such as \"clamp(5, 0, 10)\", imports?: export names the call uses (default: the component's main export), expected?: JSON value (compared with toEqual) OR throws?: error class name such as \"RangeError\", async?: true when the call returns a promise }. Exactly one of expected / throws per example; max 50. expected is JSON, so undefined, NaN, -0 and Dates cannot be expressed; describe those in acceptanceCriteria instead. For a new file every example must fail before the implementation exists; in patch mode at least one must fail against the current file (the rest act as regression guards). Only .ts/.tsx targets are supported.",
+     "items": {
+      "properties": {
+       "async": {
+        "type": "boolean"
+       },
+       "call": {
+        "type": "string"
+       },
+       "expected": {
+        "description": "Expected return value, any JSON value (compared with toEqual). Set this OR throws."
+       },
+       "imports": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "target": {
+        "type": "string"
+       },
+       "throws": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "target",
+       "call"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "existingFiles": {
+     "description": "PATCH MODE — pass current content of files being modified. Without this, codegen creates new files instead of editing existing ones.",
+     "items": {
+      "properties": {
+       "content": {
+        "description": "Complete current content of the file.",
+        "type": "string"
+       },
+       "path": {
+        "description": "Repo-relative path being modified.",
+        "type": "string"
+       },
+       "role": {
+        "description": "'target' asserts this exact path must become its own patchable component, even if the acceptanceCriteria never quotes its exact path verbatim — use this when a prior build's response indicated an existingFiles path was not matched to any component of that build; does not change the pre-flight import check below. 'context' means this file is supplied only to resolve some OTHER file's import, not to be patched itself — it EXEMPTS this file's own imports from the pre-flight check that otherwise requires every existingFiles entry's imports to also be supplied (unless acceptanceCriteria quotes this file's exact path verbatim, in which case the file may still become a real patch target and the exemption does not apply). Omitting role is NOT the same as 'context' — an omitted-role file's own imports are ALWAYS required to be supplied, same as 'target'; role is otherwise purely an ADDITIONAL signal for whether this path is treated as a guaranteed component, not an exclusion from that. NOT supported when path is a test file (*.test.ts, *_test.go, test_*.py, *Test.kt, etc.) — v2 always synthesizes its own verification test per component, so an existing test file cannot itself be a patch target yet; such a build is rejected.",
+        "enum": [
+         "target",
+         "context"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "projectId": {
+     "description": "Opaque identifier grouping related builds for CIL codebase context — omit to skip CIL entirely.",
+     "type": "string"
+    },
+    "skipTestsFor": {
+     "description": "Repo-relative source paths (max 20) to opt OUT of test-file delivery for — e.g. the repo has no test framework and a scaffolded test file would be unwanted. Verification still ALWAYS runs against every component regardless of this setting — it only filters which files are DELIVERED to you, never whether verification happens. If the target project has NO test infrastructure at all, the build will very likely still fail even with this set — there is currently no fallback verification mode (e.g. typecheck-only) for that case. Explicit opt-in only, never infer from acceptanceCriteria prose.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "stackType": {
+     "description": "Runtime target stack (free text). JavaScript/TypeScript only at launch, e.g. \"worker\", \"typescript\", \"node\", \"react\". python, go, swift-ios, kotlin-android and rust are rejected with UNSUPPORTED_STACK_TYPE until each has measured success.",
+     "type": "string"
+    },
+    "storyTitle": {
+     "description": "Short title used to organize this build.",
+     "type": "string"
+    },
+    "webhookSecret": {
+     "description": "Shared secret (16-256 chars) used to HMAC-SHA256-sign the webhook payload, sent in the x-codemind-v2-signature header. Must be supplied together with webhookUrl. Never echoed back.",
+     "type": "string"
+    },
+    "webhookUrl": {
+     "description": "HTTPS URL to POST a signed payload to when the build reaches a terminal state (completed/failed). Must be supplied together with webhookSecret.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "storyTitle",
+    "acceptanceCriteria",
+    "stackType"
+   ],
+   "type": "object"
+  },
+  "name": "build_feature",
+  "output_schema": {}
+ },
+ {
+  "description": "Submit raw PRD/plan/spec text plus a list of target repos; Codemind LLM-decomposes it into stories (each assigned to one of your declared repos, never an invented one) and dispatches them via the same path build_batch uses. Pass dryRun: true to see the decomposed story list without dispatching anything, useful for reviewing before committing. Recommended for a first-time caller: review with dryRun: true, then resubmit the (possibly edited) story list via build_batch directly — a second build_from_spec call with dryRun: false re-decomposes specText from scratch and will not reflect edits made to a prior dry run's output.",
+  "input_schema": {
+   "properties": {
+    "deliver": {
+     "description": "Opt in to delivery: when every story has finished, open one pull request per target repo (a draft if any story did not verify or the repo's own tests newly fail). Needs the repo attached through the GitHub App; an unattached repo is reported with nextAction attach_repo and its files stay available from get_build_files. Never merged automatically. Results appear under deliveries in get_batch.",
+     "enum": [
+      "pull_request"
+     ],
+     "type": "string"
+    },
+    "dryRun": {
+     "type": "boolean"
+    },
+    "maxStories": {
+     "description": "Default 20, hard ceiling 50.",
+     "type": "number"
+    },
+    "repos": {
+     "items": {
+      "properties": {
+       "existingFiles": {
+        "description": "OPTIONAL current contents of this repo's files that the spec changes or depends on ({path, content}). With deliver and the repo attached through the GitHub App you can omit this: Ship reads the files each story names, plus their local imports, from the repo itself. Every story for this repo is built with them (a file whose path the story names is edited, the rest are read-only context). With deliver, Ship only overwrites an existing file that is supplied here AND still has exactly this content in the repo at delivery; any other existing file is never overwritten.",
+        "items": {
+         "properties": {
+          "content": {
+           "type": "string"
+          },
+          "path": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "path",
+          "content"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "hint": {
+        "type": "string"
+       },
+       "repoUrl": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "repoUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "specText": {
+     "type": "string"
+    },
+    "webhookSecret": {
+     "type": "string"
+    },
+    "webhookUrl": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "specText",
+    "repos"
+   ],
+   "type": "object"
+  },
+  "name": "build_from_spec",
+  "output_schema": {}
+ },
+ {
+  "description": "Cancel a running build. Has no effect on builds that already reached a terminal state.",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "ID of the build to cancel.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId"
+   ],
+   "type": "object"
+  },
+  "name": "cancel_build",
+  "output_schema": {}
+ },
+ {
+  "description": "Resume a finished Ship run (started with build_from_spec) that ended incomplete or nothing_delivered: re-dispatches only the stories that did not verify, in the same run. Verified stories are not rebuilt or billed again; a resumed story is billed once, when it first verifies. Each resumed story is told why its earlier attempt failed. At most 2 resumes per run (then RESUME_LIMIT_EXCEEDED). The same throttle, plan cap and allowance apply as for a new submission. Resuming a run with nothing left to do changes nothing. Track progress with get_batch.",
+  "input_schema": {
+   "properties": {
+    "batchId": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "batchId"
+   ],
+   "type": "object"
+  },
+  "name": "continue_batch",
+  "output_schema": {}
+ },
+ {
+  "description": "Send corrected acceptance criteria to a running build. Applies to components that have not started generating yet; the currently-generating component finishes as originally scoped.",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "ID of the running build to steer.",
+     "type": "string"
+    },
+    "correctedAcceptanceCriteria": {
+     "description": "The new, complete acceptance criteria — replaces the original for all not-yet-started components.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId",
+    "correctedAcceptanceCriteria"
+   ],
+   "type": "object"
+  },
+  "name": "continue_build",
+  "output_schema": {}
+ },
+ {
+  "description": "Instantly provision a new anonymous Codemind account on the free plan — no credential, no human step required. Call this when build_feature (or any other tool) fails with an auth error and no CODEMIND_API_KEY is configured. Returns a tenantId and a bearer token (apiKey) usable immediately for build_feature and every other tool. The account is anonymous (no identity attached) until a person opens the claim link in the response text and signs in. If a tool call fails with an auth error and you ALREADY have a configured apiKey, call get_usage_guide with topic \"auth\" before calling this tool again — replacing an already-claimed account's credential here loses its identity and history. All arguments are optional; pass utm_source, utm_medium and utm_campaign, and invite, only if your human gave you them.",
+  "input_schema": {
+   "properties": {
+    "invite": {
+     "description": "Optional invite code from an invite link your human gave you. Case-sensitive; pass it exactly as given. An invalid or used-up code is ignored.",
+     "type": "string"
+    },
+    "ph_did": {
+     "description": "Optional web visitor id from a setup link or command your human gave you (--ph-did). Pass it exactly as given; an invalid value is ignored.",
+     "type": "string"
+    },
+    "utm_campaign": {
+     "description": "Optional campaign tag, e.g. \"ph-2026-10-08\". Same format as utm_source.",
+     "type": "string"
+    },
+    "utm_medium": {
+     "description": "Optional marketing medium tag, e.g. \"launch\". Same format as utm_source.",
+     "type": "string"
+    },
+    "utm_source": {
+     "description": "Optional marketing source tag, e.g. \"producthunt\". Lowercase letters, digits, \"_\", \".\" and \"-\", max 64 characters; anything else is ignored.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "create_free_account",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the aggregate status of a batch submitted via build_batch.",
+  "input_schema": {
+   "properties": {
+    "batchId": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "batchId"
+   ],
+   "type": "object"
+  },
+  "name": "get_batch",
+  "output_schema": {}
+ },
+ {
+  "description": "Read-only: your plan, how many verified builds you have used, how many are included and left in the current allowance window, and the paid-balance draw (cents) if you have topped up. Call this to check headroom before a large batch, or to learn why a build was rejected for allowance.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_billing_status",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the current state of a build by ID (status and error details).",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "The build ID.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId"
+   ],
+   "type": "object"
+  },
+  "name": "get_build",
+  "output_schema": {}
+ },
+ {
+  "description": "Retrieve the generated files from a completed build. Returns each file path and full content.",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "The build ID.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId"
+   ],
+   "type": "object"
+  },
+  "name": "get_build_files",
+  "output_schema": {}
+ },
+ {
+  "description": "Get a build's original submitted spec (storyTitle, acceptanceCriteria, stackType, existingFiles, skipTestsFor) without retrying it — useful for inspecting or reusing a prior build's spec as a template.",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "The build ID.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId"
+   ],
+   "type": "object"
+  },
+  "name": "get_build_spec",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the current state of a review by ID (status, verdict, findings) without streaming — useful for polling or inspecting a review after the fact. Use stream_review to follow a review in real time instead.",
+  "input_schema": {
+   "properties": {
+    "reviewId": {
+     "description": "The reviewId returned by review_code.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "reviewId"
+   ],
+   "type": "object"
+  },
+  "name": "get_review",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the current state of a test by ID (status, pass/fail verdict, generated verification test content) without streaming — useful for polling or inspecting a test after the fact. Use stream_test to follow a test in real time instead.",
+  "input_schema": {
+   "properties": {
+    "testId": {
+     "description": "The testId returned by test_component.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "testId"
+   ],
+   "type": "object"
+  },
+  "name": "get_test",
+  "output_schema": {}
+ },
+ {
+  "description": "Returns the generated fix diff (as file paths and line counts, not full content) and before/after test-run output for one triage run, identified by the triage run id from get_triage_runs (NOT a build id and NOT an issue number). stdout/stderr are tail-truncated because test failure summaries appear at the end of output, not the install noise at the start. Full file contents are available separately via the get_build_files tool using the run's buildId. Also includes a per-LLM-call trace (stage/model/status/latency) from Analytics Engine when available, covering attempts that failed before ever reaching the before/after test comparison above.",
+  "input_schema": {
+   "properties": {
+    "triageRunId": {
+     "description": "The triage run id, as returned by get_triage_runs (the first token of each line), not the build id or issue number.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "triageRunId"
+   ],
+   "type": "object"
+  },
+  "name": "get_triage_diagnostics",
+  "output_schema": {}
+ },
+ {
+  "description": "Lists the issue-triage run history for one attached repo — one row per GitHub issue that was auto-triaged — including terminal status (`pr_opened` means a fix PR was opened and passed the repo's own test suite; `needs_human` means the issue wasn't judged auto-fixable; `failed` means the triage/build/verify pipeline errored). The `repoAttachmentId` is the attachment `id` returned by `list_repos`, NOT a `owner/repo` string. Full diagnostics (the generated diff and before/after test output) for any run id returned here are available via the get_triage_diagnostics tool.",
+  "input_schema": {
+   "properties": {
+    "repoAttachmentId": {
+     "description": "The repo attachment id, as returned by list_repos (not an owner/repo string).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "repoAttachmentId"
+   ],
+   "type": "object"
+  },
+  "name": "get_triage_runs",
+  "output_schema": {}
+ },
+ {
+  "description": "Get detailed usage guidance for Codemind's tools — how to write effective acceptanceCriteria, when to use patch mode, how webhooks work, what to do when a build declines, common failure patterns unrelated to acceptanceCriteria quality, and how to recover from an auth error without losing an identified account. Call this before build_feature/test_component/review_code if you are unfamiliar with this tool surface, or if the same story fails repeatedly across retries; call it with topic \"auth\" before calling create_free_account to recover from an auth error on an existing credential.",
+  "input_schema": {
+   "properties": {
+    "topic": {
+     "description": "Which part of Codemind usage to get guidance on. Defaults to overview.",
+     "enum": [
+      "overview",
+      "patch-mode",
+      "webhooks",
+      "error-handling",
+      "common-failures",
+      "auth",
+      "cloud-swarm"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_usage_guide",
+  "output_schema": {}
+ },
+ {
+  "description": "List recent builds for this tenant.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max builds to return (default 20, max 50).",
+     "type": "number"
+    },
+    "offset": {
+     "description": "Pagination offset (default 0).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_builds",
+  "output_schema": {}
+ },
+ {
+  "description": "Lists GitHub repos currently attached to the caller's tenant via Codemind Resolve (the GitHub App that automatically triages filed issues into fix PRs), and that the returned `id` field is the repo attachment id to pass into `get_triage_runs`.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_repos",
+  "output_schema": {}
+ },
+ {
+  "description": "Index files into the CIL codebase context for a project — for files Codemind itself did not generate (a manual edit, another tool's output). Not needed after a normal build_feature call: a completed build's own output is indexed automatically when projectId was supplied.",
+  "input_schema": {
+   "properties": {
+    "files": {
+     "description": "Files to index, ≤10 files / ≤700KB total.",
+     "items": {
+      "properties": {
+       "content": {
+        "description": "Complete file content.",
+        "type": "string"
+       },
+       "path": {
+        "description": "Repo-relative path.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "projectId": {
+     "description": "Opaque project identifier — same value used in build_feature calls for this codebase.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "projectId",
+    "files"
+   ],
+   "type": "object"
+  },
+  "name": "notify_files_written",
+  "output_schema": {}
+ },
+ {
+  "description": "Retry a failed build using the same spec (story, acceptance criteria, stack, existing files).",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "ID of the failed build to retry.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId"
+   ],
+   "type": "object"
+  },
+  "name": "retry_build",
+  "output_schema": {}
+ },
+ {
+  "description": "Submit code for review: bugs, security issues, silent failures, and style concerns. Give it files (path+content) and/or a unified diff. At least one of files or diff is required — submitting neither is rejected. TWO independent LLM-judge passes review it (a general correctness/security pass and a dedicated silent-failure pass) and their findings are merged into one verdict. For a genuinely useful review, ALSO supply conventions (paste this project's CLAUDE.md and RULES.md content — you already have repo access, this tool does not) so both passes can enforce project-specific rules, and relatedFiles (any existing file the change references but doesn't itself modify — an interface being implemented, a caller of a changed function, a sibling example of the real convention) so findings can be verified against actual code instead of guessed. Omitting both still works but produces a weaker review with no codebase grounding. No code generation or execution happens here — this is judgment only, not test verification (use test_component for that). Returns a reviewId immediately; call stream_review to follow progress and get the findings. Call get_usage_guide for detailed usage guidance.",
+  "input_schema": {
+   "properties": {
+    "context": {
+     "description": "Optional story/PR description to give the reviewer intent context.",
+     "type": "string"
+    },
+    "conventions": {
+     "description": "This project's CLAUDE.md and/or RULES.md content (or the relevant excerpt). Strongly recommended when available — both review passes treat this as authoritative: a finding that violates a stated rule here is always blocking.",
+     "type": "string"
+    },
+    "diff": {
+     "description": "A unified diff. The reviewer weights changed lines most heavily. Combined with files, must not exceed 150,000 characters.",
+     "type": "string"
+    },
+    "files": {
+     "description": "Full file contents to review. Provide when you want the reviewer to see complete files, not just a diff.",
+     "items": {
+      "properties": {
+       "content": {
+        "type": "string"
+       },
+       "path": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "relatedFiles": {
+     "description": "Existing files for cross-reference ONLY — never diffed, never themselves the subject of a finding. Supply an interface the change implements, a caller of a changed function, or a sibling file showing the project's real convention, so the reviewer can verify claims against real code instead of guessing.",
+     "items": {
+      "properties": {
+       "content": {
+        "type": "string"
+       },
+       "path": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "review_code",
+  "output_schema": {}
+ },
+ {
+  "description": "Stream live progress for a batch submitted via build_batch. Polls the batch's aggregate status periodically and emits a progress notification each tick; closes once the batch reaches a terminal status (completed or completed_with_failures). Call get_batch instead for a single point-in-time snapshot.",
+  "input_schema": {
+   "properties": {
+    "batchId": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "batchId"
+   ],
+   "type": "object"
+  },
+  "name": "stream_batch",
+  "output_schema": {}
+ },
+ {
+  "description": "Follow a build submitted by build_feature in real time. Emits a progress notification on every phase change and resolves with the final result when the build completes or fails. Use immediately after build_feature returns a buildId.",
+  "input_schema": {
+   "properties": {
+    "buildId": {
+     "description": "The buildId returned by build_feature.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "buildId"
+   ],
+   "type": "object"
+  },
+  "name": "stream_build",
+  "output_schema": {}
+ },
+ {
+  "description": "Follow a review submitted by review_code in real time. Resolves with the findings and the approve/request-changes verdict.",
+  "input_schema": {
+   "properties": {
+    "reviewId": {
+     "description": "The reviewId returned by review_code.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "reviewId"
+   ],
+   "type": "object"
+  },
+  "name": "stream_review",
+  "output_schema": {}
+ },
+ {
+  "description": "Follow a test submitted by test_component in real time. Resolves with the pass/fail verdict and the generated verification test content.",
+  "input_schema": {
+   "properties": {
+    "testId": {
+     "description": "The testId returned by test_component.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "testId"
+   ],
+   "type": "object"
+  },
+  "name": "stream_test",
+  "output_schema": {}
+ },
+ {
+  "description": "Run standalone cloud verification on code you already have: give it a component (filePath/exportName/signature) plus acceptance criteria, and it generates a black-box verification test, validates that test against a mechanical stub, then executes your REAL code against it in the cloud (isolate or container, per stack). No code generation happens here — use build_feature for that. Returns a testId immediately; call stream_test to follow progress and get the pass/fail verdict. Call get_usage_guide for detailed usage guidance.",
+  "input_schema": {
+   "properties": {
+    "acceptanceCriteria": {
+     "description": "What the code must do — the verification test is generated from this alone.",
+     "type": "string"
+    },
+    "code": {
+     "description": "The REAL implementation to test. Never shown to the model that generates the verification test.",
+     "type": "string"
+    },
+    "component": {
+     "description": "MUST match the real code exactly — the generated verification test imports/calls by these exact names.",
+     "properties": {
+      "exportName": {
+       "description": "Primary export identifier the verification test will call.",
+       "type": "string"
+      },
+      "filePath": {
+       "description": "Workspace-relative path of the file under test.",
+       "type": "string"
+      },
+      "purpose": {
+       "description": "Optional one-sentence description. Not required for testing.",
+       "type": "string"
+      },
+      "signature": {
+       "description": "Declaration line for the primary export, in the target language.",
+       "type": "string"
+      },
+      "supportingTypes": {
+       "description": "Optional co-located type declarations the signature depends on.",
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "filePath",
+      "exportName",
+      "signature"
+     ],
+     "type": "object"
+    },
+    "contextFiles": {
+     "description": "Optional ambient read-only files the code under test may import.",
+     "items": {
+      "properties": {
+       "content": {
+        "type": "string"
+       },
+       "path": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "path",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "stackType": {
+     "description": "Runtime target stack (JavaScript/TypeScript only at launch), e.g. \"worker\", \"typescript\", \"node\", \"react\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "stackType",
+    "component",
+    "code",
+    "acceptanceCriteria"
+   ],
+   "type": "object"
+  },
+  "name": "test_component",
+  "output_schema": {}
+ }
+]

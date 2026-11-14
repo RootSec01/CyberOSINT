@@ -1,0 +1,135 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://agentdiet/v1/result",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://agentdiet/v1/result",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Enrich company domain"
+  },
+  "description": "Extracts verified emails, social links, 40+ tech stack signals, pricing tiers, and company summary for GTM & research agents. WHEN TO USE: Call `enrich_company_domain` when your task requires deterministic `company-enrich` analysis for `domain`; use `get_agent_wallet_status` to check your remaining free trial quota or prepaid balance. WHEN NOT TO USE: Do not use for unrelated domains or binary media. PARAMETER INTERACTIONS: Pass the target `domain` as a non-empty string; omit `agent_id` and `tx_hash` during your 5 free trial calls, or supply `agent_id` (`agd_pass_...`) / `tx_hash` for paid execution. Read-only and idempotent; results are cached for 1 hour (<5ms cache hit). $0.01 per call. Pricing: the first 5 calls per agent_id are free and failed calls are never charged. After 5 calls, the tool returns a payment-required quote (not a fatal error) with a $2 Stripe top-up link and Base/Solana USDC addresses; complete payment, then retry with your agd_pass_ key in agent_id or pass tx_hash. Example: enrich_company_domain(domain='example')",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "domain": "example"
+    }
+   ],
+   "properties": {
+    "agent_id": {
+     "description": "Optional agent identifier or prepaid agd_pass_ session key. Omit during your 5 free trial calls to use an ID automatically derived from your client IP, or pass your agd_pass_ key after topping up.",
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    },
+    "domain": {
+     "description": "Company domain name or URL (e.g. stripe.com, linear.app) to enrich.",
+     "maxLength": 99999,
+     "minLength": 1,
+     "type": "string"
+    },
+    "tx_hash": {
+     "description": "Optional on-chain Base Mainnet (0x...) or Solana SPL USDC transaction hash. Omit unless settling an individual call directly on-chain instead of using an agd_pass_ key in agent_id.",
+     "maxLength": 256,
+     "minLength": 10,
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "enrich_company_domain",
+  "output_schema": {
+   "properties": {
+    "data": {
+     "description": "Structured tool output payload.",
+     "type": "object"
+    },
+    "roi_proof": {
+     "description": "Token compression and cost-savings verification metrics.",
+     "type": "object"
+    },
+    "status": {
+     "description": "Execution status ('ok' or 'payment_required').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://agentdiet/v1/result",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://agentdiet/v1/result",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get agent wallet status"
+  },
+  "description": "Inspect an agent's account ledger: remaining free trial calls (out of 5), prepaid USD balance, cumulative spend, total API calls, and total LLM tokens saved. WHEN TO USE: Call before a batch of paid tool executions or after completing a Stripe or USDC top-up to confirm your balance. WHEN NOT TO USE: Do not use to process web content, execute marketplace tools, or submit payments; use the other tools on this server for execution. PARAMETER INTERACTIONS: Omit agent_id to inspect the default trial account derived from your client IP, or pass your explicit agent_id or agd_pass_ session key to check a specific funded wallet. Free and read-only: never charges a fee or consumes a free trial call. Example: get_agent_wallet_status(agent_id='example')",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent_id": "example"
+    }
+   ],
+   "properties": {
+    "agent_id": {
+     "description": "Optional Agent ID or agd_pass_ session key to inspect. Omit to check the default wallet derived from your client IP.",
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_agent_wallet_status",
+  "output_schema": {
+   "properties": {
+    "data": {
+     "description": "Structured tool output payload.",
+     "type": "object"
+    },
+    "roi_proof": {
+     "description": "Token compression and cost-savings verification metrics.",
+     "type": "object"
+    },
+    "status": {
+     "description": "Execution status ('ok' or 'payment_required').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "type": "object"
+  }
+ }
+]

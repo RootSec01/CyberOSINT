@@ -1,0 +1,569 @@
+[
+ {
+  "description": "Short description of Byteland: what buildings, rooms and lights stand for, units, privacy rules and supported languages. A good first call.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "about",
+  "output_schema": {},
+  "title": "What Byteland is"
+ },
+ {
+  "description": "Public detail of one building: the owner’s profile, rooms and their states, machine-readable parts and the building recipe.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "kume (default): the founder’s real building with vacant buildings; bos: topic city, everyone vacant; ornek: demo street full of sample profiles.",
+     "enum": [
+      "kume",
+      "bos",
+      "ornek"
+     ],
+     "type": "string"
+    },
+    "ref": {
+     "description": "Door number (e.g. 5) or username (e.g. \"@kaanisthatyou\").",
+     "type": [
+      "string",
+      "number"
+     ]
+    },
+    "seed": {
+     "description": "Street seed. Default: gece-sehri.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref"
+   ],
+   "type": "object"
+  },
+  "name": "get_building",
+  "output_schema": {},
+  "title": "Building detail"
+ },
+ {
+  "description": "A developer’s or company’s profile: bio, links (GitHub, website, socials), badges, projects and open-source contributions. If not on the street, looks for a saved profile, then GitHub; otherwise generates a sample (preview:true).",
+  "input_schema": {
+   "properties": {
+    "github": {
+     "description": "Look up GitHub’s public data. Default: true.",
+     "type": "boolean"
+    },
+    "handle": {
+     "description": "Username, with or without @.",
+     "type": "string"
+    },
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "kume (default): the founder’s real building with vacant buildings; bos: topic city, everyone vacant; ornek: demo street full of sample profiles.",
+     "enum": [
+      "kume",
+      "bos",
+      "ornek"
+     ],
+     "type": "string"
+    },
+    "seed": {
+     "description": "Street seed. Default: gece-sehri.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle"
+   ],
+   "type": "object"
+  },
+  "name": "get_profile",
+  "output_schema": {},
+  "title": "Profile"
+ },
+ {
+  "description": "A single project of a profile. Returns nothing for private projects.",
+  "input_schema": {
+   "properties": {
+    "github": {
+     "description": "Look up GitHub’s public data. Default: true.",
+     "type": "boolean"
+    },
+    "handle": {
+     "type": "string"
+    },
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "kume (default): the founder’s real building with vacant buildings; bos: topic city, everyone vacant; ornek: demo street full of sample profiles.",
+     "enum": [
+      "kume",
+      "bos",
+      "ornek"
+     ],
+     "type": "string"
+    },
+    "project": {
+     "description": "Project name or id.",
+     "type": "string"
+    },
+    "seed": {
+     "description": "Street seed. Default: gece-sehri.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle",
+    "project"
+   ],
+   "type": "object"
+  },
+  "name": "get_project",
+  "output_schema": {},
+  "title": "One project"
+ },
+ {
+  "description": "Unique visits (all time and this week), project views, weekly rank and the last 14 days for one username.",
+  "input_schema": {
+   "properties": {
+    "handle": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle"
+   ],
+   "type": "object"
+  },
+  "name": "get_stats",
+  "output_schema": {},
+  "title": "Visits of a building"
+ },
+ {
+  "description": "Buildings in a range (owner, type, floors, light counts) and gaps (alleys, empty lots). Positions in centimetres, at most 80000 cm.",
+  "input_schema": {
+   "properties": {
+    "from": {
+     "description": "Start x (cm). Default -3000.",
+     "type": "number"
+    },
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "kume (default): the founder’s real building with vacant buildings; bos: topic city, everyone vacant; ornek: demo street full of sample profiles.",
+     "enum": [
+      "kume",
+      "bos",
+      "ornek"
+     ],
+     "type": "string"
+    },
+    "seed": {
+     "description": "Street seed. Default: gece-sehri.",
+     "type": "string"
+    },
+    "to": {
+     "description": "End x (cm). Default 12000.",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_street",
+  "output_schema": {},
+  "title": "A stretch of the street"
+ },
+ {
+  "description": "A profile’s projects: state, description, stack, links (repo, site) plus open-source contributions. Private projects appear only as hidden:true.",
+  "input_schema": {
+   "properties": {
+    "github": {
+     "description": "Look up GitHub’s public data. Default: true.",
+     "type": "boolean"
+    },
+    "handle": {
+     "type": "string"
+    },
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "kume (default): the founder’s real building with vacant buildings; bos: topic city, everyone vacant; ornek: demo street full of sample profiles.",
+     "enum": [
+      "kume",
+      "bos",
+      "ornek"
+     ],
+     "type": "string"
+    },
+    "seed": {
+     "description": "Street seed. Default: gece-sehri.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle"
+   ],
+   "type": "object"
+  },
+  "name": "list_projects",
+  "output_schema": {},
+  "title": "Projects"
+ },
+ {
+  "description": "The project rooms of a person that have been used (every public project of a resident has a room, open by default; one nobody wrote in is empty and not listed): mode (open or read-only), channels with message counts, forum threads, last activity and how many are in voice. Closed rooms and private projects never appear.",
+  "input_schema": {
+   "properties": {
+    "handle": {
+     "description": "Username, with or without @.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle"
+   ],
+   "type": "object"
+  },
+  "name": "list_rooms",
+  "output_schema": {},
+  "title": "Rooms of a person"
+ },
+ {
+  "description": "Voice rooms with people in them right now and the rooms with messages in the last 48 hours. Voice presence comes from the running site (BYTELAND_URL, default http://127.0.0.1:8787); without it only the recent rooms are known.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "live",
+  "output_schema": {},
+  "title": "What is happening now"
+ },
+ {
+  "description": "The leaderboard: buildings by unique visits this week (or period: \"all\"), the most viewed projects and the newest residents. A visit counts once per person per day; owners do not count themselves.",
+  "input_schema": {
+   "properties": {
+    "period": {
+     "enum": [
+      "week",
+      "all"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "popular",
+  "output_schema": {},
+  "title": "Most visited"
+ },
+ {
+  "description": "Builds a user's building as if it stood at the start of a street (GitHub repositories become rooms). The preview is not added to the city. Append the returned url_hash to index.html to open it on the site.",
+  "input_schema": {
+   "properties": {
+    "github": {
+     "description": "Look up GitHub’s public data. Default: true.",
+     "type": "boolean"
+    },
+    "handle": {
+     "type": "string"
+    },
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle"
+   ],
+   "type": "object"
+  },
+  "name": "preview_building",
+  "output_schema": {},
+  "title": "Deed preview"
+ },
+ {
+  "description": "The latest messages of one channel of a project room (default: its first channel) and the forum threads (idea, review, question, announcement) with reply and reaction counts.",
+  "input_schema": {
+   "properties": {
+    "channel": {
+     "description": "Channel name or id. Default: the first channel.",
+     "type": "string"
+    },
+    "handle": {
+     "type": "string"
+    },
+    "limit": {
+     "description": "How many recent messages. Default 30.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project": {
+     "description": "Project id (the repository name for GitHub projects).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handle",
+    "project"
+   ],
+   "type": "object"
+  },
+  "name": "read_room",
+  "output_schema": {},
+  "title": "Read a room"
+ },
+ {
+  "description": "One forum thread of a project room with all of its replies and reactions.",
+  "input_schema": {
+   "properties": {
+    "handle": {
+     "type": "string"
+    },
+    "project": {
+     "type": "string"
+    },
+    "thread": {
+     "description": "Thread id (from read_room).",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "handle",
+    "project",
+    "thread"
+   ],
+   "type": "object"
+  },
+  "name": "read_thread",
+  "output_schema": {},
+  "title": "Read a forum thread"
+ },
+ {
+  "description": "Any public GitHub repository as a Byteland street: its top contributors (bots left out) with commit counts, who pushed in the last 30 days (their lights are on), who lives in Byteland, the total number of contributors, and the image and page links (street: an SVG for READMEs, page: the street page). total is null when GitHub will not list the contributors of a very large history; then the people are this month's committers.",
+  "input_schema": {
+   "properties": {
+    "owner": {
+     "description": "Repository owner (user or organisation).",
+     "type": "string"
+    },
+    "repo": {
+     "description": "Repository name. Leave it out for the owner’s skyline: their public repositories (no forks) by stars, lit when pushed in the last 30 days.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "owner"
+   ],
+   "type": "object"
+  },
+  "name": "repo_street",
+  "output_schema": {},
+  "title": "A repository as a street"
+ },
+ {
+  "description": "Find people, projects and stacks across every resident of the city (people, projects, stacks), plus buildings on the street by username, name, project or technology (results). Private projects never appear.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "description": "Language of text fields (recipe, badges, topic names). Default: en.",
+     "enum": [
+      "en",
+      "tr",
+      "es",
+      "pt",
+      "fr",
+      "de",
+      "it",
+      "nl",
+      "pl",
+      "ru",
+      "uk",
+      "ar",
+      "hi",
+      "id",
+      "zh",
+      "ja",
+      "ko"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "kume (default): the founder’s real building with vacant buildings; bos: topic city, everyone vacant; ornek: demo street full of sample profiles.",
+     "enum": [
+      "kume",
+      "bos",
+      "ornek"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "type": "string"
+    },
+    "radius": {
+     "description": "Street chunks to scan on both sides (1 chunk = 80 m). Default 4.",
+     "maximum": 12,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "seed": {
+     "description": "Street seed. Default: gece-sehri.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {},
+  "title": "Search Byteland"
+ },
+ {
+  "description": "Anyone's GitHub contribution calendar for one year, by month: contributions per day (with GitHub's quartile level), the total, days with contributions, the longest and the current streak and the busiest month. image is the Byteland picture of it (twelve month buildings, one window per day).",
+  "input_schema": {
+   "properties": {
+    "handle": {
+     "description": "GitHub username.",
+     "type": "string"
+    },
+    "year": {
+     "description": "A past year; this year when left out.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "handle"
+   ],
+   "type": "object"
+  },
+  "name": "year_in_lights",
+  "output_schema": {},
+  "title": "A developer’s year"
+ }
+]

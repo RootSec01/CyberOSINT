@@ -1,0 +1,314 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check Compliance"
+  },
+  "description": "Free, instant pre-flight for the compliance gate: runs the SAME TCPA/GDPR/CASL/CAN-SPAM/10DLC checks as send_message and call_business, in preview mode -- nothing is sent, nothing changes. Tells you whether a send would be permitted before you pay, and if not, names the exact rule and how to fix it. De-risks a paid send the way check_booking_link de-risks a paid booking. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "channel": {
+     "description": "Delivery channel. Omit to auto-infer sms/email from recipient_id; set 'voice'…",
+     "enum": [
+      "sms",
+      "email",
+      "voice"
+     ],
+     "type": "string"
+    },
+    "content": {
+     "description": "The actual message body you intend to send. The gate classifies the real text,…",
+     "type": "string"
+    },
+    "country_code": {
+     "description": "ISO 3166-1 alpha-2 (e.g. 'US', 'DE', 'CA'). Auto-inferred from phone if…",
+     "type": "string"
+    },
+    "message_type": {
+     "default": "transactional",
+     "description": "One of transactional, marketing, reminder, follow_up, notification (any case).…",
+     "type": "string"
+    },
+    "recipient_id": {
+     "description": "Phone in E.164 (e.g. '+14045550100') or email address the message would go to.",
+     "type": "string"
+    },
+    "state_code": {
+     "description": "US state code (e.g. 'CA') for state-specific rules.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "recipient_id",
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "check_compliance",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get Outcome"
+  },
+  "description": "Retrieve the final OutcomeReceipt for a completed operation. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "operation_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "operation_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_outcome",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get Status"
+  },
+  "description": "Query the current state of any in-flight async operation by operation_id. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "operation_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "operation_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_status",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Map Trade Restriction"
+  },
+  "description": "Free cross-border screening of destination and parties: DOES NOT CLASSIFY THE PRODUCT: echoed back, never checked against export-control lists, so a controlled item to an unrestricted destination returns 'partial', never 'clear'. Not an export-control clearance -- classify HS/ECCN yourself. Never fabricates a tariff rate, a clear, or a restricted status. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "destination_country": {
+     "description": "ISO 3166-1 alpha-2 code for the importing country (e.g. 'IR', 'CA', 'DE').…",
+     "type": "string"
+    },
+    "hs_code": {
+     "description": "Optional Harmonized System code (e.g. '8471.30' for laptops). If provided,…",
+     "type": "string"
+    },
+    "origin_country": {
+     "description": "Optional ISO 3166-1 alpha-2 code for the exporting country (e.g. 'US', 'DE').…",
+     "type": "string"
+    },
+    "parties": {
+     "description": "Optional list of party names to screen (exporter, importer, freight forwarder,…",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "product": {
+     "description": "Product name or description, e.g. 'laptop computers', 'crude oil', 'medical…",
+     "type": "string"
+    }
+   },
+   "required": [
+    "product",
+    "destination_country"
+   ],
+   "type": "object"
+  },
+  "name": "map_trade_restriction",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   },
+   {
+    "scopes": [
+     "agentbroker.tools"
+    ],
+    "type": "oauth2"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Preview Cost"
+  },
+  "description": "Return an expected cost estimate, latency estimate, and success-probability estimate for a proposed call before execution. Returns the exact price when it is fixed, and a min/max range when the cost depends on channel or outcome. It does not promise an accuracy percentage - check cost_range. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "operation": {
+     "type": "string"
+    },
+    "params": {
+     "description": "The same request body you would pass to the operation",
+     "type": "object"
+    }
+   },
+   "required": [
+    "operation",
+    "params"
+   ],
+   "type": "object"
+  },
+  "name": "preview_cost",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Screen Sanctions"
+  },
+  "description": "Free screening of a name/entity (Latin or Arabic script) against sanctions lists: OFAC SDN (US Treasury), EU consolidated list (European Commission), UK Sanctions List (FCDO). THE UN CONSOLIDATED LIST IS NOT SCREENED -- no licence permits redistribution. Never fabricates a match or clear: check lists_screened; reason_code 'partial_screening' (never 'clear') if any source failed. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "Optional ISO 3166-1 alpha-2 country code or country name (e.g. 'IR', 'Iran').…",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the person or entity to screen, in Latin or Arabic script, e.g. 'Kim…",
+     "type": "string"
+    },
+    "type": {
+     "description": "Optional entity type hint. 'person' for individuals, 'entity' for…",
+     "enum": [
+      "person",
+      "entity"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "screen_sanctions",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   },
+   {
+    "scopes": [
+     "agentbroker.tools"
+    ],
+    "type": "oauth2"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Self Test"
+  },
+  "description": "Service health probe: runs 6 internal checks and reports how many passed. Confirms the server is up and responding - it does NOT probe each tool individually. Use to verify connectivity before production use. [free, no key]",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "self_test",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ]
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Verify Company Record"
+  },
+  "description": "Free, live lookup of a company official registry record. Queries the GLEIF global LEI registry (primary, 2.6 million legal entities worldwide) and SEC EDGAR (US public companies) to return the official legal name, LEI, entity status, jurisdiction, registered address, and registry authority. Never fabricates: if the company is not found in these free registries, returns an honest not_found with the sources that were queried. [free, no key]",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "Optional ISO 3166-1 alpha-2 country filter (e.g. US, DE, GB). Narrows GLEIF…",
+     "type": "string"
+    },
+    "lei": {
+     "description": "Optional 20-character Legal Entity Identifier for a direct, precise lookup.",
+     "type": "string"
+    },
+    "name": {
+     "description": "Legal company name to look up, e.g. Apple Inc or Volkswagen AG.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "verify_company_record",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   },
+   {
+    "scopes": [
+     "agentbroker.tools"
+    ],
+    "type": "oauth2"
+   }
+  ]
+ }
+]

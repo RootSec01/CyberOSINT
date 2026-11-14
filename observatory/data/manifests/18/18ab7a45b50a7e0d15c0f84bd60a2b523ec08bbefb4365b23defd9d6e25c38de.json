@@ -1,0 +1,104 @@
+[
+ {
+  "description": "Returns the per-source breakdown of current quotes across the tracked P2P exchanges, including each exchange's median buy, median sell, internal spread, and observation count. Use this to identify which exchange offers the best price right now.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "compare_exchanges",
+  "output_schema": {},
+  "title": "Comparativa entre exchanges"
+ },
+ {
+  "description": "Converts an amount between BOB and USD. Use direction=parallel for the P2P parallel rate (default) or direction=official for the BCB's Tipo de Cambio Oficial (TCO), which has floated since 26/06/2026 and is republished every business day — it is no longer the old fixed Bs 6.96.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "amount": {
+     "description": "Amount to convert (positive number)",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "direction": {
+     "description": "Which exchange rate to apply. Defaults to parallel (live).",
+     "enum": [
+      "parallel",
+      "official"
+     ],
+     "type": "string"
+    },
+    "from": {
+     "enum": [
+      "USD",
+      "BOB"
+     ],
+     "type": "string"
+    },
+    "to": {
+     "enum": [
+      "USD",
+      "BOB"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "amount",
+    "from",
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "convert_currency",
+  "output_schema": {},
+  "title": "Convertir BOB ↔ USD"
+ },
+ {
+  "description": "Returns information about Bolivian banks that issue international debit/credit cards used for online purchases (Amazon, AliExpress, etc.). Pass a slug to get a specific bank, or omit to list all. Each entry includes the canonical paralelo.bo URL where current limits are documented.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "bank": {
+     "description": "Optional bank slug (bcp, bisa, bnb, economico, fie, ganadero, mercantil-santa-cruz, sol, union, fortaleza, ecofuturo, prodem). Omit to list all.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_bank_limits",
+  "output_schema": {},
+  "title": "Límites bancarios para compras al exterior"
+ },
+ {
+  "description": "Returns the current Bolivia parallel-market USD/BOB rate, aggregated from all tracked P2P exchanges. Median, buy, sell, spread percentage, source count, and ISO timestamp. Updated every 60 seconds.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_current_rate",
+  "output_schema": {},
+  "title": "Tipo de cambio paralelo actual"
+ },
+ {
+  "description": "Returns the parallel-market rate on a specific date, or the most recent available date before it. Daily resolution from 2024-01-01 to present. Date must be ISO format (YYYY-MM-DD).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "date": {
+     "description": "ISO date (YYYY-MM-DD)",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "date"
+   ],
+   "type": "object"
+  },
+  "name": "get_historical_rate",
+  "output_schema": {},
+  "title": "Tipo de cambio histórico"
+ }
+]

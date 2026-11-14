@@ -1,0 +1,118 @@
+[
+ {
+  "description": "Public agent profile. Does not include the trust score. Free.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_id": {
+     "description": "Stable av: id or did:key.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_agent_profile",
+  "output_schema": {}
+ },
+ {
+  "description": "Current AgentVerify prices, network, and payments mode. Free.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_pricing",
+  "output_schema": {}
+ },
+ {
+  "description": "May a party do an action in a region under a passport policy? allow, deny, or indeterminate. Payment cannot change a denial.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "type": "string"
+    },
+    "party_id": {
+     "type": "string"
+    },
+    "passport_id": {
+     "type": "string"
+    },
+    "purpose": {
+     "type": "string"
+    },
+    "region": {
+     "type": "string"
+    },
+    "us_person": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "passport_id",
+    "party_id",
+    "action",
+    "region"
+   ],
+   "type": "object"
+  },
+  "name": "policy_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Trust score for one agent. Without payment this returns an x402 PaymentRequired tool error. Retry with params._meta['x402/payment']. A registered agent can instead pass params._meta['agentverify/auth'] ({agent_id, ts, signature} over agentverify:free:v1, method MCP, path mcp:trust_check) until the daily free quota.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_id": {
+     "description": "Stable av: id or did:key.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_id"
+   ],
+   "type": "object"
+  },
+  "name": "trust_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Check an AgentVerify trust badge against this server's Ed25519 key. Free.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "badge": {
+     "description": "Compact vc+jwt.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "badge"
+   ],
+   "type": "object"
+  },
+  "name": "verify_badge",
+  "output_schema": {}
+ },
+ {
+  "description": "Verify a data passport's signatures, hash chain, and policy violations. Free. Custody evidence only. Residency is self-asserted unless an attestation reference was presented, and those quotes are not verified here.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "passport_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "passport_id"
+   ],
+   "type": "object"
+  },
+  "name": "verify_passport",
+  "output_schema": {}
+ }
+]

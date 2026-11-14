@@ -1,0 +1,732 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Add a comment"
+  },
+  "description": "Add a comment to a ticket or topic. A private note is visible to staff only. Visible to customers unless is_private is 1. UseResponse API: POST /comments.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "content": {
+     "description": "The comment body. BBcode is supported, HTML is not (at most 12000 characters).",
+     "maxLength": 12000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "is_private": {
+     "description": "1 saves a private staff note. Needs agent or admin rights.",
+     "maximum": 1,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "object_id": {
+     "description": "The ticket or topic id to comment on.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "reply_to": {
+     "description": "Id of the comment to reply to.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "object_id",
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_create_comment",
+  "output_schema": {},
+  "title": "Add a comment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create a ticket or topic"
+  },
+  "description": "Create a new ticket or topic (no attachments). Visible to customers once created. UseResponse API: POST /objects.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category_id": {
+     "description": "Category id (from useresponse_list_categories); 0 means none.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "content": {
+     "description": "The body. BBcode is supported, HTML is not (at most 12000 characters).",
+     "maxLength": 12000,
+     "type": "string"
+    },
+    "object_type": {
+     "description": "The type of the new object.",
+     "enum": [
+      "ticket",
+      "idea",
+      "problem",
+      "question"
+     ],
+     "type": "string"
+    },
+    "ownership": {
+     "description": "The logical group.",
+     "enum": [
+      "feedback",
+      "helpdesk"
+     ],
+     "type": "string"
+    },
+    "responsible_id": {
+     "description": "Responsible agent id; 0 means nobody.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "tags": {
+     "description": "Tags.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "team_id": {
+     "description": "Team id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "title": {
+     "description": "The title (at most 100 characters).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "object_type",
+    "ownership",
+    "title"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_create_object",
+  "output_schema": {},
+  "title": "Create a ticket or topic"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a live chat"
+  },
+  "description": "Get one live chat by its external id. UseResponse API: GET /chats/{external_id}.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "external_id": {
+     "description": "The chat's external id (from useresponse_list_chats).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "external_id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_chat",
+  "output_schema": {},
+  "title": "Get a live chat"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get live chat messages"
+  },
+  "description": "Get the messages of one live chat. UseResponse API: GET /chats/{external_id}/messages.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "external_id": {
+     "description": "The chat's external id (from useresponse_list_chats).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "external_id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_chat_messages",
+  "output_schema": {},
+  "title": "Get live chat messages"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get the current user"
+  },
+  "description": "Get the user that owns the API key: name, role and team. Good first call to check the connection. UseResponse API: GET /me.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "useresponse_get_current_user",
+  "output_schema": {},
+  "title": "Get the current user"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a ticket or topic"
+  },
+  "description": "Get one ticket or topic by id. UseResponse API: GET /objects/{id}.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_object",
+  "output_schema": {},
+  "title": "Get a ticket or topic"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a ticket or topic history"
+  },
+  "description": "Get the change history of one ticket or topic. UseResponse API: GET /changelog/object/{id}.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_object_changelog",
+  "output_schema": {},
+  "title": "Get a ticket or topic history"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List comments on a ticket or topic"
+  },
+  "description": "List the comments on one ticket or topic. UseResponse API: GET /objects/{id}/comments.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "is_private": {
+     "description": "0 or 1.",
+     "maximum": 1,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort order, as the API defines it (for example a field name).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_object_comments",
+  "output_schema": {},
+  "title": "List comments on a ticket or topic"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get report rows"
+  },
+  "description": "Get the rows of one saved report, with sorting, grouping and paging. UseResponse API: GET /report/{id}/objects.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "groupValue": {
+     "description": "Show only one group of the report.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "perPage": {
+     "description": "Rows per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort order, as the API defines it (for example a field name).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_report_objects",
+  "output_schema": {},
+  "title": "Get report rows"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a user"
+  },
+  "description": "Get one user by id, with role, team, custom fields and registration date. UseResponse API: GET /users/{id}.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_user",
+  "output_schema": {},
+  "title": "Get a user"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List a user's objects"
+  },
+  "description": "List the tickets and topics one user created. UseResponse API: GET /users/{id}/activity.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "count": {
+     "description": "Results per page (the API default is 50).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "id": {
+     "description": "Numeric id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "useresponse_get_user_activity",
+  "output_schema": {},
+  "title": "List a user's objects"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List categories"
+  },
+  "description": "List the categories for tickets or topics. UseResponse API: GET /categories.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ownership": {
+     "description": "The logical group, for example feedback or helpdesk.",
+     "type": "string"
+    },
+    "type": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_list_categories",
+  "output_schema": {},
+  "title": "List categories"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List live chats"
+  },
+  "description": "List the live chats of the account. UseResponse API: GET /chats.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "authorId": {
+     "description": "Filter by visitor or author user id.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_list_chats",
+  "output_schema": {},
+  "title": "List live chats"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List comments"
+  },
+  "description": "List comments across the account, filtered by date or privacy. UseResponse API: GET /comments.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "date": {
+     "description": "Filter by date range, as the API defines it.",
+     "type": "string"
+    },
+    "is_private": {
+     "description": "0 or 1.",
+     "maximum": 1,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort order, as the API defines it (for example a field name).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_list_comments",
+  "output_schema": {},
+  "title": "List comments"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List communities"
+  },
+  "description": "List the communities (forums) of the account. UseResponse API: GET /forums.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "useresponse_list_forums",
+  "output_schema": {},
+  "title": "List communities"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List ticket and topic custom fields"
+  },
+  "description": "List the custom fields defined for tickets and topics. UseResponse API: GET /objects/custom-fields/list.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "useresponse_list_object_custom_fields",
+  "output_schema": {},
+  "title": "List ticket and topic custom fields"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List reports"
+  },
+  "description": "List the saved reports of the account. UseResponse API: GET /reports/list.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "useresponse_list_reports",
+  "output_schema": {},
+  "title": "List reports"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List statuses"
+  },
+  "description": "List the statuses that tickets and topics can have. UseResponse API: GET /statuses.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ownership": {
+     "description": "The logical group, for example feedback or helpdesk.",
+     "type": "string"
+    },
+    "type": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_list_statuses",
+  "output_schema": {},
+  "title": "List statuses"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List tickets"
+  },
+  "description": "List help desk tickets, with filters for status, responsible agent, forum, author email and completion. UseResponse API: GET /tickets.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "authorEmail": {
+     "description": "Filter by author email.",
+     "type": "string"
+    },
+    "authorId": {
+     "description": "Filter by author user id.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "completed_by": {
+     "description": "Filter completed tickets by the user who completed them.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "completed_on": {
+     "description": "Filter by completion date range.",
+     "type": "string"
+    },
+    "count": {
+     "description": "Results per page (the API default is 50).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "date": {
+     "description": "Filter by date range, as the API defines it.",
+     "type": "string"
+    },
+    "forum_id": {
+     "description": "Filter by forum id (from useresponse_list_forums).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "responsible_id": {
+     "description": "Filter by responsible agent id.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Sort order, as the API defines it (for example a field name).",
+     "type": "string"
+    },
+    "status": {
+     "description": "Filter by status.",
+     "type": "string"
+    },
+    "text": {
+     "description": "The search phrase.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_list_tickets",
+  "output_schema": {},
+  "title": "List tickets"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List user custom fields"
+  },
+  "description": "List the custom fields defined for users. UseResponse API: GET /users/custom-fields/list.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "useresponse_list_user_custom_fields",
+  "output_schema": {},
+  "title": "List user custom fields"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search tickets and topics"
+  },
+  "description": "Search feedback topics and help desk tickets by text, status, category, author, date or type. UseResponse API: GET /search.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "authorId": {
+     "description": "Filter by author user id.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "category_id": {
+     "description": "Filter by category id (from useresponse_list_categories).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "count": {
+     "description": "Results per page (the API default is 50).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "date": {
+     "description": "Filter by date range, as the API defines it.",
+     "type": "string"
+    },
+    "ownership": {
+     "description": "The logical group, for example feedback or helpdesk.",
+     "type": "string"
+    },
+    "sort": {
+     "description": "Sort order, as the API defines it (for example a field name).",
+     "type": "string"
+    },
+    "status": {
+     "description": "Filter by status (ids from useresponse_list_statuses).",
+     "type": "string"
+    },
+    "text": {
+     "description": "The search phrase.",
+     "type": "string"
+    },
+    "type": {
+     "description": "Filter by object type.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_search_objects",
+  "output_schema": {},
+  "title": "Search tickets and topics"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search users"
+  },
+  "description": "Search customers and staff by name, email, phone, team or status. UseResponse API: GET /users/search.json.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "count": {
+     "description": "Results per page (the API default is 50).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "email": {
+     "description": "Filter by email.",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "phone": {
+     "description": "Filter by phone number.",
+     "type": "string"
+    },
+    "search": {
+     "description": "The search phrase (name or email).",
+     "type": "string"
+    },
+    "sort": {
+     "description": "Sort order, as the API defines it (for example a field name).",
+     "type": "string"
+    },
+    "status": {
+     "description": "Filter by user status.",
+     "type": "string"
+    },
+    "team": {
+     "description": "Filter by team.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "useresponse_search_users",
+  "output_schema": {},
+  "title": "Search users"
+ }
+]

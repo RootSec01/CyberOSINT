@@ -1,0 +1,527 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get order parcels"
+  },
+  "description": "Get the parcels (shipments) of orders: courier, tracking numbers and status. API: GET /orders/packages.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "order_serial_numbers": {
+     "description": "Order serial numbers.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "order_serial_numbers"
+   ],
+   "type": "object"
+  },
+  "name": "idosell_get_order_packages",
+  "output_schema": {},
+  "title": "Get order parcels"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get orders by id"
+  },
+  "description": "Get orders by order ids or serial numbers (give at least one). Use idosell_search_orders for filters. API: GET /orders/orders.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "orders_ids": {
+     "description": "Order ids.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "serial_numbers": {
+     "description": "Order serial numbers (max 100).",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "maxItems": 100,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_get_orders",
+  "output_schema": {},
+  "title": "Get orders by id"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get product stock levels"
+  },
+  "description": "Get stock quantities per warehouse and size for products. API: GET /products/stocks.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ident_type": {
+     "description": "What the values in products are: panel id, index, external code or producer code.",
+     "enum": [
+      "id",
+      "index",
+      "codeExtern",
+      "codeProducer"
+     ],
+     "type": "string"
+    },
+    "products": {
+     "description": "Product identifiers of the given type.",
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "ident_type",
+    "products"
+   ],
+   "type": "object"
+  },
+  "name": "idosell_get_product_stocks",
+  "output_schema": {},
+  "title": "Get product stock levels"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get shop configuration"
+  },
+  "description": "Get the panel configuration: owner company data, languages, base currency, warehouses (stocks) and shops with their ids. Good first call to learn shop ids and warehouse ids. API: GET /system/config.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "idosell_get_shop_config",
+  "output_schema": {},
+  "title": "Get shop configuration"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List brands"
+  },
+  "description": "List the brands (producers) of the shop with ids and names. API: GET /products/brands.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_list_brands",
+  "output_schema": {},
+  "title": "List brands"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List product categories"
+  },
+  "description": "List the product categories of the shop with ids and names. API: GET /products/categories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ids": {
+     "description": "Only these category ids.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_list_categories",
+  "output_schema": {},
+  "title": "List product categories"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List couriers"
+  },
+  "description": "List the couriers available for a country, and whether each one handles pickup points. API: GET /couriers/couriers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "country_code": {
+     "description": "Country code, ISO 3166-1 alpha-2.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "country_code"
+   ],
+   "type": "object"
+  },
+  "name": "idosell_list_couriers",
+  "output_schema": {},
+  "title": "List couriers"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List order statuses"
+  },
+  "description": "List the order statuses configured in the panel, with their ids and names. API: GET /orders/statuses.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "idosell_list_order_statuses",
+  "output_schema": {},
+  "title": "List order statuses"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List returns"
+  },
+  "description": "List returns issued for orders, filterable by order serial number, return id or status id. API: GET /returns/returns.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "order_serial_number": {
+     "description": "Order serial number.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "return_ids": {
+     "description": "Return ids.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "status": {
+     "description": "Return status id.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_list_returns",
+  "output_schema": {},
+  "title": "List returns"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search customers"
+  },
+  "description": "Find customer accounts by text (name, e-mail, login), ids or active state. Returns contact data, addresses, balances and consents. API: GET /clients/clients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "active": {
+     "description": "true = only active accounts, false = only inactive.",
+     "type": "boolean"
+    },
+    "customer_ids": {
+     "description": "Customer numbers.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "text": {
+     "description": "Text searched in customer data.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_search_customers",
+  "output_schema": {},
+  "title": "Search customers"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search orders"
+  },
+  "description": "Search orders by status, date range, customer, order ids or serial numbers. Returns order details with products, payments, dispatch data and the customer. Read-only (a POST search). API: POST /orders/orders/search.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_email": {
+     "description": "Customer e-mail address.",
+     "type": "string"
+    },
+    "customer_login": {
+     "description": "Customer login.",
+     "type": "string"
+    },
+    "date_from": {
+     "description": "Range start, YYYY-MM-DD or YYYY-MM-DD HH:MM:SS.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2}:\\d{2})?$",
+     "type": "string"
+    },
+    "date_to": {
+     "description": "Range end, YYYY-MM-DD or YYYY-MM-DD HH:MM:SS.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2}:\\d{2})?$",
+     "type": "string"
+    },
+    "date_type": {
+     "description": "Which date the range applies to (default add = order placed).",
+     "enum": [
+      "add",
+      "modified",
+      "dispatch",
+      "payment",
+      "last_payments_operation",
+      "declared_payments"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "orders_ids": {
+     "description": "Order ids.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "serial_numbers": {
+     "description": "Order serial numbers (max 100).",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "maxItems": 100,
+     "type": "array"
+    },
+    "statuses": {
+     "description": "Only orders in these statuses.",
+     "items": {
+      "enum": [
+       "new",
+       "finished",
+       "false",
+       "lost",
+       "on_order",
+       "packed",
+       "ready",
+       "canceled",
+       "payment_waiting",
+       "delivery_waiting",
+       "suspended",
+       "joined",
+       "finished_ext"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_search_orders",
+  "output_schema": {},
+  "title": "Search orders"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search products"
+  },
+  "description": "Search products by text, code, availability, visibility or promotion. Returns prices, stock summary, images and categories. Read-only (a POST search). API: POST /products/products/search.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "available": {
+     "description": "true = only available products, false = only unavailable.",
+     "type": "boolean"
+    },
+    "code_part": {
+     "description": "Product code, or a part of it (producer, external or panel code).",
+     "type": "string"
+    },
+    "in_promotion": {
+     "description": "true = only products in promotion.",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Results per page, 1 to 100.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, counting from 0 (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "product_ids": {
+     "description": "Product ids.",
+     "items": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "text": {
+     "description": "Text found in the name or description.",
+     "type": "string"
+    },
+    "visible": {
+     "description": "true = only products visible in the shop.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "idosell_search_products",
+  "output_schema": {},
+  "title": "Search products"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "title": "Set order status"
+  },
+  "description": "WRITE: change the status of one order (for example to packed, ready or canceled). Setting the same status again has no further effect. The panel may send customer e-mails for some status changes. API: PUT /orders/orders.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "order_serial_number": {
+     "description": "Order serial number (from idosell_search_orders).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "status": {
+     "description": "The new order status.",
+     "enum": [
+      "new",
+      "finished",
+      "false",
+      "lost",
+      "on_order",
+      "packed",
+      "ready",
+      "canceled",
+      "payment_waiting",
+      "delivery_waiting",
+      "suspended",
+      "joined",
+      "finished_ext"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_serial_number",
+    "status"
+   ],
+   "type": "object"
+  },
+  "name": "idosell_set_order_status",
+  "output_schema": {},
+  "title": "Set order status"
+ }
+]

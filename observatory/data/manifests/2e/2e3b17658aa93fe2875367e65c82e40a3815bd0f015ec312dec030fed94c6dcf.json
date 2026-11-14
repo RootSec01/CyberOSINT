@@ -1,0 +1,78 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find coupon / promo / discount codes for an online store. Pass the store domain or any URL from the store (product, cart or checkout page). Returns codes ordered by how likely they are to work: try them at checkout from the top, keep the one that lowers the total the most. Codes can expire or carry store restrictions, so none is guaranteed; an empty list means none are known for that store.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "Maximum number of codes to return",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "store": {
+     "description": "Store domain or any URL on the store, e.g. \"momcozy.com\"",
+     "type": "string"
+    }
+   },
+   "required": [
+    "store"
+   ],
+   "type": "object"
+  },
+  "name": "find_coupons",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "coupons": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "code": {
+        "type": "string"
+       },
+       "description": {
+        "type": "string"
+       },
+       "expiresAt": {
+        "type": "string"
+       },
+       "lastWorkedAt": {
+        "type": "string"
+       },
+       "successCount": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "code"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "domain": {
+     "type": "string"
+    },
+    "storeName": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain",
+    "coupons"
+   ],
+   "type": "object"
+  },
+  "title": "Find coupon codes"
+ }
+]

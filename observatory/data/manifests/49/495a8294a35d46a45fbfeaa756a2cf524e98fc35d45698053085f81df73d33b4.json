@@ -1,0 +1,105 @@
+[
+ {
+  "description": "LLM fact-check: verdict (supported/refuted/partially_true/unverifiable), confidence, reasoning. Paid $0.02 USDC via x402.",
+  "input_schema": {
+   "properties": {
+    "claim": {
+     "description": "The claim to verify",
+     "type": "string"
+    }
+   },
+   "required": [
+    "claim"
+   ],
+   "type": "object"
+  },
+  "name": "fact_check",
+  "output_schema": {}
+ },
+ {
+  "description": "BTC/ETH/SOL prices & 24h change. Free, 5 req/min. Optional symbols param to filter coins.",
+  "input_schema": {
+   "properties": {
+    "symbols": {
+     "description": "Optional comma-separated filter: btc,eth,sol",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_crypto_prices",
+  "output_schema": {}
+ },
+ {
+  "description": "AI market analysis: sentiment, key levels, risk factors, depth technical+on-chain. Paid $0.05 USDC via x402.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_market_analysis",
+  "output_schema": {}
+ },
+ {
+  "description": "Real-time quote for chosen symbols: price, 24h change, market cap, 24h volume, source. Paid $0.01 USDC via x402. 10 req/min.",
+  "input_schema": {
+   "properties": {
+    "symbols": {
+     "description": "Comma-separated: btc,eth,sol",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbols"
+   ],
+   "type": "object"
+  },
+  "name": "get_market_quote",
+  "output_schema": {}
+ },
+ {
+  "description": "Full structured report: technical, on-chain, macro outlook. Paid $0.25 USDC via x402.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_research_report",
+  "output_schema": {}
+ },
+ {
+  "description": "Fetch any URL and return clean extracted text with title. Paid $0.005 USDC via x402.",
+  "input_schema": {
+   "properties": {
+    "url": {
+     "description": "Full URL starting with http(s)://",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "scrape_url",
+  "output_schema": {}
+ },
+ {
+  "description": "EVM token rug-pull risk: liquidity, volume, pair age, heuristic 0-100 score from live DEX data. Paid $0.01 USDC via x402.",
+  "input_schema": {
+   "properties": {
+    "address": {
+     "description": "EVM token contract address 0x...",
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "token_safety",
+  "output_schema": {}
+ }
+]

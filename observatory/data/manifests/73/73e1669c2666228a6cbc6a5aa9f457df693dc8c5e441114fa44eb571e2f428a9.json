@@ -1,0 +1,86 @@
+[
+ {
+  "description": "Reply conversationally when the request is ambiguous or needs clarification.",
+  "input_schema": {
+   "properties": {
+    "reply_hint": {
+     "description": "Optional hint for the conversational reply.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "converse",
+  "output_schema": {}
+ },
+ {
+  "description": "📄 PDF Generator: delete preview",
+  "input_schema": {
+   "properties": {
+    "detail": {
+     "description": "Parameters for this action (title, content, preview_id).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "delete_preview",
+  "output_schema": {}
+ },
+ {
+  "description": "📄 PDF Generator: generate pdf",
+  "input_schema": {
+   "properties": {
+    "detail": {
+     "description": "Parameters for this action (title, content, preview_id).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "generate_pdf",
+  "output_schema": {}
+ },
+ {
+  "description": "📄 PDF Generator: get preview",
+  "input_schema": {
+   "properties": {
+    "detail": {
+     "description": "Parameters for this action (title, content, preview_id).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_preview",
+  "output_schema": {}
+ },
+ {
+  "description": "📄 PDF Generator: list previews",
+  "input_schema": {
+   "properties": {
+    "detail": {
+     "description": "Parameters for this action (title, content, preview_id).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_previews",
+  "output_schema": {}
+ },
+ {
+  "description": "📄 PDF Generator: preview document",
+  "input_schema": {
+   "properties": {
+    "detail": {
+     "description": "Parameters for this action (title, content, preview_id).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "preview_document",
+  "output_schema": {}
+ }
+]

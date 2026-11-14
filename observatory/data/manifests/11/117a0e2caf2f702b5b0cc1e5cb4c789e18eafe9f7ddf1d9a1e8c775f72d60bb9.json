@@ -1,0 +1,160 @@
+[
+ {
+  "_meta": {
+   "ui": {
+    "resourceUri": "ui://sudhanva/profile-explorer",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   },
+   "ui/resourceUri": "ui://sudhanva/profile-explorer"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this first for a summary of Sudhanva Narayana. Returns his name, job title, employer, location, specialization, skills, and contact email as JSON. Set include_links to false to leave out his profile URL and social links.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "include_links": {
+     "default": true,
+     "description": "Include canonical profile and social links. Defaults to true.",
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_public_profile",
+  "output_schema": {},
+  "title": "Get Sudhanva public profile"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "resourceUri": "ui://sudhanva/profile-explorer",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   },
+   "ui/resourceUri": "ui://sudhanva/profile-explorer"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this when you know an article slug, for example from list_published_articles. Returns that one post with its title, summary, category, tags, dates, and URL as JSON, or an error when no post has that slug.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "The article slug: the last path segment of its /blog/posts/ URL, for example conda-vs-poetry-vs-uv-vs-pip.",
+     "maxLength": 120,
+     "minLength": 1,
+     "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_published_article",
+  "output_schema": {},
+  "title": "Get one Sudhanva article"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "resourceUri": "ui://sudhanva/profile-explorer",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   },
+   "ui/resourceUri": "ui://sudhanva/profile-explorer"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this for evidence of Sudhanva's production ML work. Returns each published case study with its title, summary, verified proof points, technologies, and URL as JSON.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 5,
+     "description": "Maximum case studies to return. Defaults to all five.",
+     "maximum": 5,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_case_studies",
+  "output_schema": {},
+  "title": "List Sudhanva case studies"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "resourceUri": "ui://sudhanva/profile-explorer",
+    "visibility": [
+     "model",
+     "app"
+    ]
+   },
+   "ui/resourceUri": "ui://sudhanva/profile-explorer"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this to find Sudhanva's technical writing on ML infrastructure, inference, and Kubernetes. Returns posts with title, summary, tags, dates, and URL, newest first. Filter by tag. To read one post, use get_published_article.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 20,
+     "description": "Maximum articles to return. Defaults to 20.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "slug": {
+     "description": "Return one exact article instead of a list.",
+     "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+     "type": "string"
+    },
+    "tag": {
+     "description": "Only return articles with this tag slug.",
+     "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_published_articles",
+  "output_schema": {},
+  "title": "Find Sudhanva published articles"
+ }
+]

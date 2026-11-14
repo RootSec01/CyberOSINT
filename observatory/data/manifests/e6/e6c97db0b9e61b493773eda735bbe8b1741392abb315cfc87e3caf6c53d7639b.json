@@ -1,0 +1,174 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find MCP servers by observed facts"
+  },
+  "description": "Lowdown(로우다운) lists public MCP servers by observed facts, when you do not have a server name yet. Use does to find servers by what they do (words in the Registry name or tool names, e.g. 'postgres'). Filter by the latest daily check (e.g. state 'answered' = answered initialize and tools/list without credentials), days answered in the last 30, how long the tool list has been unchanged, tool count, Registry status and package state; sort by one key. No score or ranking: order is only the chosen sort key. Each result carries a lookup URL; call get_lowdown with its name for the full record. Tool lists are recorded from 2026-10-20, so a long stable_days returns nothing yet.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "answered_days": {
+     "description": "Minimum daily checks in the last 30 days that answered tools/list",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "does": {
+     "description": "What the server does: 1-3 words separated by spaces, e.g. 'postgres' or 'github issue'. Every word must appear in the Registry name or in a tool name from the latest observed tool list; results show matched_in",
+     "maxLength": 92,
+     "minLength": 2,
+     "type": "string"
+    },
+    "limit": {
+     "description": "1-50, default 20",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "For the next page, use next_offset from the previous answer",
+     "maximum": 2000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "order": {
+     "description": "Default depends on sort",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "package": {
+     "description": "ok = declared packages with no deprecated/yanked/404 latest; flagged = at least one; none = no declared packages",
+     "enum": [
+      "ok",
+      "flagged",
+      "none"
+     ],
+     "type": "string"
+    },
+    "q": {
+     "description": "Part of the Registry name, e.g. 'github' or 'io.github.user'",
+     "maxLength": 100,
+     "minLength": 2,
+     "type": "string"
+    },
+    "registry": {
+     "description": "MCP Registry status",
+     "enum": [
+      "active",
+      "deprecated"
+     ],
+     "type": "string"
+    },
+    "sort": {
+     "description": "Sort key (default name). tools = tool count, answering = days answered, stable = tool list unchanged longest, newest, updated, changed, release",
+     "enum": [
+      "name",
+      "newest",
+      "updated",
+      "tools",
+      "stable",
+      "answering",
+      "changed",
+      "release"
+     ],
+     "type": "string"
+    },
+    "stable_days": {
+     "description": "Current tool list first observed at least this many days ago",
+     "maximum": 3650,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "state": {
+     "description": "Latest daily check result (only servers checked in the last 2 days). 'answered' = answered tools/list with no credentials",
+     "enum": [
+      "answered",
+      "auth_required",
+      "payment_required",
+      "list_failed",
+      "no_response",
+      "invalid_response",
+      "mixed"
+     ],
+     "type": "string"
+    },
+    "tools_max": {
+     "description": "Maximum tool count",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "tools_min": {
+     "description": "Minimum tool count",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "find_servers",
+  "output_schema": {},
+  "title": "Find MCP servers by observed facts"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Look up recorded facts about an MCP server"
+  },
+  "description": "Lowdown(로우다운) looks up recorded facts about an MCP server before installing or connecting to it. Accepts an MCP Registry name ('mcp:io.github.user/server'), a short name, or a package ('npm:@scope/name', 'pypi:name'). Returns dated facts, not scores: `status` (latest daily initialize/tools/list check: answered, required authentication, or no response), `registry` (what the official MCP Registry declares, and changes in the last 30 days), `packages` (declared npm/PyPI packages: deprecated, yanked, archived, or 404), `scanner` (tool definition changes and content markers such as a new URL or invisible characters), `payment` (HTTP 402 terms on the latest check: x402, MPP or L402; payment support declared in the server card or ERC-8004 file; Lowdown does not pay), and agent reports. Optional `menu` returns one part, e.g. 'install-check' or 'payment'. Absence of data says nothing about a server. Each answer ends with a `source` block (dataset, CC BY 4.0, retrieval time).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "menu": {
+     "description": "Optional. Before installing, use 'install-check' (status, payment, packages, declared-vs-observed, content-flags). 'change-watch' = what changed recently, or one part: status, payment, packages, tools, declared-vs-observed, content-flags, tool-list, registry, history, agent-reports. Omit or 'full' for everything.",
+     "enum": [
+      "install-check",
+      "change-watch",
+      "full",
+      "status",
+      "payment",
+      "packages",
+      "tools",
+      "declared-vs-observed",
+      "content-flags",
+      "tool-list",
+      "registry",
+      "history",
+      "agent-reports"
+     ],
+     "type": "string"
+    },
+    "target": {
+     "description": "MCP Registry name with the mcp: prefix (e.g. 'mcp:io.github.user/server'), a short name, or a package with the npm: or pypi: prefix",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "target"
+   ],
+   "type": "object"
+  },
+  "name": "get_lowdown",
+  "output_schema": {},
+  "title": "Look up recorded facts about an MCP server"
+ }
+]

@@ -1,0 +1,91 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Fetch an entity's structured feeds"
+  },
+  "description": "Page an entity's structured feeds on AITWIRE — products, services, articles or locations (tenant_id comes from aitwire_entity_lookup).",
+  "input_schema": {
+   "properties": {
+    "feed_type": {
+     "enum": [
+      "products",
+      "services",
+      "articles",
+      "locations"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max items (default 10)",
+     "type": "number"
+    },
+    "tenant_id": {
+     "description": "AITWIRE tenant ID (from lookup)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "tenant_id",
+    "feed_type"
+   ],
+   "type": "object"
+  },
+  "name": "aitwire_entity_feeds",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Look up an entity's business record"
+  },
+  "description": "Look up a business, brand, organization, person, or website's business-supplied entity record on AITWIRE by domain or name — its confirmed description, feed URLs, and proof counts, each carrying the date it was confirmed. Returns no match for entities that have not published to AITWIRE.",
+  "input_schema": {
+   "properties": {
+    "domain": {
+     "description": "Domain (e.g. 'example.com')",
+     "type": "string"
+    },
+    "name": {
+     "description": "Entity name (e.g. 'AITWIRE')",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aitwire_entity_lookup",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check a claim against an entity's record"
+  },
+  "description": "Check whether a specific claim matches an entity's business-supplied record on AITWIRE. Returns verified / contradicted / unknown with a confidence score, so you can attribute the result.",
+  "input_schema": {
+   "properties": {
+    "claim": {
+     "description": "Claim to verify",
+     "type": "string"
+    },
+    "entity": {
+     "description": "Entity domain or name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "entity",
+    "claim"
+   ],
+   "type": "object"
+  },
+  "name": "aitwire_grounding",
+  "output_schema": {}
+ }
+]

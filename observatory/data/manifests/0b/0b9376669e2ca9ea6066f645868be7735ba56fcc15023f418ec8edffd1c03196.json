@@ -1,0 +1,71 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a public horse"
+  },
+  "description": "Get one public horse by id, including its pedigree, profile and miniature image URLs, and the videos and pictures the stable made public. Only public horses are reachable. Equicty Website API: GET /horses/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "horse_id": {
+     "description": "The horse id (from equicty_list_public_horses).",
+     "minLength": 1,
+     "type": "string"
+    },
+    "language": {
+     "description": "Language of the horse data (default EN).",
+     "enum": [
+      "EN",
+      "FR",
+      "DE",
+      "NL"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "horse_id"
+   ],
+   "type": "object"
+  },
+  "name": "equicty_get_public_horse",
+  "output_schema": {},
+  "title": "Get a public horse"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List public horses"
+  },
+  "description": "List the horses the stable marked public for its website: name, age, birthday, sex, studbook, colour, height, 3-generation pedigree, and profile and miniature image URLs. Only public horses are returned; private horses are not reachable through this API. Equicty Website API: POST /horses.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "gender": {
+     "description": "Only horses of this sex.",
+     "enum": [
+      "STALLION",
+      "MARE",
+      "GELDING"
+     ],
+     "type": "string"
+    },
+    "language": {
+     "description": "Language of the horse data (default EN).",
+     "enum": [
+      "EN",
+      "FR",
+      "DE",
+      "NL"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "equicty_list_public_horses",
+  "output_schema": {},
+  "title": "List public horses"
+ }
+]

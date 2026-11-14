@@ -1,0 +1,312 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Site changelog"
+  },
+  "description": "Recent shipped changes to 21btc.cc with dates and links. Same data as the /changelog page and its RSS feed. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_changelog",
+  "output_schema": {},
+  "title": "Site changelog"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Bitcoin derivatives"
+  },
+  "description": "BTC perpetual futures on Binance, Bybit, OKX and Deribit: open interest (BTC and USD), mark price, funding rate per interval and annualised, a 30-day Binance open interest history and recent OKX liquidations. Public keyless exchange APIs, cached 60 seconds. Liquidations cover one exchange only; no free all-exchange total exists. Not advice. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_derivatives",
+  "output_schema": {},
+  "title": "Bitcoin derivatives: open interest, funding, liquidations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Spot Bitcoin ETF flows"
+  },
+  "description": "US spot Bitcoin ETFs: BTC held, fee, latest/5d/20d/cumulative flows (USD millions). Same data as GET /api/v1/etf. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_etf_flows",
+  "output_schema": {},
+  "title": "Spot Bitcoin ETF flows"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Bitcoin events"
+  },
+  "description": "Upcoming Bitcoin-only conferences with dates, city, official URL, ticket offer (price only where verified on the official page) and the 21btc.cc event page where one exists. Dates in the venue's local time. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "description": "Filter by country name in English, e.g. Switzerland",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "limit": {
+     "default": 15,
+     "maximum": 40,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_events",
+  "output_schema": {},
+  "title": "Upcoming Bitcoin conferences and events"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Bitcoin transaction fees"
+  },
+  "description": "Recommended Bitcoin transaction fees in sat/vB (fastest, 30 minutes, 1 hour, economy, minimum) and mempool size, from mempool.space. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_fees",
+  "output_schema": {},
+  "title": "Bitcoin transaction fees"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Bitcoin address distribution"
+  },
+  "description": "How many Bitcoin addresses hold at least 0.1, 1, 10, 100, 1,000 and 10,000 BTC and how coins split across holder classes. Addresses, not people. Source: BitInfoCharts and four cross-checks, with an as-of date. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_holder_distribution",
+  "output_schema": {},
+  "title": "Bitcoin addresses by balance (shrimp to humpback)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Bitcoin holders: companies, funds, governments"
+  },
+  "description": "Bitcoin holders: companies, funds, governments (BTC, 7-day change). Same data as GET /api/v1/holders. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_holders",
+  "output_schema": {},
+  "title": "Bitcoin holders: companies, funds, governments"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Bitcoin network stats"
+  },
+  "description": "Bitcoin network now: block height, hashrate (EH/s), difficulty and the next difficulty adjustment, mempool size, average block time, halving countdown. Sources: mempool.space, blockchain.info, Blockchair. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_network_stats",
+  "output_schema": {},
+  "title": "Bitcoin network stats"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Bitcoin price"
+  },
+  "description": "Live BTC price in USD and 7 other currencies (official FX reference rates). Same data as GET /api/v1/price. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_price",
+  "output_schema": {},
+  "title": "Bitcoin price"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Rainbow model (a model, not a forecast)"
+  },
+  "description": "Rainbow model fit parameters and today's deviation (a model, not a forecast). Same data as GET /api/v1/rainbow. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_rainbow_model",
+  "output_schema": {},
+  "title": "Rainbow model (a model, not a forecast)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Risk On/Off score"
+  },
+  "description": "Risk On/Off composite score (0–100) with every input, formula and source. Same data as GET /api/v1/risk. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_risk_score",
+  "output_schema": {},
+  "title": "Risk On/Off score"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Stock-to-flow model (a model, not a forecast)"
+  },
+  "description": "Stock-to-flow ratio and PlanB 2019 model value (a model, not a forecast). Same data as GET /api/v1/stock-to-flow. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_stock_to_flow",
+  "output_schema": {},
+  "title": "Stock-to-flow model (a model, not a forecast)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Bitcoin volatility"
+  },
+  "description": "Annualised realised volatility over 7/30/90/365 days and by year. Same data as GET /api/v1/volatility. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_volatility",
+  "output_schema": {},
+  "title": "Bitcoin volatility"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search 21btc.cc"
+  },
+  "description": "Search the site's pages, Bitcoin glossary terms, wiki articles, blog posts, videos, pools, wallets and hacks. Matches English and Russian. Returns title, kind, URL and a short summary. Use kind=glossary for definitions. Read-only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "description": "Limit to one kind of result",
+     "enum": [
+      "section",
+      "blog",
+      "glossary",
+      "wiki",
+      "video",
+      "pool",
+      "wallet",
+      "museum",
+      "hack"
+     ],
+     "type": "string"
+    },
+    "language": {
+     "default": "en",
+     "description": "Language of titles and summaries",
+     "enum": [
+      "en",
+      "ru"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 8,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words to look for, English or Russian",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_site",
+  "output_schema": {},
+  "title": "Search 21btc.cc (pages, glossary, wiki, blog)"
+ }
+]

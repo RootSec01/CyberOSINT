@@ -1,0 +1,885 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Campaign Summary"
+  },
+  "description": "Per-brand campaign rollup (brands are ViralCat's campaign unit): posted/scheduled/failed/draft counts, platforms used, next scheduled date, last posted date, and auto-post settings. Optionally scope to one brand_id.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand_id": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "campaign_summary",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Cancel Post"
+  },
+  "description": "WRITE (safe): cancel a queued post, or move it to a new slot. Omit scheduled_date to CANCEL (status -> cancelled; the publisher ignores it). Pass scheduled_date to RESCHEDULE to that time instead (ISO 8601, at least 15 minutes out; a draft keeps its draft status). Works on draft or scheduled posts (cancel or reschedule); also works on FAILED posts but cancel-only (omit scheduled_date) — this is the way to clear a dead failed-post backlog, since failed has no other exit. Posts already posting/posted/cancelled are immutable. Get post ids from content_queue, list_posts or diagnose_failures.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "post_id": {
+     "description": "Post id to cancel or reschedule (from content_queue)",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "scheduled_date": {
+     "description": "Omit to cancel. Provide to reschedule: ISO 8601, at least 15 minutes in the future",
+     "type": "string"
+    }
+   },
+   "required": [
+    "post_id"
+   ],
+   "type": "object"
+  },
+  "name": "cancel_post",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Content Queue"
+  },
+  "description": "The forward content pipeline: drafts awaiting approval first, then scheduled posts in publish order. Use to review what is queued before it goes out, and to find draft ids for schedule_post.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 50,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "content_queue",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create Brand"
+  },
+  "description": "WRITE (gated): create a brand (content profile) so create_draft and schedule_post have something to target. Every other write here needs a brand_id, so an agent had no way to set one up. Returns the brand_id and the Drive folder the publisher will read its media from (Viral-Cat/_Res/{name}/Vids). Publishes nothing and reaches no audience.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "content_type": {
+     "description": "What the publisher should expect to find for this brand.",
+     "enum": [
+      "video",
+      "image"
+     ],
+     "type": "string"
+    },
+    "cta_url": {
+     "description": "Link included in posts.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "description": {
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "hashtags": {
+     "description": "Brand hashtags appended to captions unless skip_hashtags is set.",
+     "items": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "name": {
+     "description": "Brand name. Also names its Drive media folder, so keep it filesystem-friendly.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "website_url": {
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "create_brand",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create Draft"
+  },
+  "description": "WRITE (safe): create a DRAFT post for a brand. Drafts are never picked up by the publisher, so nothing goes live; a human approves in the dashboard or promotes it later with schedule_post. scheduled_date is a proposed slot (default: 7 days out).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand_id": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "caption": {
+     "description": "Post body. Omit to inherit the brand's taglines.",
+     "maxLength": 2200,
+     "type": "string"
+    },
+    "platform": {
+     "description": "Target platform, e.g. youtube, tiktok, instagram",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "reply_text": {
+     "description": "Follow-up reply posted under the main post. On X this is where a link belongs: a URL in the post body costs up to 94% of the reach (near-total on a non-Premium account), while the same URL one reply down costs nothing. Omit to reply with the brand's CTA url; pass an empty string for no reply at all. Ignored by every platform except X.",
+     "maxLength": 2200,
+     "type": "string"
+    },
+    "scheduled_date": {
+     "description": "Proposed ISO 8601 slot, e.g. 2026-07-15T09:00:00Z",
+     "type": "string"
+    },
+    "skip_hashtags": {
+     "description": "true = publish the caption as-is with NO brand hashtags appended; false = always append them. Omit to auto-detect: long hand-authored captions (>280 chars, no '#') skip hashtags. The result's hashtagsSkipped shows the decision.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "brand_id",
+    "platform"
+   ],
+   "type": "object"
+  },
+  "name": "create_draft",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create Media Upload"
+  },
+  "description": "WRITE (gated): open a Google Drive upload session for media you hold locally, so a clip rendered on your own machine never has to be published publicly just so ViralCat can fetch it back. Returns an uploadUrl - PUT the bytes to it yourself (no auth header) and Drive stores the file; the response Location/id is the fileId for create_draft or schedule_post. When brand is given the file lands in the folder the generator actually reads for that media type: Viral-Cat/_Res/{brand}/Imgs for an image, Vids for a video, Music for audio. Without brand it defaults to the Viral-Cat folder. Video, image or audio up to 100MB. Publishes nothing and reaches no audience.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand": {
+     "description": "Brand whose _Res/{brand} folder should receive the file. Ignored when folder_id is given.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "file_name": {
+     "description": "Name to save as in Drive, e.g. \"ducktax-short.mp4\".",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "folder_id": {
+     "description": "Destination Drive folder id, overriding brand.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "kind": {
+     "description": "Which brand folder receives the file: Vids, Imgs or Music. Omit to route by media type, which is almost always right.",
+     "enum": [
+      "video",
+      "image",
+      "music"
+     ],
+     "type": "string"
+    },
+    "mime_type": {
+     "description": "Media type of the file, e.g. \"video/mp4\".",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "size_bytes": {
+     "description": "Exact byte length of the file. Drive rejects a mismatch.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "file_name",
+    "mime_type",
+    "size_bytes"
+   ],
+   "type": "object"
+  },
+  "name": "create_media_upload",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Diagnose Failures"
+  },
+  "description": "Group failed posts by platform + normalized failure reason: counts, date range, affected brands, a sample raw error, a recoverable flag (retry_failed_posts can re-queue it) and a concrete suggested fix per group. Answers \"what is broken and why\" in one call. Read-only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "days": {
+     "default": 60,
+     "description": "Rolling window of failed posts to analyze",
+     "maximum": 365,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    },
+    "platform": {
+     "description": "Scope to a single platform, e.g. pinterest",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "diagnose_failures",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Brand Details"
+  },
+  "description": "Full content profile for one brand: description, taglines, hashtags, CTA/website URL, niche (category/subcategory), content type, target platforms, and active discount. Use this to write on-brand captions BEFORE calling create_draft or schedule_post. Read-only; returns no secrets.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand_id": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "brand_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_brand_details",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Pipeline Summary"
+  },
+  "description": "High-level snapshot of the posting pipeline: active brand count, a status breakdown (how many scheduled/posted/failed/etc.), a per-platform breakdown, how many posts are due in the next 7 days, and the next scheduled date. Use for 'how's the pipeline?' style questions.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_pipeline_summary",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List Brands"
+  },
+  "description": "List brands (content profiles), newest first, with per-brand post counts (posted/scheduled) and the next scheduled date. Use to see which brands exist and how active each is. Excludes archived brands. Returns `total` (all active brands) next to `count` (rows returned): when `truncated` is true the roster was cut off by `limit`, so raise it (max 50) before concluding a brand does not exist.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_brands",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List Connections"
+  },
+  "description": "List connected platform accounts (channels) and their health: platform, account username, connected flag, posting-enabled flag, and token expiry. Use to check which platforms are wired up and whether any connection has expired. Never returns access or refresh tokens.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_connections",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List Posts"
+  },
+  "description": "List posts across all platforms, newest scheduled first. Each row is one publication on one platform. Filter by status (draft|scheduled|posting|posted|failed|cancelled) and/or platform (youtube|tiktok|instagram|...). Returns caption, brand name, permalink, error message when present, and publishWarning for posts that succeeded with an anomaly (e.g. published without media).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "platform": {
+     "description": "Filter to a single platform, e.g. youtube or tiktok",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "draft",
+      "scheduled",
+      "posting",
+      "posted",
+      "failed",
+      "cancelled"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_posts",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Post Performance"
+  },
+  "description": "Publish-outcome metrics over a rolling window (default 30 days): posted/failed/cancelled totals, success rate, per-platform breakdown, and the most recent published posts with permalinks plus their latest stored engagement snapshot (views/likes/comments/shares; available for youtube/tiktok/twitter/threads). Snapshots are stored, not live: call refresh_post_metrics first if the numbers must be current. Optionally scope by brand_id and/or platform.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand_id": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "days": {
+     "default": 30,
+     "maximum": 365,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    },
+    "platform": {
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "post_performance",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Preflight Check"
+  },
+  "description": "READ-ONLY: validate a post BEFORE it is scheduled or published, so a problem is caught up front instead of discovered as a failure afterwards. Checks the exact things that produced the failed-post backlog: incompatible media for the platform (e.g. video to Pinterest), a disconnected or unrefreshable platform token (LinkedIn has no refresh token on this API tier and needs a manual browser reconnect roughly every 60 days — that's an expected state, not a bug), Facebook posting to an account with no Page (impossible via the Graph API), content referencing an already-passed date/season/promo code, and X/Twitter free-tier monthly write-cap headroom. Pass post_id to check one existing post; omit it to scan the forward queue (draft + scheduled, soonest first) and return only posts that have at least one issue.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users (email contains \"sample\"). Default: real data only.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 20,
+     "description": "Queue-scan mode only: how many upcoming posts to check.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "post_id": {
+     "description": "Check one existing post (id from list_posts or content_queue). Omit to scan the whole upcoming queue instead.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "preflight_check",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Reconnect Platform"
+  },
+  "description": "WRITE (safe): attempt a server-side token refresh for a platform whose access token has lapsed, updating the stored connection's token/expiry. Works without a browser when a refresh token is on file (twitter/youtube/google_drive self-heal this way); returns needsManualReauth + a dashboard link when the platform genuinely requires a manual browser reconnect (e.g. threads). Cannot publish or touch content, only refreshes credentials; safe to retry. Never exposes tokens.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "platform": {
+     "description": "Platform to reconnect, e.g. twitter, youtube, google_drive",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "required": [
+    "platform"
+   ],
+   "type": "object"
+  },
+  "name": "reconnect_platform",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Refresh Post Metrics"
+  },
+  "description": "WRITE (gated): fetch current engagement (views/likes/comments/shares) for already-published posts and store today's snapshot, then read it back with post_performance. This is the only way to update the numbers without opening the dashboard Stats tab. Supported platforms: youtube, tiktok, twitter, threads; LinkedIn and the rest expose no engagement API. A 60-minute cooldown applies per account and protects X's free-tier read quota, so a call inside it returns skipped:true and changes nothing. Publishes nothing and reaches no audience.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "include_samples": {
+     "default": false,
+     "description": "Include sample users. Default false: real accounts only, matching every read tool.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "refresh_post_metrics",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Reschedule Post"
+  },
+  "description": "WRITE (gated): move ONE post to a new future slot (ISO 8601, at least 15 minutes out). Unlike cancel_post this also accepts FAILED posts: a failed post is re-queued (status -> scheduled, error cleared). Draft and scheduled posts keep their status. Refuses posts that would structurally fail again (archived brand, incompatible media, Facebook with no Page).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "post_id": {
+     "description": "Post id (from list_posts, content_queue or diagnose_failures)",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "scheduled_date": {
+     "description": "New slot, ISO 8601, at least 15 minutes in the future",
+     "type": "string"
+    }
+   },
+   "required": [
+    "post_id",
+    "scheduled_date"
+   ],
+   "type": "object"
+  },
+  "name": "reschedule_post",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Retry Failed Posts"
+  },
+  "description": "WRITE (gated): bulk re-queue recoverable failed posts (default reason classes: token_expired, missed_window, platform_transient_error, drive_media_missing). dry_run DEFAULTS TO TRUE and only returns the plan; pass dry_run=false to actually reschedule. Retries are staggered per platform (spacing_minutes apart) and capped at limit, so a bulk retry cannot dogpile a platform API. Posts that would structurally fail again (archived brand, incompatible media, Facebook with no Page) are skipped with the reason. Use diagnose_failures first to see what is recoverable.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "dry_run": {
+     "default": true,
+     "description": "true = plan only, change nothing (the default)",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "platform": {
+     "description": "Scope to a single platform",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "reasons": {
+     "description": "Failure reason classes to retry. Default: token_expired, missed_window, platform_transient_error, drive_media_missing. Non-retryable classes are rejected.",
+     "items": {
+      "maxLength": 40,
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "spacing_minutes": {
+     "default": 30,
+     "description": "Gap between retries on the same platform",
+     "maximum": 240,
+     "minimum": 5,
+     "type": "integer"
+    },
+    "start_at": {
+     "description": "ISO 8601 start of the retry window, at least 15 minutes out. Default: ~20 minutes from now.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "retry_failed_posts",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Schedule Post"
+  },
+  "description": "WRITE (gated): queue a post for FUTURE publishing, at least 15 minutes out (immediate posting is not available over MCP). Either pass post_id to promote an existing draft, or brand_id + platform to create a new scheduled post. The publishing cron sends it at the scheduled time.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand_id": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "caption": {
+     "maxLength": 2200,
+     "type": "string"
+    },
+    "platform": {
+     "maxLength": 20,
+     "type": "string"
+    },
+    "post_id": {
+     "description": "Draft post id to promote (from content_queue)",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "reply_text": {
+     "description": "Follow-up reply posted under the main post. On X this is where a link belongs: a URL in the post body costs up to 94% of the reach (near-total on a non-Premium account), while the same URL one reply down costs nothing. Omit to reply with the brand's CTA url; pass an empty string for no reply at all. Ignored by every platform except X.",
+     "maxLength": 2200,
+     "type": "string"
+    },
+    "scheduled_date": {
+     "description": "ISO 8601, at least 15 minutes in the future",
+     "type": "string"
+    },
+    "skip_hashtags": {
+     "description": "true = publish the caption as-is with NO brand hashtags appended; false = always append them. Omit to auto-detect: long hand-authored captions (>280 chars, no '#') skip hashtags. When promoting a draft without a new caption, omitting this keeps the draft's existing setting.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "scheduled_date"
+   ],
+   "type": "object"
+  },
+  "name": "schedule_post",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update Brand"
+  },
+  "description": "WRITE (gated): correct a brand's content profile: description, taglines, hashtags, CTA and website links, content type, and the auto-post switch. This is the repair path for a brand carrying wrong copy, which otherwise makes every caption for it wrong, and the off switch for a brand whose generator is posting against your content rules. Only the fields you pass change; the rest keep their stored values. Cannot rename a brand (the name also names its Drive media folder) and cannot touch posting frequency/day or discount settings. Queues nothing and publishes nothing itself.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "auto_post_enabled": {
+     "description": "false = stop the content generator booking posts for this brand from its next cycle; true = let it resume. This is the only way to stop a brand auto-posting without opening the dashboard. Already-scheduled posts are NOT withdrawn by this: cancel those with cancel_post.",
+     "type": "boolean"
+    },
+    "brand_id": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "content_type": {
+     "description": "What the publisher should expect to find for this brand.",
+     "enum": [
+      "video",
+      "image"
+     ],
+     "type": "string"
+    },
+    "cta_url": {
+     "description": "Link included in posts. Pass an empty string to clear it.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "description": {
+     "description": "What the product actually is. The generator writes captions from this, so a wrong description makes every post wrong.",
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "hashtags": {
+     "description": "Brand hashtags appended to captions unless skip_hashtags is set.",
+     "items": {
+      "maxLength": 100,
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "taglines": {
+     "description": "Short lines the publisher rotates through when a post has no caption of its own.",
+     "items": {
+      "maxLength": 500,
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "website_url": {
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "brand_id"
+   ],
+   "type": "object"
+  },
+  "name": "update_brand",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Upload Media"
+  },
+  "description": "WRITE (gated): fetch a public media URL and store it in the connected Google Drive, returning the Drive fileId to pass to create_draft or schedule_post. This uploads to YOUR OWN Drive; it publishes nothing and reaches no audience. Accepts video, image or audio up to 100MB. With brand, files land in the folder the generator actually reads for that media type: Viral-Cat/_Res/{brand}/Imgs for an image, Vids for a video, Music for audio. Without brand it defaults to the Viral-Cat folder, and folder_id overrides both.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "brand": {
+     "description": "Brand whose _Res/{brand} folder should receive the file. Ignored when folder_id is given.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "file_name": {
+     "description": "Name to save as. Omit to take it from the URL.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "folder_id": {
+     "description": "Destination Drive folder id, overriding brand. Omit to use the Viral-Cat folder.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "kind": {
+     "description": "Which brand folder receives the file: Vids, Imgs or Music. Omit to route by media type, which is almost always right.",
+     "enum": [
+      "video",
+      "image",
+      "music"
+     ],
+     "type": "string"
+    },
+    "source_url": {
+     "description": "Public https URL of the media to store, e.g. a rendered Short. Must be reachable without auth.",
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source_url"
+   ],
+   "type": "object"
+  },
+  "name": "upload_media",
+  "output_schema": {}
+ }
+]

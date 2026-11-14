@@ -1,0 +1,851 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much cheese, cured meat, crackers, fruit, nuts and jars to buy for a charcuterie board, and what size board, for a guest count.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "guests": {
+     "description": "Number of guests",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "occasion": {
+     "description": "appetizer = before a meal; meal = the board is dinner; cheese-course = after dinner",
+     "enum": [
+      "appetizer",
+      "meal",
+      "cheese-course"
+     ],
+     "type": "string"
+    },
+    "vegetarians": {
+     "description": "Guests who eat no meat",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "guests",
+    "occasion"
+   ],
+   "type": "object"
+  },
+  "name": "charcuterie_board_calculator",
+  "output_schema": {},
+  "title": "Charcuterie board calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find Plate Artists guides, board guides, holiday hubs and free tools on a topic: plating technique, garnishes, sauces, plate types, knife skills, table setting, napkin folding, food photography, charcuterie boards and more. Returns titles, summaries and URLs. Without a query, lists every guide.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Max results (default 5)",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Topic, e.g. \"how to plate steak\", \"quenelle\", \"cocktail garnish\"",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "find_guide",
+  "output_schema": {},
+  "title": "Find a plating guide"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The full recipe by id: description, times, servings, ingredients with quantities, the method step by step, plating ideas (how to plate and garnish it), food-safety notes, FAQ and the page URL.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Recipe id from search_recipes",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_recipe",
+  "output_schema": {},
+  "title": "Get a recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much ham to buy per person and USDA FSIS cooking or reheating time and safe temperature. label: cooked = fully cooked (reheat); cbe = cook before eating; fresh = raw pork leg; country = dry-cured country ham. Not every label has every cut.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appetite": {
+     "enum": [
+      "dinner",
+      "leftovers"
+     ],
+     "type": "string"
+    },
+    "cut": {
+     "enum": [
+      "spiral",
+      "whole",
+      "half",
+      "boneless"
+     ],
+     "type": "string"
+    },
+    "guests": {
+     "description": "Number of guests",
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "label": {
+     "enum": [
+      "cooked",
+      "cbe",
+      "fresh",
+      "country"
+     ],
+     "type": "string"
+    },
+    "store_wrapped": {
+     "description": "Fully cooked ham repackaged at the store or deli (reheat to 165°F, not 140°F)",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "guests",
+    "label",
+    "cut"
+   ],
+   "type": "object"
+  },
+  "name": "ham_calculator",
+  "output_schema": {},
+  "title": "Ham calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The size and method of a classic knife cut (julienne, brunoise, batonnet, small dice, chiffonade, paysanne, tourné, mirepoix and more), in inches and millimetres. Without a cut, lists every cut with its size.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cut": {
+     "description": "e.g. \"brunoise\", \"allumette\"",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "knife_cut_size",
+  "output_schema": {},
+  "title": "Knife cut sizes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The cuisines and categories in the recipe catalog, to use as exact filter values.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_recipe_filters",
+  "output_schema": {},
+  "title": "List recipe filters"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How much food and drink to buy for a party: appetizer pieces, then the mains, sides, salads, bread and desserts you pick, and drinks for the hours.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "drinks": {
+     "items": {
+      "enum": [
+       "soft",
+       "tea",
+       "punch",
+       "coffee"
+      ],
+      "type": "string"
+     },
+     "maxItems": 4,
+     "type": "array"
+    },
+    "foods": {
+     "description": "Dishes on the menu",
+     "items": {
+      "enum": [
+       "turkey",
+       "poultry-bone",
+       "poultry-boneless",
+       "roast-bone",
+       "roast-boneless",
+       "pork",
+       "ribs",
+       "ground-beef",
+       "stew",
+       "steak",
+       "shrimp",
+       "shellfish",
+       "pasta-main",
+       "casserole",
+       "soup-first",
+       "soup-main",
+       "veg",
+       "potatoes",
+       "corn",
+       "pasta-side",
+       "rice",
+       "green-salad",
+       "potato-salad",
+       "coleslaw",
+       "fruit-salad",
+       "rolls",
+       "loaf",
+       "pie",
+       "layer-cake",
+       "cheesecake",
+       "cookies",
+       "brownies",
+       "ice-cream",
+       "pudding"
+      ],
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "guests": {
+     "description": "Number of guests",
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "hours": {
+     "description": "Party length, for drinks (default 3)",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "number"
+    },
+    "style": {
+     "enum": [
+      "appetizers-then-meal",
+      "meal",
+      "appetizers-only"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "guests",
+    "style"
+   ],
+   "type": "object"
+  },
+  "name": "party_food_calculator",
+  "output_schema": {},
+  "title": "Party food calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Which plate colour flatters a dish and which makes it disappear, by the food's dominant colour; or which foods a plate you own suits. Call with neither to see the colour families and plates.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "food_color": {
+     "enum": [
+      "golden",
+      "darkbrown",
+      "red",
+      "orange",
+      "green",
+      "pale",
+      "purple",
+      "multi"
+     ],
+     "type": "string"
+    },
+    "plate": {
+     "enum": [
+      "white",
+      "white-rim",
+      "cream-rings",
+      "black",
+      "speckled",
+      "fog-speckle",
+      "slate",
+      "navy",
+      "sage",
+      "blush",
+      "terracotta",
+      "white-bowl",
+      "slate-board"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "plate_color_pairing",
+  "output_schema": {},
+  "title": "Plate colour pairing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "How big a prime rib (standing rib roast) to buy for a guest count, roasting time, the pull temperature for the doneness you want, and the rest. Classic 350°F roast or reverse sear.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appetite": {
+     "description": "light = plenty else on the table",
+     "enum": [
+      "light",
+      "standard"
+     ],
+     "type": "string"
+    },
+    "bone": {
+     "enum": [
+      "bone-in",
+      "boneless"
+     ],
+     "type": "string"
+    },
+    "doneness": {
+     "enum": [
+      "rare",
+      "medium-rare",
+      "medium",
+      "usda",
+      "medium-well",
+      "well"
+     ],
+     "type": "string"
+    },
+    "guests": {
+     "description": "Number of guests",
+     "maximum": 60,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "leftovers": {
+     "type": "boolean"
+    },
+    "method": {
+     "enum": [
+      "classic",
+      "reverse-sear"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "guests"
+   ],
+   "type": "object"
+  },
+  "name": "prime_rib_calculator",
+  "output_schema": {},
+  "title": "Prime rib calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "One random full recipe, optionally limited by cuisine, category or vegetarian. For \"what should I cook tonight?\" questions.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category": {
+     "maxLength": 60,
+     "type": "string"
+    },
+    "cuisine": {
+     "maxLength": 60,
+     "type": "string"
+    },
+    "vegetarian": {
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "random_recipe",
+  "output_schema": {},
+  "title": "Random recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search the Plate Artists recipe catalog by words in the dish name or keywords, cuisine, category, vegetarian, and total time. Returns short cards with ids and URLs; call get_recipe for the full recipe. Call list_recipe_filters for the exact cuisine and category values.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category": {
+     "description": "Exact category, e.g. \"Dessert\"",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "cuisine": {
+     "description": "Exact cuisine, e.g. \"Italian\"",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max results (default 10)",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_total_minutes": {
+     "description": "Prep + cook + rest time limit",
+     "maximum": 10000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words to match, e.g. \"chicken\", \"chocolate cake\", \"goulash\"",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "vegetarian": {
+     "description": "Only vegetarian recipes",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_recipes",
+  "output_schema": {},
+  "title": "Search recipes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "A Thanksgiving cooking schedule worked back from the dinner time: what to do on each day before (thawing, make-ahead dishes), when the turkey goes in and comes out, which oven each side dish goes in and when, and any dish that does not fit the ovens, with fixes. Turkey times are USDA FSIS's; dish times are each recipe's own. Every setting is optional.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "date": {
+     "description": "Dinner date YYYY-MM-DD (default: the next US Thanksgiving)",
+     "maxLength": 10,
+     "type": "string"
+    },
+    "dinner_time": {
+     "description": "24-hour HH:MM the food is on the table (default \"16:00\")",
+     "maxLength": 5,
+     "type": "string"
+    },
+    "dish_beside_turkey": {
+     "description": "A side dish fits on a rack beside the turkey",
+     "type": "boolean"
+    },
+    "dishes": {
+     "description": "Dishes on the menu (default: mashed, gravy, stuffing, green-beans, rolls, cranberry, pumpkin-pie, pecan-pie). mashed = Mashed potatoes, gravy = Turkey gravy, stuffing = Stuffing, baked in a dish, green-beans = Green bean casserole, sweet-potato = Sweet potato casserole, scalloped = Scalloped potatoes, mac = Baked mac and cheese, sprouts = Roasted Brussels sprouts, rolls = Dinner rolls, cranberry = Cranberry sauce, pumpkin-pie = Pumpkin pie, pecan-pie = Pecan pie",
+     "items": {
+      "enum": [
+       "mashed",
+       "gravy",
+       "stuffing",
+       "green-beans",
+       "sweet-potato",
+       "scalloped",
+       "mac",
+       "sprouts",
+       "rolls",
+       "cranberry",
+       "pumpkin-pie",
+       "pecan-pie"
+      ],
+      "type": "string"
+     },
+     "maxItems": 12,
+     "type": "array"
+    },
+    "kitchen": {
+     "description": "one oven (default), one oven plus a countertop oven, or two ovens",
+     "enum": [
+      "one",
+      "countertop",
+      "two"
+     ],
+     "type": "string"
+    },
+    "stuffed": {
+     "description": "Roasting with stuffing inside the bird",
+     "type": "boolean"
+    },
+    "thaw": {
+     "description": "fridge (default), cold water, or fresh = no thawing",
+     "enum": [
+      "fridge",
+      "water",
+      "fresh"
+     ],
+     "type": "string"
+    },
+    "turkey_lb": {
+     "description": "Turkey weight in pounds, 4 to 24 (default 16; kg × 2.2)",
+     "maximum": 24,
+     "minimum": 4,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "thanksgiving_timeline",
+  "output_schema": {},
+  "title": "Thanksgiving timeline planner"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What size turkey to buy for a guest count, USDA roasting time at 325°F, fridge and cold-water thawing time, and the done temperature.",
+  "icons": [
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-light-128.png",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/png",
+    "sizes": [
+     "128x128"
+    ],
+    "src": "https://plateartists.com/brand/logo-mark-dark-128.png",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appetite": {
+     "description": "leftovers adds ½ lb a person",
+     "enum": [
+      "standard",
+      "leftovers"
+     ],
+     "type": "string"
+    },
+    "guests": {
+     "description": "Number of guests",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "kind": {
+     "description": "Default whole",
+     "enum": [
+      "whole",
+      "prestuffed"
+     ],
+     "type": "string"
+    },
+    "stuffed": {
+     "description": "Roasting with stuffing inside",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "guests"
+   ],
+   "type": "object"
+  },
+  "name": "turkey_calculator",
+  "output_schema": {},
+  "title": "Turkey calculator"
+ }
+]

@@ -1,0 +1,66 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check a fax"
+  },
+  "description": "How a fax set up with send_fax is going: waiting for payment, sending, trying again, delivered, or why it didn’t go through.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "description": "The code send_fax returned (the end of the link).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "fax_status",
+  "output_schema": {},
+  "title": "Check a fax"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Send a fax"
+  },
+  "description": "Send a fax to a US or Canada fax number with Dimefax (10¢ a page, no subscription, no account needed first). Give the document as base64 (PDF, PNG or JPEG), as a public https link to one, or as the plain text of a letter you wrote. This prepares the fax and returns a link for the user: they check it and pay (Apple Pay, Google Pay or card) or use page credits they already have, and it sends automatically. Nothing is sent or charged before that. If you can’t pass the file, call this with just the number: the user can add the document at the link.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "document_base64": {
+     "description": "The document, base64-encoded: a PDF, PNG or JPEG.",
+     "type": "string"
+    },
+    "document_url": {
+     "description": "A public https link to a PDF, PNG or JPEG.",
+     "type": "string"
+    },
+    "text": {
+     "description": "The text of a letter to fax, if there is no file. Dimefax sets it on letter-size pages.",
+     "type": "string"
+    },
+    "to": {
+     "description": "The fax number, US or Canada, e.g. \"(503) 555-0147\" or \"+15035550147\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "send_fax",
+  "output_schema": {},
+  "title": "Send a fax"
+ }
+]

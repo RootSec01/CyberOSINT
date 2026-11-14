@@ -1,0 +1,2155 @@
+[
+ {
+  "_meta": {
+   "openai/fileParams": [
+    "file"
+   ],
+   "openai/outputTemplate": "ui://deepbom/analyzer-v2.html",
+   "openai/toolInvocation/invoked": "Browser analysis opened",
+   "openai/toolInvocation/invoking": "Analyzing the attached model…",
+   "openai/widgetAccessible": true,
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ],
+   "ui": {
+    "resourceUri": "ui://deepbom/analyzer-v2.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use when the user asks to inspect, summarize, or visualize an attached TFLite, ONNX, GGUF, SafeTensors, Core ML, or ExecuTorch deployment artifact. Opens a browser-local analyzer, returns a hash-bound format-neutral Model IR table and static evidence summary, and provides deterministic document views without executing model code. Do not use for training checkpoints, measured latency, task accuracy, clinical validity, regulatory compliance, or actual runtime placement.",
+  "input_schema": {
+   "$defs": {
+    "OpenAIFile": {
+     "additionalProperties": false,
+     "properties": {
+      "download_url": {
+       "type": "string"
+      },
+      "file_id": {
+       "type": "string"
+      },
+      "file_name": {
+       "type": "string"
+      },
+      "mime_type": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "download_url",
+      "file_id"
+     ],
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "analysis_depth": {
+     "default": "structure",
+     "description": "Use structure unless the user explicitly asks to inspect serialized tensor payload values. Payload integrity can require reading the complete attachment.",
+     "enum": [
+      "structure",
+      "payload_integrity"
+     ],
+     "type": "string"
+    },
+    "file": {
+     "$ref": "#/$defs/OpenAIFile"
+    }
+   },
+   "required": [
+    "file"
+   ],
+   "type": "object"
+  },
+  "name": "deepbom_analyze_file",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "analysis_depth": {
+     "type": "string"
+    },
+    "analyzer_version": {
+     "type": "string"
+    },
+    "file": {
+     "additionalProperties": false,
+     "properties": {
+      "file_id": {
+       "type": "string"
+      },
+      "file_name": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "mime_type": {
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "required": [
+      "file_id",
+      "file_name",
+      "mime_type"
+     ],
+     "type": "object"
+    },
+    "privacy": {
+     "type": "string"
+    },
+    "status": {
+     "const": "browser_analysis_started",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "analyzer_version",
+    "file",
+    "analysis_depth",
+    "privacy"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Analyze an AI model artifact"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Capabilities ready",
+   "openai/toolInvocation/invoking": "Checking DEEPBOM capabilities…",
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use before analysis when format support, privacy boundaries, or the difference between the ChatGPT and local DEEPBOM paths is unclear. Returns capability metadata only and does not inspect a file.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "deepbom_capabilities",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "chatgpt_path": {
+     "type": "object"
+    },
+    "evidence_boundary": {
+     "type": "string"
+    },
+    "local_path": {
+     "type": "object"
+    },
+    "schema": {
+     "type": "string"
+    },
+    "supported_formats": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "version": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema",
+    "version",
+    "supported_formats",
+    "chatgpt_path",
+    "local_path",
+    "evidence_boundary"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Check DEEPBOM capabilities"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Evidence returned to chat",
+   "openai/toolInvocation/invoking": "Returning the evidence summary…",
+   "openai/visibility": "private",
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ],
+   "ui": {
+    "visibility": [
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Receives one bounded browser-produced DEEPBOM result, validates its structure, and returns it to the conversation. This tool accepts analysis results, never model bytes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "result": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "analysis_location": {
+         "const": "chatgpt_browser_sandbox",
+         "type": "string"
+        },
+        "analyzer_version": {
+         "type": "string"
+        },
+        "artifact": {
+         "additionalProperties": false,
+         "properties": {
+          "artifact_ir_sha256": {
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "byte_length": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "filename": {
+           "type": "string"
+          },
+          "format": {
+           "type": "string"
+          },
+          "sha256": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "filename",
+          "format",
+          "sha256",
+          "byte_length"
+         ],
+         "type": "object"
+        },
+        "evidence_boundary": {
+         "type": "string"
+        },
+        "findings": {
+         "type": "object"
+        },
+        "graph": {
+         "additionalProperties": false,
+         "properties": {
+          "mac_confidence": {
+           "type": "string"
+          },
+          "operator_count": {
+           "minimum": 0,
+           "type": [
+            "integer",
+            "null"
+           ]
+          },
+          "tensor_count": {
+           "minimum": 0,
+           "type": [
+            "integer",
+            "null"
+           ]
+          },
+          "total_macs": {
+           "minimum": 0,
+           "type": [
+            "number",
+            "null"
+           ]
+          }
+         },
+         "required": [
+          "operator_count",
+          "tensor_count",
+          "total_macs",
+          "mac_confidence"
+         ],
+         "type": "object"
+        },
+        "model_summary": {
+         "type": "object"
+        },
+        "quantization": {
+         "type": "object"
+        },
+        "reproduction": {
+         "type": [
+          "object",
+          "null"
+         ]
+        },
+        "schema": {
+         "const": "deepbom.chatgpt_analysis_result.v1",
+         "type": "string"
+        },
+        "storage": {
+         "type": [
+          "object",
+          "null"
+         ]
+        },
+        "transfer_boundary": {
+         "type": "string"
+        },
+        "verdict": {
+         "additionalProperties": false,
+         "properties": {
+          "artifact_defect_count": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "caution_count": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "evidence_needed_count": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "status": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "status",
+          "artifact_defect_count",
+          "caution_count",
+          "evidence_needed_count"
+         ],
+         "type": "object"
+        }
+       },
+       "required": [
+        "schema",
+        "analyzer_version",
+        "analysis_location",
+        "artifact",
+        "verdict",
+        "graph",
+        "storage",
+        "quantization",
+        "model_summary",
+        "findings",
+        "evidence_boundary",
+        "transfer_boundary",
+        "reproduction"
+       ],
+       "type": "object"
+      },
+      {
+       "additionalProperties": false,
+       "properties": {
+        "analysis_location": {
+         "const": "chatgpt_browser_sandbox",
+         "type": "string"
+        },
+        "analyzer_version": {
+         "type": "string"
+        },
+        "artifact": {
+         "additionalProperties": false,
+         "properties": {
+          "artifact_ir_sha256": {
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "byte_length": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "filename": {
+           "type": "string"
+          },
+          "format": {
+           "type": "string"
+          },
+          "sha256": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "filename",
+          "format",
+          "sha256",
+          "byte_length"
+         ],
+         "type": "object"
+        },
+        "evidence_boundary": {
+         "type": "string"
+        },
+        "findings": {
+         "type": "object"
+        },
+        "graph": {
+         "additionalProperties": false,
+         "properties": {
+          "mac_confidence": {
+           "type": "string"
+          },
+          "operator_count": {
+           "minimum": 0,
+           "type": [
+            "integer",
+            "null"
+           ]
+          },
+          "tensor_count": {
+           "minimum": 0,
+           "type": [
+            "integer",
+            "null"
+           ]
+          },
+          "total_macs": {
+           "minimum": 0,
+           "type": [
+            "number",
+            "null"
+           ]
+          }
+         },
+         "required": [
+          "operator_count",
+          "tensor_count",
+          "total_macs",
+          "mac_confidence"
+         ],
+         "type": "object"
+        },
+        "model_summary": {
+         "type": "object"
+        },
+        "provenance_summary": {
+         "additionalProperties": false,
+         "properties": {
+          "artifact_sha256": {
+           "pattern": "^[a-f0-9]{64}$",
+           "type": "string"
+          },
+          "attested_relationship_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "check_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "check_counts": {
+           "additionalProperties": false,
+           "properties": {
+            "match": {
+             "maximum": 1000000,
+             "minimum": 0,
+             "type": "integer"
+            },
+            "mismatch": {
+             "maximum": 1000000,
+             "minimum": 0,
+             "type": "integer"
+            },
+            "not_assessed": {
+             "maximum": 1000000,
+             "minimum": 0,
+             "type": "integer"
+            },
+            "unresolved": {
+             "maximum": 1000000,
+             "minimum": 0,
+             "type": "integer"
+            },
+            "unsupported": {
+             "maximum": 1000000,
+             "minimum": 0,
+             "type": "integer"
+            }
+           },
+           "required": [
+            "match",
+            "mismatch",
+            "not_assessed",
+            "unresolved",
+            "unsupported"
+           ],
+           "type": "object"
+          },
+          "field_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "mapped_declared_field_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "metadata_truth_verified": {
+           "const": false,
+           "type": "boolean"
+          },
+          "model_ir_sha256": {
+           "pattern": "^[a-f0-9]{64}$",
+           "type": "string"
+          },
+          "node_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "observed_file_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "provenance_ir_sha256": {
+           "pattern": "^[a-f0-9]{64}$",
+           "type": "string"
+          },
+          "publisher_authenticity": {
+           "const": "not_verified",
+           "type": "string"
+          },
+          "relationship_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "schema": {
+           "const": "deepbom.provenance_summary.v1",
+           "type": "string"
+          },
+          "status": {
+           "enum": [
+            "contradiction_observed",
+            "incomplete",
+            "no_contradiction_observed"
+           ],
+           "type": "string"
+          },
+          "unsupported_field_count": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          }
+         },
+         "required": [
+          "schema",
+          "artifact_sha256",
+          "model_ir_sha256",
+          "provenance_ir_sha256",
+          "status",
+          "node_count",
+          "relationship_count",
+          "observed_file_count",
+          "check_count",
+          "field_count",
+          "mapped_declared_field_count",
+          "unsupported_field_count",
+          "attested_relationship_count",
+          "check_counts",
+          "metadata_truth_verified",
+          "publisher_authenticity"
+         ],
+         "type": "object"
+        },
+        "quantization": {
+         "type": "object"
+        },
+        "reproduction": {
+         "type": [
+          "object",
+          "null"
+         ]
+        },
+        "schema": {
+         "const": "deepbom.chatgpt_analysis_result.v2",
+         "type": "string"
+        },
+        "storage": {
+         "type": [
+          "object",
+          "null"
+         ]
+        },
+        "transfer_boundary": {
+         "type": "string"
+        },
+        "verdict": {
+         "additionalProperties": false,
+         "properties": {
+          "artifact_defect_count": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "caution_count": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "evidence_needed_count": {
+           "minimum": 0,
+           "type": "integer"
+          },
+          "status": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "status",
+          "artifact_defect_count",
+          "caution_count",
+          "evidence_needed_count"
+         ],
+         "type": "object"
+        }
+       },
+       "required": [
+        "schema",
+        "analyzer_version",
+        "analysis_location",
+        "artifact",
+        "verdict",
+        "graph",
+        "storage",
+        "quantization",
+        "model_summary",
+        "findings",
+        "evidence_boundary",
+        "transfer_boundary",
+        "reproduction"
+       ],
+       "type": "object"
+      }
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "name": "deepbom_publish_analysis",
+  "output_schema": {
+   "anyOf": [
+    {
+     "additionalProperties": false,
+     "properties": {
+      "analysis_location": {
+       "const": "chatgpt_browser_sandbox",
+       "type": "string"
+      },
+      "analyzer_version": {
+       "type": "string"
+      },
+      "artifact": {
+       "additionalProperties": false,
+       "properties": {
+        "artifact_ir_sha256": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "byte_length": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "filename": {
+         "type": "string"
+        },
+        "format": {
+         "type": "string"
+        },
+        "sha256": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "filename",
+        "format",
+        "sha256",
+        "byte_length"
+       ],
+       "type": "object"
+      },
+      "evidence_boundary": {
+       "type": "string"
+      },
+      "findings": {
+       "type": "object"
+      },
+      "graph": {
+       "additionalProperties": false,
+       "properties": {
+        "mac_confidence": {
+         "type": "string"
+        },
+        "operator_count": {
+         "minimum": 0,
+         "type": [
+          "integer",
+          "null"
+         ]
+        },
+        "tensor_count": {
+         "minimum": 0,
+         "type": [
+          "integer",
+          "null"
+         ]
+        },
+        "total_macs": {
+         "minimum": 0,
+         "type": [
+          "number",
+          "null"
+         ]
+        }
+       },
+       "required": [
+        "operator_count",
+        "tensor_count",
+        "total_macs",
+        "mac_confidence"
+       ],
+       "type": "object"
+      },
+      "model_summary": {
+       "type": "object"
+      },
+      "quantization": {
+       "type": "object"
+      },
+      "reproduction": {
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "schema": {
+       "const": "deepbom.chatgpt_analysis_result.v1",
+       "type": "string"
+      },
+      "storage": {
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "transfer_boundary": {
+       "type": "string"
+      },
+      "verdict": {
+       "additionalProperties": false,
+       "properties": {
+        "artifact_defect_count": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "caution_count": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "evidence_needed_count": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "status": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "artifact_defect_count",
+        "caution_count",
+        "evidence_needed_count"
+       ],
+       "type": "object"
+      }
+     },
+     "required": [
+      "schema",
+      "analyzer_version",
+      "analysis_location",
+      "artifact",
+      "verdict",
+      "graph",
+      "storage",
+      "quantization",
+      "model_summary",
+      "findings",
+      "evidence_boundary",
+      "transfer_boundary",
+      "reproduction"
+     ],
+     "type": "object"
+    },
+    {
+     "additionalProperties": false,
+     "properties": {
+      "analysis_location": {
+       "const": "chatgpt_browser_sandbox",
+       "type": "string"
+      },
+      "analyzer_version": {
+       "type": "string"
+      },
+      "artifact": {
+       "additionalProperties": false,
+       "properties": {
+        "artifact_ir_sha256": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "byte_length": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "filename": {
+         "type": "string"
+        },
+        "format": {
+         "type": "string"
+        },
+        "sha256": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "filename",
+        "format",
+        "sha256",
+        "byte_length"
+       ],
+       "type": "object"
+      },
+      "evidence_boundary": {
+       "type": "string"
+      },
+      "findings": {
+       "type": "object"
+      },
+      "graph": {
+       "additionalProperties": false,
+       "properties": {
+        "mac_confidence": {
+         "type": "string"
+        },
+        "operator_count": {
+         "minimum": 0,
+         "type": [
+          "integer",
+          "null"
+         ]
+        },
+        "tensor_count": {
+         "minimum": 0,
+         "type": [
+          "integer",
+          "null"
+         ]
+        },
+        "total_macs": {
+         "minimum": 0,
+         "type": [
+          "number",
+          "null"
+         ]
+        }
+       },
+       "required": [
+        "operator_count",
+        "tensor_count",
+        "total_macs",
+        "mac_confidence"
+       ],
+       "type": "object"
+      },
+      "model_summary": {
+       "type": "object"
+      },
+      "provenance_summary": {
+       "additionalProperties": false,
+       "properties": {
+        "artifact_sha256": {
+         "pattern": "^[a-f0-9]{64}$",
+         "type": "string"
+        },
+        "attested_relationship_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "check_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "check_counts": {
+         "additionalProperties": false,
+         "properties": {
+          "match": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "mismatch": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "not_assessed": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "unresolved": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          },
+          "unsupported": {
+           "maximum": 1000000,
+           "minimum": 0,
+           "type": "integer"
+          }
+         },
+         "required": [
+          "match",
+          "mismatch",
+          "not_assessed",
+          "unresolved",
+          "unsupported"
+         ],
+         "type": "object"
+        },
+        "field_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "mapped_declared_field_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "metadata_truth_verified": {
+         "const": false,
+         "type": "boolean"
+        },
+        "model_ir_sha256": {
+         "pattern": "^[a-f0-9]{64}$",
+         "type": "string"
+        },
+        "node_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "observed_file_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "provenance_ir_sha256": {
+         "pattern": "^[a-f0-9]{64}$",
+         "type": "string"
+        },
+        "publisher_authenticity": {
+         "const": "not_verified",
+         "type": "string"
+        },
+        "relationship_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "schema": {
+         "const": "deepbom.provenance_summary.v1",
+         "type": "string"
+        },
+        "status": {
+         "enum": [
+          "contradiction_observed",
+          "incomplete",
+          "no_contradiction_observed"
+         ],
+         "type": "string"
+        },
+        "unsupported_field_count": {
+         "maximum": 1000000,
+         "minimum": 0,
+         "type": "integer"
+        }
+       },
+       "required": [
+        "schema",
+        "artifact_sha256",
+        "model_ir_sha256",
+        "provenance_ir_sha256",
+        "status",
+        "node_count",
+        "relationship_count",
+        "observed_file_count",
+        "check_count",
+        "field_count",
+        "mapped_declared_field_count",
+        "unsupported_field_count",
+        "attested_relationship_count",
+        "check_counts",
+        "metadata_truth_verified",
+        "publisher_authenticity"
+       ],
+       "type": "object"
+      },
+      "quantization": {
+       "type": "object"
+      },
+      "reproduction": {
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "schema": {
+       "const": "deepbom.chatgpt_analysis_result.v2",
+       "type": "string"
+      },
+      "storage": {
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "transfer_boundary": {
+       "type": "string"
+      },
+      "verdict": {
+       "additionalProperties": false,
+       "properties": {
+        "artifact_defect_count": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "caution_count": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "evidence_needed_count": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "status": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "status",
+        "artifact_defect_count",
+        "caution_count",
+        "evidence_needed_count"
+       ],
+       "type": "object"
+      }
+     },
+     "required": [
+      "schema",
+      "analyzer_version",
+      "analysis_location",
+      "artifact",
+      "verdict",
+      "graph",
+      "storage",
+      "quantization",
+      "model_summary",
+      "findings",
+      "evidence_boundary",
+      "transfer_boundary",
+      "reproduction"
+     ],
+     "type": "object"
+    }
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Return a DEEPBOM analysis to chat"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Recovery guidance is ready",
+   "openai/toolInvocation/invoking": "Returning the analysis error…",
+   "openai/visibility": "private",
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ],
+   "ui": {
+    "visibility": [
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Receives one bounded browser-produced DEEPBOM error and returns a recovery action to the conversation. This tool accepts diagnostic text, never model bytes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "error": {
+     "additionalProperties": false,
+     "properties": {
+      "analysis_location": {
+       "const": "chatgpt_browser_sandbox",
+       "type": "string"
+      },
+      "analyzer_version": {
+       "type": "string"
+      },
+      "code": {
+       "type": "string"
+      },
+      "file_name": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "message": {
+       "type": "string"
+      },
+      "schema": {
+       "const": "deepbom.chatgpt_error.v1",
+       "type": "string"
+      },
+      "suggested_action": {
+       "type": "string"
+      },
+      "transfer_boundary": {
+       "const": "model_bytes_not_sent_to_deepbom_service",
+       "type": "string"
+      }
+     },
+     "required": [
+      "schema",
+      "analyzer_version",
+      "analysis_location",
+      "code",
+      "message",
+      "suggested_action",
+      "file_name",
+      "transfer_boundary"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "error"
+   ],
+   "type": "object"
+  },
+  "name": "deepbom_publish_error",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "analysis_location": {
+     "const": "chatgpt_browser_sandbox",
+     "type": "string"
+    },
+    "analyzer_version": {
+     "type": "string"
+    },
+    "code": {
+     "type": "string"
+    },
+    "file_name": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "message": {
+     "type": "string"
+    },
+    "schema": {
+     "const": "deepbom.chatgpt_error.v1",
+     "type": "string"
+    },
+    "suggested_action": {
+     "type": "string"
+    },
+    "transfer_boundary": {
+     "const": "model_bytes_not_sent_to_deepbom_service",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema",
+    "analyzer_version",
+    "analysis_location",
+    "code",
+    "message",
+    "suggested_action",
+    "file_name",
+    "transfer_boundary"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Return a DEEPBOM analysis error to chat"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Requested evidence returned",
+   "openai/toolInvocation/invoking": "Returning requested evidence…",
+   "openai/visibility": "private",
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ],
+   "ui": {
+    "visibility": [
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Component-only: validates and returns a bounded Evidence IR query projection for the same attachment. No model bytes, state persistence, or runtime execution. Result digests establish consistency, not independent server attestation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "result": {
+     "additionalProperties": false,
+     "properties": {
+      "analysis_location": {
+       "const": "chatgpt_browser_sandbox",
+       "type": "string"
+      },
+      "analyzer_version": {
+       "type": "string"
+      },
+      "artifact": {
+       "additionalProperties": false,
+       "properties": {
+        "filename": {
+         "type": "string"
+        },
+        "format": {
+         "type": "string"
+        },
+        "sha256": {
+         "pattern": "^[a-f0-9]{64}$",
+         "type": "string"
+        }
+       },
+       "required": [
+        "filename",
+        "format",
+        "sha256"
+       ],
+       "type": "object"
+      },
+      "context": {
+       "type": "object"
+      },
+      "coverage": {
+       "additionalProperties": false,
+       "properties": {
+        "detail_truncated": {
+         "type": "boolean"
+        },
+        "matched_rows": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "next_offset": {
+         "minimum": 0,
+         "type": [
+          "integer",
+          "null"
+         ]
+        },
+        "offset": {
+         "minimum": 0,
+         "type": "integer"
+        },
+        "returned_rows": {
+         "maximum": 40,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "total_rows": {
+         "minimum": 0,
+         "type": "integer"
+        }
+       },
+       "required": [
+        "total_rows",
+        "matched_rows",
+        "returned_rows",
+        "offset",
+        "next_offset",
+        "detail_truncated"
+       ],
+       "type": "object"
+      },
+      "evidence_boundary": {
+       "type": "string"
+      },
+      "model_ir_sha256": {
+       "pattern": "^[a-f0-9]{64}$",
+       "type": "string"
+      },
+      "query": {
+       "additionalProperties": false,
+       "properties": {
+        "limit": {
+         "default": 20,
+         "maximum": 40,
+         "minimum": 1,
+         "type": "integer"
+        },
+        "offset": {
+         "default": 0,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "profile_ids": {
+         "description": "Exact static backend profile IDs returned by section=profiles. Independent eligibility profiles, not runtime assignments.",
+         "items": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         },
+         "maxItems": 4,
+         "type": "array",
+         "uniqueItems": true
+        },
+        "search": {
+         "description": "Literal case-insensitive filter over row names and references.",
+         "maxLength": 160,
+         "type": "string"
+        },
+        "section": {
+         "enum": [
+          "operators",
+          "operator",
+          "findings",
+          "placement",
+          "fusion",
+          "improvements",
+          "profiles",
+          "weights"
+         ],
+         "type": "string"
+        },
+        "source_index": {
+         "description": "Native serialized operator index, not display order. Ambiguous indices require subject_ref.",
+         "minimum": 0,
+         "type": "integer"
+        },
+        "subject_ref": {
+         "description": "Exact Model IR subject_ref from a previous result; preferred over an index.",
+         "maxLength": 512,
+         "minLength": 1,
+         "type": "string"
+        },
+        "target": {
+         "description": "Optional TFLite CPU planning profile ID from capabilities. Not detected hardware or a GPU delegate selector.",
+         "maxLength": 128,
+         "minLength": 1,
+         "type": "string"
+        },
+        "weight_view": {
+         "description": "Only for section=weights: explicitly opt into bounded payload analysis; use returned weight subject_ref to select a tensor. Default distribution.",
+         "enum": [
+          "distribution",
+          "channels",
+          "similarity",
+          "spectrum",
+          "sparsity",
+          "quantization"
+         ],
+         "type": "string"
+        }
+       },
+       "required": [
+        "section"
+       ],
+       "type": "object"
+      },
+      "query_sha256": {
+       "pattern": "^[a-f0-9]{64}$",
+       "type": "string"
+      },
+      "result_sha256": {
+       "pattern": "^[a-f0-9]{64}$",
+       "type": "string"
+      },
+      "rows": {
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "detail_truncations": {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         "details": {
+          "type": "object"
+         },
+         "kind": {
+          "type": "string"
+         },
+         "subject_ref": {
+          "type": "string"
+         },
+         "title": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "subject_ref",
+         "kind",
+         "title",
+         "details",
+         "detail_truncations"
+        ],
+        "type": "object"
+       },
+       "maxItems": 40,
+       "type": "array"
+      },
+      "schema": {
+       "const": "deepbom.evidence_query_result.v1",
+       "type": "string"
+      },
+      "status": {
+       "enum": [
+        "complete",
+        "partial",
+        "not_assessable",
+        "no_matches"
+       ],
+       "type": "string"
+      },
+      "transfer_boundary": {
+       "const": "model_bytes_not_sent_to_deepbom_service",
+       "type": "string"
+      }
+     },
+     "required": [
+      "schema",
+      "analyzer_version",
+      "analysis_location",
+      "artifact",
+      "model_ir_sha256",
+      "query",
+      "query_sha256",
+      "status",
+      "coverage",
+      "context",
+      "rows",
+      "evidence_boundary",
+      "transfer_boundary",
+      "result_sha256"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "name": "deepbom_publish_query",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "analysis_location": {
+     "const": "chatgpt_browser_sandbox",
+     "type": "string"
+    },
+    "analyzer_version": {
+     "type": "string"
+    },
+    "artifact": {
+     "additionalProperties": false,
+     "properties": {
+      "filename": {
+       "type": "string"
+      },
+      "format": {
+       "type": "string"
+      },
+      "sha256": {
+       "pattern": "^[a-f0-9]{64}$",
+       "type": "string"
+      }
+     },
+     "required": [
+      "filename",
+      "format",
+      "sha256"
+     ],
+     "type": "object"
+    },
+    "context": {
+     "type": "object"
+    },
+    "coverage": {
+     "additionalProperties": false,
+     "properties": {
+      "detail_truncated": {
+       "type": "boolean"
+      },
+      "matched_rows": {
+       "minimum": 0,
+       "type": "integer"
+      },
+      "next_offset": {
+       "minimum": 0,
+       "type": [
+        "integer",
+        "null"
+       ]
+      },
+      "offset": {
+       "minimum": 0,
+       "type": "integer"
+      },
+      "returned_rows": {
+       "maximum": 40,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "total_rows": {
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "total_rows",
+      "matched_rows",
+      "returned_rows",
+      "offset",
+      "next_offset",
+      "detail_truncated"
+     ],
+     "type": "object"
+    },
+    "evidence_boundary": {
+     "type": "string"
+    },
+    "model_ir_sha256": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "query": {
+     "additionalProperties": false,
+     "properties": {
+      "limit": {
+       "default": 20,
+       "maximum": 40,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "offset": {
+       "default": 0,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "profile_ids": {
+       "description": "Exact static backend profile IDs returned by section=profiles. Independent eligibility profiles, not runtime assignments.",
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 4,
+       "type": "array",
+       "uniqueItems": true
+      },
+      "search": {
+       "description": "Literal case-insensitive filter over row names and references.",
+       "maxLength": 160,
+       "type": "string"
+      },
+      "section": {
+       "enum": [
+        "operators",
+        "operator",
+        "findings",
+        "placement",
+        "fusion",
+        "improvements",
+        "profiles",
+        "weights"
+       ],
+       "type": "string"
+      },
+      "source_index": {
+       "description": "Native serialized operator index, not display order. Ambiguous indices require subject_ref.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "subject_ref": {
+       "description": "Exact Model IR subject_ref from a previous result; preferred over an index.",
+       "maxLength": 512,
+       "minLength": 1,
+       "type": "string"
+      },
+      "target": {
+       "description": "Optional TFLite CPU planning profile ID from capabilities. Not detected hardware or a GPU delegate selector.",
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "weight_view": {
+       "description": "Only for section=weights: explicitly opt into bounded payload analysis; use returned weight subject_ref to select a tensor. Default distribution.",
+       "enum": [
+        "distribution",
+        "channels",
+        "similarity",
+        "spectrum",
+        "sparsity",
+        "quantization"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "section"
+     ],
+     "type": "object"
+    },
+    "query_sha256": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "result_sha256": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "rows": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "detail_truncations": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "details": {
+        "type": "object"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "subject_ref": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "subject_ref",
+       "kind",
+       "title",
+       "details",
+       "detail_truncations"
+      ],
+      "type": "object"
+     },
+     "maxItems": 40,
+     "type": "array"
+    },
+    "schema": {
+     "const": "deepbom.evidence_query_result.v1",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "complete",
+      "partial",
+      "not_assessable",
+      "no_matches"
+     ],
+     "type": "string"
+    },
+    "transfer_boundary": {
+     "const": "model_bytes_not_sent_to_deepbom_service",
+     "type": "string"
+    }
+   },
+   "required": [
+    "schema",
+    "analyzer_version",
+    "analysis_location",
+    "artifact",
+    "model_ir_sha256",
+    "query",
+    "query_sha256",
+    "status",
+    "coverage",
+    "context",
+    "rows",
+    "evidence_boundary",
+    "transfer_boundary",
+    "result_sha256"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Return requested model evidence to chat"
+ },
+ {
+  "_meta": {
+   "openai/fileParams": [
+    "file"
+   ],
+   "openai/outputTemplate": "ui://deepbom/analyzer-v2.html",
+   "openai/toolInvocation/invoked": "Evidence query opened",
+   "openai/toolInvocation/invoking": "Inspecting the requested model evidence…",
+   "openai/widgetAccessible": true,
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ],
+   "ui": {
+    "resourceUri": "ui://deepbom/analyzer-v2.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use for follow-up questions about an already identified attachment: inspect a layer by subject_ref, search or page through all operations, inspect findings, rank improvement investigations, inspect encoded activation fusion, compare source-pinned static delegate eligibility, or explicitly analyze weight distributions, channels, similarity, singular spectra, sparsity and quantization with section=weights and optional weight_view. Weight analysis reads payloads on demand with explicit decoder/budget coverage (128 MiB widget limit). Reuse the ChatGPT-authorized file and the exact SHA-256 from its previous DEEPBOM result. section=profiles lists available backend profiles; query.target selects only a TFLite CPU planning profile from capabilities. The browser computes the query from the shared Evidence IR and returns a bounded result; model bytes are not sent to DEEPBOM. Static candidate eligibility is not observed placement, speed, accuracy, or runtime fusion. Do not invent findings while browser_query_started is pending.",
+  "input_schema": {
+   "$defs": {
+    "OpenAIFile": {
+     "additionalProperties": false,
+     "properties": {
+      "download_url": {
+       "type": "string"
+      },
+      "file_id": {
+       "type": "string"
+      },
+      "file_name": {
+       "type": "string"
+      },
+      "mime_type": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "download_url",
+      "file_id"
+     ],
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "analysis_depth": {
+     "default": "structure",
+     "description": "Use structure unless the user explicitly asks to inspect serialized tensor payload values. Payload integrity can require reading the complete attachment.",
+     "enum": [
+      "structure",
+      "payload_integrity"
+     ],
+     "type": "string"
+    },
+    "expected_sha256": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    },
+    "file": {
+     "$ref": "#/$defs/OpenAIFile"
+    },
+    "query": {
+     "additionalProperties": false,
+     "properties": {
+      "limit": {
+       "default": 20,
+       "maximum": 40,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "offset": {
+       "default": 0,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "profile_ids": {
+       "description": "Exact static backend profile IDs returned by section=profiles. Independent eligibility profiles, not runtime assignments.",
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 4,
+       "type": "array",
+       "uniqueItems": true
+      },
+      "search": {
+       "description": "Literal case-insensitive filter over row names and references.",
+       "maxLength": 160,
+       "type": "string"
+      },
+      "section": {
+       "enum": [
+        "operators",
+        "operator",
+        "findings",
+        "placement",
+        "fusion",
+        "improvements",
+        "profiles",
+        "weights"
+       ],
+       "type": "string"
+      },
+      "source_index": {
+       "description": "Native serialized operator index, not display order. Ambiguous indices require subject_ref.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "subject_ref": {
+       "description": "Exact Model IR subject_ref from a previous result; preferred over an index.",
+       "maxLength": 512,
+       "minLength": 1,
+       "type": "string"
+      },
+      "target": {
+       "description": "Optional TFLite CPU planning profile ID from capabilities. Not detected hardware or a GPU delegate selector.",
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "weight_view": {
+       "description": "Only for section=weights: explicitly opt into bounded payload analysis; use returned weight subject_ref to select a tensor. Default distribution.",
+       "enum": [
+        "distribution",
+        "channels",
+        "similarity",
+        "spectrum",
+        "sparsity",
+        "quantization"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "section"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "file",
+    "expected_sha256",
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "deepbom_query_file",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "analysis_depth": {
+     "default": "structure",
+     "description": "Use structure unless the user explicitly asks to inspect serialized tensor payload values. Payload integrity can require reading the complete attachment.",
+     "enum": [
+      "structure",
+      "payload_integrity"
+     ],
+     "type": "string"
+    },
+    "analyzer_version": {
+     "type": "string"
+    },
+    "expected_sha256": {
+     "type": "string"
+    },
+    "query": {
+     "additionalProperties": false,
+     "properties": {
+      "limit": {
+       "default": 20,
+       "maximum": 40,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "offset": {
+       "default": 0,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "profile_ids": {
+       "description": "Exact static backend profile IDs returned by section=profiles. Independent eligibility profiles, not runtime assignments.",
+       "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 4,
+       "type": "array",
+       "uniqueItems": true
+      },
+      "search": {
+       "description": "Literal case-insensitive filter over row names and references.",
+       "maxLength": 160,
+       "type": "string"
+      },
+      "section": {
+       "enum": [
+        "operators",
+        "operator",
+        "findings",
+        "placement",
+        "fusion",
+        "improvements",
+        "profiles",
+        "weights"
+       ],
+       "type": "string"
+      },
+      "source_index": {
+       "description": "Native serialized operator index, not display order. Ambiguous indices require subject_ref.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "subject_ref": {
+       "description": "Exact Model IR subject_ref from a previous result; preferred over an index.",
+       "maxLength": 512,
+       "minLength": 1,
+       "type": "string"
+      },
+      "target": {
+       "description": "Optional TFLite CPU planning profile ID from capabilities. Not detected hardware or a GPU delegate selector.",
+       "maxLength": 128,
+       "minLength": 1,
+       "type": "string"
+      },
+      "weight_view": {
+       "description": "Only for section=weights: explicitly opt into bounded payload analysis; use returned weight subject_ref to select a tensor. Default distribution.",
+       "enum": [
+        "distribution",
+        "channels",
+        "similarity",
+        "spectrum",
+        "sparsity",
+        "quantization"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "section"
+     ],
+     "type": "object"
+    },
+    "status": {
+     "const": "browser_query_started",
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "analyzer_version",
+    "expected_sha256",
+    "analysis_depth",
+    "query"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Inspect specific model evidence"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Workflow guidance ready",
+   "openai/toolInvocation/invoking": "Finding the analysis workflow…",
+   "securitySchemes": [
+    {
+     "type": "noauth"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use to discover how to answer a model-analysis question across ChatGPT, the interactive deepbom.org workspace and the local CLI. Returns real query sections, visualization/export actions, explicit web continuation links, required inputs, CLI argument templates and evidence limits for weights, pruning investigation, comparison, BOM verification, metadata/OMOP, activation evidence, runtime, batch/CI and integrations. No attachment is required. This is guidance, not a completed analysis or local command execution. Prefer answering from existing evidence; inspect supported follow-ups with deepbom_query_file before offering web continuation for richer interaction. Website links transfer only a workflow ID, never model data.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "format": {
+     "description": "Optional known artifact format; filters applicable workflows, not per-file analysis coverage.",
+     "enum": [
+      "tflite",
+      "onnx",
+      "gguf",
+      "safetensors",
+      "coreml",
+      "executorch"
+     ],
+     "type": "string"
+    },
+    "workflow": {
+     "default": "all",
+     "enum": [
+      "all",
+      "audit",
+      "layers",
+      "findings",
+      "quantization",
+      "placement",
+      "fusion",
+      "visualization",
+      "weights",
+      "pruning",
+      "compare",
+      "redesign",
+      "exports",
+      "verify",
+      "provenance",
+      "activation",
+      "runtime",
+      "batch",
+      "integrations"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "deepbom_workflow_guide",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "boundary": {
+     "type": "string"
+    },
+    "catalog_version": {
+     "type": "string"
+    },
+    "format": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "schema": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "workflows": {
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "schema",
+    "catalog_version",
+    "status",
+    "format",
+    "workflows",
+    "boundary"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Choose a DEEPBOM analysis workflow"
+ }
+]

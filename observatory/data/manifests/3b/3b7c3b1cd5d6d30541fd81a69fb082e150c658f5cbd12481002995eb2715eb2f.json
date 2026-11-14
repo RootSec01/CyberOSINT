@@ -1,0 +1,196 @@
+[
+ {
+  "description": "Analyze complete API call flow and identify patterns",
+  "input_schema": {
+   "properties": {
+    "calls": {
+     "description": "Array of API calls with metadata",
+     "items": {
+      "properties": {
+       "duration_ms": {
+        "type": "number"
+       },
+       "endpoint": {
+        "type": "string"
+       },
+       "method": {
+        "type": "string"
+       },
+       "timestamp": {
+        "type": "number"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "flow_id": {
+     "description": "Unique request flow identifier",
+     "type": "string"
+    }
+   },
+   "required": [
+    "calls",
+    "flow_id"
+   ],
+   "type": "object"
+  },
+  "name": "analyze_flow",
+  "output_schema": {}
+ },
+ {
+  "description": "Calculate estimated cost and latency savings from optimizations",
+  "input_schema": {
+   "properties": {
+    "avg_latency_ms": {
+     "description": "Average latency per call in ms",
+     "type": "number"
+    },
+    "cost_per_call_usd": {
+     "default": 0.0001,
+     "description": "Cost per API call in USD",
+     "type": "number"
+    },
+    "current_calls": {
+     "description": "Current number of API calls",
+     "type": "number"
+    },
+    "optimized_calls": {
+     "description": "Optimized number of calls",
+     "type": "number"
+    }
+   },
+   "required": [
+    "current_calls",
+    "optimized_calls"
+   ],
+   "type": "object"
+  },
+  "name": "calculate_savings",
+  "output_schema": {}
+ },
+ {
+  "description": "Identify duplicate or redundant API calls in a flow",
+  "input_schema": {
+   "properties": {
+    "calls": {
+     "description": "Array of API calls to analyze",
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "threshold_pct": {
+     "default": 80,
+     "description": "Similarity threshold percentage (0-100)",
+     "type": "number"
+    }
+   },
+   "required": [
+    "calls"
+   ],
+   "type": "object"
+  },
+  "name": "detect_redundancy",
+  "output_schema": {}
+ },
+ {
+  "description": "Generate dependency graph of API calls showing call sequence and relationships",
+  "input_schema": {
+   "properties": {
+    "calls": {
+     "description": "Array of API calls with dependencies",
+     "items": {
+      "properties": {
+       "depends_on": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "endpoint": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "calls"
+   ],
+   "type": "object"
+  },
+  "name": "get_dependency_graph",
+  "output_schema": {}
+ },
+ {
+  "description": "Recommend batching opportunities for parallel API calls",
+  "input_schema": {
+   "properties": {
+    "batch_size_limit": {
+     "default": 50,
+     "description": "Max items per batch",
+     "type": "number"
+    },
+    "calls": {
+     "description": "Array of API calls to optimize",
+     "items": {
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "calls"
+   ],
+   "type": "object"
+  },
+  "name": "suggest_batching",
+  "output_schema": {}
+ },
+ {
+  "description": "Record and track an individual API call with metadata",
+  "input_schema": {
+   "properties": {
+    "duration_ms": {
+     "description": "Call duration in milliseconds",
+     "type": "number"
+    },
+    "endpoint": {
+     "description": "API endpoint URL",
+     "type": "string"
+    },
+    "method": {
+     "description": "HTTP method (GET, POST, etc.)",
+     "type": "string"
+    },
+    "response_size_bytes": {
+     "description": "Response payload size",
+     "type": "number"
+    },
+    "service_name": {
+     "description": "Source service identifier",
+     "type": "string"
+    },
+    "status_code": {
+     "description": "HTTP status code",
+     "type": "number"
+    }
+   },
+   "required": [
+    "method",
+    "endpoint",
+    "duration_ms",
+    "status_code"
+   ],
+   "type": "object"
+  },
+  "name": "track_call",
+  "output_schema": {}
+ }
+]

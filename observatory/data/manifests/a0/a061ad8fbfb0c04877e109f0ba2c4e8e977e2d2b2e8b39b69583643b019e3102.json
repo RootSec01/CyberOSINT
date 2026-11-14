@@ -1,0 +1,486 @@
+[
+ {
+  "description": "List recent Render deploys for Jarvis.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 5,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "jarvis_render_deploysArguments",
+   "type": "object"
+  },
+  "name": "jarvis_render_deploys",
+  "output_schema": {}
+ },
+ {
+  "description": "Read recent Render logs for Jarvis.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 50,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "jarvis_render_logsArguments",
+   "type": "object"
+  },
+  "name": "jarvis_render_logs",
+  "output_schema": {}
+ },
+ {
+  "description": "Read Jarvis Render service status using the shared Render API credentials.",
+  "input_schema": {
+   "properties": {},
+   "title": "jarvis_render_statusArguments",
+   "type": "object"
+  },
+  "name": "jarvis_render_status",
+  "output_schema": {}
+ },
+ {
+  "description": "Find public A2A agents and ask several independently.",
+  "input_schema": {
+   "properties": {
+    "max_agents": {
+     "default": 3,
+     "title": "Max Agents",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    },
+    "question": {
+     "title": "Question",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query",
+    "question"
+   ],
+   "title": "neo_ask_agentsArguments",
+   "type": "object"
+  },
+  "name": "neo_ask_agents",
+  "output_schema": {}
+ },
+ {
+  "description": "Run two collective rounds: independent answers, then peer critique.",
+  "input_schema": {
+   "properties": {
+    "max_agents": {
+     "default": 4,
+     "title": "Max Agents",
+     "type": "integer"
+    },
+    "problem": {
+     "title": "Problem",
+     "type": "string"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query",
+    "problem"
+   ],
+   "title": "neo_collectiveArguments",
+   "type": "object"
+  },
+  "name": "neo_collective",
+  "output_schema": {}
+ },
+ {
+  "description": "Coordinate external agents to research revenue opportunities. Research-only; no spending or external actions.",
+  "input_schema": {
+   "properties": {
+    "budget_eur": {
+     "default": 0.0,
+     "title": "Budget Eur",
+     "type": "number"
+    },
+    "goal": {
+     "title": "Goal",
+     "type": "string"
+    },
+    "hours_per_week": {
+     "default": 5,
+     "title": "Hours Per Week",
+     "type": "integer"
+    },
+    "max_agents": {
+     "default": 3,
+     "title": "Max Agents",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "goal"
+   ],
+   "title": "neo_directorArguments",
+   "type": "object"
+  },
+  "name": "neo_director",
+  "output_schema": {}
+ },
+ {
+  "description": "Return recent compact Director results from the runtime log.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 5,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "neo_director_resultsArguments",
+   "type": "object"
+  },
+  "name": "neo_director_results",
+  "output_schema": {}
+ },
+ {
+  "description": "Search public A2A agents and the official MCP Registry.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "neo_discoverArguments",
+   "type": "object"
+  },
+  "name": "neo_discover",
+  "output_schema": {}
+ },
+ {
+  "description": "Discover relevant MCP servers and inspect initialize/tools-list only. Never invokes remote tools.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 4,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "neo_inspect_mcpArguments",
+   "type": "object"
+  },
+  "name": "neo_inspect_mcp",
+  "output_schema": {}
+ },
+ {
+  "description": "Ask the configured internal Jarvis endpoint. Requires JARVIS_URL on Render.",
+  "input_schema": {
+   "properties": {
+    "context_json": {
+     "default": "",
+     "title": "Context Json",
+     "type": "string"
+    },
+    "message": {
+     "title": "Message",
+     "type": "string"
+    }
+   },
+   "required": [
+    "message"
+   ],
+   "title": "neo_jarvisArguments",
+   "type": "object"
+  },
+  "name": "neo_jarvis",
+  "output_schema": {}
+ },
+ {
+  "description": "Check whether NEO can reach public discovery registries.",
+  "input_schema": {
+   "properties": {},
+   "title": "neo_preflightArguments",
+   "type": "object"
+  },
+  "name": "neo_preflight",
+  "output_schema": {}
+ },
+ {
+  "description": "List recent Render deploys for NEO.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 5,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "neo_render_deploysArguments",
+   "type": "object"
+  },
+  "name": "neo_render_deploys",
+  "output_schema": {}
+ },
+ {
+  "description": "Read recent Render logs for NEO.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 50,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "neo_render_logsArguments",
+   "type": "object"
+  },
+  "name": "neo_render_logs",
+  "output_schema": {}
+ },
+ {
+  "description": "Read NEO's Render service status.",
+  "input_schema": {
+   "properties": {},
+   "title": "neo_render_statusArguments",
+   "type": "object"
+  },
+  "name": "neo_render_status",
+  "output_schema": {}
+ },
+ {
+  "description": "Search the public web using a free RSS search surface. No paid API key.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 6,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "neo_web_searchArguments",
+   "type": "object"
+  },
+  "name": "neo_web_search",
+  "output_schema": {}
+ },
+ {
+  "description": "Free, no API key. Read-only MCP diagnostic. Reuses MYCELIX endpoint verification, classifies technical failures, and optionally compares the requested capability with declared tool metadata. Never invokes remote tools, never forwards credentials, and never affects commercial gates.",
+  "input_schema": {
+   "properties": {
+    "expected_capability": {
+     "default": "",
+     "title": "Expected Capability",
+     "type": "string"
+    },
+    "registry_name": {
+     "default": "",
+     "title": "Registry Name",
+     "type": "string"
+    },
+    "url": {
+     "default": "",
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "title": "oxibay_doctorArguments",
+   "type": "object"
+  },
+  "name": "oxibay_doctor",
+  "output_schema": {},
+  "title": "OXIBAY Doctor"
+ },
+ {
+  "description": "Catch invented or stitched citations before an answer ships: up to 8 quote-and-link pairs (or the citations extracted from the text) checked against the live pages, each one graded verbatim, paraphrase, stitched or not found. One signed, logged report. Free signed sample: /x402/citation-check/sample. Paid per call via x402 (USDC on Base). Call without payment to get the requirements (isError result, 402 object in structuredContent); retry with the signed payment in _meta['x402/payment']. Result is signed by neo and logged.",
+  "input_schema": {
+   "properties": {
+    "answer": {
+     "default": "",
+     "title": "Answer",
+     "type": "string"
+    },
+    "citations": {
+     "anyOf": [
+      {
+       "items": {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Citations"
+    }
+   },
+   "title": "paid_citation_checkArguments",
+   "type": "object"
+  },
+  "name": "paid_citation_check",
+  "output_schema": {},
+  "title": "Paid: check every citation in an answer (0.05 USDC)"
+ },
+ {
+  "description": "Know whether a text or public page is trying to steer your agent before the agent reads it: overrides, fake roles, exfiltration, tool abuse, payment requests, invisible Unicode or HTML-hidden text, base64 payloads. Rule-based evidence (what matched and where), signed and logged, with what was not checked stated. Free signed sample: /x402/injection-scan/sample. Paid per call via x402 (USDC on Base). Call without payment to get the requirements (isError result, 402 object in structuredContent); retry with the signed payment in _meta['x402/payment']. Result is signed by neo and logged.",
+  "input_schema": {
+   "properties": {
+    "text": {
+     "default": "",
+     "title": "Text",
+     "type": "string"
+    },
+    "url": {
+     "default": "",
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "title": "paid_injection_scanArguments",
+   "type": "object"
+  },
+  "name": "paid_injection_scan",
+  "output_schema": {},
+  "title": "Paid: prompt-injection scan (0.01 USDC)"
+ },
+ {
+  "description": "Know what an MCP server can do to your agent before connecting it: hidden instructions in tool descriptions and schemas, tool shadowing, risky capabilities, annotation mismatches, transport faults, plus a fingerprint of every tool so a later silent change is detectable. Read-only (initialize and tools/list). Signed report, logged in a public witnessed log, with what was and was not checked. Free signed sample: /x402/mcp-audit/sample. Paid per call via x402 (USDC on Base). Call without payment to get the requirements (isError result, 402 object in structuredContent); retry with the signed payment in _meta['x402/payment']. Result is signed by neo and logged.",
+  "input_schema": {
+   "properties": {
+    "previous_fingerprint": {
+     "default": "",
+     "title": "Previous Fingerprint",
+     "type": "string"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "title": "paid_mcp_auditArguments",
+   "type": "object"
+  },
+  "name": "paid_mcp_audit",
+  "output_schema": {},
+  "title": "Paid: MCP server security audit (0.80 USDC)"
+ },
+ {
+  "description": "Keep evidence that a public page said something, dated and independent of you: the fetched text, its sha256, final URL and status, signed by a third party and written to a public append-only log anchored daily on Bitcoin and Software Heritage. Useful for disputes, deleted pages and changed terms. Free signed sample: /x402/proof-of-publication/sample. Paid per call via x402 (USDC on Base). Call without payment to get the requirements (isError result, 402 object in structuredContent); retry with the signed payment in _meta['x402/payment']. Result is signed by neo and logged.",
+  "input_schema": {
+   "properties": {
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "title": "paid_proof_of_publicationArguments",
+   "type": "object"
+  },
+  "name": "paid_proof_of_publication",
+  "output_schema": {},
+  "title": "Paid: proof of publication (0.50 USDC)"
+ },
+ {
+  "description": "Prove that a file or message existed at this time without revealing it: its sha256 gets a signed receipt with a position in a public log anchored daily on Bitcoin (OpenTimestamps) and Software Heritage. Free signed sample: /x402/timestamp/sample. Paid per call via x402 (USDC on Base). Call without payment to get the requirements (isError result, 402 object in structuredContent); retry with the signed payment in _meta['x402/payment']. Result is signed by neo and logged.",
+  "input_schema": {
+   "properties": {
+    "note": {
+     "default": "",
+     "title": "Note",
+     "type": "string"
+    },
+    "sha256": {
+     "title": "Sha256",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sha256"
+   ],
+   "title": "paid_timestampArguments",
+   "type": "object"
+  },
+  "name": "paid_timestamp",
+  "output_schema": {},
+  "title": "Paid: timestamp a sha256 (0.01 USDC)"
+ },
+ {
+  "description": "Free, no API key. Read-only verification of a public MCP HTTPS endpoint or official Registry server name. Checks DNS/SSRF safety, TLS/HTTP reachability, initialize, tools/list schema sanity, latency and discovery metadata. Never invokes remote tools or forwards credentials.",
+  "input_schema": {
+   "properties": {
+    "registry_name": {
+     "default": "",
+     "title": "Registry Name",
+     "type": "string"
+    },
+    "url": {
+     "default": "",
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "title": "verify_mcp_endpointArguments",
+   "type": "object"
+  },
+  "name": "verify_mcp_endpoint",
+  "output_schema": {},
+  "title": "Verify MCP Endpoint"
+ },
+ {
+  "description": "Free, no API key. Checks whether an exact sentence appears on a public HTTPS page: verbatim (quotes cut with '...' allowed if the pieces are in order and close), stitched (pieces far apart or reordered), paraphrase (most 4-word runs present), not_found or unreachable. not_found means these words are not on the page; it does NOT mean the claim is false (a faithful rewording also reads not_found). Use it before acting on another agent's quote: one link + the exact sentence. Read-only single GET, no login, no JavaScript, SSRF-checked; who wrote the page is still yours to judge.",
+  "input_schema": {
+   "properties": {
+    "quote": {
+     "default": "",
+     "title": "Quote",
+     "type": "string"
+    },
+    "url": {
+     "default": "",
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "title": "verify_quoteArguments",
+   "type": "object"
+  },
+  "name": "verify_quote",
+  "output_schema": {},
+  "title": "Verify Quote"
+ }
+]

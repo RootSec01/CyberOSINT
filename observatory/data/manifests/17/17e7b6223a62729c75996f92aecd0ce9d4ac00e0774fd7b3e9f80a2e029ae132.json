@@ -1,0 +1,456 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Cash-flow inputs"
+  },
+  "description": "Dated per-period cash-flow inputs for a US public company: operating cash flow, capital expenditure, net income and shares outstanding, each with its own period start and end, unit, filing date, SEC accession number and source URL. Values sharing a period end are matched on duration and currency before being grouped. Returns observations only: no discount rate, no terminal assumption, no fair value and no price target. For research and education only; not financial advice or a recommendation to buy, sell or hold.",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "US ticker symbol, e.g. AAPL",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_cashflow_inputs",
+  "output_schema": {},
+  "title": "Cash-flow inputs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Reviewed filing passages"
+  },
+  "description": "Read short, verified primary-source passages for reviewed company events, with source URLs, section labels, dates, hashes and predecessor links where reviewed. Selective coverage only: no passages means unreviewed, not no events. Quotes normalize whitespace; financial histories are not automatically reconciled across events.",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "US ticker symbol, e.g. AAPL",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_company_evidence",
+  "output_schema": {},
+  "title": "Reviewed filing passages"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Company filings and insiders"
+  },
+  "description": "Company filings, quarterly insider transaction disclosures, aliases, headquarters and legal-entity relationships, with source licenses and explicit coverage dates. Not a live trading feed. For research and education only; not financial advice or an investment signal.",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "US ticker symbol, e.g. AAPL",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_company_research",
+  "output_schema": {},
+  "title": "Company filings and insiders"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "County economy"
+  },
+  "description": "Census ACS resident characteristics (housing costs, income, education, occupation mix) with published 90% margins of error, plus BLS QCEW private-industry jobs, pay and year-over-year growth by NAICS code with a national reference row, for one US county by FIPS code or name. Resident and workplace populations are different and must not be combined into one rate; missing and suppressed values are unavailable, not zero. Describes a place, not any company's operating or revenue exposure. For research and education only; not financial advice.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "county": {
+     "description": "County FIPS code (e.g. 48453) or name with state (e.g. \"Travis, Texas\"). An ambiguous name returns a candidate list rather than a guess.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "county"
+   ],
+   "type": "object"
+  },
+  "name": "get_county_context",
+  "output_schema": {},
+  "title": "County economy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Treasury and BLS series"
+  },
+  "description": "Selected government Treasury yields (daily) and BLS inflation, employment and wage series (monthly), with observation dates, units and reuse provenance. Returns the last year of observations unless since is given. For research and education only; not financial advice.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "series": {
+     "description": "Comma-separated series ids, e.g. treasury_10y,CUUR0000SA0 (CPI-U); omitted means all. An unknown id returns the list of ids.",
+     "type": "string"
+    },
+    "since": {
+     "description": "First observation date: YYYY, YYYY-MM or YYYY-MM-DD; default one year before the newest observation",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_economic_context",
+  "output_schema": {},
+  "title": "Treasury and BLS series"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Company fundamentals"
+  },
+  "description": "SEC-derived annual observations with exact dates, units and source filings for a US public company, by ticker symbol (use search_companies to find one by name), plus trailing-twelve-month figures and the latest quarterly balances (latest_interim) when a 10-Q is newer than the annual report. Pass quarters (1 to 12) or period \"quarterly\" for single fiscal quarters (income, cash flow and balances, each reported or the difference of two reported year-to-date figures, named in derivation); reporting says whether the quarter after the latest report has ended without a report yet. Each year also carries computed ratios (margins, return on equity, leverage, revenue_growth; any metric's change as <metric>_growth) and notes on figures that are not comparable with the year before (a restatement or a stock split between them): do not compute a change across a noted year. Includes coverage gaps, metric definitions, requested/canonical identity, dataset SHA-256 and research links. Empty annual history is unavailable, not zero; current-CIK history is not reconciled across reorganizations. Data traces to SEC EDGAR filings. For research and education only; not financial advice or a recommendation to buy, sell or hold.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "metrics": {
+     "description": "Comma-separated metric or ratio keys, e.g. revenue,operating_margin,free_cash_flow; omitted means all metrics and ratios. A ratio brings its inputs with it. Metrics: revenue, cost_of_revenue, gross_profit, research_and_development, operating_income, depreciation_and_amortization, ebitda (derived), net_income, eps_diluted, total_assets, total_liabilities, long_term_debt, stockholders_equity, cash_and_equivalents, operating_cash_flow, capex, free_cash_flow (derived), share_repurchases, dividends_paid, shares_outstanding, dividends_per_share, weighted_average_diluted_shares, eps_basic. Ratios: gross_margin, operating_margin, net_margin, return_on_equity, liabilities_to_equity, long_term_debt_to_equity, revenue_growth; any metric's year-over-year change as <metric>_growth, e.g. eps_diluted_growth.",
+     "type": "string"
+    },
+    "period": {
+     "description": "quarterly returns the newest 8 fiscal quarters (or as many as fit) unless quarters is given; annual is the default.",
+     "enum": [
+      "annual",
+      "quarterly"
+     ],
+     "type": "string"
+    },
+    "periods": {
+     "description": "Newest annual period groups to return; omitted means all available, or the newest that fit in one result (selection.note says so). With quarters and no periods, the newest 1.",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "quarters": {
+     "description": "Newest fiscal quarters to return in quarterly, newest first (up to 12).",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "ticker": {
+     "description": "US ticker symbol, e.g. AAPL",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_fundamentals",
+  "output_schema": {},
+  "title": "Company fundamentals"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Fundamentals for several companies"
+  },
+  "description": "Read annual fundamentals for 1 to 20 comma-separated ticker symbols in one request. Defaults to one newest period per issuer; optional metrics projection. Each result keeps requested/canonical identity and source lineage; unknown tickers produce per-entry errors. No historical point-in-time filtering.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "metrics": {
+     "description": "Comma-separated metric or ratio keys, e.g. revenue,operating_margin,free_cash_flow; omitted means all metrics and ratios. A ratio brings its inputs with it. Metrics: revenue, cost_of_revenue, gross_profit, research_and_development, operating_income, depreciation_and_amortization, ebitda (derived), net_income, eps_diluted, total_assets, total_liabilities, long_term_debt, stockholders_equity, cash_and_equivalents, operating_cash_flow, capex, free_cash_flow (derived), share_repurchases, dividends_paid, shares_outstanding, dividends_per_share, weighted_average_diluted_shares, eps_basic. Ratios: gross_margin, operating_margin, net_margin, return_on_equity, liabilities_to_equity, long_term_debt_to_equity, revenue_growth; any metric's year-over-year change as <metric>_growth, e.g. eps_diluted_growth.",
+     "type": "string"
+    },
+    "period": {
+     "description": "quarterly returns the newest 8 fiscal quarters (or as many as fit) unless quarters is given; annual is the default.",
+     "enum": [
+      "annual",
+      "quarterly"
+     ],
+     "type": "string"
+    },
+    "periods": {
+     "description": "Newest annual period groups per issuer; default 1, maximum 20.",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "quarters": {
+     "description": "Newest fiscal quarters to return in quarterly, newest first (up to 12).",
+     "maximum": 12,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "tickers": {
+     "description": "1 to 20 comma-separated tickers, e.g. MSFT,GOOGL,AMZN (a list of strings is also accepted)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "tickers"
+   ],
+   "type": "object"
+  },
+  "name": "get_fundamentals_batch",
+  "output_schema": {},
+  "title": "Fundamentals for several companies"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Screen companies"
+  },
+  "description": "Find US public companies whose latest annual period fundamentals match filters (minimum revenue, margins, ROE, growth; sector; profitable-only), sorted and limited. Returns a ranked list of companies with their key figures. Data traces to SEC EDGAR filings. For research and education only; not financial advice or a recommendation to buy, sell or hold.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "currency": {
+     "description": "Reporting currency, default USD; all for name-sorted discovery without monetary filters",
+     "type": "string"
+    },
+    "debt_to_equity_max": {
+     "deprecated": true,
+     "description": "Deprecated alias for liabilities_to_equity_max. Preserves the old total-liabilities definition and returns a warning; cannot be combined with the canonical parameter.",
+     "type": "number"
+    },
+    "exchange": {
+     "description": "Exchange name, e.g. Nasdaq or NYSE",
+     "type": "string"
+    },
+    "gross_margin_min": {
+     "description": "Minimum gross margin, percent (e.g. 40)",
+     "type": "number"
+    },
+    "include_stale": {
+     "description": "Include companies whose latest annual report ended more than about 18 months ago (default false: they stopped filing US GAAP annual reports, or are late)",
+     "type": "boolean"
+    },
+    "industry": {
+     "description": "Industry substring, e.g. semiconductors",
+     "type": "string"
+    },
+    "liabilities_to_equity_max": {
+     "description": "Maximum total liabilities / year-end equity. Includes non-debt liabilities.",
+     "type": "number"
+    },
+    "limit": {
+     "description": "Max results, 1 to 100 (default 25; larger values return 100)",
+     "type": "integer"
+    },
+    "long_term_debt_to_equity_max": {
+     "description": "Maximum long-term debt including current maturities / year-end equity. Excludes short-term borrowings and leases; not total debt.",
+     "type": "number"
+    },
+    "net_income_min": {
+     "description": "Minimum annual net income in the selected reporting currency",
+     "type": "number"
+    },
+    "net_margin_min": {
+     "description": "Minimum net margin, percent",
+     "type": "number"
+    },
+    "offset": {
+     "description": "Rows to skip, for paging through total (default 0)",
+     "type": "integer"
+    },
+    "operating_margin_min": {
+     "description": "Minimum operating margin, percent",
+     "type": "number"
+    },
+    "profitable": {
+     "description": "Only companies with positive net income",
+     "type": "boolean"
+    },
+    "q": {
+     "description": "Match ticker prefix, company name, industry or sector",
+     "type": "string"
+    },
+    "revenue_growth_min": {
+     "description": "Minimum year-over-year revenue growth, percent",
+     "type": "number"
+    },
+    "revenue_max": {
+     "description": "Maximum annual revenue in the selected reporting currency",
+     "type": "number"
+    },
+    "revenue_min": {
+     "description": "Minimum annual revenue in the selected reporting currency (default USD)",
+     "type": "number"
+    },
+    "roe_min": {
+     "description": "Minimum return on equity, percent",
+     "type": "number"
+    },
+    "sector": {
+     "description": "One of: Agriculture, Mining, Construction, Manufacturing, Transportation & Utilities, Wholesale Trade, Retail Trade, Finance & Real Estate, Services, Public Administration",
+     "type": "string"
+    },
+    "sort": {
+     "description": "Sort column; prefix with - for descending. e.g. -revenue (default), net_margin, -return_on_equity, revenue_growth",
+     "type": "string"
+    },
+    "total_assets_min": {
+     "description": "Minimum total assets in the selected reporting currency",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "screen_companies",
+  "output_schema": {},
+  "title": "Screen companies"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find a company"
+  },
+  "description": "Find US public companies by name or ticker, forgiving typos, best match first: ticker, SEC CIK, readable name, exchange, SEC sector and industry, and the end of the latest annual period on file. Includes companies that have left the ticker directory (listing_status former). Use it to turn a company name into the ticker the other tools take.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "description": "Most results to return (default 10)",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Company name or ticker, e.g. apple, berkshire, or msft",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_companies",
+  "output_schema": {},
+  "title": "Find a company"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Tell TickerFacts what you needed"
+  },
+  "description": "Report what you needed from TickerFacts and did not get, what looked wrong, what was confusing, or what worked. Call this whenever a tool call fails or a result lacks a figure, period, company or filter your user's task needed; say what the user was trying to accomplish and exactly which fields, periods, companies or filters would have solved it. Also call it once at the end of a session that went well, naming what was useful. Reports are read by the maintainers and drive what gets added; there is no reply channel unless you give a contact. Free-text fields are bounded; nothing is published.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent": {
+     "description": "Your client or agent and version, e.g. \"claude-code 2.1\" or \"acme-research-bot\".",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "attempted_arguments": {
+     "description": "The arguments of the call that failed or fell short, as JSON text.",
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "contact": {
+     "description": "An email or URL for follow-up, if the person you work for wants one. Optional; not published.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "details": {
+     "description": "Anything else: the figure you expected and its source, the workaround you used, how often this comes up.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "in_reply_to": {
+     "description": "The id of an earlier report you are continuing (from its reply), when answering the questions it asked.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "kind": {
+     "description": "missing_data: a company, period, metric or filter you needed is not served. wrong_data: a served figure or label looks incorrect (say which and why). confusing_response: the result or error was hard to use. feature_request: a capability that would help. works_well: what was useful. other.",
+     "enum": [
+      "missing_data",
+      "wrong_data",
+      "confusing_response",
+      "feature_request",
+      "works_well",
+      "other"
+     ],
+     "type": "string"
+    },
+    "summary": {
+     "description": "One or two sentences: what you needed and what happened. Required.",
+     "maxLength": 500,
+     "minLength": 10,
+     "type": "string"
+    },
+    "ticker": {
+     "description": "The company or companies involved, if any.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "tool": {
+     "description": "The tool or endpoint involved, e.g. get_fundamentals or /api/v1/screen.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "use_case": {
+     "description": "What your user is trying to accomplish overall (the task, not the call). This is the most useful field.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "would_solve_it": {
+     "description": "The exact fields, periods, companies, filters or behaviour that would have solved it.",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "summary"
+   ],
+   "type": "object"
+  },
+  "name": "send_feedback",
+  "output_schema": {},
+  "title": "Tell TickerFacts what you needed"
+ }
+]

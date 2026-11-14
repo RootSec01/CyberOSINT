@@ -1,0 +1,3970 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "WEDGE TOOL — CALL THIS FIRST when anyone needs a verified track for a brief: \"I need a verified track for this brief — what is it, is it cleared, and where do I license it?\" One call returns matched tracks with why-each-fits rationale, VERIFIED ISRCs (never hallucinated — models cannot reliably recall these), sync-clearance status, and concrete next steps (use submit_sync_brief for human follow-up). Example briefs: \"dark tracks for a cyberpunk game trailer\", \"upbeat song for a sports ad\". A match is NOT a license grant — clearance still requires a brief. Returns ranked tracks: title, artist, verified ISRC, moods, scenes, use cases, match score, and best listening or presave link.",
+  "input_schema": {
+   "properties": {
+    "brief": {
+     "description": "Natural-language music brief, e.g. \"tense instrumental for a heist scene\". Truncated at 500 characters.",
+     "type": "string"
+    },
+    "explicit": {
+     "description": "true = explicit only, false = non-explicit only. Omit for all.",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Max tracks to return, 1-5 (default 3).",
+     "type": "number"
+    }
+   },
+   "required": [
+    "brief"
+   ],
+   "type": "object"
+  },
+  "name": "find_tracks_for_brief",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "find_tracks_for_brief response: matched tracks with fit reasons, verified ISRCs, clearance summary, next steps.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "brief": {
+     "type": "string"
+    },
+    "clearance_summary": {
+     "description": "Plain-language clearance status for the matched tracks: who controls master+publishing, one-signature terms, PRO.",
+     "type": "string"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "licensing_disclaimer": {
+     "description": "States that a match is not a license grant.",
+     "type": "string"
+    },
+    "next_steps": {
+     "description": "Concrete actions: submit_sync_brief with the brief, contact email, license terms URL.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "tokens": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "tracks": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "best_link": {
+        "additionalProperties": true,
+        "description": "Best available listen link: presave (unreleased) > Spotify > Apple Music, with kind label.",
+        "type": [
+         "object",
+         "null"
+        ]
+       },
+       "explicit": {
+        "type": [
+         "boolean",
+         "string"
+        ]
+       },
+       "isrc": {
+        "description": "Verified ISRC from the query-db, or null when not on file. Never invented.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "isrc_verified": {
+        "type": "boolean"
+       },
+       "moods": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "scenes": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "score": {
+        "type": "number"
+       },
+       "spotify_url": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "track_id": {
+        "type": "string"
+       },
+       "use_cases": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "why_it_fits": {
+        "description": "Concrete descriptor matches, e.g. 'mood: aggressive', 'scene: fight scene'.",
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "brief",
+    "count",
+    "tracks",
+    "clearance_summary",
+    "licensing_disclaimer",
+    "next_steps"
+   ],
+   "type": "object"
+  },
+  "title": "Find Tracks for a Brief"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks what is new: \"any new music\", \"what is CWI up to\", \"latest news\". Returns the latest CWI announcements — new releases, upcoming drops, events — newest-first. Filter by \"releases\", \"news\", or \"events\".",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Optional filter: \"releases\", \"news\", or \"events\". Omit for all categories.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max announcements to return, 1-50 (default 10).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_announcements",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_announcements response: CWI announcements newest-first.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "announcements": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "category": {
+     "type": "string"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "data_updated_at": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "count",
+    "announcements"
+   ],
+   "type": "object"
+  },
+  "title": "Get Announcements"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks about an artist's identity or body of work: \"who is King Ahkeem\", \"what else has 183 Wildboi made\", \"tell me about Dre50\". Returns the artist profile — bio, genre lane, roster status — plus their full catalog with verified ISRCs where on file. Use get_track when the user asks about one specific song.",
+  "input_schema": {
+   "properties": {
+    "name": {
+     "description": "Artist name, e.g. \"That Boy Hi Hat\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "get_artist",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_artist response: artist profile, catalog list, related graph nodes.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "artist": {
+     "type": "string"
+    },
+    "related_nodes": {
+     "description": "Up to 8 connected knowledge-graph node IDs.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "track_count": {
+     "type": "integer"
+    },
+    "tracks": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "spotify_url": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "artist",
+    "track_count",
+    "tracks"
+   ],
+   "type": "object"
+  },
+  "title": "Get Artist Profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks about CWI happenings: \"any upcoming events\", \"when is the next release party\", \"what is happening\". Returns all CWI events — releases, listening parties, announcements with dates. Use the event_id with rsvp to RSVP.",
+  "input_schema": {
+   "properties": {
+    "upcoming_only": {
+     "description": "Only show upcoming events (default true). Set false to see all.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_events",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_events response: CWI events (releases, listening parties, recurring).",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "events": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "date": {
+        "type": "string"
+       },
+       "description": {
+        "type": "string"
+       },
+       "event_id": {
+        "type": "string"
+       },
+       "links": {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       "title": {
+        "type": "string"
+       },
+       "type": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "upcoming_only": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "count",
+    "events"
+   ],
+   "type": "object"
+  },
+  "title": "Get Events"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when recommending music: \"what should I listen to\", \"what is hot right now\", \"best tracks\". Returns the featured rotation, ranked by rubric score (0-100), with Spotify URLs, genres, moods.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max tracks to return, 1-20 (default 10).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_featured",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_featured response: featured rotation ranked by rubric score (0-100).",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "data_updated_at": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "featured": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "genres": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "graph_node": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "moods": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "score": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "why_featured": {
+        "additionalProperties": true,
+        "type": "object"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "new_release_spotlight": {
+     "additionalProperties": true,
+     "description": "Active pre-release spotlight: title, artist, drop date, presave URL, ISRC.",
+     "type": "object"
+    },
+    "rotation": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "rotation_raw": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "count",
+    "featured"
+   ],
+   "type": "object"
+  },
+  "title": "Get Featured Tracks"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks what a single genre IS: \"what is Post-Trap Futurism\", \"define emo rap\", \"what defines trap\". Returns the genre definition, its key artists, and key tracks. Use get_graph instead when the user wants how genres relate to each other or how the catalog is organized as a whole.",
+  "input_schema": {
+   "properties": {
+    "genre": {
+     "description": "Genre name, e.g. \"post-trap futurism\" (required).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "genre"
+   ],
+   "type": "object"
+  },
+  "name": "get_genre",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_genre response: genre definition, key artists, key tracks; found:false with available_genres otherwise.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "available_genres": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "found": {
+     "type": "boolean"
+    },
+    "genre": {
+     "additionalProperties": true,
+     "type": [
+      "object",
+      "string"
+     ]
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "found"
+   ],
+   "type": "object"
+  },
+  "title": "Get Genre Info"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user wants the big picture of how the catalog connects: \"how is the catalog organized\", \"how are these genres related\", \"show me the connections\". Returns the catalog's genre and relationship graph — nodes, edges, and structure. Use get_genre instead when the user asks what one specific genre is.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_graph",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_graph response: catalog knowledge-graph summary (node/edge counts, samples), not the full graph.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "full_graph": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "source": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "source",
+    "full_graph"
+   ],
+   "type": "object"
+  },
+  "title": "Get Catalog Graph"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks about Cumulative Web Inc itself: \"who is CWI\", \"what is the label\", \"who is on the roster\". Returns the label profile, roster, services, and contact.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_label",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_label response: Cumulative Web Inc label profile, roster, services, contact.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "label": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "label"
+   ],
+   "type": "object"
+  },
+  "title": "Get Label Profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user wants lyrics for a track: \"lyrics for Zooted Zone\". Returns timestamped lyrics. Check the verified flag — unverified lyrics are marked as such.",
+  "input_schema": {
+   "properties": {
+    "track_id": {
+     "description": "Track ID from get_track or search_catalog (required).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "track_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_lyrics",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_lyrics response: timestamped lyrics when on file; found:false with note otherwise.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "found": {
+     "type": "boolean"
+    },
+    "lyrics": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "note": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "track_id": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "found"
+   ],
+   "type": "object"
+  },
+  "title": "Get Lyrics"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks where CWI tracks are placed: \"what playlists\", \"where is Diabolique placed\". Returns verified playlist placements only.",
+  "input_schema": {
+   "properties": {
+    "artist": {
+     "description": "Optional: filter by artist name.",
+     "type": "string"
+    },
+    "track_id": {
+     "description": "Optional: filter by track ID.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_playlists",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_playlists response: verified playlist placements only (never pitch status).",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "label_playlists": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "note": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "placements": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "placements",
+    "count"
+   ],
+   "type": "object"
+  },
+  "title": "Get Playlists"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user needs press materials: \"press kit\", \"bio for That Boy Hi Hat\", \"media assets\". Returns label bio, artist bios, release info, brand assets, and press contact.",
+  "input_schema": {
+   "properties": {
+    "artist": {
+     "description": "Optional: specific artist name for their press bio.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_press_kit",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_press_kit response: label bio, artist bios, release info, brand assets, press contact.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "press_kit": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "press_kit"
+   ],
+   "type": "object"
+  },
+  "title": "Get Press Kit"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks what is on the radio right now: \"what is playing\", \"is Radio 365 live\". Returns live Cumulative Radio 365 state and the current track.",
+  "input_schema": {
+   "properties": {
+    "include": {
+     "description": "Optional comma-separated sections to include: \"now_playing\", \"listeners\", \"stream\". Omit or pass \"all\" for everything. Unknown values are ignored.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_radio",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_radio response: live Radio 365 state — stream, now-playing, listeners, proof-of-airplay.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "listeners": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "now_playing": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "proof_of_airplay": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "station": {
+     "type": "string"
+    },
+    "station_url": {
+     "type": "string"
+    },
+    "stream": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "station",
+    "station_url"
+   ],
+   "type": "object"
+  },
+  "title": "Get Radio Status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS for casual listening recommendations — \"what should I play at my party\", \"something for a workout\" — where the user wants music for themselves, NOT for a licensing brief. This is the personal-taste path with editorial rubric scoring. Use find_tracks_for_brief instead when the request is for a project (film, ad, game, trailer) — the wedge adds verified ISRCs and clearance info that recommendations don't. Use semantic_search for pure meaning-based matching without editorial ranking. Returns genres, moods, Spotify URLs, artwork, and why each track matches. ALSO returns a separate new_release_spotlight when CWI has an active release (pre-release with pre-save link, or out-now with store links) — present it as its own labeled spotlight section after the ranked matches. Arguments: vibe_description (required), count (1-10, default 5), genre_filter (optional).",
+  "input_schema": {
+   "properties": {
+    "count": {
+     "description": "Number of recommendations, 1-10 (default 5).",
+     "type": "number"
+    },
+    "genre_filter": {
+     "description": "Optional genre filter (e.g. \"trap\", \"afrobeats\", \"rap rock\").",
+     "type": "string"
+    },
+    "vibe_description": {
+     "description": "Describe the vibe/mood you want music for.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "vibe_description"
+   ],
+   "type": "object"
+  },
+  "name": "get_recommendations",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_recommendations response: vibe-ranked tracks plus an editorial new-release spotlight.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "genre_filter": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "method": {
+     "type": "string"
+    },
+    "new_release_spotlight": {
+     "additionalProperties": true,
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "note": {
+     "type": "string"
+    },
+    "recommendations": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "genres": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "graph_node": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "match_score": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "moods": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "rank": {
+        "type": "integer"
+       },
+       "rubric_score": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "why_matches": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "vibe_description": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "vibe_description",
+    "method",
+    "count",
+    "recommendations"
+   ],
+   "type": "object"
+  },
+  "title": "Get Music Recommendations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks about a release as a whole — an album, EP, or single package: \"tracklist for Idol or Icon\", \"when did NO SKIPS come out\", \"credits for the GTA VI EP\". Returns the release fact packet: tracklist, date, credits, background. Use get_track instead when the user asks about one specific song.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Release id, e.g. \"cyberpunk-2027\". Omit for the latest release.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_release",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_release response: release fact packet (claims with evidence tiers) or not-found.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "found": {
+     "type": "boolean"
+    },
+    "id": {
+     "type": "string"
+    },
+    "known_releases": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "new_release_spotlight": {
+     "additionalProperties": true,
+     "description": "Active pre-release spotlight: title, artist, drop date, presave URL, ISRC.",
+     "type": "object"
+    },
+    "packet": {
+     "additionalProperties": true,
+     "description": "Fact packet: facts list of {claim, evidence{source, observed}, tier}.",
+     "type": "object"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "id",
+    "found"
+   ],
+   "type": "object"
+  },
+  "title": "Get Release Info"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks about song requests: \"did my request play yet\", \"what songs have been requested\". Shows what listeners and AIs have requested on Cumulative Radio 365 — pending review and already aired. Filter by \"pending\", \"played\", or \"all\". Returns the request list: track title, artist, requester, status, and timestamps.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max requests to return, 1-20 (default 10).",
+     "type": "number"
+    },
+    "status": {
+     "description": "Filter by status: \"pending\" (awaiting review), \"played\" (aired), \"all\". Default \"pending\".",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_requests",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_requests response: song-request queue (pending/played/all).",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    },
+    "pending_count": {
+     "type": "integer"
+    },
+    "requests": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "dedication": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "reason": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "request_id": {
+        "type": "integer"
+       },
+       "requested_at": {
+        "type": "string"
+       },
+       "requested_by": {
+        "type": "string"
+       },
+       "status": {
+        "type": "string"
+       },
+       "track_title": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "station": {
+     "type": "string"
+    },
+    "status_filter": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "station",
+    "count",
+    "requests"
+   ],
+   "type": "object"
+  },
+  "title": "Get Song Requests"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user wants the radio program guide: \"when does Diabolique play\", \"show me the schedule\", \"what time is that song on\". Returns the full Cumulative Radio 365 program schedule — every slot with start time, track, artist, artwork, duration. The program is a deterministic loop that repeats; times in UTC.",
+  "input_schema": {
+   "properties": {
+    "date": {
+     "description": "Date for the schedule in YYYY-MM-DD format. Defaults to today (UTC).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_schedule",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_schedule response: full Radio 365 rotation — every slot with track, artist, duration, next air time (UTC).",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "date": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    },
+    "period_seconds": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "program_version": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "slot_count": {
+     "type": "integer"
+    },
+    "slots": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "station": {
+     "type": "string"
+    },
+    "stream_url": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "station",
+    "slot_count",
+    "slots"
+   ],
+   "type": "object"
+  },
+  "title": "Get Radio Schedule"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user wants to browse the full licensable inventory — not a specific search, but \"show me everything I can license\" or \"what's in the sync catalog\". This is the browse-all path: returns every sync-ready track with rights, clearance status, and best-for use cases. Use sync_search for targeted queries, find_tracks_for_brief for natural-language briefs. Chain to submit_sync_brief to start licensing.",
+  "input_schema": {
+   "properties": {
+    "genre": {
+     "description": "Filter by genre, e.g. \"post-trap futurism\".",
+     "type": "string"
+    },
+    "mood": {
+     "description": "Filter by mood, e.g. \"dark\", \"energetic\".",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_sync_catalog",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_sync_catalog response: sync-ready tracks with rights and clearance info.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "note": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "tracks": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "tracks",
+    "count"
+   ],
+   "type": "object"
+  },
+  "title": "Get Sync Catalog"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when you have a track ID or exact title and need the full record: credits, genres, moods, tempo, licensing status, links. Usually follows a search. Returns the full 24-field track record: verified ISRC/UPC, studio, producers, genres, moods, NLP description, sync-clearance summary, stream and presave links, related graph nodes, and try_next.",
+  "input_schema": {
+   "properties": {
+    "id_or_title": {
+     "description": "Track title (exact or partial) or a Spotify track ID / open.spotify.com URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id_or_title"
+   ],
+   "type": "object"
+  },
+  "name": "get_track",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_track response: full 24-field track record plus summary_markdown, related_nodes, try_next.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "album": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "apple_music_url": {
+     "type": "string"
+    },
+    "artist": {
+     "type": "string"
+    },
+    "artist_mbid": {
+     "description": "MusicBrainz artist MBID.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "artwork_url": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "contexts": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "credits": {
+     "additionalProperties": true,
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "description": {
+     "description": "150-300 word NLP prose (Whisper-derived where flagged; not proofread).",
+     "type": "string"
+    },
+    "engineer": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "featured": {
+     "type": "boolean"
+    },
+    "genres": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "graph_node": {
+     "type": "string"
+    },
+    "isrc": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "label": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "mbid": {
+     "description": "MusicBrainz recording MBID.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "moods": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "presave_url": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "producers": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "related_nodes": {
+     "description": "Up to 8 connected knowledge-graph node IDs.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "release_date": {
+     "description": "Original commercial release date (YYYY-MM-DD).",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "scenes": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "signature": {
+     "additionalProperties": true,
+     "description": "That Boy Hi Hat flow-architecture signature block (present on his tracks).",
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "sounds_like_lanes": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "spotify_url": {
+     "type": "string"
+    },
+    "streaming_urls": {
+     "additionalProperties": true,
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "studio": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "summary_markdown": {
+     "description": "Compact markdown: title, ISRC/UPC, studio, genres/moods, one-line sync clearance.",
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "track_id": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "upc": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "use_cases": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "track_id",
+    "title",
+    "artist"
+   ],
+   "type": "object"
+  },
+  "title": "Get Track Details"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user asks what plays next on Radio 365: \"what's coming up\", \"what's after this song\". Returns the upcoming queue.",
+  "input_schema": {
+   "properties": {
+    "count": {
+     "description": "Number of upcoming tracks to return, 1-10 (default 5).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_up_next",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_up_next response: now-playing plus the upcoming Radio 365 queue with air times (UTC).",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    },
+    "now_playing": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "program_version": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "station": {
+     "type": "string"
+    },
+    "stream_url": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "up_next": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "station",
+    "now_playing",
+    "up_next"
+   ],
+   "type": "object"
+  },
+  "title": "Get Up Next on Radio"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user wants video content: \"music videos\", \"trailers\", \"visuals\". Returns videos with YouTube links and embed URLs.",
+  "input_schema": {
+   "properties": {
+    "artist": {
+     "description": "Optional: filter by artist name.",
+     "type": "string"
+    },
+    "type": {
+     "description": "Optional: filter by type (trailer, music-video, visualizer, live).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_videos",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "get_videos response: videos with YouTube links and embed URLs.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "videos": {
+     "items": {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "videos",
+    "count"
+   ],
+   "type": "object"
+  },
+  "title": "Get Videos"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "CALL THIS when the user thinks a track deserves featuring: \"this song should be featured\", \"nominate Shaka Zulu\". Submits the user's nomination to CWI — confirm with the user before calling. Auto-scored against the editorial rubric (0-100), then human-reviewed. Returns nomination ID, the track's rubric score, and queue position. Rate limit: 3 per requester per 24h. Arguments: track_title, artist, nominated_by (required), reason (required).",
+  "input_schema": {
+   "properties": {
+    "artist": {
+     "description": "Artist name.",
+     "type": "string"
+    },
+    "nominated_by": {
+     "description": "Your name or agent identity (required).",
+     "type": "string"
+    },
+    "reason": {
+     "description": "Why this track deserves the featured rotation (required).",
+     "type": "string"
+    },
+    "track_title": {
+     "description": "Title of the track you are nominating.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "track_title",
+    "artist",
+    "nominated_by",
+    "reason"
+   ],
+   "type": "object"
+  },
+  "name": "nominate_featured",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "nominate_featured response: nomination ID, rubric score, and a receipt with the real D1 row id.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "artist": {
+     "type": "string"
+    },
+    "graph_node": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "in_current_rotation": {
+     "type": "boolean"
+    },
+    "nominated_by": {
+     "type": "string"
+    },
+    "nomination_id": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "queue_position": {
+     "type": "integer"
+    },
+    "receipt": {
+     "additionalProperties": false,
+     "description": "Confirmation receipt; id is the real intake row id.",
+     "properties": {
+      "id": {
+       "type": [
+        "integer",
+        "null"
+       ]
+      },
+      "received_at": {
+       "type": "string"
+      },
+      "status": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "status",
+      "received_at"
+     ],
+     "type": "object"
+    },
+    "review": {
+     "type": "string"
+    },
+    "rubric_note": {
+     "type": "string"
+    },
+    "rubric_score": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "status": {
+     "type": "string"
+    },
+    "submitted_at": {
+     "type": "string"
+    },
+    "track_title": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "nomination_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "title": "Nominate Featured Track"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "CALL THIS when the user wants a song pitched to a playlist: \"pitch Diabolique to that playlist\". Submits the user's pitch to CWI — confirm with the user before calling. Goes to human review, NEVER auto-added. Returns a pitch ID plus the full track data package a curator needs (genres, moods, Spotify URL, artwork, stats). Rate limit: 3 per requester per 24h. Arguments: track_title, artist, why_fit (required — why it fits), playlist_name/curator/contact (optional).",
+  "input_schema": {
+   "properties": {
+    "artist": {
+     "description": "Artist name.",
+     "type": "string"
+    },
+    "contact": {
+     "description": "Optional: email for follow-up.",
+     "type": "string"
+    },
+    "curator": {
+     "description": "Optional: curator name or handle.",
+     "type": "string"
+    },
+    "playlist_name": {
+     "description": "Optional: target playlist name.",
+     "type": "string"
+    },
+    "track_title": {
+     "description": "Title of the track you are pitching.",
+     "type": "string"
+    },
+    "why_fit": {
+     "description": "Why this track fits the playlist (required).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "track_title",
+    "artist",
+    "why_fit"
+   ],
+   "type": "object"
+  },
+  "name": "pitch_for_playlist",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "pitch_for_playlist response: pitch ID, review status, and a receipt with the real D1 row id.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "artist": {
+     "type": "string"
+    },
+    "curator": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "note": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "pitch_id": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "playlist_name": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "receipt": {
+     "additionalProperties": false,
+     "description": "Confirmation receipt; id is the real intake row id.",
+     "properties": {
+      "id": {
+       "type": [
+        "integer",
+        "null"
+       ]
+      },
+      "received_at": {
+       "type": "string"
+      },
+      "status": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "status",
+      "received_at"
+     ],
+     "type": "object"
+    },
+    "review": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "submitted_at": {
+     "type": "string"
+    },
+    "track_data": {
+     "additionalProperties": true,
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "track_title": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "why_fit": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ok",
+    "pitch_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "title": "Pitch for Playlist"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "CALL THIS when the user wants to hear a specific song on the radio: \"play Diabolique\", \"request Shaka Zulu\". Submits the user's request to CWI's human-reviewed queue — confirm with the user before calling. Does NOT auto-play. Returns queue position and estimated air time. Rate limit: 3 per requester name per 24h. Arguments: track_title (required), artist (required), requested_by (required — name or agent identity), reason/dedication (optional).",
+  "input_schema": {
+   "properties": {
+    "artist": {
+     "description": "Artist name.",
+     "type": "string"
+    },
+    "dedication": {
+     "description": "Optional: who this request is dedicated to.",
+     "type": "string"
+    },
+    "reason": {
+     "description": "Optional: why you want to hear this track.",
+     "type": "string"
+    },
+    "requested_by": {
+     "description": "Your name or agent identity (used for rate limiting).",
+     "type": "string"
+    },
+    "track_title": {
+     "description": "Title of the track you want to hear.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "track_title",
+    "artist",
+    "requested_by"
+   ],
+   "type": "object"
+  },
+  "name": "request_song",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "request_song response: queued request with ID, queue position, ETA. Human-reviewed; never auto-plays.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "artist": {
+     "type": "string"
+    },
+    "estimated_air_in_minutes": {
+     "type": "integer"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "queue_position": {
+     "type": "integer"
+    },
+    "request_id": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "requested_at": {
+     "type": "string"
+    },
+    "requested_by": {
+     "type": "string"
+    },
+    "review": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "track_title": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "request_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "title": "Request a Song"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "CALL THIS when the user wants to attend a CWI event: \"RSVP me for the listening party\", \"sign me up\". Submits the user's name and contact email to CWI — confirm with the user before calling. Returns confirmation with event details. Rate limit: 3 per requester per 24h. Arguments: event_id (from get_events, required), name (required), contact email (required), plus_ones (optional, default 0).",
+  "input_schema": {
+   "properties": {
+    "contact": {
+     "description": "Email for confirmation (required).",
+     "type": "string"
+    },
+    "event_id": {
+     "description": "Event ID from get_events (required).",
+     "type": "string"
+    },
+    "name": {
+     "description": "Your name (required).",
+     "type": "string"
+    },
+    "plus_ones": {
+     "description": "Number of additional guests (default 0).",
+     "type": "number"
+    }
+   },
+   "required": [
+    "event_id",
+    "name",
+    "contact"
+   ],
+   "type": "object"
+  },
+  "name": "rsvp",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "rsvp response: RSVP confirmation with ID. Rate limit: 3 per contact per 24h.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "confirmation": {
+     "type": "string"
+    },
+    "event_id": {
+     "type": "string"
+    },
+    "event_title": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "plus_ones": {
+     "type": "integer"
+    },
+    "rsvp_at": {
+     "type": "string"
+    },
+    "rsvp_id": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "status": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ok",
+    "rsvp_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "title": "RSVP to Event"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS for explicit lookups: \"tracks by X\", \"downtempo around 90 bpm\", \"songs titled...\". Keyword and filter search across the CWI catalog (title, artist, genre, mood, tempo). Use semantic_search instead if the user describes a feeling. Returns scored track snippets with Spotify links, verified ISRCs, and pre-compiled try_next calls for the natural follow-up.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max tracks to return, 1-10 (default 5).",
+     "type": "number"
+    },
+    "q": {
+     "description": "Search keywords, e.g. \"cyberpunk rap\" or \"dark cinematic\". Truncated at 500 characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "search_catalog",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "search_catalog response: scored track snippets plus pre-compiled try_next calls.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "limit": {
+     "type": "integer"
+    },
+    "new_release_spotlight": {
+     "additionalProperties": true,
+     "description": "Active pre-release spotlight: title, artist, drop date, presave URL, ISRC.",
+     "type": "object"
+    },
+    "query": {
+     "type": "string"
+    },
+    "results": {
+     "items": {
+      "additionalProperties": true,
+      "description": "Track snippet (list views carry a snippet, not the full prose description).",
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "featured": {
+        "type": "boolean"
+       },
+       "genres": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "graph_node": {
+        "description": "Knowledge-graph node id, e.g. track:cyberpunk-2027.",
+        "type": "string"
+       },
+       "moods": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "tokens": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "query",
+    "count",
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Search Catalog"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS when the user describes music in plain words: \"rainy night drive, nostalgic\", \"something that sounds like a heist\". Returns catalog matches ranked by meaning rather than keywords.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max results, 1-20 (default 5).",
+     "type": "number"
+    },
+    "q": {
+     "description": "Natural-language music query, e.g. \"dark cyberpunk rap for a film scene\". Truncated at 500 characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "semantic_search",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "semantic_search response: cosine- or keyword-ranked tracks for a natural-language mood query.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "dim": {
+     "type": "integer"
+    },
+    "fallback": {
+     "type": "boolean"
+    },
+    "fallback_note": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "limit": {
+     "type": "integer"
+    },
+    "method": {
+     "description": "cosine:<model> or fallback:keyword.",
+     "type": "string"
+    },
+    "model": {
+     "type": "string"
+    },
+    "query": {
+     "type": "string"
+    },
+    "results": {
+     "items": {
+      "additionalProperties": true,
+      "description": "Track snippet (list views carry a snippet, not the full prose description).",
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "featured": {
+        "type": "boolean"
+       },
+       "genres": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "graph_node": {
+        "description": "Knowledge-graph node id, e.g. track:cyberpunk-2027.",
+        "type": "string"
+       },
+       "moods": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "query",
+    "method",
+    "count",
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Semantic Music Search"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "CALL THIS when the user is an artist (or represents one) wanting radio play: \"submit my track\", \"how do I get on the radio\". Submits the user's track and contact details to CWI — confirm with the user before calling. Goes to human review, NEVER auto-added. Returns a submission ID and next steps. Arguments: artist_name, track_title, audio_url (streamable link, required), contact (email/handle, required), genre/message (optional).",
+  "input_schema": {
+   "properties": {
+    "artist_name": {
+     "description": "Artist name.",
+     "type": "string"
+    },
+    "audio_url": {
+     "description": "Streamable URL to the track audio (required for review).",
+     "type": "string"
+    },
+    "contact": {
+     "description": "Email or social handle for follow-up.",
+     "type": "string"
+    },
+    "genre": {
+     "description": "Genre of the track.",
+     "type": "string"
+    },
+    "message": {
+     "description": "Optional pitch: why this track fits Radio 365.",
+     "type": "string"
+    },
+    "track_title": {
+     "description": "Track title.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "artist_name",
+    "track_title",
+    "audio_url",
+    "contact"
+   ],
+   "type": "object"
+  },
+  "name": "submit_for_airplay",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "submit_for_airplay response: submission ID and review status. Human-reviewed; never auto-added.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "artist_name": {
+     "type": "string"
+    },
+    "genre": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "review_note": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "submission_id": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "submitted_at": {
+     "type": "string"
+    },
+    "track_title": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "what_happens_next": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ok",
+    "submission_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "title": "Submit for Airplay"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "readOnlyHint": false
+  },
+  "description": "CALL THIS when the user works in film/TV/ads/games and needs music: \"I need a song for my film\", \"looking for tracks for a commercial\". Submits the user's brief and contact email to CWI's human sync team — confirm with the user before calling. CWI may follow up by email about this brief. Tracks are NEVER auto-licensed. Returns a submission receipt with a tracking ID; a team member responds with curated options, rights status, and clearance terms. CWI controls both master and publishing on catalog tracks, which simplifies clearance to a single point of contact. Rate limit: 3 per requester per 24h. Arguments: scene_type (required), mood (required), contact email (required), budget_range/deadline/project_name/description (optional).",
+  "input_schema": {
+   "properties": {
+    "budget_range": {
+     "description": "Optional budget range (e.g. \"$1k-5k\", \"$10k+\").",
+     "type": "string"
+    },
+    "contact": {
+     "description": "Email for follow-up (required).",
+     "type": "string"
+    },
+    "deadline": {
+     "description": "Optional deadline in YYYY-MM-DD format.",
+     "type": "string"
+    },
+    "description": {
+     "description": "Optional: more detail about the project or scene.",
+     "type": "string"
+    },
+    "mood": {
+     "description": "Mood/energy needed (e.g. \"dark aggressive\", \"uplifting anthemic\").",
+     "type": "string"
+    },
+    "project_name": {
+     "description": "Optional project/film/show name.",
+     "type": "string"
+    },
+    "scene_type": {
+     "description": "Type of scene needing music (e.g. \"car chase\", \"romantic montage\").",
+     "type": "string"
+    }
+   },
+   "required": [
+    "scene_type",
+    "mood",
+    "contact"
+   ],
+   "type": "object"
+  },
+  "name": "submit_sync_brief",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "submit_sync_brief response: brief ID, review status, and a license_block markdown summary.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "brief_id": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "budget_range": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "deadline": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "license_block": {
+     "description": "Markdown licensing summary: rights holders, clearance terms, contact.",
+     "type": "string"
+    },
+    "mood": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "project_name": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "rights_note": {
+     "type": "string"
+    },
+    "scene_type": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "submitted_at": {
+     "type": "string"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "what_happens_next": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ok",
+    "brief_id",
+    "status"
+   ],
+   "type": "object"
+  },
+  "title": "Submit Sync Brief"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "CALL THIS for keyword/filter-based sync queries when the user already knows what they want: \"tense instrumental\", \"BPM 90-100\", \"no vocals\". This is the precise-query path. Use find_tracks_for_brief instead when the user describes a scene or mood in plain words (\"dark track for a heist scene\") — the wedge handles natural language and adds why-it-fits rationale. Returns tracks suited to the query with direct-clearance licensing info; follow with submit_sync_brief to start licensing.",
+  "input_schema": {
+   "properties": {
+    "bpm_max": {
+     "description": "Maximum BPM (inclusive).",
+     "type": "number"
+    },
+    "bpm_min": {
+     "description": "Minimum BPM (inclusive).",
+     "type": "number"
+    },
+    "explicit": {
+     "description": "true = explicit only, false = non-explicit only. Omit for all.",
+     "type": "boolean"
+    },
+    "mood": {
+     "description": "Mood filter, matched against moods + energy words, e.g. \"aggressive\".",
+     "type": "string"
+    },
+    "q": {
+     "description": "Sync query, e.g. \"club scene\" or \"dark aggressive\". Truncated at 500 characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "sync_search",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "sync_search response: scene-matched tracks with rights info, plus a license_block for the top hit.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "descriptor_provenance": {
+     "type": "string"
+    },
+    "filters_applied": {
+     "additionalProperties": true,
+     "type": "object"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "license_block": {
+     "description": "Markdown licensing summary for the top hit: ISRC, rights holders, clearance terms, contact.",
+     "type": "string"
+    },
+    "query": {
+     "type": "string"
+    },
+    "results": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "credits": {
+        "type": "string"
+       },
+       "licensing_terms_pointer": {
+        "type": "string"
+       },
+       "moods": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "musical_key": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "rights": {
+        "additionalProperties": true,
+        "type": [
+         "object",
+         "null"
+        ]
+       },
+       "scenes": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "score": {
+        "type": "number"
+       },
+       "title": {
+        "type": "string"
+       },
+       "track_id": {
+        "type": "string"
+       },
+       "use_cases": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "tokens": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "query",
+    "count",
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Search Sync Catalog"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "NEW WORK — built 2026-10-27 for the Meta Global AI Developer Hackathon. Deterministic verified-brief gate: takes candidate tracks proposed by a caller (for example Muse Spark reasoning supplied by the caller) and returns the gate decision for each against the worker sync catalog data (sync-catalog-data.js, 29 tracks, 27 verified ISRCs). PASS only for a catalog match with a verified ISRC. FLAG for a catalog match without a verified ISRC. DROP for no catalog match (invented or outside the catalog). This tool makes NO Meta API call and holds no Meta key — Spark reasoning is supplied by the caller, the gate is the tool. A match is NOT a license — clearance is direct by Cumulative Web Inc, hp@cumulativeweb.com, one-signature, BMI.",
+  "input_schema": {
+   "properties": {
+    "candidates": {
+     "description": "Proposed candidates, up to 50: each {title, artist}. Title matching is case-insensitive and punctuation-insensitive; the artist is echoed, not used for matching.",
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "description": "Proposed artist name.",
+        "type": "string"
+       },
+       "title": {
+        "description": "Proposed track title (required).",
+        "type": "string"
+       }
+      },
+      "required": [
+       "title"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "candidates"
+   ],
+   "type": "object"
+  },
+  "name": "verify_brief_candidates",
+  "output_schema": {
+   "additionalProperties": true,
+   "description": "verify_brief_candidates response: one deterministic gate decision per candidate plus the verified shortlist.",
+   "properties": {
+    "_session": {
+     "additionalProperties": false,
+     "description": "Chain session: pass _session.session_token back in the next call to continue the chain.",
+     "properties": {
+      "session_token": {
+       "description": "Hex session token; echo it as params._session.session_token to continue.",
+       "type": "string"
+      },
+      "step": {
+       "description": "Hop number in this chain (1 = chain start).",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "session_token",
+      "step"
+     ],
+     "type": "object"
+    },
+    "built": {
+     "description": "Build date of this new tool: 2026-10-27 (Meta hackathon new work).",
+     "type": "string"
+    },
+    "clearance_note": {
+     "type": "string"
+    },
+    "counts": {
+     "properties": {
+      "drop": {
+       "type": "integer"
+      },
+      "flag": {
+       "type": "integer"
+      },
+      "pass": {
+       "type": "integer"
+      },
+      "proposed": {
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "decisions": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "catalog_artist": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "catalog_title": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "decision": {
+        "description": "PASS, FLAG, or DROP.",
+        "type": "string"
+       },
+       "decision_reason": {
+        "type": "string"
+       },
+       "isrc": {
+        "description": "Verified ISRC from the sync catalog data, or null. Never invented.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "isrc_provenance": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "proposed_artist": {
+        "type": "string"
+       },
+       "proposed_title": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "gate_source": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "rule": {
+     "type": "string"
+    },
+    "tool": {
+     "type": "string"
+    },
+    "tracks_on_file": {
+     "type": "integer"
+    },
+    "try_next": {
+     "description": "Suggested follow-up calls, each a pre-compiled {tool, arguments, purpose} payload.",
+     "items": {
+      "additionalProperties": false,
+      "description": "Pre-compiled next call: copy `arguments` straight into the next tools/call.",
+      "properties": {
+       "arguments": {
+        "additionalProperties": true,
+        "description": "Ready-to-use arguments, pre-populated from the current response.",
+        "type": "object"
+       },
+       "purpose": {
+        "description": "Why this call is the natural next step.",
+        "type": "string"
+       },
+       "tool": {
+        "description": "Tool to call next.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool",
+       "arguments"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "verified_on_file": {
+     "type": "integer"
+    },
+    "verified_shortlist": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "artist": {
+        "type": "string"
+       },
+       "isrc": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "tool",
+    "counts",
+    "decisions",
+    "verified_shortlist",
+    "clearance_note"
+   ],
+   "type": "object"
+  },
+  "title": "Verify Brief Candidates"
+ }
+]

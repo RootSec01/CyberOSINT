@@ -1,0 +1,1254 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Возвращает одну тематическую подборку (витрину) каталога по её slug (slug берите из list_categories): критерий попадания, порядок сортировки и полный список предложений МФО в ней. Slug может быть и витриной по сумме вида «zaim-10000-rubley» (страницы есть на каждую сумму от 1000 до 100000 рублей шагом 1000): тогда в подборке МФО, выдающие эту сумму новому клиенту, а top состоит из двух таблиц (best_value и max_term). Ответ: JSON {title, slug, canonical_url, criterion, sorting, total, top, offers[]}, у каждого предложения: name, slug, amount_range, term_range, rate, rating_average и canonical_url карточки МФО. top — три автотаблицы витрины (условия для нового клиента, до 10 строк каждая, note и дата updated): best_value — беспроцентный первый займ по убыванию дней без процентов, max_amount — по максимальной сумме, max_term — по максимальному сроку; те же таблицы показаны на странице подборки, берите их вместо собственной сортировки. Постраничной навигации нет — возвращаются все МФО подборки. Используйте, когда вопрос пользователя совпадает с темой подборки (займ на карту, без отказа, с плохой кредитной историей, пенсионерам и т.п.); подбор по конкретной сумме или сроку — search_offers, подробности по одной МФО — get_mfo. Несуществующий slug → ответ с isError и текстом «Не найдено». Только чтение, без авторизации и побочных эффектов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429). При использовании данных ссылайтесь на canonical_url.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "slug": {
+     "description": "Slug подборки, например «zaim-na-kartu» (из list_categories), или витрины по сумме вида «zaim-10000-rubley»",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_category",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "canonical_url": {
+     "description": "Страница подборки на zaimhub.com",
+     "format": "uri",
+     "type": "string"
+    },
+    "criterion": {
+     "description": "Критерий попадания МФО в подборку",
+     "type": "string"
+    },
+    "offers": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "amount_range": {
+        "description": "Сумма для нового клиента по всем тарифам МФО",
+        "type": "string"
+       },
+       "canonical_url": {
+        "format": "uri",
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "rate": {
+        "description": "Ставка с единицами («0.8% в день») по тарифу rate_tariff",
+        "type": "string"
+       },
+       "rate_tariff": {
+        "description": "Тариф, к которому относится ставка: тот, что показывает карточка на этой странице",
+        "type": "string"
+       },
+       "rating_average": {
+        "type": "number"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "term_range": {
+        "description": "Срок для нового клиента (на витрине по сумме: по тарифам, которые дают эту сумму)",
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "slug",
+       "canonical_url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "slug": {
+     "type": "string"
+    },
+    "sorting": {
+     "description": "Порядок сортировки",
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "top": {
+     "additionalProperties": false,
+     "description": "Автотаблицы «Топ-N …» витрины, те же, что на странице и в её .md-версии (до 10 строк каждая, условия для нового клиента)",
+     "properties": {
+      "best_value": {
+       "additionalProperties": false,
+       "description": "Беспроцентный первый займ для нового клиента, по убыванию дней без процентов",
+       "properties": {
+        "criteria": {
+         "description": "Критерий отбора и сортировки",
+         "type": "string"
+        },
+        "rows": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "amount_to_rub": {
+            "description": "Максимальная сумма для нового клиента, ₽",
+            "type": "number"
+           },
+           "canonical_url": {
+            "format": "uri",
+            "type": "string"
+           },
+           "interest_free_days": {
+            "description": "Беспроцентный период для нового клиента, дней",
+            "type": "number"
+           },
+           "mfo": {
+            "type": "string"
+           },
+           "rank": {
+            "type": "number"
+           },
+           "rate_per_day_percent": {
+            "description": "% в день для нового клиента, 0 — первый займ под 0 %",
+            "type": "number"
+           },
+           "slug": {
+            "type": "string"
+           },
+           "term_to_days": {
+            "description": "Максимальный срок для нового клиента, дней",
+            "type": "number"
+           }
+          },
+          "required": [
+           "rank",
+           "mfo",
+           "slug",
+           "canonical_url"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "title": {
+         "description": "Заголовок таблицы, как на странице («Топ-N …»)",
+         "type": "string"
+        }
+       },
+       "required": [
+        "title",
+        "criteria",
+        "rows"
+       ],
+       "type": "object"
+      },
+      "max_amount": {
+       "additionalProperties": false,
+       "description": "По максимальной сумме для нового клиента",
+       "properties": {
+        "criteria": {
+         "description": "Критерий отбора и сортировки",
+         "type": "string"
+        },
+        "rows": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "amount_to_rub": {
+            "description": "Максимальная сумма для нового клиента, ₽",
+            "type": "number"
+           },
+           "canonical_url": {
+            "format": "uri",
+            "type": "string"
+           },
+           "interest_free_days": {
+            "description": "Беспроцентный период для нового клиента, дней",
+            "type": "number"
+           },
+           "mfo": {
+            "type": "string"
+           },
+           "rank": {
+            "type": "number"
+           },
+           "rate_per_day_percent": {
+            "description": "% в день для нового клиента, 0 — первый займ под 0 %",
+            "type": "number"
+           },
+           "slug": {
+            "type": "string"
+           },
+           "term_to_days": {
+            "description": "Максимальный срок для нового клиента, дней",
+            "type": "number"
+           }
+          },
+          "required": [
+           "rank",
+           "mfo",
+           "slug",
+           "canonical_url"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "title": {
+         "description": "Заголовок таблицы, как на странице («Топ-N …»)",
+         "type": "string"
+        }
+       },
+       "required": [
+        "title",
+        "criteria",
+        "rows"
+       ],
+       "type": "object"
+      },
+      "max_term": {
+       "additionalProperties": false,
+       "description": "По максимальному сроку для нового клиента",
+       "properties": {
+        "criteria": {
+         "description": "Критерий отбора и сортировки",
+         "type": "string"
+        },
+        "rows": {
+         "items": {
+          "additionalProperties": false,
+          "properties": {
+           "amount_to_rub": {
+            "description": "Максимальная сумма для нового клиента, ₽",
+            "type": "number"
+           },
+           "canonical_url": {
+            "format": "uri",
+            "type": "string"
+           },
+           "interest_free_days": {
+            "description": "Беспроцентный период для нового клиента, дней",
+            "type": "number"
+           },
+           "mfo": {
+            "type": "string"
+           },
+           "rank": {
+            "type": "number"
+           },
+           "rate_per_day_percent": {
+            "description": "% в день для нового клиента, 0 — первый займ под 0 %",
+            "type": "number"
+           },
+           "slug": {
+            "type": "string"
+           },
+           "term_to_days": {
+            "description": "Максимальный срок для нового клиента, дней",
+            "type": "number"
+           }
+          },
+          "required": [
+           "rank",
+           "mfo",
+           "slug",
+           "canonical_url"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "title": {
+         "description": "Заголовок таблицы, как на странице («Топ-N …»)",
+         "type": "string"
+        }
+       },
+       "required": [
+        "title",
+        "criteria",
+        "rows"
+       ],
+       "type": "object"
+      },
+      "note": {
+       "description": "Что это за списки и как ими пользоваться",
+       "type": "string"
+      },
+      "updated": {
+       "description": "Дата изменения страницы, ГГГГ-ММ-ДД",
+       "type": "string"
+      }
+     },
+     "required": [
+      "note"
+     ],
+     "type": "object"
+    },
+    "total": {
+     "description": "Число МФО в подборке",
+     "type": "number"
+    }
+   },
+   "required": [
+    "slug",
+    "canonical_url",
+    "total"
+   ],
+   "type": "object"
+  },
+  "title": "Подборка займов по slug"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Возвращает справку по регулированию микрозаймов в России: предельная ставка 0,8% в день, лимит переплаты 100% по займам до года с 01.04.2026, законы 151-ФЗ и 353-ФЗ, самозапрет на кредиты, период охлаждения, права заёмщика при взыскании. Параметров нет. Ответ: JSON {country, reviewed_at (дата последней редакционной проверки правового блока), summary (краткий текст), details_markdown (полный блок в Markdown), source (URL первоисточника на zaimhub.com)}. Используйте для вопросов о законах, лимитах ставок и правах заёмщика; условия конкретных МФО — get_mfo, подбор предложений — search_offers. Правовые лимиты актуальны на reviewed_at. Только чтение, без авторизации и побочных эффектов и внешних сетевых вызовов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429).",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_market_rules",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "type": "string"
+    },
+    "details_markdown": {
+     "description": "Полный блок «Ключевые факты» в Markdown",
+     "type": "string"
+    },
+    "reviewed_at": {
+     "description": "Дата последней проверки правового блока, YYYY-MM-DD",
+     "type": "string"
+    },
+    "source": {
+     "description": "Первоисточник — llms-full.txt на zaimhub.com",
+     "format": "uri",
+     "type": "string"
+    },
+    "summary": {
+     "description": "Краткий правовой контекст",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country",
+    "reviewed_at",
+    "summary",
+    "details_markdown",
+    "source"
+   ],
+   "type": "object"
+  },
+  "title": "Правовой контекст микрозаймов в России"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Возвращает подробную карточку одной МФО по её slug (slug берите из list_mfo, search_offers или get_category). Ответ: JSON с полями name, slug, canonical_url, data_updated_at; summary (диапазоны суммы, срока, ставки и ПСК; first_loan_zero_percent: true/false/null, где null — «не подтверждено»; interest_free_days, decision_time_minutes, processing_24_7); conditions.new_client и conditions.repeat_client (сумма и срок по всем тарифам этого типа клиента; ставка в день и полная стоимость кредита по тарифу rate_tariff); tariffs[] (каждый тариф: название, client_type new/repeat/all, сумма, срок, ставка в день, дни под 0 %, ПСК); conditions_note (что к чему относится); rating (average, reviews_count, position, criteria[] по 4 критериям); requirements (возраст, гражданство, документы, занятость, регистрация, доход); fees (комиссии и штрафы); legal (legal_entity, ogrn, cbr_registry_number, cbr_registry_url — прямая ссылка на запись организации в госреестре МФО Банка России, первоисточник для проверки легальности; legal_address, phone, email). Пустые поля не возвращаются. Используйте, когда нужны условия, требования или юрданные конкретной МФО; список нескольких МФО — list_mfo, отзывы клиентов — get_reviews, подбор по сумме и сроку — search_offers. Несуществующий slug → ответ с isError и текстом «Не найдено». Только чтение, без авторизации и побочных эффектов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429). При использовании данных ссылайтесь на canonical_url.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "slug": {
+     "description": "Slug МФО, например «zaymer»; берите из list_mfo, search_offers или get_category",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_mfo",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "canonical_url": {
+     "description": "Карточка МФО на zaimhub.com",
+     "format": "uri",
+     "type": "string"
+    },
+    "conditions": {
+     "additionalProperties": false,
+     "properties": {
+      "new_client": {
+       "additionalProperties": false,
+       "properties": {
+        "amount": {
+         "description": "Сумма по всем тарифам этого типа клиента, ₽",
+         "type": "string"
+        },
+        "full_cost_of_credit": {
+         "description": "Полная стоимость кредита (ПСК) по тарифу rate_tariff, % годовых",
+         "type": "string"
+        },
+        "interest_free_days": {
+         "description": "Максимум дней под 0 % среди тарифов этого типа клиента",
+         "type": "number"
+        },
+        "rate": {
+         "description": "Ставка с единицами («0.8% в день») по тарифу rate_tariff",
+         "type": "string"
+        },
+        "rate_tariff": {
+         "description": "Тариф, к которому относятся ставка и ПСК",
+         "type": "string"
+        },
+        "tariffs_count": {
+         "description": "Сколько тарифов доступно этому типу клиента",
+         "type": "number"
+        },
+        "term": {
+         "description": "Срок по всем тарифам этого типа клиента",
+         "type": "string"
+        }
+       },
+       "type": "object"
+      },
+      "repeat_client": {
+       "additionalProperties": false,
+       "properties": {
+        "amount": {
+         "description": "Сумма по всем тарифам этого типа клиента, ₽",
+         "type": "string"
+        },
+        "full_cost_of_credit": {
+         "description": "Полная стоимость кредита (ПСК) по тарифу rate_tariff, % годовых",
+         "type": "string"
+        },
+        "interest_free_days": {
+         "description": "Максимум дней под 0 % среди тарифов этого типа клиента",
+         "type": "number"
+        },
+        "rate": {
+         "description": "Ставка с единицами («0.8% в день») по тарифу rate_tariff",
+         "type": "string"
+        },
+        "rate_tariff": {
+         "description": "Тариф, к которому относятся ставка и ПСК",
+         "type": "string"
+        },
+        "tariffs_count": {
+         "description": "Сколько тарифов доступно этому типу клиента",
+         "type": "number"
+        },
+        "term": {
+         "description": "Срок по всем тарифам этого типа клиента",
+         "type": "string"
+        }
+       },
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "conditions_note": {
+     "description": "Что к чему относится в summary и conditions",
+     "type": "string"
+    },
+    "data_updated_at": {
+     "description": "Дата актуализации записи (ISO 8601)",
+     "type": "string"
+    },
+    "fees": {
+     "additionalProperties": false,
+     "properties": {
+      "early_repayment": {
+       "description": "Досрочное погашение",
+       "type": "string"
+      },
+      "issuance": {
+       "description": "Комиссия за выдачу",
+       "type": "string"
+      },
+      "penalty": {
+       "description": "Штраф при просрочке",
+       "type": "string"
+      },
+      "service": {
+       "description": "Комиссия за обслуживание",
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "legal": {
+     "additionalProperties": false,
+     "properties": {
+      "cbr_registry_number": {
+       "description": "Номер записи в госреестре МФО Банка России",
+       "type": "string"
+      },
+      "cbr_registry_url": {
+       "description": "Запись организации в госреестре МФО на cbr.ru — первоисточник для проверки легальности",
+       "format": "uri",
+       "type": "string"
+      },
+      "email": {
+       "type": "string"
+      },
+      "legal_address": {
+       "type": "string"
+      },
+      "legal_entity": {
+       "description": "Юридическое лицо",
+       "type": "string"
+      },
+      "ogrn": {
+       "description": "ОГРН",
+       "type": "string"
+      },
+      "phone": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "name": {
+     "type": "string"
+    },
+    "rating": {
+     "additionalProperties": false,
+     "properties": {
+      "average": {
+       "description": "Средняя оценка, 0–5",
+       "type": "number"
+      },
+      "criteria": {
+       "description": "Оценки по 4 критериям: скорость, условия, поддержка, сайт",
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "label": {
+          "type": "string"
+         },
+         "value": {
+          "type": "number"
+         }
+        },
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "position": {
+       "description": "Место в рейтинге",
+       "type": "number"
+      },
+      "reviews_count": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "requirements": {
+     "additionalProperties": false,
+     "properties": {
+      "age_max": {
+       "type": "number"
+      },
+      "age_min": {
+       "type": "number"
+      },
+      "citizenship": {
+       "type": "string"
+      },
+      "documents": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       ]
+      },
+      "employment": {
+       "type": "string"
+      },
+      "income_proof": {
+       "type": "string"
+      },
+      "registration": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "slug": {
+     "type": "string"
+    },
+    "summary": {
+     "additionalProperties": false,
+     "properties": {
+      "amount_range": {
+       "description": "Сумма для нового клиента по всем тарифам МФО",
+       "type": "string"
+      },
+      "decision_time_minutes": {
+       "type": "number"
+      },
+      "first_loan_zero_percent": {
+       "description": "Первый займ под 0%: true / false / null (не подтверждено)",
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "full_cost_of_credit_range": {
+       "description": "Диапазон ПСК тарифа rate_tariff, % годовых",
+       "type": "string"
+      },
+      "interest_free_days": {
+       "description": "Беспроцентный период первого займа, дней",
+       "type": "number"
+      },
+      "processing_24_7": {
+       "description": "Приём заявок круглосуточно",
+       "type": "boolean"
+      },
+      "rate": {
+       "description": "Ставка с единицами («0.8% в день») по тарифу rate_tariff",
+       "type": "string"
+      },
+      "rate_tariff": {
+       "description": "Тариф, к которому относятся ставка и ПСК: тот, что карточка показывает по умолчанию",
+       "type": "string"
+      },
+      "term_range": {
+       "description": "Срок для нового клиента по всем тарифам МФО",
+       "type": "string"
+      }
+     },
+     "required": [
+      "first_loan_zero_percent"
+     ],
+     "type": "object"
+    },
+    "tariffs": {
+     "description": "Все опубликованные тарифы МФО: кому доступен каждый, сумма, срок, ставка в день, дни под 0 %, ПСК",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "amount_rub": {
+        "additionalProperties": false,
+        "description": "Сумма займа по тарифу, ₽",
+        "properties": {
+         "max": {
+          "type": "number"
+         },
+         "min": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "min",
+         "max"
+        ],
+        "type": "object"
+       },
+       "client_type": {
+        "description": "Кому доступен: new — только новым клиентам, repeat — только повторным, all — всем",
+        "enum": [
+         "new",
+         "repeat",
+         "all"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "type": [
+         "number",
+         "string"
+        ]
+       },
+       "interest_free_days": {
+        "description": "Дней под 0 % по акции этого тарифа; поля нет — акции у тарифа нет",
+        "type": "number"
+       },
+       "name": {
+        "description": "Название тарифа",
+        "type": "string"
+       },
+       "psk_percent": {
+        "additionalProperties": false,
+        "description": "Полная стоимость кредита по тарифу, % годовых",
+        "properties": {
+         "from": {
+          "type": "number"
+         },
+         "to": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "from",
+         "to"
+        ],
+        "type": "object"
+       },
+       "rate_per_day_percent": {
+        "description": "Ставка, % в день (с ежедневной платой за обслуживание, если она есть); при ставке «от … до» верхняя граница",
+        "type": "number"
+       },
+       "rate_per_day_percent_from": {
+        "description": "Нижняя граница ставки, % в день, если ставка задана диапазоном",
+        "type": "number"
+       },
+       "term_days": {
+        "additionalProperties": false,
+        "description": "Срок по тарифу, дней",
+        "properties": {
+         "max": {
+          "type": "number"
+         },
+         "min": {
+          "type": "number"
+         }
+        },
+        "required": [
+         "min",
+         "max"
+        ],
+        "type": "object"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "client_type",
+       "amount_rub",
+       "term_days",
+       "rate_per_day_percent"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "name",
+    "slug",
+    "canonical_url"
+   ],
+   "type": "object"
+  },
+  "title": "Карточка МФО по slug"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Возвращает последние отзывы заёмщиков о конкретной МФО по её slug, от новых к старым. Параметр limit — сколько отзывов вернуть (по умолчанию 10, максимум 50); поле total — общее число отзывов на сайте, постраничной навигации нет. Ответ: JSON {mfo_slug, canonical_url, total, reviews[]}, у каждого отзыва: author, rating (1–5), date, text — только публичные данные сайта, без персональных. Используйте для мнений реальных клиентов и примеров их опыта; средняя оценка и место в рейтинге есть в get_mfo (поле rating), сравнение МФО по рейтингу — list_mfo. Несуществующий slug → ответ с isError и текстом «Не найдено». Только чтение, без авторизации и побочных эффектов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429). При цитировании ссылайтесь на canonical_url.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Сколько отзывов вернуть, 1–50 (по умолчанию 10)",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "slug": {
+     "description": "Slug МФО, например «zaymer»; берите из list_mfo или search_offers",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_reviews",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "canonical_url": {
+     "description": "Страница отзывов о МФО на zaimhub.com",
+     "format": "uri",
+     "type": "string"
+    },
+    "mfo_slug": {
+     "type": "string"
+    },
+    "reviews": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "author": {
+        "type": "string"
+       },
+       "date": {
+        "description": "Дата публикации (ISO 8601)",
+        "type": "string"
+       },
+       "rating": {
+        "description": "Оценка 1–5",
+        "type": "number"
+       },
+       "text": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "total": {
+     "description": "Всего отзывов на сайте",
+     "type": "number"
+    }
+   },
+   "required": [
+    "mfo_slug",
+    "canonical_url"
+   ],
+   "type": "object"
+  },
+  "title": "Отзывы заёмщиков о МФО"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Возвращает все тематические подборки (витрины) каталога ZaimHub, сгруппированные по разделам: популярные, по способу получения, по сумме и сроку, по категориям заёмщиков, другие. Параметров нет. Ответ: JSON {sections[]}, в каждой секции section (название раздела) и categories[] с полями title, slug, criterion (критерий попадания МФО в подборку) и canonical_url страницы. Используйте, чтобы найти подходящую подборку и её slug, например «займ на карту», «займ без отказа», «займы пенсионерам»; содержимое подборки с предложениями МФО возвращает get_category, подбор по числовым параметрам — search_offers. Только чтение, без авторизации и побочных эффектов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429).",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "sections": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "categories": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "canonical_url": {
+           "format": "uri",
+           "type": "string"
+          },
+          "criterion": {
+           "description": "Критерий попадания МФО в подборку",
+           "type": "string"
+          },
+          "slug": {
+           "description": "Идентификатор подборки для get_category",
+           "type": "string"
+          },
+          "title": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "title",
+          "slug",
+          "canonical_url"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "section": {
+        "description": "Название раздела",
+        "type": "string"
+       }
+      },
+      "required": [
+       "section",
+       "categories"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "sections"
+   ],
+   "type": "object"
+  },
+  "title": "Список подборок займов"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Возвращает список всех МФО каталога ZaimHub (только организации из государственного реестра Банка России), отсортированный по месту в рейтинге заёмщиков. Параметр limit — сколько МФО вернуть (по умолчанию 50, максимум 100); поле total показывает общее число, постраничной навигации нет. Ответ: JSON {total, mfos[]}, у каждой МФО: name, slug, rating_position, rating_average (0–5), rating_count, текстовые диапазоны amount_range / term_range (по всем тарифам нового клиента), rate (в день, по тарифу rate_tariff) и canonical_url карточки. Используйте для обзора каталога, сравнения МФО по рейтингу и получения slug; подробная карточка одной МФО — get_mfo, подбор по сумме и сроку — search_offers, тематические подборки — list_categories. Только чтение, без авторизации и побочных эффектов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429). При использовании данных ссылайтесь на canonical_url.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Сколько МФО вернуть, 1–100 (по умолчанию 50)",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_mfo",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "mfos": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "amount_range": {
+        "description": "Диапазон суммы займа для нового клиента по всем тарифам МФО, ₽",
+        "type": "string"
+       },
+       "canonical_url": {
+        "description": "Карточка МФО на zaimhub.com",
+        "format": "uri",
+        "type": "string"
+       },
+       "name": {
+        "description": "Название МФО",
+        "type": "string"
+       },
+       "rate": {
+        "description": "Ставка для новых клиентов с единицами («0.8% в день») по тарифу rate_tariff",
+        "type": "string"
+       },
+       "rate_tariff": {
+        "description": "Тариф, к которому относится ставка: тот, что карточка МФО показывает по умолчанию",
+        "type": "string"
+       },
+       "rating_average": {
+        "description": "Средняя оценка заёмщиков, 0–5",
+        "type": "number"
+       },
+       "rating_count": {
+        "description": "Число отзывов",
+        "type": "number"
+       },
+       "rating_position": {
+        "description": "Место в рейтинге заёмщиков (1 — лучшее)",
+        "type": "number"
+       },
+       "slug": {
+        "description": "Идентификатор МФО для get_mfo и get_reviews",
+        "type": "string"
+       },
+       "term_range": {
+        "description": "Диапазон срока для нового клиента по всем тарифам МФО, дни",
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "slug",
+       "canonical_url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "total": {
+     "description": "Всего МФО в каталоге",
+     "type": "number"
+    }
+   },
+   "required": [
+    "total",
+    "mfos"
+   ],
+   "type": "object"
+  },
+  "title": "Список МФО каталога"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Подбирает предложения МФО для новых клиентов по сумме займа (amount, ₽), сроку (term_days, дней) и признаку первого займа под 0% (first_loan_zero: true — только МФО с беспроцентным первым займом). В подбор входят только МФО, которые сейчас показываются на витринах сайта; организации, временно снятые с витрин, остаются в list_mfo и get_mfo, но сюда не попадают. Все фильтры необязательны; без них возвращаются все такие МФО, поэтому задавайте amount и/или term_days и ограничивайте limit (по умолчанию 15, максимум 100). МФО попадает в выдачу, только если у неё есть тариф для нового клиента, который один покрывает и сумму, и срок (срок короче минимального срока тарифа допускается: это досрочный возврат). Результат отсортирован по месту в рейтинге заёмщиков. Ответ: JSON {query, total, truncated, note, offers[]}, у каждого предложения: name, slug, amount_range и term_range (все тарифы МФО для нового клиента), rate (в день, по тарифу rate_tariff), matched_tariff (тариф, подобранный под запрос: название, пределы суммы и срока, ставка в день, interest_free_days — дни под 0 % именно на эти сумму и срок, interest_free_whole_term — весь ли срок без процентов, early_repayment), interest_free_days и first_loan_zero_percent (есть ли акция у МФО вообще: true/false/null, null — не подтверждено), rating_average, canonical_url. Используйте, когда у пользователя есть конкретная сумма или срок; весь каталог по рейтингу — list_mfo, тематические подборки (займ на карту, без отказа и т.п.) — list_categories и get_category, подробности по МФО — get_mfo. Только чтение, без авторизации и побочных эффектов; лимит 60 запросов в минуту с одного IP (при превышении HTTP 429). Условия волатильны — финальные смотрите на canonical_url.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "amount": {
+     "description": "Нужная сумма займа в рублях, например 15000",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "first_loan_zero": {
+     "description": "true — только МФО с первым займом под 0% для новых клиентов",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Сколько предложений вернуть, 1–100 (по умолчанию 15)",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "term_days": {
+     "description": "Нужный срок в днях, например 30",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_offers",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "note": {
+     "type": "string"
+    },
+    "offers": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "amount_range": {
+        "description": "Сумма для нового клиента по всем тарифам МФО",
+        "type": "string"
+       },
+       "canonical_url": {
+        "format": "uri",
+        "type": "string"
+       },
+       "first_loan_zero_percent": {
+        "type": [
+         "boolean",
+         "null"
+        ]
+       },
+       "interest_free_days": {
+        "description": "Максимум дней под 0 % среди тарифов нового клиента этой МФО",
+        "type": "number"
+       },
+       "matched_tariff": {
+        "additionalProperties": false,
+        "description": "Тариф нового клиента, подобранный под запрос (есть, только если заданы amount или term_days). Его interest_free_days — дни под 0 % именно на эти сумму и срок; поля нет — на запрос 0 % не действует",
+        "properties": {
+         "amount_rub": {
+          "additionalProperties": false,
+          "description": "Сумма займа по тарифу, ₽",
+          "properties": {
+           "max": {
+            "type": "number"
+           },
+           "min": {
+            "type": "number"
+           }
+          },
+          "required": [
+           "min",
+           "max"
+          ],
+          "type": "object"
+         },
+         "client_type": {
+          "description": "Кому доступен: new — только новым клиентам, repeat — только повторным, all — всем",
+          "enum": [
+           "new",
+           "repeat",
+           "all"
+          ],
+          "type": "string"
+         },
+         "early_repayment": {
+          "description": "true — срок запроса короче минимального срока тарифа: договор на минимальный срок, вернуть раньше можно досрочно",
+          "type": "boolean"
+         },
+         "id": {
+          "type": [
+           "number",
+           "string"
+          ]
+         },
+         "interest_free_days": {
+          "description": "Дней под 0 % по акции этого тарифа; поля нет — акции у тарифа нет",
+          "type": "number"
+         },
+         "interest_free_whole_term": {
+          "description": "true — весь запрошенный срок без процентов; false — акции нет или её не хватает на весь срок",
+          "type": "boolean"
+         },
+         "name": {
+          "description": "Название тарифа",
+          "type": "string"
+         },
+         "psk_percent": {
+          "additionalProperties": false,
+          "description": "Полная стоимость кредита по тарифу, % годовых",
+          "properties": {
+           "from": {
+            "type": "number"
+           },
+           "to": {
+            "type": "number"
+           }
+          },
+          "required": [
+           "from",
+           "to"
+          ],
+          "type": "object"
+         },
+         "rate_per_day_percent": {
+          "description": "Ставка, % в день (с ежедневной платой за обслуживание, если она есть); при ставке «от … до» верхняя граница",
+          "type": "number"
+         },
+         "rate_per_day_percent_from": {
+          "description": "Нижняя граница ставки, % в день, если ставка задана диапазоном",
+          "type": "number"
+         },
+         "selected_by": {
+          "description": "query — тариф подобран под сумму или срок запроса",
+          "enum": [
+           "query",
+           "default"
+          ],
+          "type": "string"
+         },
+         "term_days": {
+          "additionalProperties": false,
+          "description": "Срок по тарифу, дней",
+          "properties": {
+           "max": {
+            "type": "number"
+           },
+           "min": {
+            "type": "number"
+           }
+          },
+          "required": [
+           "min",
+           "max"
+          ],
+          "type": "object"
+         }
+        },
+        "required": [
+         "id",
+         "name",
+         "client_type",
+         "amount_rub",
+         "term_days",
+         "rate_per_day_percent",
+         "selected_by"
+        ],
+        "type": "object"
+       },
+       "name": {
+        "type": "string"
+       },
+       "rate": {
+        "description": "Ставка с единицами («0.8% в день») по тарифу rate_tariff",
+        "type": "string"
+       },
+       "rate_tariff": {
+        "description": "Тариф, к которому относится ставка: с суммой или сроком в запросе это matched_tariff",
+        "type": "string"
+       },
+       "rating_average": {
+        "type": "number"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "term_range": {
+        "description": "Срок для нового клиента по всем тарифам МФО",
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "slug",
+       "canonical_url",
+       "first_loan_zero_percent"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "query": {
+     "additionalProperties": false,
+     "description": "Применённые фильтры",
+     "properties": {
+      "amount": {
+       "type": "number"
+      },
+      "first_loan_zero": {
+       "type": "boolean"
+      },
+      "term_days": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "total": {
+     "description": "Сколько предложений подошло всего",
+     "type": "number"
+    },
+    "truncated": {
+     "description": "true — вернулась не вся выборка, увеличьте limit",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "query",
+    "total",
+    "truncated",
+    "note",
+    "offers"
+   ],
+   "type": "object"
+  },
+  "title": "Подбор предложений по сумме и сроку"
+ }
+]

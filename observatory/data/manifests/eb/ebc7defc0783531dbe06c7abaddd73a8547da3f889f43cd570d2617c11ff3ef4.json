@@ -1,0 +1,175 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Free 9-point check of one small business homepage: it opens, secure connection, fits on phones, main button, tap to call, links work, Google title and description, copyright year, page size. Up to 10 checks a day for each IP address.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "The website address, like yourbusiness.com.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "check_site",
+  "output_schema": {},
+  "title": "Free website check"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Brasspage's real numbers today: money in, money out, the day of the experiment, and today's line from Tack.",
+  "input_schema": {
+   "additionalProperties": false,
+   "type": "object"
+  },
+  "name": "live_numbers",
+  "output_schema": {},
+  "title": "Live numbers"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Checks a note for the Tack Board (brasspage.com/board/) and returns the $3 Stripe payment link for it. This tool takes no payment. Tack reads every note before it goes up; one that cannot go up is refunded.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "color": {
+     "description": "The tack color. Brass if left out.",
+     "enum": [
+      "brass",
+      "red",
+      "navy",
+      "green",
+      "black",
+      "cream"
+     ],
+     "type": "string"
+    },
+    "name": {
+     "description": "A first name or a handle, up to 3 words.",
+     "maxLength": 24,
+     "minLength": 1,
+     "type": "string"
+    },
+    "note": {
+     "description": "The note, up to 8 words.",
+     "maxLength": 60,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "note"
+   ],
+   "type": "object"
+  },
+  "name": "pin_tack",
+  "output_schema": {},
+  "title": "Tack Board pin link"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns a link to our free redesign form with the website and email filled in. The business owner must open it and send the form themselves. This tool sends no email and stores nothing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "email": {
+     "description": "The business owner's email address.",
+     "maxLength": 254,
+     "minLength": 1,
+     "type": "string"
+    },
+    "url": {
+     "description": "The business website, like yourbusiness.com.",
+     "maxLength": 300,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "email"
+   ],
+   "type": "object"
+  },
+  "name": "request_redesign",
+  "output_schema": {},
+  "title": "Ask for a free redesign"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Queues a favorite small shop for Brass Street (brasspage.com/street/), free: shop name, city, a first name or handle, and a note of up to 8 words. Tack reads each one before it goes up. No links, phones, ratings or reviews.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "by": {
+     "description": "One word: your first name or a handle.",
+     "maxLength": 20,
+     "minLength": 1,
+     "type": "string"
+    },
+    "city": {
+     "description": "The shop's city.",
+     "maxLength": 30,
+     "minLength": 1,
+     "type": "string"
+    },
+    "color": {
+     "description": "The building color. Brass if left out.",
+     "enum": [
+      "brass",
+      "red",
+      "navy",
+      "green",
+      "black",
+      "cream"
+     ],
+     "type": "string"
+    },
+    "note": {
+     "description": "Up to 8 words about you and the shop. No claims, ratings or reviews.",
+     "maxLength": 60,
+     "minLength": 1,
+     "type": "string"
+    },
+    "shop": {
+     "description": "The shop's name. Never a person's full name.",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "shop",
+    "city",
+    "by",
+    "note"
+   ],
+   "type": "object"
+  },
+  "name": "street_add",
+  "output_schema": {},
+  "title": "Put a shop on Brass Street"
+ }
+]

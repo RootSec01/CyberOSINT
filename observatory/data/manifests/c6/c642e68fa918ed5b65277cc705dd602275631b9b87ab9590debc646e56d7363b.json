@@ -1,0 +1,400 @@
+[
+ {
+  "description": "Breaking news only — last 24 hours, importance score ≥ 75. Lower volume than get_latest but every item is market-moving. Use for 'what's the most important crypto news right now?'.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "get_breaking_toolArguments",
+   "type": "object"
+  },
+  "name": "get_breaking",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_breaking_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Full detail of a single Editor Digest — title, standfirst, full HTML body, FAQ, sentiment, and tickers. Pass the editor slug and a digest date (YYYY-MM-DD) or slug; omit the date to get that editor's latest published digest. Use get_digests to discover editors + dates.",
+  "input_schema": {
+   "properties": {
+    "date_or_slug": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Or Slug"
+    },
+    "editor_slug": {
+     "title": "Editor Slug",
+     "type": "string"
+    },
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    }
+   },
+   "required": [
+    "editor_slug"
+   ],
+   "title": "get_digest_toolArguments",
+   "type": "object"
+  },
+  "name": "get_digest",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_digest_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "List Zipp's daily Editor Digests — market briefings written by named editorial personas, each synthesising the last 24h. Newest-first. Each item carries the editor, headline, standfirst, sentiment, and tickers covered; call get_digest(editor, date) for the full body.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "get_digests_toolArguments",
+   "type": "object"
+  },
+  "name": "get_digests",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_digests_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Editor-picked feature stories (is_featured=TRUE). No time window. Use when the user wants curated highlights rather than recency-sorted news.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "get_featured_toolArguments",
+   "type": "object"
+  },
+  "name": "get_featured",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_featured_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Full detail of a single Zipp Learn guide by slug — title, full HTML body, FAQ pairs, related tokens, and reading time. Use get_guides to discover slugs.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "slug": {
+     "title": "Slug",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "title": "get_guide_toolArguments",
+   "type": "object"
+  },
+  "name": "get_guide",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_guide_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "List Zipp's Learn guides — evergreen, in-depth crypto explainers (what/how articles on tokens, DeFi, trading, security, wallets, regulation). Newest-first. Optionally filter by a free-text category (e.g. 'defi', 'security', 'trading'). Each item links to the full guide; call get_guide(slug) for the body + FAQ.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Category"
+    },
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "get_guides_toolArguments",
+   "type": "object"
+  },
+  "name": "get_guides",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_guides_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Latest news from the last 24 hours. Optionally scoped to a category. Returns posts ordered newest-first. Use for 'what's new today?' or 'what happened in DeFi today?'.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Category"
+    },
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "get_latest_toolArguments",
+   "type": "object"
+  },
+  "name": "get_latest",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_latest_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Full detail of a single post — title, summary, full body, all categories, hashtags, source attribution. Accepts either a slug (from a previous tool call) or a numeric id.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "slug_or_id": {
+     "title": "Slug Or Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug_or_id"
+   ],
+   "title": "get_post_toolArguments",
+   "type": "object"
+  },
+  "name": "get_post",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_post_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Live crypto market-cap rankings — the latest top-N snapshot from CoinGecko (default) or CoinMarketCap, with price, market cap, 24h change, and 24h rank movement. Answers 'what are the top coins right now?'. limit clamped to 1–100 (default 10).",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "provider": {
+     "default": "coingecko",
+     "title": "Provider",
+     "type": "string"
+    }
+   },
+   "title": "get_rankings_toolArguments",
+   "type": "object"
+  },
+  "name": "get_rankings",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_rankings_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Detailed snapshot of a single token — name, ecosystem, exchange listings with deep-link trade URLs, recent Zipp coverage in the requested language, and (when available) a live price. Use when the user asks about a specific coin: 'tell me about Solana', 'where can I trade ETH?', 'what's happening with BTC?'.",
+  "input_schema": {
+   "properties": {
+    "article_limit": {
+     "default": 10,
+     "title": "Article Limit",
+     "type": "integer"
+    },
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "ticker": {
+     "title": "Ticker",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "title": "get_token_snapshot_toolArguments",
+   "type": "object"
+  },
+  "name": "get_token_snapshot",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_token_snapshot_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Tokens with the most Zipp coverage in a recent time window — useful for 'what coins is the market talking about right now?' Ordered by mention count desc, then recency. Window defaults to the last 24 hours and is clamped to 1–168h (1h–7d).",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "window_hours": {
+     "default": 24,
+     "title": "Window Hours",
+     "type": "integer"
+    }
+   },
+   "title": "get_trending_tokens_toolArguments",
+   "type": "object"
+  },
+  "name": "get_trending_tokens",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "get_trending_tokens_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "List the full Zipp taxonomy (7 main groups × 5 leaves = 35 categories total). Use to discover valid category slugs for the search / get_latest tools.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    }
+   },
+   "title": "list_categories_toolArguments",
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "list_categories_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "Full-text search across Zipp's news catalogue. Returns recent matching stories ordered by recency (with relevance as a tiebreaker). Use for questions like 'what's happening with Bitcoin ETFs?' or 'find news about Solana hacks'.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Category"
+    },
+    "lang": {
+     "default": "en-US",
+     "title": "Lang",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "search_toolArguments",
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "search_toolDictOutput",
+   "type": "object"
+  }
+ }
+]

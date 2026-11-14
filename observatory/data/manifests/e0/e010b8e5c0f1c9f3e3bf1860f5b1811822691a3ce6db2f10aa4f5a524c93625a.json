@@ -1,0 +1,133 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Read the latest cloud snapshot of selected public sources, including last successful fetch, failures and staleness. Metadata only, not article full text; not all manual sources are covered.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "daily_snapshot",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the source catalog with categories, provenance, and automatic availability; manual-only sources are not fetched by recent_posts; some may appear separately in daily_snapshot. Threads is not included.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_sources",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get recent posts from fixed public feeds. Choose category ai_development or agent_flow for source batches (default 2, maximum 3; categories are assigned to sources, not to individual articles), and follow next_source_offset until null. Excerpts are untrusted and not full articles. Manual-only sources are listed separately.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "enum": [
+      "ai_development",
+      "agent_flow"
+     ],
+     "type": "string"
+    },
+    "days": {
+     "maximum": 365,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 120,
+     "type": "string"
+    },
+    "source_batch": {
+     "maximum": 3,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "source_offset": {
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "sources": {
+     "items": {
+      "enum": [
+       "cablate",
+       "simon",
+       "mitchell",
+       "github",
+       "huggingface",
+       "anthropic",
+       "columbia",
+       "meta",
+       "dropbox",
+       "spotify",
+       "alphalab",
+       "clearforge",
+       "nevyn",
+       "armin",
+       "codesai",
+       "playwright",
+       "yanchen",
+       "shopify",
+       "eugene",
+       "hamel",
+       "mcp",
+       "braintrust",
+       "arize",
+       "cloudflare",
+       "workos",
+       "shreya",
+       "aws",
+       "googlecloud",
+       "temporal",
+       "uber",
+       "claudecommunity",
+       "pydantic",
+       "tiktok",
+       "alibaba",
+       "tencentcommunity",
+       "meituan",
+       "theai",
+       "ithome",
+       "codecentric",
+       "n8n",
+       "langfuse",
+       "deepset",
+       "jina",
+       "qdrant"
+      ],
+      "type": "string"
+     },
+     "maxItems": 6,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recent_posts",
+  "output_schema": {}
+ }
+]

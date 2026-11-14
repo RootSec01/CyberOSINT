@@ -1,0 +1,3565 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Amortization Schedule"
+  },
+  "description": "Use this when you need a fixed-rate loan or mortgage's level monthly payment plus a year-by-year amortization schedule (principal paid, interest paid, remaining balance) rather than doing the amortization arithmetic yourself. Uses the standard payment formula and handles the 0% case (payment = principal / months, all principal). annualRate is a percent (6.5 = 6.5%); years is 1-50. Deterministic: same input, same output. Example: principal 300000, annualRate 6.5, years 30 -> monthlyPayment 1896.20, totalInterest 382633.47, numberOfPayments 360, and a 30-row schedule (one per year).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "annualRate": {
+     "description": "Annual interest rate as a percent, e.g. 6.5.",
+     "type": "number"
+    },
+    "principal": {
+     "description": "Loan amount (positive).",
+     "type": "number"
+    },
+    "years": {
+     "description": "Loan term in years.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "principal",
+    "annualRate",
+    "years"
+   ],
+   "type": "object"
+  },
+  "name": "amortization_schedule",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "monthlyPayment": {
+     "description": "Level monthly payment, rounded to cents.",
+     "type": "number"
+    },
+    "numberOfPayments": {
+     "description": "Total monthly payments = years * 12.",
+     "type": "integer"
+    },
+    "schedule": {
+     "description": "One row per year of the term.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "endingBalance": {
+        "description": "Balance at year end (0 once the loan is retired).",
+        "type": "number"
+       },
+       "interestPaid": {
+        "description": "Interest paid during the year.",
+        "type": "number"
+       },
+       "principalPaid": {
+        "description": "Principal repaid during the year.",
+        "type": "number"
+       },
+       "startingBalance": {
+        "description": "Balance at the start of the year.",
+        "type": "number"
+       },
+       "year": {
+        "description": "1-based year number.",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "year",
+       "startingBalance",
+       "principalPaid",
+       "interestPaid",
+       "endingBalance"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "totalInterest": {
+     "description": "Total interest paid = totalPaid - principal.",
+     "type": "number"
+    },
+    "totalPaid": {
+     "description": "Sum of all payments over the full term (monthlyPayment * numberOfPayments).",
+     "type": "number"
+    }
+   },
+   "required": [
+    "monthlyPayment",
+    "totalPaid",
+    "totalInterest",
+    "numberOfPayments",
+    "schedule"
+   ],
+   "type": "object"
+  },
+  "title": "Amortization Schedule"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "APR / APY Calculator"
+  },
+  "description": "Use this when you need an exact loan APR or APY rather than an approximation. Two modes. mode=\"loan\" (default): solve the true APR of an installment loan from amount financed, monthly payment, term, and upfront fees — Reg-Z style, fees discounted against the amount received, solved by Newton-Raphson. mode=\"rate\": convert a nominal annual rate to APY for a given compounding frequency. Deterministic: same input, same output. Example: mode=\"loan\", loanAmount=20000, monthlyPayment=450, termMonths=60, fees=500 -> apr=13.6301, totalInterest=7000. Prefer this over estimating APR/APY by hand.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "compoundingPerYear": {
+     "description": "[rate mode] Compounding periods per year.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "fees": {
+     "description": "[loan mode] Upfront finance charge/fees (default 0).",
+     "type": "number"
+    },
+    "loanAmount": {
+     "description": "[loan mode] Amount financed.",
+     "type": "number"
+    },
+    "mode": {
+     "description": "\"rate\" for nominal->APY, \"loan\" for loan APR (default loan).",
+     "enum": [
+      "rate",
+      "loan"
+     ],
+     "type": "string"
+    },
+    "monthlyPayment": {
+     "description": "[loan mode] Payment per month.",
+     "type": "number"
+    },
+    "nominalRate": {
+     "description": "[rate mode] Nominal annual rate as a percent.",
+     "type": "number"
+    },
+    "termMonths": {
+     "description": "[loan mode] Number of monthly payments.",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "apr_calc",
+  "output_schema": {
+   "properties": {
+    "apr": {
+     "description": "(loan mode) True annual percentage rate as a percent, rounded to 4 decimals.",
+     "type": "number"
+    },
+    "apy": {
+     "description": "(rate mode) Annual percentage yield as a percent, rounded to 4 decimals.",
+     "type": "number"
+    },
+    "compoundingPerYear": {
+     "description": "(rate mode) Compounding periods per year used for the APY.",
+     "type": "integer"
+    },
+    "mode": {
+     "description": "Which calculation was performed.",
+     "enum": [
+      "rate",
+      "loan"
+     ],
+     "type": "string"
+    },
+    "monthlyRate": {
+     "description": "(loan mode) Periodic (monthly) rate as a percent, rounded to 6 decimals.",
+     "type": "number"
+    },
+    "nominalRate": {
+     "description": "(rate mode) The nominal annual rate that was supplied, as a percent.",
+     "type": "number"
+    },
+    "totalInterest": {
+     "description": "(loan mode) totalPaid minus loanAmount, rounded to cents.",
+     "type": "number"
+    },
+    "totalPaid": {
+     "description": "(loan mode) monthlyPayment x termMonths, rounded to cents.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "mode"
+   ],
+   "type": "object"
+  },
+  "title": "APR / APY Calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "WCAG Contrast Checker"
+  },
+  "description": "Use this when checking whether a text/background color pair meets WCAG 2.x accessibility contrast. Computes the relative-luminance contrast ratio (1-21, rounded to 2 decimals) and returns pass/fail booleans for normal and large text at AA and AAA levels (thresholds 4.5 / 7 / 3 / 4.5), plus a suggested passing foreground hex when normal-text AA fails (null when it already passes or none is found). Accepts 3- or 6-digit hex, with or without a leading '#'; echoed colors are normalized to 6-digit hex. Deterministic: same input, same output. Example: {foreground:'777', background:'fff'} -> ratio 4.48, normalAA false, largeAA true, suggestedForeground '#767676'.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "background": {
+     "description": "Background color as a 3 or 6 digit HEX string, with or without a leading #, e.g. \"#ffffff\" or \"fff\".",
+     "type": "string"
+    },
+    "foreground": {
+     "description": "Foreground (text) color as a 3 or 6 digit HEX string, with or without a leading #, e.g. \"#1a1a1a\" or \"777\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "foreground",
+    "background"
+   ],
+   "type": "object"
+  },
+  "name": "color_contrast",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "background": {
+     "description": "Normalized background color as a 6-digit hex string.",
+     "type": "string"
+    },
+    "foreground": {
+     "description": "Normalized foreground color as a 6-digit hex string.",
+     "type": "string"
+    },
+    "largeAA": {
+     "description": "Unrounded ratio >= 3 (large text >=18pt / 14pt bold, AA).",
+     "type": "boolean"
+    },
+    "largeAAA": {
+     "description": "Unrounded ratio >= 4.5 (large text, AAA).",
+     "type": "boolean"
+    },
+    "normalAA": {
+     "description": "Unrounded ratio >= 4.5 (normal text, AA).",
+     "type": "boolean"
+    },
+    "normalAAA": {
+     "description": "Unrounded ratio >= 7 (normal text, AAA).",
+     "type": "boolean"
+    },
+    "ratio": {
+     "description": "WCAG 2.x contrast ratio, 1 to 21, rounded to 2 decimals.",
+     "type": "number"
+    },
+    "suggestedForeground": {
+     "description": "A passing foreground hex (>=4.5 vs the background) when normal-text AA fails; null when the pair already passes or no passing value is found.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "foreground",
+    "background",
+    "ratio",
+    "normalAA",
+    "normalAAA",
+    "largeAA",
+    "largeAAA",
+    "suggestedForeground"
+   ],
+   "type": "object"
+  },
+  "title": "WCAG Contrast Checker"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Color Palette Generator"
+  },
+  "description": "Use this when you need color-harmony palettes derived from one base hex color. Rotates hue/lightness in HSL to build complementary (+180 degrees), analogous (-30/+30), triadic (+120/+240), split-complementary (+150/+210), and monochromatic (lightness steps) swatch sets, each as an array of hex strings. Accepts a 6-digit hex with or without a leading '#' (case-insensitive). Deterministic: same input, same output. Example: {color:'#e11d48'} -> base '#e11d48', complementary ['#e11d48','#1de1b6'], monochromatic ['#590c1d','#9d1432','#e11d48','#eb607e','#f3a4b5']. Note: grayscale inputs (e.g. '#000000') have no defined hue, so the hue-rotated sets are all identical and only the monochromatic lightness steps differ.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "color": {
+     "description": "A 6-digit hex color, with or without a leading '#', e.g. \"#e11d48\" or \"e11d48\". Case-insensitive.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "color"
+   ],
+   "type": "object"
+  },
+  "name": "color_palette",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "analogous": {
+     "description": "[hue-30, base, hue+30] — 3 hex swatches.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "base": {
+     "description": "Normalized base color as a 6-digit hex string (lowercased, with leading '#').",
+     "type": "string"
+    },
+    "complementary": {
+     "description": "[base, hue+180] — 2 hex swatches.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "monochromatic": {
+     "description": "5 hex shades stepping lightness by -30, -15, 0, +15, +30 from the base; the two darker steps are floored at lightness 5 and 10, and the two lighter steps capped at 90 and 95.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "splitComplementary": {
+     "description": "[base, hue+150, hue+210] — 3 hex swatches.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "triadic": {
+     "description": "[base, hue+120, hue+240] — 3 hex swatches.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "base",
+    "complementary",
+    "analogous",
+    "triadic",
+    "splitComplementary",
+    "monochromatic"
+   ],
+   "type": "object"
+  },
+  "title": "Color Palette Generator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Compound Interest Projection"
+  },
+  "description": "Use this when you need to project a principal's growth under compound interest, optionally with recurring monthly contributions, returning the final balance and a year-by-year breakdown rather than estimating compound growth yourself. Iterates month-by-month for accuracy; contributions are added at the start of each month; compoundingPerYear defaults to 12. annualRate is a percent; years is 1-200. Deterministic: same input, same output. Example: principal 10000, annualRate 7, years 10, monthlyContribution 500 -> finalBalance 107143.85, totalContributions 70000, totalInterest 37143.85, with a 10-row schedule (one per year).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "annualRate": {
+     "description": "Annual interest rate as a percent.",
+     "type": "number"
+    },
+    "compoundingPerYear": {
+     "description": "Compounding periods per year (default 12).",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "monthlyContribution": {
+     "description": "Amount added at the start of each month (default 0).",
+     "type": "number"
+    },
+    "principal": {
+     "description": "Starting principal (>= 0).",
+     "type": "number"
+    },
+    "years": {
+     "description": "Number of years.",
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "principal",
+    "annualRate",
+    "years"
+   ],
+   "type": "object"
+  },
+  "name": "compound_interest",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "finalBalance": {
+     "description": "Ending balance after all years.",
+     "type": "number"
+    },
+    "schedule": {
+     "description": "One row per year.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "contributions": {
+        "description": "Contributions added during the year.",
+        "type": "number"
+       },
+       "endingBalance": {
+        "description": "Balance at year end.",
+        "type": "number"
+       },
+       "interest": {
+        "description": "Interest credited during the year.",
+        "type": "number"
+       },
+       "startingBalance": {
+        "description": "Balance at the start of the year.",
+        "type": "number"
+       },
+       "year": {
+        "description": "1-based year number.",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "year",
+       "startingBalance",
+       "interest",
+       "contributions",
+       "endingBalance"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "totalContributions": {
+     "description": "Principal plus all monthly contributions.",
+     "type": "number"
+    },
+    "totalInterest": {
+     "description": "Interest earned = finalBalance - totalContributions.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "finalBalance",
+    "totalContributions",
+    "totalInterest",
+    "schedule"
+   ],
+   "type": "object"
+  },
+  "title": "Compound Interest Projection"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Convert Case"
+  },
+  "description": "Use this when you need to re-case text into a specific naming or letter case. Given `text` and a target `case` (upper, lower, title, sentence, camel, snake, kebab, or constant), returns the converted string. Smart word tokenization splits camelCase, snake_case, kebab-case, and whitespace, so a phrase in any style re-cases consistently; title case honors an editorial stop-word list and preserves ALL-CAPS acronyms. Empty text returns an empty result. Deterministic: same input, same output. Example: {text: \"myVariableName\", case: \"constant\"} -> result \"MY_VARIABLE_NAME\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "case": {
+     "description": "Target case: upper (UPPER CASE), lower (lower case), title (Title Case with stop-words), sentence (Sentence case), camel (camelCase), snake (snake_case), kebab (kebab-case), constant (CONSTANT_CASE).",
+     "enum": [
+      "upper",
+      "lower",
+      "title",
+      "sentence",
+      "camel",
+      "snake",
+      "kebab",
+      "constant"
+     ],
+     "type": "string"
+    },
+    "text": {
+     "description": "The input text to convert.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text",
+    "case"
+   ],
+   "type": "object"
+  },
+  "name": "convert_case",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "case": {
+     "description": "The target case that was applied (echoes the requested `case`).",
+     "type": "string"
+    },
+    "result": {
+     "description": "The converted text. Empty string if the input text was empty.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "case",
+    "result"
+   ],
+   "type": "object"
+  },
+  "title": "Convert Case"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Color Converter"
+  },
+  "description": "Use this when you need one color's exact values across every common format. Accepts a hex (#abc or #aabbcc), rgb(r, g, b) with r/g/b 0-255, or hsl(h, s%, l%) color and returns hex, rgb {r,g,b}, hsl {h,s,l}, hsv {h,s,v}, cmyk {c,m,y,k}, and oklch {l,c,h} (CSS Color 4: sRGB -> linear -> OKLab -> OKLCH, rounded to 4 decimals). Note oklch.l is 0-1 (not 0-100) and hue is 0 for grays. Deterministic: same input, same output. Example: \"#ff0000\" -> oklch {l: 0.628, c: 0.2577, h: 29.2339}. Alpha channels are not supported.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "color": {
+     "description": "A color as hex (#abc or #aabbcc), rgb(r, g, b) with r/g/b 0-255, or hsl(h, s%, l%). Alpha is not supported.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "color"
+   ],
+   "type": "object"
+  },
+  "name": "convert_color",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cmyk": {
+     "additionalProperties": false,
+     "properties": {
+      "c": {
+       "description": "Cyan 0-100 percent.",
+       "type": "integer"
+      },
+      "k": {
+       "description": "Key/black 0-100 percent.",
+       "type": "integer"
+      },
+      "m": {
+       "description": "Magenta 0-100 percent.",
+       "type": "integer"
+      },
+      "y": {
+       "description": "Yellow 0-100 percent.",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "c",
+      "m",
+      "y",
+      "k"
+     ],
+     "type": "object"
+    },
+    "hex": {
+     "description": "6-digit lowercase hex, e.g. '#ff0000'.",
+     "type": "string"
+    },
+    "hsl": {
+     "additionalProperties": false,
+     "properties": {
+      "h": {
+       "description": "Hue 0-360 degrees (0 for grays).",
+       "type": "integer"
+      },
+      "l": {
+       "description": "Lightness 0-100 percent.",
+       "type": "integer"
+      },
+      "s": {
+       "description": "Saturation 0-100 percent.",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "h",
+      "s",
+      "l"
+     ],
+     "type": "object"
+    },
+    "hsv": {
+     "additionalProperties": false,
+     "properties": {
+      "h": {
+       "description": "Hue 0-360 degrees.",
+       "type": "integer"
+      },
+      "s": {
+       "description": "Saturation 0-100 percent.",
+       "type": "integer"
+      },
+      "v": {
+       "description": "Value/brightness 0-100 percent.",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "h",
+      "s",
+      "v"
+     ],
+     "type": "object"
+    },
+    "oklch": {
+     "additionalProperties": false,
+     "properties": {
+      "c": {
+       "description": "OKLCH chroma, rounded to 4 decimals.",
+       "type": "number"
+      },
+      "h": {
+       "description": "OKLCH hue 0-360 degrees (0 for grays), rounded to 4 decimals.",
+       "type": "number"
+      },
+      "l": {
+       "description": "OKLCH lightness 0-1 (not 0-100), rounded to 4 decimals.",
+       "type": "number"
+      }
+     },
+     "required": [
+      "l",
+      "c",
+      "h"
+     ],
+     "type": "object"
+    },
+    "rgb": {
+     "additionalProperties": false,
+     "properties": {
+      "b": {
+       "description": "Blue 0-255.",
+       "type": "integer"
+      },
+      "g": {
+       "description": "Green 0-255.",
+       "type": "integer"
+      },
+      "r": {
+       "description": "Red 0-255.",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "r",
+      "g",
+      "b"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "hex",
+    "rgb",
+    "hsl",
+    "hsv",
+    "cmyk",
+    "oklch"
+   ],
+   "type": "object"
+  },
+  "title": "Color Converter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Convert Data"
+  },
+  "description": "Use this when you need to convert tabular data between JSON (array of objects), CSV, TSV, and XML instead of hand-transforming it. Deterministic: same input, same output. Handles quoted CSV fields (embedded commas, escaped \"\" quotes), flattens nested objects into dotted keys (b.x), and takes the union of keys across all rows so ragged data still lines up in columns. CSV/TSV input needs a header row plus at least one data row; JSON input must be an array of objects. Example: {from:'csv', to:'json'} on \"name,age\\nAda,36\\nGrace,45\" -> rowCount 2 and an output JSON array of two objects. Returns the input/output formats, the parsed row count, and the serialized output document as a string.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "description": "The source document as text.",
+     "type": "string"
+    },
+    "from": {
+     "description": "Input format.",
+     "enum": [
+      "json",
+      "csv",
+      "tsv",
+      "xml"
+     ],
+     "type": "string"
+    },
+    "to": {
+     "description": "Output format.",
+     "enum": [
+      "json",
+      "csv",
+      "tsv",
+      "xml"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "data",
+    "from",
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "convert_data",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "from": {
+     "description": "Echo of the input format.",
+     "enum": [
+      "json",
+      "csv",
+      "tsv",
+      "xml"
+     ],
+     "type": "string"
+    },
+    "output": {
+     "description": "The converted document as text in the target format (JSON is pretty-printed with 2-space indent).",
+     "type": "string"
+    },
+    "rowCount": {
+     "description": "Number of data rows (objects) parsed from the input.",
+     "type": "integer"
+    },
+    "to": {
+     "description": "Echo of the target format.",
+     "enum": [
+      "json",
+      "csv",
+      "tsv",
+      "xml"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "from",
+    "to",
+    "rowCount",
+    "output"
+   ],
+   "type": "object"
+  },
+  "title": "Convert Data"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Number Base Converter"
+  },
+  "description": "Use this when you need to convert an integer between numeral bases 2-36 (binary, octal, decimal, hex, or any radix up to 36), including arbitrarily large values and an optional leading minus sign. Uses BigInt so there is no precision loss, and output digits are lowercase. Deterministic: same input, same output. Example: { value: \"ff\", from: 16 } -> decimal \"255\", results.base2 \"11111111\". Prefer this over doing base/digit conversion in your head, which is an error-prone bit-fiddling task. If `to` is omitted it converts to bases 2, 8, 10, and 16 (excluding the source base).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "from": {
+     "description": "The base the input value is written in (2-36).",
+     "maximum": 36,
+     "minimum": 2,
+     "type": "integer"
+    },
+    "to": {
+     "description": "Target base(s): a single integer 2-36, or an array of them. Optional; defaults to [2, 8, 10, 16] with the source base excluded.",
+     "oneOf": [
+      {
+       "maximum": 36,
+       "minimum": 2,
+       "type": "integer"
+      },
+      {
+       "items": {
+        "maximum": 36,
+        "minimum": 2,
+        "type": "integer"
+       },
+       "type": "array"
+      }
+     ]
+    },
+    "value": {
+     "description": "The number to convert, as a string so huge values are not truncated. Digits are case-insensitive (a-z = 10-35) and an optional leading \"-\" is allowed, e.g. \"ff\", \"-1010\", \"HELLOWORLD123\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "value",
+    "from"
+   ],
+   "type": "object"
+  },
+  "name": "convert_number_base",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "decimal": {
+     "description": "The value in base 10 (may carry a leading '-').",
+     "type": "string"
+    },
+    "from": {
+     "description": "Echo of the source base.",
+     "maximum": 36,
+     "minimum": 2,
+     "type": "integer"
+    },
+    "results": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Converted representations keyed by 'base<N>' (e.g. base2, base8, base16) with lowercase digit strings. Which keys appear depends on the `to` argument (default bases 2, 8, 10, 16 excluding the source base).",
+     "type": "object"
+    },
+    "value": {
+     "description": "Echo of the input value.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "value",
+    "from",
+    "decimal",
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Number Base Converter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Timestamp Converter"
+  },
+  "description": "Use this when you have a timestamp in one form (unix epoch seconds/milliseconds/microseconds, or an ISO-8601 date-time) and need it in the others, or rendered in a specific IANA time zone. Auto-detects the input: a number or digit-string is an epoch classified by length (~10 digits = seconds, ~13 = milliseconds, ~16 = microseconds); anything else is parsed as ISO-8601, with a naive date-time (no Z/offset) taken as UTC. Returns unix_s, unix_ms, iso_utc, iso_tz (with numeric offset), a human string, and the weekday, all in the requested zone (default UTC), correctly handling DST transitions and pre-1970 (negative) epochs. Deterministic: same input, same output. Prefer this over doing epoch/timezone arithmetic yourself. Example: { value: 1783454640, timezone: \"America/Chicago\" } -> iso_utc \"2026-07-07T20:04:00.000Z\", human \"Tuesday, July 7, 2026 at 3:04 PM CDT\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "timezone": {
+     "description": "IANA time zone used to render iso_tz, human, and weekday, e.g. \"America/Chicago\". Defaults to \"UTC\".",
+     "type": "string"
+    },
+    "value": {
+     "description": "The timestamp to convert: a unix epoch (number or digit-string; seconds/milliseconds/microseconds auto-detected by length) or an ISO-8601 date-time (e.g. \"2026-07-07T15:04:00-05:00\" or \"2026-07-07\"). A naive date-time with no zone designator is interpreted as UTC.",
+     "type": [
+      "string",
+      "number"
+     ]
+    }
+   },
+   "required": [
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "convert_timestamp",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "detected": {
+     "description": "How the input was classified: an epoch band chosen by digit length, or 'iso' when parsed as a date-time string.",
+     "enum": [
+      "seconds",
+      "milliseconds",
+      "microseconds",
+      "iso"
+     ],
+     "type": "string"
+    },
+    "human": {
+     "description": "Human-readable local time with weekday, date, time, and zone abbreviation.",
+     "type": "string"
+    },
+    "iso_tz": {
+     "description": "The instant rendered in the requested zone, ISO-8601 with a numeric offset (e.g. '-05:00').",
+     "type": "string"
+    },
+    "iso_utc": {
+     "description": "The instant in UTC, ISO-8601 with milliseconds and a trailing 'Z'.",
+     "type": "string"
+    },
+    "timezone": {
+     "description": "IANA time zone used to render iso_tz, human, and weekday (echo of input; default 'UTC').",
+     "type": "string"
+    },
+    "unix_ms": {
+     "description": "Unix epoch in milliseconds.",
+     "type": "integer"
+    },
+    "unix_s": {
+     "description": "Unix epoch in whole seconds (negative for pre-1970 instants).",
+     "type": "integer"
+    },
+    "weekday": {
+     "description": "Day of week in the requested zone, e.g. 'Tuesday'.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "detected",
+    "timezone",
+    "unix_s",
+    "unix_ms",
+    "iso_utc",
+    "iso_tz",
+    "human",
+    "weekday"
+   ],
+   "type": "object"
+  },
+  "title": "Timestamp Converter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Time Zone Converter"
+  },
+  "description": "Use this when you need to convert a wall-clock date-time between IANA time zones with correct DST handling. Prefer this over doing timezone math yourself (a documented LLM failure mode): it uses the runtime's IANA database so offsets and daylight-saving transitions are exact. Deterministic: same input, same output. Returns the corresponding UTC instant, both zones' UTC offsets in minutes at that instant, and the converted local time. Example: {datetime:'2026-07-08T14:30', fromTz:'America/New_York', toTz:'Asia/Tokyo'} -> converted '9 Jul 2026, 03:30:00' (UTC 2026-07-08T18:30:00.000Z).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "datetime": {
+     "description": "Local date-time in the source zone, ISO form YYYY-MM-DDTHH:MM.",
+     "type": "string"
+    },
+    "fromTz": {
+     "description": "Source IANA zone, e.g. America/New_York.",
+     "type": "string"
+    },
+    "toTz": {
+     "description": "Target IANA zone, e.g. Asia/Tokyo.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "datetime",
+    "fromTz",
+    "toTz"
+   ],
+   "type": "object"
+  },
+  "name": "convert_timezone",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "converted": {
+     "description": "Wall-clock time in the target zone, e.g. '9 Jul 2026, 03:30:00'.",
+     "type": "string"
+    },
+    "fromTz": {
+     "description": "Source IANA time zone.",
+     "type": "string"
+    },
+    "fromUtcOffsetMinutes": {
+     "description": "Source zone's UTC offset in minutes at that instant (e.g. -240 for EDT).",
+     "type": "integer"
+    },
+    "input": {
+     "description": "Echo of the source wall-clock datetime.",
+     "type": "string"
+    },
+    "toTz": {
+     "description": "Target IANA time zone.",
+     "type": "string"
+    },
+    "toUtcOffsetMinutes": {
+     "description": "Target zone's UTC offset in minutes at that instant (e.g. 540 for JST).",
+     "type": "integer"
+    },
+    "utc": {
+     "description": "The corresponding UTC instant, ISO-8601.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "input",
+    "fromTz",
+    "toTz",
+    "utc",
+    "fromUtcOffsetMinutes",
+    "toUtcOffsetMinutes",
+    "converted"
+   ],
+   "type": "object"
+  },
+  "title": "Time Zone Converter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Convert Units"
+  },
+  "description": "Use this when you need to convert a value between units within one category (length, weight, temperature, volume, data, speed, area, time) instead of doing conversion arithmetic yourself. Deterministic: same input, same output. Temperature uses the correct offset formulas (Celsius/Fahrenheit/Kelvin), not a naive ratio, and unit keys are case-sensitive (e.g. km, lb, celsius, MB) while the category name is case-insensitive. Example: {category:'length', value:5, from:'km', to:'mile'} -> result 3.10685596119. Returns the echoed category/value/from/to plus the converted result, rounded to 12 significant figures (switching to exponential for very large or very small magnitudes).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Unit category.",
+     "enum": [
+      "length",
+      "weight",
+      "temperature",
+      "volume",
+      "data",
+      "speed",
+      "area",
+      "time"
+     ],
+     "type": "string"
+    },
+    "from": {
+     "description": "Source unit key (e.g. km, lb, celsius, MB).",
+     "type": "string"
+    },
+    "to": {
+     "description": "Target unit key.",
+     "type": "string"
+    },
+    "value": {
+     "description": "The numeric value to convert.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "category",
+    "value",
+    "from",
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "convert_units",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Echo of the unit category, lowercased.",
+     "enum": [
+      "length",
+      "weight",
+      "temperature",
+      "volume",
+      "data",
+      "speed",
+      "area",
+      "time"
+     ],
+     "type": "string"
+    },
+    "from": {
+     "description": "Echo of the source unit key.",
+     "type": "string"
+    },
+    "result": {
+     "description": "Converted value, rounded to 12 significant figures (magnitudes >= 1e15 or < 1e-10 use exponential rounding to ~7 significant figures).",
+     "type": "number"
+    },
+    "to": {
+     "description": "Echo of the target unit key.",
+     "type": "string"
+    },
+    "value": {
+     "description": "Echo of the input value (coerced to a number).",
+     "type": "number"
+    }
+   },
+   "required": [
+    "category",
+    "value",
+    "from",
+    "to",
+    "result"
+   ],
+   "type": "object"
+  },
+  "title": "Convert Units"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "YAML / JSON Converter"
+  },
+  "description": "Use this when converting between YAML and JSON in either direction, or normalizing one format in place (set from equal to to). Deterministic: same input, same output. Parses a single YAML document and caps alias expansion at 100 to defuse billion-laughs bombs; multi-document input, tabs-as-indentation, and other parse errors return a typed error with the line number. Example: { data: \"name: web\\nport: 8080\", from: \"yaml\", to: \"json\" } -> { result: \"{\\n  \\\"name\\\": \\\"web\\\",\\n  \\\"port\\\": 8080\\n}\" }.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "data": {
+     "description": "The document to convert, as a string.",
+     "type": "string"
+    },
+    "from": {
+     "description": "Input format of data.",
+     "enum": [
+      "yaml",
+      "json"
+     ],
+     "type": "string"
+    },
+    "to": {
+     "description": "Output format; if equal to \"from\", the document is normalized (parsed and re-emitted).",
+     "enum": [
+      "yaml",
+      "json"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "data",
+    "from",
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "convert_yaml",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "result": {
+     "description": "The converted (or, when from equals to, normalized) document as text in the target format.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "type": "object"
+  },
+  "title": "YAML / JSON Converter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Text Counter"
+  },
+  "description": "Use this when you need exact word, character, sentence, and paragraph counts instead of estimating. Deterministic: same input, same output. Uses Unicode-aware segmentation (Intl.Segmenter): characters are grapheme clusters, so an emoji or an accented letter counts as one; words are word-like segments; sentence splitting is abbreviation-aware (Dr., etc., won't end a sentence). charactersNoSpaces counts graphemes after stripping whitespace, and paragraphs are blocks separated by blank lines. Example: \"Café ☕!\" -> words 1, characters 7, charactersNoSpaces 6, sentences 1, paragraphs 1. Empty input returns all zeros.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "text": {
+     "description": "Text to analyze.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "count_text",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "characters": {
+     "description": "Count of grapheme clusters (user-perceived characters), including whitespace.",
+     "type": "integer"
+    },
+    "charactersNoSpaces": {
+     "description": "Grapheme count after removing all whitespace.",
+     "type": "integer"
+    },
+    "paragraphs": {
+     "description": "Count of non-empty blocks separated by blank lines.",
+     "type": "integer"
+    },
+    "sentences": {
+     "description": "Sentence count using abbreviation-aware segmentation.",
+     "type": "integer"
+    },
+    "words": {
+     "description": "Count of word-like segments.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "words",
+    "characters",
+    "charactersNoSpaces",
+    "sentences",
+    "paragraphs"
+   ],
+   "type": "object"
+  },
+  "title": "Text Counter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "CSS Gradient Builder"
+  },
+  "description": "Use this when you need a ready-to-paste CSS gradient value from 2-5 hex color stops. Builds a linear-gradient(...) (default; direction defaults to 'to bottom') or a radial-gradient(circle, ...). Direction accepts keywords ('to right', 'to left', 'to top', 'to bottom'), angles ('45deg', '90deg', '135deg'), or 'to <side> <side>'; it is ignored for radial, and passing type 'radial' (or direction 'radial') forces a radial gradient. Colors accept 6-digit hex with or without a leading '#' and are echoed normalized in order. Deterministic: same input, same output. Example: {colors:['#3b82f6','8b5cf6']} -> css 'linear-gradient(to bottom, #3b82f6, #8b5cf6)', type 'linear'. Radial results omit the 'direction' field.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "colors": {
+     "description": "2 to 5 color stops as 6-digit hex strings, with or without a leading '#', e.g. [\"#3b82f6\", \"8b5cf6\"].",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 5,
+     "minItems": 2,
+     "type": "array"
+    },
+    "direction": {
+     "description": "Linear direction: a keyword (\"to right\", \"to left\", \"to bottom\", \"to top\"), an angle (\"45deg\", \"135deg\", \"90deg\"), or \"to <side> <side>\". Defaults to \"to bottom\". Ignored for radial; passing \"radial\" here forces a radial gradient.",
+     "type": "string"
+    },
+    "type": {
+     "description": "Gradient type. Defaults to \"linear\". \"radial\" produces radial-gradient(circle, ...).",
+     "enum": [
+      "linear",
+      "radial"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "colors"
+   ],
+   "type": "object"
+  },
+  "name": "css_gradient",
+  "output_schema": {
+   "properties": {
+    "colors": {
+     "description": "Normalized 6-digit hex color stops, in input order.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "css": {
+     "description": "Ready-to-paste CSS gradient value, e.g. 'linear-gradient(to bottom, #3b82f6, #8b5cf6)' or 'radial-gradient(circle, #3b82f6, #8b5cf6)'.",
+     "type": "string"
+    },
+    "direction": {
+     "description": "Resolved linear direction (keyword or angle). Present only for linear gradients; omitted for radial.",
+     "type": "string"
+    },
+    "type": {
+     "description": "Resolved gradient type.",
+     "enum": [
+      "linear",
+      "radial"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "css",
+    "type",
+    "colors"
+   ],
+   "type": "object"
+  },
+  "title": "CSS Gradient Builder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Decode JWT"
+  },
+  "description": "Use this when you need to decode (NOT verify) a JSON Web Token: base64url-decode the header and payload, surface standard claims, and report expiry — prefer it over reading a JWT by eye. The decode is deterministic, but `expired`/`notYetValid` are compared against the current clock unless you pass `now` (ISO) to pin the reference time. The signature is never checked (`signatureVerified` is always false), so never authorize anything based on the output. `expired`/`notYetValid` are booleans when `exp`/`nbf` are present in the payload, otherwise null. Example: a token with sub \"1234567890\" and a far-future exp -> signatureVerified false, expired false, claims.subject \"1234567890\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "now": {
+     "description": "Optional ISO time for the expiry check (default: current time).",
+     "type": "string"
+    },
+    "token": {
+     "description": "The compact JWT string (header.payload.signature).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "token"
+   ],
+   "type": "object"
+  },
+  "name": "decode_jwt",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "claims": {
+     "additionalProperties": false,
+     "description": "Normalized standard claims; each key appears only when the corresponding claim is present in the payload.",
+     "properties": {
+      "audience": {
+       "description": "aud claim, copied verbatim (a string or an array of strings)."
+      },
+      "expires": {
+       "description": "exp converted to ISO 8601.",
+       "type": "string"
+      },
+      "issuedAt": {
+       "description": "iat converted to ISO 8601.",
+       "type": "string"
+      },
+      "issuer": {
+       "description": "iss claim.",
+       "type": "string"
+      },
+      "notBefore": {
+       "description": "nbf converted to ISO 8601.",
+       "type": "string"
+      },
+      "subject": {
+       "description": "sub claim.",
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "expired": {
+     "description": "Whether now is past exp; null when the payload has no numeric exp.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "header": {
+     "additionalProperties": true,
+     "description": "Decoded JWT header (parsed JSON; arbitrary fields, e.g. alg, typ).",
+     "type": "object"
+    },
+    "notYetValid": {
+     "description": "Whether now is before nbf; null when the payload has no numeric nbf.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "payload": {
+     "additionalProperties": true,
+     "description": "Decoded JWT payload/claims (parsed JSON; arbitrary fields).",
+     "type": "object"
+    },
+    "segments": {
+     "description": "Number of dot-separated segments in the token (2 or 3).",
+     "enum": [
+      2,
+      3
+     ],
+     "type": "integer"
+    },
+    "signatureVerified": {
+     "description": "Always false — this tool never checks the signature.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "signatureVerified",
+    "header",
+    "payload",
+    "claims",
+    "expired",
+    "notYetValid",
+    "segments"
+   ],
+   "type": "object"
+  },
+  "title": "Decode JWT"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Text Diff"
+  },
+  "description": "Use this when you need an exact line-level diff between two blocks of text instead of eyeballing the differences. Deterministic: same input, same output. Computes a longest-common-subsequence diff and returns every line tagged added, removed, or unchanged, plus per-category counts. Example: original \"a\\nb\", modified \"a\\nB\" -> added 1, removed 1, unchanged 1, with lines [{type:\"unchanged\",text:\"a\"},{type:\"removed\",text:\"b\"},{type:\"added\",text:\"B\"}]. Trailing edits produce separate removed+added lines rather than an in-place change. Inputs whose line-count product exceeds 4,000,000 are rejected as too large to diff.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "modified": {
+     "description": "Modified text.",
+     "type": "string"
+    },
+    "original": {
+     "description": "Original text.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "original",
+    "modified"
+   ],
+   "type": "object"
+  },
+  "name": "diff_text",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "added": {
+     "description": "Number of lines present only in the modified text.",
+     "type": "integer"
+    },
+    "lines": {
+     "description": "The full diff in order, one entry per line.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "text": {
+        "description": "The line content (without its trailing newline).",
+        "type": "string"
+       },
+       "type": {
+        "description": "How this line differs between the two texts.",
+        "enum": [
+         "added",
+         "removed",
+         "unchanged"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "type",
+       "text"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "removed": {
+     "description": "Number of lines present only in the original text.",
+     "type": "integer"
+    },
+    "unchanged": {
+     "description": "Number of lines common to both texts.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "added",
+    "removed",
+    "unchanged",
+    "lines"
+   ],
+   "type": "object"
+  },
+  "title": "Text Diff"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Encoder / Decoder"
+  },
+  "description": "Use this when you need to encode or decode text and want multi-byte and entity edge cases handled correctly rather than doing it by hand. Deterministic: same input, same output. The mode selects the operation: url-encode/url-decode (percent-encoding), html-encode/html-decode (entity table plus numeric character references), base64-encode/base64-decode (UTF-8 safe; decode tolerates URL-safe alphabet, whitespace, and missing padding), and unicode-encode/unicode-decode (\\uXXXX and \\u{...} escapes for non-ASCII). Every mode returns the same shape: {mode, output}. Example: mode base64-encode, text \"héllo\" -> output \"aMOpbGxv\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "mode": {
+     "description": "Operation to perform.",
+     "enum": [
+      "url-encode",
+      "url-decode",
+      "html-encode",
+      "html-decode",
+      "base64-encode",
+      "base64-decode",
+      "unicode-encode",
+      "unicode-decode"
+     ],
+     "type": "string"
+    },
+    "text": {
+     "description": "Input text.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode",
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "encode_decode",
+  "output_schema": {
+   "properties": {
+    "mode": {
+     "description": "The operation that was performed (echoed back).",
+     "enum": [
+      "url-encode",
+      "url-decode",
+      "html-encode",
+      "html-decode",
+      "base64-encode",
+      "base64-decode",
+      "unicode-encode",
+      "unicode-decode"
+     ],
+     "type": "string"
+    },
+    "output": {
+     "description": "The encoded or decoded result string.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode",
+    "output"
+   ],
+   "type": "object"
+  },
+  "title": "Encoder / Decoder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "RRULE Expander"
+  },
+  "description": "Use this when you need to build an iCalendar RRULE (RFC 5545) or list the actual dates a recurrence produces. Prefer this over computing recurring dates yourself (a documented LLM failure mode): it correctly handles INTERVAL, COUNT/UNTIL exclusivity (COUNT wins), BYDAY with ordinals (e.g. the 2nd Monday), BYMONTH, and month-length edge cases. Deterministic: same input, same output; start is interpreted as UTC. Returns the RRULE string, a plain-English description, and up to 10 (or COUNT) occurrence timestamps. Example: {freq:'MONTHLY', start:'2026-01-05T09:00', byday:['MO'], ordinal:2, count:3} -> rrule 'RRULE:FREQ=MONTHLY;BYDAY=2MO;COUNT=3', first occurrence 2026-01-12T09:00:00.000Z.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "byday": {
+     "description": "Days of week (WEEKLY/MONTHLY).",
+     "items": {
+      "enum": [
+       "MO",
+       "TU",
+       "WE",
+       "TH",
+       "FR",
+       "SA",
+       "SU"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "bymonth": {
+     "description": "Months (YEARLY).",
+     "items": {
+      "maximum": 12,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "count": {
+     "description": "Total number of occurrences (mutually exclusive with until; count wins).",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "freq": {
+     "description": "Recurrence frequency.",
+     "enum": [
+      "DAILY",
+      "WEEKLY",
+      "MONTHLY",
+      "YEARLY"
+     ],
+     "type": "string"
+    },
+    "interval": {
+     "description": "Repeat every N periods (default 1).",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "ordinal": {
+     "description": "Ordinal week position for MONTHLY BYDAY (e.g. 2 = 2nd, -1 = last).",
+     "enum": [
+      1,
+      2,
+      3,
+      4,
+      -1
+     ],
+     "type": "integer"
+    },
+    "start": {
+     "description": "Start date-time, ISO form YYYY-MM-DDTHH:MM (interpreted as UTC).",
+     "type": "string"
+    },
+    "until": {
+     "description": "End date YYYY-MM-DD (ignored if count is set).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "freq",
+    "start"
+   ],
+   "type": "object"
+  },
+  "name": "expand_rrule",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "description": {
+     "description": "Plain-English description of the recurrence.",
+     "type": "string"
+    },
+    "occurrences": {
+     "description": "Upcoming occurrence timestamps as ISO-8601 UTC strings; capped at min(COUNT,10), otherwise 10.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "rrule": {
+     "description": "iCalendar RRULE string, e.g. 'RRULE:FREQ=MONTHLY;BYDAY=2MO;COUNT=3'.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rrule",
+    "description",
+    "occurrences"
+   ],
+   "type": "object"
+  },
+  "title": "RRULE Expander"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Cron Explainer"
+  },
+  "description": "Use this when you need to understand or schedule a 5-field cron expression. Prefer this over reasoning about cron semantics yourself (a documented LLM failure mode): it correctly handles ranges, lists, steps, month/day names, and the tricky day-of-month OR day-of-week rule. Deterministic: same input, same output. Returns a plain-English description, the expanded matching values per field, and the next run times computed in UTC (pass `now` to fix the reference point, `count` for how many). Example: '*/15 9-17 * * 1-5' -> description 'At minute */15 past hour 9-17 on every weekday (Monday through Friday)'.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "How many upcoming run times to return (default 5).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "expression": {
+     "description": "5-field cron, e.g. \"*/15 9-17 * * 1-5\" (minute hour day-of-month month day-of-week).",
+     "type": "string"
+    },
+    "now": {
+     "description": "Optional ISO timestamp to compute next runs from (default: current time).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "expression"
+   ],
+   "type": "object"
+  },
+  "name": "explain_cron",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "description": {
+     "description": "Plain-English description of the schedule.",
+     "type": "string"
+    },
+    "error": {
+     "description": "Always null on the success result.",
+     "type": "null"
+    },
+    "expression": {
+     "description": "The normalized 5-field cron expression.",
+     "type": "string"
+    },
+    "fields": {
+     "additionalProperties": false,
+     "properties": {
+      "dayOfMonth": {
+       "description": "Matching days of month, 1-31.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "dayOfWeek": {
+       "description": "Matching weekdays, 0=Sunday .. 6=Saturday (7 folds to 0).",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "hour": {
+       "description": "Matching hours, 0-23.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "minute": {
+       "description": "Matching minutes, 0-59.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "month": {
+       "description": "Matching months, 1-12.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "minute",
+      "hour",
+      "dayOfMonth",
+      "month",
+      "dayOfWeek"
+     ],
+     "type": "object"
+    },
+    "nextRuns": {
+     "description": "Upcoming run times in UTC; length is capped by `count` (default 5).",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "iso": {
+        "description": "ISO-8601 UTC timestamp of the run.",
+        "type": "string"
+       },
+       "label": {
+        "description": "Human-readable UTC label, e.g. 'Fri Jan 1 2027, 00:00 UTC'.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "iso",
+       "label"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "valid": {
+     "description": "Always true on the success result.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "valid",
+    "error",
+    "expression",
+    "description",
+    "fields",
+    "nextRuns"
+   ],
+   "type": "object"
+  },
+  "title": "Cron Explainer"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Fancy Text"
+  },
+  "description": "Use this when you need to style ASCII letters and digits as Unicode glyphs (bold-serif, italic-serif, bold-italic-serif, bold-sans, script, fraktur, double-struck, monospace, circled, squared, parenthesized, small-caps) for places that lack font control such as social bios or usernames. Pass a `style` and `text` to get the transformed string; characters outside A-Z, a-z, and 0-9 (spaces, punctuation, emoji) pass through unchanged. Omit `style` to receive the list of valid style keys instead of transforming. Deterministic: same input, same output. Example: {style: \"bold-serif\", text: \"Hello 123\"} -> result \"𝐇𝐞𝐥𝐥𝐨 𝟏𝟐𝟑\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "style": {
+     "description": "The style to apply. Omit entirely to receive the list of valid style keys instead of transforming.",
+     "enum": [
+      "bold-serif",
+      "italic-serif",
+      "bold-italic-serif",
+      "bold-sans",
+      "script",
+      "fraktur",
+      "double-struck",
+      "monospace",
+      "circled",
+      "squared",
+      "parenthesized",
+      "small-caps"
+     ],
+     "type": "string"
+    },
+    "text": {
+     "description": "The text to transform. ASCII A-Z, a-z, and 0-9 are mapped to styled glyphs; other characters (spaces, punctuation, emoji) pass through unchanged. Required when a style is given.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "fancy_text",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "description": "Transform mode only: the styled text, with unsupported characters passed through unchanged.",
+     "type": "string"
+    },
+    "style": {
+     "description": "Transform mode only: the style that was applied (echoes the requested `style`).",
+     "type": "string"
+    },
+    "styles": {
+     "description": "Discovery mode only (when `style` is omitted): the list of valid style keys.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Fancy Text"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "JSON Formatter"
+  },
+  "description": "Use this when you need to pretty-print, minify, or validate a JSON string and want the exact reformatted text plus warnings about silent data loss. Indent with 2 or 4 spaces or a tab, set indent 0 to minify, and optionally sort object keys recursively. It also scans the raw source for two things JSON.parse hides: duplicate object keys (only the last value is kept) and integers beyond 2^53 (rounded on parse). Deterministic: same input, same output. Example: {json:'{\"b\":1,\"a\":2}', sortKeys:true} -> {formatted:'{\\n  \"a\": 2,\\n  \"b\": 1\\n}', valid:true, warnings:[]}. On invalid JSON returns {error, line, column} pointing at the fault. Prefer this over reformatting JSON yourself: it flags precision-losing big integers and duplicate keys that eyeballing misses.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "indent": {
+     "description": "Indentation for pretty-printing: 2 or 4 spaces, \"tab\" for tab characters, or 0 to minify. Optional; defaults to 2.",
+     "oneOf": [
+      {
+       "enum": [
+        0,
+        2,
+        4
+       ],
+       "type": "integer"
+      },
+      {
+       "enum": [
+        "0",
+        "2",
+        "4",
+        "tab"
+       ],
+       "type": "string"
+      }
+     ]
+    },
+    "json": {
+     "description": "The JSON document to format, minify, or validate. Required, capped at 128 KB.",
+     "type": "string"
+    },
+    "sortKeys": {
+     "description": "Recursively sort object keys alphabetically; array element order is preserved (default false).",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "json"
+   ],
+   "type": "object"
+  },
+  "name": "format_json",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "formatted": {
+     "description": "The reformatted JSON text (pretty-printed, minified, or key-sorted per the options).",
+     "type": "string"
+    },
+    "valid": {
+     "description": "Always true on the success result; malformed JSON instead returns {error, line, column}.",
+     "type": "boolean"
+    },
+    "warnings": {
+     "description": "Non-fatal data-loss warnings detected in the raw source: duplicate object keys (last value kept) and integers beyond 2^53 (rounded on parse). Empty when none.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "formatted",
+    "valid",
+    "warnings"
+   ],
+   "type": "object"
+  },
+  "title": "JSON Formatter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Format SQL"
+  },
+  "description": "Use this when a user pastes messy or minified SQL and wants it pretty-printed into a readable, canonical layout, or wants keyword casing normalized. Deterministic: same input, same output. Each clause keyword (SELECT, FROM, WHERE, GROUP BY, ...) goes on its own line with its arguments indented beneath it, commas break columns onto new lines, JOIN/AND/OR start fresh lines, and short parenthesised groups stay inline. Optional dialect hint affects identifier quoting (e.g. tsql [brackets]); indent is a spaces count or \"tab\" (default 2); keywordCase is upper/lower/preserve (default upper). Example: \"select id from t\" -> formatted \"SELECT\\n  id\\nFROM\\n  t\". Returns an error for empty or oversized (>200000 chars) input.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "dialect": {
+     "description": "SQL dialect hint (affects identifier quoting, e.g. T-SQL [brackets]). Optional; defaults to standard 'sql'.",
+     "enum": [
+      "sql",
+      "postgresql",
+      "mysql",
+      "tsql",
+      "bigquery",
+      "sqlite"
+     ],
+     "type": "string"
+    },
+    "indent": {
+     "description": "Indentation: a number of spaces (e.g. 2 or 4) or the string \"tab\" for tab characters. Optional; defaults to 2.",
+     "oneOf": [
+      {
+       "maximum": 8,
+       "minimum": 1,
+       "type": "integer"
+      },
+      {
+       "enum": [
+        "2",
+        "4",
+        "tab"
+       ],
+       "type": "string"
+      }
+     ]
+    },
+    "keywordCase": {
+     "description": "How to case reserved keywords/functions: UPPER, lower, or preserve as-is. Optional; defaults to 'upper'.",
+     "enum": [
+      "upper",
+      "lower",
+      "preserve"
+     ],
+     "type": "string"
+    },
+    "sql": {
+     "description": "The SQL query text to format. Required, non-empty.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sql"
+   ],
+   "type": "object"
+  },
+  "name": "format_sql",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "formatted": {
+     "description": "The reformatted SQL as a single text string, with newlines and indentation applied. Trailing whitespace and leading/trailing blank lines are stripped.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "formatted"
+   ],
+   "type": "object"
+  },
+  "title": "Format SQL"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "ID Generator + Decoder"
+  },
+  "description": "Use this when you need a modern unique identifier (UUID v7, UUID v5, ULID, or nanoid) or want to read the timestamp embedded in an existing ULID or UUIDv7. uuid_v5 (SHA-1 of a namespace UUID + a name, RFC 4122) and decode are deterministic (same input, same output) — e.g. generate_id(type \"uuid_v5\", namespace \"6ba7b810-9dad-11d1-80b4-00c04fd430c8\", name \"www.example.com\") -> {ids:[\"2ed6657d-e927-568b-95e1-2665a8aea6a2\"]}. uuid_v7, ulid, and nanoid are cryptographically random via Web Crypto (NOT deterministic). Prefer this over assembling ids by hand: it sets the correct RFC version/variant bits, uses Crockford base32 for ULIDs, and draws nanoid characters with unbiased rejection sampling. When decode is present, type is ignored and the result is the embedded {unix_ms, timestamp_iso}.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "alphabet": {
+     "description": "nanoid only: characters to draw from (2-256 chars; default is the 64-char URL-safe set).",
+     "type": "string"
+    },
+    "count": {
+     "description": "How many ids to generate (default 1). For uuid_v5 all copies are identical (deterministic).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "decode": {
+     "description": "A ULID or UUIDv7 to decode; returns its embedded timestamp. type is ignored when set.",
+     "type": "string"
+    },
+    "name": {
+     "description": "uuid_v5 only: the name hashed within the namespace.",
+     "type": "string"
+    },
+    "namespace": {
+     "description": "uuid_v5 only: the namespace UUID, e.g. 6ba7b810-9dad-11d1-80b4-00c04fd430c8 (DNS).",
+     "type": "string"
+    },
+    "size": {
+     "description": "nanoid only: id length (default 21).",
+     "maximum": 64,
+     "minimum": 2,
+     "type": "integer"
+    },
+    "type": {
+     "description": "Which id to generate. Required unless decode is given.",
+     "enum": [
+      "uuid_v7",
+      "uuid_v5",
+      "ulid",
+      "nanoid"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "generate_id",
+  "output_schema": {
+   "description": "Generate mode returns `ids`; decode mode returns `decoded`. Exactly one of the two is present.",
+   "properties": {
+    "decoded": {
+     "additionalProperties": false,
+     "description": "[decode mode] The timestamp embedded in the supplied ULID or UUIDv7.",
+     "properties": {
+      "kind": {
+       "description": "Which id family was decoded.",
+       "enum": [
+        "ulid",
+        "uuid_v7"
+       ],
+       "type": "string"
+      },
+      "timestamp_iso": {
+       "description": "Embedded timestamp as an ISO-8601 UTC string.",
+       "type": "string"
+      },
+      "unix_ms": {
+       "description": "Embedded timestamp as Unix epoch milliseconds.",
+       "type": "integer"
+      }
+     },
+     "required": [
+      "kind",
+      "unix_ms",
+      "timestamp_iso"
+     ],
+     "type": "object"
+    },
+    "ids": {
+     "description": "[generate mode] The generated identifiers, length = count. For uuid_v5 every copy is identical (deterministic).",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "title": "ID Generator + Decoder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Generate Password"
+  },
+  "description": "Use this when you need strong passwords with Web Crypto randomness: mode=\"random\" builds character-set passwords (length plus uppercase/lowercase/numbers/symbols toggles); mode=\"memorable\" builds word passphrases (words, separator, addNumber, addSymbol). Cryptographically random via Web Crypto (NOT deterministic). For test/dev fixtures — for real credentials prefer the client-side web tool at clean.tools/password-generator/ so the password never crosses the network. Example: {mode: \"random\", length: 16} -> mode \"random\", length 16, count 1, passwords [\"NXqtsn6MrsfG9d2i\"].",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "addNumber": {
+     "description": "[memorable] Insert a random number (default true).",
+     "type": "boolean"
+    },
+    "addSymbol": {
+     "description": "[memorable] Insert a random symbol (default false).",
+     "type": "boolean"
+    },
+    "count": {
+     "description": "How many passwords (default 1).",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "length": {
+     "description": "[random] Character length (default 16).",
+     "maximum": 128,
+     "minimum": 4,
+     "type": "integer"
+    },
+    "lowercase": {
+     "description": "[random] Include a-z (default true).",
+     "type": "boolean"
+    },
+    "mode": {
+     "description": "Password style (default random).",
+     "enum": [
+      "random",
+      "memorable"
+     ],
+     "type": "string"
+    },
+    "numbers": {
+     "description": "[random] Include 0-9 (default true).",
+     "type": "boolean"
+    },
+    "separator": {
+     "description": "[memorable] Word separator (default \"-\").",
+     "type": "string"
+    },
+    "symbols": {
+     "description": "[random] Include symbols (default false).",
+     "type": "boolean"
+    },
+    "uppercase": {
+     "description": "[random] Include A-Z (default true).",
+     "type": "boolean"
+    },
+    "words": {
+     "description": "[memorable] Number of words (default 4).",
+     "maximum": 8,
+     "minimum": 3,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "generate_password",
+  "output_schema": {
+   "properties": {
+    "count": {
+     "description": "Number of passwords generated (matches passwords.length).",
+     "type": "integer"
+    },
+    "length": {
+     "description": "[random mode only] character length of each password.",
+     "type": "integer"
+    },
+    "mode": {
+     "description": "Which generator produced the passwords.",
+     "enum": [
+      "random",
+      "memorable"
+     ],
+     "type": "string"
+    },
+    "passwords": {
+     "description": "The generated passwords/passphrases, length = count.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "words": {
+     "description": "[memorable mode only] number of words in each passphrase.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "mode",
+    "count",
+    "passwords"
+   ],
+   "type": "object"
+  },
+  "title": "Generate Password"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Generate QR Code"
+  },
+  "description": "Use this when you need to turn text or a URL into a real, scannable QR code rather than describing one. Deterministic: same input, same output. Byte mode, error-correction level M, versions 1-10 auto-selected by length (up to 213 bytes); the encoder scores all 8 mask patterns and keeps the lowest-penalty one. Returns both the module matrix as rows of 0/1 (1 = dark module) and a ready-to-render self-contained SVG string. moduleSize sets SVG pixels per module (default 10) and quietZone the border width in modules (default 4). Example: {text:'HELLO'} -> version 1, size 21x21, byteLength 5. Longer text auto-bumps the version and matrix size; over 213 bytes returns an error.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "moduleSize": {
+     "description": "SVG pixels per module (default 10).",
+     "maximum": 40,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "quietZone": {
+     "description": "Quiet-zone module border (default 4).",
+     "maximum": 16,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "text": {
+     "description": "Text/URL to encode (up to 213 bytes).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "generate_qr",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "byteLength": {
+     "description": "UTF-8 byte length of the encoded text.",
+     "type": "integer"
+    },
+    "errorCorrectionLevel": {
+     "description": "Always \"M\" (medium, ~15% recovery).",
+     "enum": [
+      "M"
+     ],
+     "type": "string"
+    },
+    "mask": {
+     "description": "Chosen mask pattern (0-7), the one with the lowest penalty score.",
+     "maximum": 7,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "matrix": {
+     "description": "size x size grid; each row is an array of 0/1 where 1 is a dark module. Excludes the quiet-zone border.",
+     "items": {
+      "items": {
+       "enum": [
+        0,
+        1
+       ],
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     "type": "array"
+    },
+    "moduleSize": {
+     "description": "SVG pixels per module (echo of input, clamped 1-40; default 10).",
+     "type": "integer"
+    },
+    "quietZone": {
+     "description": "Quiet-zone border width in modules (echo of input, clamped 0-16; default 4).",
+     "type": "integer"
+    },
+    "size": {
+     "description": "Matrix dimension in modules (version*4+17, so 21-57).",
+     "type": "integer"
+    },
+    "svg": {
+     "description": "Self-contained SVG document string rendering the QR code (includes the quiet zone and moduleSize scaling): a white background rect plus a #000000 group of one rect per dark module.",
+     "type": "string"
+    },
+    "text": {
+     "description": "Echo of the encoded text.",
+     "type": "string"
+    },
+    "version": {
+     "description": "Auto-selected QR version (1-10).",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "text",
+    "version",
+    "errorCorrectionLevel",
+    "mask",
+    "size",
+    "byteLength",
+    "quietZone",
+    "moduleSize",
+    "matrix",
+    "svg"
+   ],
+   "type": "object"
+  },
+  "title": "Generate QR Code"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Hash Text"
+  },
+  "description": "Use this when you need the exact SHA-1, SHA-256, and/or SHA-512 hex digest of a UTF-8 string — never recall or guess a hash, since digests cannot be produced from memory. Deterministic: same input, same output. Pass `algorithm` for a single digest or `algorithms` for a subset; the default computes all three. The empty string is valid, and `byteLength` reports the UTF-8 encoded byte length of the input. Example: text \"hello\" with algorithm SHA-256 -> byteLength 5, hashes[\"SHA-256\"] = \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "algorithm": {
+     "description": "A single algorithm to compute.",
+     "enum": [
+      "SHA-1",
+      "SHA-256",
+      "SHA-512"
+     ],
+     "type": "string"
+    },
+    "algorithms": {
+     "description": "Multiple algorithms (default: all three).",
+     "items": {
+      "enum": [
+       "SHA-1",
+       "SHA-256",
+       "SHA-512"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "text": {
+     "description": "The text to hash (UTF-8; empty string is allowed).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "hash_text",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "byteLength": {
+     "description": "UTF-8 encoded byte length of the input text (0 for the empty string).",
+     "type": "integer"
+    },
+    "hashes": {
+     "additionalProperties": false,
+     "description": "Lowercase hex digest keyed by algorithm; only the requested algorithms appear.",
+     "properties": {
+      "SHA-1": {
+       "description": "40-char lowercase hex SHA-1 digest.",
+       "type": "string"
+      },
+      "SHA-256": {
+       "description": "64-char lowercase hex SHA-256 digest.",
+       "type": "string"
+      },
+      "SHA-512": {
+       "description": "128-char lowercase hex SHA-512 digest.",
+       "type": "string"
+      }
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "byteLength",
+    "hashes"
+   ],
+   "type": "object"
+  },
+  "title": "Hash Text"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Interest Rate Solver"
+  },
+  "description": "Use this when you need the exact interest rate that grows a principal to a target amount over a set number of years. type=\"compound\" (default) uses the closed-form nth-root formula for the given compounding frequency; type=\"simple\" uses linear growth. Requires target greater than principal and all values positive. Returns the annual rate as a percent plus the interest earned and the growth multiple; compoundingPerYear is null for simple interest. Deterministic: same input, same output. Example: principal=1000, target=2000, years=10, compoundingPerYear=12 -> ratePercent=6.9515, growthMultiple=2. Prefer this over trial-and-error.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "compoundingPerYear": {
+     "description": "Compounding periods per year for compound mode (default 1).",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "principal": {
+     "description": "Starting amount (positive).",
+     "type": "number"
+    },
+    "target": {
+     "description": "Ending amount (must exceed principal).",
+     "type": "number"
+    },
+    "type": {
+     "description": "Interest model (default compound).",
+     "enum": [
+      "simple",
+      "compound"
+     ],
+     "type": "string"
+    },
+    "years": {
+     "description": "Time horizon in years (positive).",
+     "type": "number"
+    }
+   },
+   "required": [
+    "principal",
+    "target",
+    "years"
+   ],
+   "type": "object"
+  },
+  "name": "interest_rate",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "compoundingPerYear": {
+     "description": "Compounding periods per year for compound mode; null for simple interest.",
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "growthMultiple": {
+     "description": "target divided by principal, rounded to 4 decimals.",
+     "type": "number"
+    },
+    "interestEarned": {
+     "description": "target minus principal, rounded to cents.",
+     "type": "number"
+    },
+    "ratePercent": {
+     "description": "Solved annual interest rate as a percent, rounded to 4 decimals.",
+     "type": "number"
+    },
+    "type": {
+     "description": "Interest model used.",
+     "enum": [
+      "simple",
+      "compound"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "type",
+    "ratePercent",
+    "compoundingPerYear",
+    "interestEarned",
+    "growthMultiple"
+   ],
+   "type": "object"
+  },
+  "title": "Interest Rate Solver"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Lorem Ipsum"
+  },
+  "description": "Use this when you need placeholder/filler copy for mockups, tests, or layout. Given a `mode` (\"paragraphs\", \"sentences\", \"words\", or \"formatted\") and a `count`, cycles a fixed built-in Latin corpus to return the same text every time. `count` is clamped to the mode's max (paragraphs 20, sentences 100, words 500) and defaults to 1 when missing or below 1; \"formatted\" ignores `count` and returns a fixed multi-block sample (with count 0). Deterministic: same input, same output. Example: {mode: \"words\", count: 5} -> text \"Lorem ipsum dolor sit amet.\", count 5.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "How many units to generate. Clamped to the mode's max (paragraphs 20, sentences 100, words 500); values below 1 or missing default to 1. Unused for \"formatted\".",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "mode": {
+     "description": "Unit of generated text. \"paragraphs\", \"sentences\", or \"words\" repeat the corpus up to the requested count; \"formatted\" returns a fixed multi-block sample as plain text and ignores count.",
+     "enum": [
+      "paragraphs",
+      "sentences",
+      "words",
+      "formatted"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode"
+   ],
+   "type": "object"
+  },
+  "name": "lorem_ipsum",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "The effective number of units generated after clamping/defaulting; always 0 for \"formatted\" mode.",
+     "type": "integer"
+    },
+    "mode": {
+     "description": "The generation mode used (echoes the requested `mode`).",
+     "enum": [
+      "paragraphs",
+      "sentences",
+      "words",
+      "formatted"
+     ],
+     "type": "string"
+    },
+    "text": {
+     "description": "The generated placeholder text. Paragraphs are separated by blank lines; words mode is capitalized and terminated with a period.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "mode",
+    "count",
+    "text"
+   ],
+   "type": "object"
+  },
+  "title": "Lorem Ipsum"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Luhn Validate"
+  },
+  "description": "Use this when you need to check whether a number passes the Luhn (mod-10) checksum used by credit cards and many identifier numbers, instead of computing the doubling-and-summing by hand. Deterministic: same input, same output. Spaces and dashes are stripped first; any remaining non-digit character is an error. Returns the boolean result plus the full per-digit working, one steps entry per digit in original order (the digit, its transformed value after Luhn doubling, and whether that position was doubled). Example: {number:'4539 1488 0343 6467'} -> valid true, sum 80, mod10 0, digitCount 16.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "number": {
+     "description": "Digits to validate (spaces and dashes are ignored).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "number"
+   ],
+   "type": "object"
+  },
+  "name": "luhn_validate",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "digitCount": {
+     "description": "Number of digits validated.",
+     "type": "integer"
+    },
+    "mod10": {
+     "description": "sum modulo 10; 0 exactly when valid.",
+     "type": "integer"
+    },
+    "number": {
+     "description": "Input with spaces and dashes removed (digits only).",
+     "type": "string"
+    },
+    "steps": {
+     "description": "Per-digit working, one entry per digit in original left-to-right order.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "digit": {
+        "description": "The original digit (0-9).",
+        "type": "integer"
+       },
+       "doubled": {
+        "description": "Whether this position was doubled (every second digit from the right).",
+        "type": "boolean"
+       },
+       "transformed": {
+        "description": "Value used in the sum: doubled digits have 9 subtracted when the double exceeds 9, otherwise the digit is unchanged.",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "digit",
+       "transformed",
+       "doubled"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "sum": {
+     "description": "Sum of the transformed digits.",
+     "type": "integer"
+    },
+    "valid": {
+     "description": "True when sum is divisible by 10 (mod10 === 0).",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "number",
+    "valid",
+    "sum",
+    "mod10",
+    "digitCount",
+    "steps"
+   ],
+   "type": "object"
+  },
+  "title": "Luhn Validate"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Percentage Calculator"
+  },
+  "description": "Use this when you want exact, auditable percentage math with a written-out formula. Three modes: \"of\" computes percent% of value (fields percent, value); \"is-what\" computes what percent x is of y (fields x, y; y must be non-zero); \"change\" computes the percent change from -> to (from must be non-zero) and reports direction as \"increase\" or \"decrease\". Returns the numeric result plus a human-readable formula string. Deterministic: same input, same output. Example: mode=\"change\", from=200, to=250 -> result=25, direction=\"increase\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "from": {
+     "description": "(mode \"change\") The starting value; must be non-zero.",
+     "type": "number"
+    },
+    "mode": {
+     "default": "of",
+     "description": "Which calculation to perform. \"of\" = percent% of value; \"is-what\" = x is what percent of y; \"change\" = percent change from -> to.",
+     "enum": [
+      "of",
+      "is-what",
+      "change"
+     ],
+     "type": "string"
+    },
+    "percent": {
+     "description": "(mode \"of\") The percentage to apply, e.g. 15 for 15%.",
+     "type": "number"
+    },
+    "to": {
+     "description": "(mode \"change\") The ending value.",
+     "type": "number"
+    },
+    "value": {
+     "description": "(mode \"of\") The base value that the percentage is taken of.",
+     "type": "number"
+    },
+    "x": {
+     "description": "(mode \"is-what\") The part value.",
+     "type": "number"
+    },
+    "y": {
+     "description": "(mode \"is-what\") The whole value; must be non-zero.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "mode"
+   ],
+   "type": "object"
+  },
+  "name": "percentage",
+  "output_schema": {
+   "properties": {
+    "direction": {
+     "description": "(change mode only) Whether the change was an increase (result >= 0) or a decrease.",
+     "enum": [
+      "increase",
+      "decrease"
+     ],
+     "type": "string"
+    },
+    "formula": {
+     "description": "Human-readable statement of what was computed, e.g. \"15% of 80\".",
+     "type": "string"
+    },
+    "mode": {
+     "description": "Which calculation was performed.",
+     "enum": [
+      "of",
+      "is-what",
+      "change"
+     ],
+     "type": "string"
+    },
+    "percent": {
+     "description": "(is-what and change modes) The percent, equal to result; present alongside result for those two modes.",
+     "type": "number"
+    },
+    "result": {
+     "description": "The numeric answer: the computed amount (of), or the percent (is-what, change). May be negative for a decrease.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "mode",
+    "result",
+    "formula"
+   ],
+   "type": "object"
+  },
+  "title": "Percentage Calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "JSONPath Query"
+  },
+  "description": "Use this when you need to pull specific values out of a JSON document by JSONPath and getting the path exactly right on deeply nested or large structures matters. Evaluates a JSONPath subset — $ (root), .name or ['name'] (child), [n] (index, negative allowed), [*] (wildcard), .. (recursive descent), and [start:end] (slice) — and returns every matching value in document order. Prefer this over hand-walking nested JSON, where it is easy to miscount array indices or miss a deep match. Filter (?()) and script (()) expressions are not supported and are rejected with a message naming the supported subset. Deterministic: same input, same output. Example: path \"$.store.book[-1].title\" over {\"store\":{\"book\":[{\"title\":\"A\"},{\"title\":\"B\"}]}} -> matches [\"B\"], count 1.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "json": {
+     "description": "The JSON document to query, as a string. Must parse as valid JSON (object, array, or primitive).",
+     "type": "string"
+    },
+    "path": {
+     "description": "JSONPath (subset). Supports $ root, .name / ['name'] child, [n] index (negative allowed), [*] wildcard, .. recursive descent, and [start:end] slice (optional :step). Filter (?()) and script (()) expressions are not supported. Example: $.items[*].id",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "json",
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "query_json",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "Number of matches (equals matches.length).",
+     "type": "integer"
+    },
+    "matches": {
+     "description": "Every matching value in document order; items may be any JSON type (object, array, string, number, boolean, or null).",
+     "items": {},
+     "type": "array"
+    },
+    "path": {
+     "description": "Echo of the JSONPath that was evaluated.",
+     "type": "string"
+    },
+    "truncated": {
+     "description": "True if the internal match cap was reached and further matches were dropped.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "path",
+    "matches",
+    "count",
+    "truncated"
+   ],
+   "type": "object"
+  },
+  "title": "JSONPath Query"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Random Number"
+  },
+  "description": "Use this when you need to draw cryptographically secure random integers or decimals in a range using unbiased rejection sampling — prefer it over inventing 'random' numbers, which are neither uniform nor safe. Cryptographically random via Web Crypto (NOT deterministic). Bounds are inclusive; a reversed min/max is auto-swapped; integer mode rounds the bounds inward; `decimals` sets the decimal places in decimal mode. `count` (default 1, max 100). The returned `min`/`max` are the normalized effective bounds. Example: {min: 1, max: 6} -> type \"integer\", min 1, max 6, count 1, values [2].",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "How many numbers (default 1).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "decimals": {
+     "description": "Decimal places for decimal type (default 0).",
+     "maximum": 10,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "max": {
+     "description": "Upper bound (inclusive for integers).",
+     "type": "number"
+    },
+    "min": {
+     "description": "Lower bound (inclusive).",
+     "type": "number"
+    },
+    "type": {
+     "description": "Number type (default integer).",
+     "enum": [
+      "integer",
+      "decimal"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "min",
+    "max"
+   ],
+   "type": "object"
+  },
+  "name": "random_number",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "Number of values drawn (matches values.length).",
+     "type": "integer"
+    },
+    "max": {
+     "description": "Effective upper bound after normalization (inclusive for integers).",
+     "type": "number"
+    },
+    "min": {
+     "description": "Effective lower bound after normalization (inclusive).",
+     "type": "number"
+    },
+    "type": {
+     "description": "Whether integers or decimals were drawn.",
+     "enum": [
+      "integer",
+      "decimal"
+     ],
+     "type": "string"
+    },
+    "values": {
+     "description": "The generated numbers, length = count.",
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "type",
+    "min",
+    "max",
+    "count",
+    "values"
+   ],
+   "type": "object"
+  },
+  "title": "Random Number"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Redact Text"
+  },
+  "description": "Use this when scrubbing test/dev text: replaces each occurrence of the given terms with block characters (████). Provide `text` plus `terms` (a comma-separated string or an array of strings). By default it matches whole words only using Unicode boundaries (so \"ann\" will not match inside \"annual\") and is case-insensitive; set `caseSensitive` to match exactly, `wholeWords: false` to match substrings, or `fixedWidth: true` to hide each term's length behind a constant-width bar. Returns the redacted text and a replacement count, and never echoes the original terms. Deterministic: same input, same output. Truly sensitive text is better redacted client-side at clean.tools/text-redact/. Example: {text: \"Contact Jane Doe\", terms: \"Jane Doe\"} -> redacted \"Contact ████████\", redactedCount 1.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "caseSensitive": {
+     "description": "When true, match terms case-sensitively. Defaults to false (case-insensitive).",
+     "type": "boolean"
+    },
+    "fixedWidth": {
+     "description": "When true, replace every matched term with a constant-width block bar so the redacted length does not leak the original term length. Defaults to false (block length equals term length).",
+     "type": "boolean"
+    },
+    "terms": {
+     "description": "The sensitive terms to redact, given either as a comma-separated string (e.g. \"Jane Doe, jane@x.com\") or an array of strings.",
+     "oneOf": [
+      {
+       "type": "string"
+      },
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     ]
+    },
+    "text": {
+     "description": "The text to redact terms from.",
+     "type": "string"
+    },
+    "wholeWords": {
+     "description": "When true (default), only match terms as whole words using Unicode word boundaries (so \"ann\" will not match inside \"annual\").",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "text",
+    "terms"
+   ],
+   "type": "object"
+  },
+  "name": "redact_text",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "redacted": {
+     "description": "The text with all matched terms replaced by block characters; identical to the input when no terms matched.",
+     "type": "string"
+    },
+    "redactedCount": {
+     "description": "The number of replacements made.",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "redacted",
+    "redactedCount"
+   ],
+   "type": "object"
+  },
+  "title": "Redact Text"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Render Markdown"
+  },
+  "description": "Use this when you need to convert lightweight Markdown into a sanitized, XSS-safe HTML fragment to preview or embed, matching the Clean.tools markdown preview. Deterministic: same input, same output. Supports headings, bold/italic/strikethrough, inline and fenced code, links and images (http/https/mailto URL schemes only; other schemes become \"#\"), blockquotes, ordered/unordered/task lists, GFM tables, and horizontal rules. All raw angle brackets are HTML-escaped so the output is safe to inject. Example: \"# Hi\\n\\n**bold**\" -> html \"<h1>Hi</h1><p><strong>bold</strong></p>\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "markdown": {
+     "description": "The Markdown source text to render to HTML.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "markdown"
+   ],
+   "type": "object"
+  },
+  "name": "render_markdown",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "html": {
+     "description": "The rendered HTML fragment. Block elements are concatenated with no separators; inline styles are attached to tables, code, blockquotes, images, and task-list items. No wrapping document element.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "html"
+   ],
+   "type": "object"
+  },
+  "title": "Render Markdown"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Slug Generator"
+  },
+  "description": "Use this when you need a URL- or filename-safe slug from arbitrary text. Deterministic: same input, same output. Applies Unicode NFKD normalization, strips combining accents, and transliterates non-decomposing letters (ß->ss, æ->ae, œ->oe, ø->o, đ->d, ł->l, þ->th, ð->d, plus uppercase variants), then collapses every run of non-alphanumeric characters to a single separator and trims separators; e.g. \"Héllo Wörld!\" -> \"hello-world\". Emoji, CJK, and any other characters with no ASCII form are dropped. Prefer this over transliterating Unicode yourself, which models routinely get wrong. Returns { error } when no URL-safe characters remain.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lowercase": {
+     "description": "Lowercase the result (default true).",
+     "type": "boolean"
+    },
+    "maxLength": {
+     "description": "Maximum slug length; 0 means no limit (default). When set and exceeded, the slug is cut at a separator boundary when possible, otherwise hard-cut.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "separator": {
+     "description": "Word separator: empty string (join words) or a single character from \"-\", \"_\", \".\". Default \"-\".",
+     "maxLength": 1,
+     "type": "string"
+    },
+    "text": {
+     "description": "Text to slugify (max 10000 characters).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "slugify",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "changed": {
+     "description": "True when the slug differs from the input text.",
+     "type": "boolean"
+    },
+    "slug": {
+     "description": "The URL/filename-safe slug.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "changed"
+   ],
+   "type": "object"
+  },
+  "title": "Slug Generator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "strftime Preview"
+  },
+  "description": "Use this when you need to know exactly what a C/POSIX strftime pattern (%Y %m %d %H %M %S %A %B %j %z etc.) produces. Prefer this over guessing the output yourself. Deterministic: same input, same output; the reference time is formatted in UTC (%Z is 'UTC', %z is '+0000', defaults to current time when datetime is omitted). Unknown directives pass through literally. Example: {format:'%A, %B %e, %Y at %I:%M %p', datetime:'2026-07-08T14:30:45'} -> 'Wednesday, July  8, 2026 at 02:30 PM'.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "datetime": {
+     "description": "Optional ISO date-time to format (default: current time).",
+     "type": "string"
+    },
+    "format": {
+     "description": "strftime format string, e.g. \"%A, %B %e, %Y at %I:%M %p\".",
+     "type": "string"
+    },
+    "now": {
+     "description": "Alias for the reference time when datetime is omitted.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "format"
+   ],
+   "type": "object"
+  },
+  "name": "strftime_preview",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "datetimeUtc": {
+     "description": "The reference date-time that was formatted, ISO-8601 UTC.",
+     "type": "string"
+    },
+    "format": {
+     "description": "Echo of the strftime format string.",
+     "type": "string"
+    },
+    "output": {
+     "description": "The formatted result; unknown directives are emitted literally as '%X'.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "format",
+    "datetimeUtc",
+    "output"
+   ],
+   "type": "object"
+  },
+  "title": "strftime Preview"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Regex Tester"
+  },
+  "description": "Use this when you need the true matches of a JavaScript regular expression rather than predicting regex behavior yourself, which is easy to get wrong. Deterministic: same input, same output. Returns every match with its index, length, matched text, positional capture groups (null for a group that didn't participate), and named groups (an object, or null when the pattern has none). Without the g flag only the first match is returned; with g all matches are collected, capped at 10,000 with truncated=true. Inputs are length-bounded (pattern 2,000 chars, text 50,000 chars) as a ReDoS guard. Example: pattern (?<y>\\d{4})-(?<m>\\d{2}) over \"2024-01\" with flag g -> matchCount 1, match \"2024-01\", groups [\"2024\",\"01\"], named {y:\"2024\",m:\"01\"}.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "flags": {
+     "description": "Any of g i m s u v y.",
+     "type": "string"
+    },
+    "pattern": {
+     "description": "Regular expression source (no delimiters).",
+     "type": "string"
+    },
+    "text": {
+     "description": "String to search.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pattern",
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "test_regex",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "flags": {
+     "description": "The flags applied (subset of g i m s u v y).",
+     "type": "string"
+    },
+    "matchCount": {
+     "description": "Number of matches returned in the matches array.",
+     "type": "integer"
+    },
+    "matches": {
+     "description": "One entry per match, in order of appearance.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "groups": {
+        "description": "Positional capture groups 1..n; a non-participating group is null.",
+        "items": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "type": "array"
+       },
+       "index": {
+        "description": "Zero-based start offset of the match in the text.",
+        "type": "integer"
+       },
+       "length": {
+        "description": "Length of the matched substring.",
+        "type": "integer"
+       },
+       "match": {
+        "description": "The full matched substring (group 0).",
+        "type": "string"
+       },
+       "named": {
+        "additionalProperties": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "description": "Named capture groups as name->value, or null when the pattern defines none; a non-participating named group is null.",
+        "type": [
+         "object",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "index",
+       "length",
+       "match",
+       "groups",
+       "named"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "pattern": {
+     "description": "The regex source that was compiled (echoed back).",
+     "type": "string"
+    },
+    "truncated": {
+     "description": "True if the 10,000-match cap was hit and further matches were dropped.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "pattern",
+    "flags",
+    "matchCount",
+    "truncated",
+    "matches"
+   ],
+   "type": "object"
+  },
+  "title": "Regex Tester"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Tip Calculator"
+  },
+  "description": "Use this when you want penny-accurate tip and bill-split figures. Given a bill amount, a tip percentage, and an optional number of people (default 1; values below 1 are treated as 1), returns the tip amount, grand total, and the per-person tip and per-person total, all rounded to cents. Deterministic: same input, same output. Example: bill=120, tipPercent=18, people=4 -> tipAmount=21.6, total=141.6, perPersonTotal=35.4.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "bill": {
+     "description": "The pre-tip bill amount in dollars. Required. Must be zero or positive.",
+     "type": "number"
+    },
+    "people": {
+     "description": "Number of people splitting the bill. Optional, defaults to 1; values below 1 are treated as 1.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "tipPercent": {
+     "description": "The tip as a percentage of the bill (e.g. 20 for 20%). Required. Must be zero or positive.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "bill",
+    "tipPercent"
+   ],
+   "type": "object"
+  },
+  "name": "tip",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "bill": {
+     "description": "The pre-tip bill amount, rounded to cents.",
+     "type": "number"
+    },
+    "people": {
+     "description": "Number of people the bill was split across (>= 1).",
+     "type": "integer"
+    },
+    "perPersonTip": {
+     "description": "tipAmount divided by people, rounded to cents.",
+     "type": "number"
+    },
+    "perPersonTotal": {
+     "description": "total divided by people, rounded to cents.",
+     "type": "number"
+    },
+    "tipAmount": {
+     "description": "Total tip in dollars, rounded to cents.",
+     "type": "number"
+    },
+    "tipPercent": {
+     "description": "The tip percentage that was applied (echoed as supplied).",
+     "type": "number"
+    },
+    "total": {
+     "description": "Bill plus tip in dollars, rounded to cents.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "bill",
+    "tipPercent",
+    "people",
+    "tipAmount",
+    "total",
+    "perPersonTip",
+    "perPersonTotal"
+   ],
+   "type": "object"
+  },
+  "title": "Tip Calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "TVM Solver"
+  },
+  "description": "Use this when you have four of the five time-value-of-money variables (N periods, I/Y annual rate percent, PV, PMT, FV) and need the fifth - annuity, loan, or investment problems - instead of solving the equation by hand. Solving for I/Y uses Newton-Raphson (no closed form). Supports compoundingPerYear and annuityDue (payments at the beginning of each period). Follows the cash-flow sign convention (outflows negative). Deterministic: same input, same output. Example: solveFor 'fv', n 120, iy 6, pv -10000, pmt -200, compoundingPerYear 12 -> result 50969.84. result holds the solved value; iy is rounded to 4 decimals, all others to 2.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "annuityDue": {
+     "description": "True if payments occur at the beginning of each period (default false = ordinary annuity).",
+     "type": "boolean"
+    },
+    "compoundingPerYear": {
+     "description": "Compounding periods per year (default 1).",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "fv": {
+     "description": "Future value.",
+     "type": "number"
+    },
+    "iy": {
+     "description": "Interest rate per year as a percent.",
+     "type": "number"
+    },
+    "n": {
+     "description": "Number of periods.",
+     "type": "number"
+    },
+    "pmt": {
+     "description": "Payment per period.",
+     "type": "number"
+    },
+    "pv": {
+     "description": "Present value (cash-flow sign convention).",
+     "type": "number"
+    },
+    "solveFor": {
+     "description": "Which variable to solve for.",
+     "enum": [
+      "n",
+      "iy",
+      "pv",
+      "pmt",
+      "fv"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "solveFor"
+   ],
+   "type": "object"
+  },
+  "name": "tvm_solve",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "annuityDue": {
+     "description": "True if payments were treated as beginning-of-period (annuity due).",
+     "type": "boolean"
+    },
+    "compoundingPerYear": {
+     "description": "Compounding periods per year used (default 1).",
+     "type": "integer"
+    },
+    "result": {
+     "description": "The solved value (iy in percent, rounded to 4 decimals; n/pv/pmt/fv rounded to 2).",
+     "type": "number"
+    },
+    "solveFor": {
+     "description": "Echo of which variable was solved for.",
+     "enum": [
+      "n",
+      "iy",
+      "pv",
+      "pmt",
+      "fv"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "solveFor",
+    "result",
+    "compoundingPerYear",
+    "annuityDue"
+   ],
+   "type": "object"
+  },
+  "title": "TVM Solver"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "UUID v4 Generator"
+  },
+  "description": "Use this when you need RFC 4122 version-4 UUIDs — always generate them here rather than fabricating one, so the version and variant bits and the randomness are correct. Cryptographically random via Web Crypto (NOT deterministic): every call returns fresh values. `count` (default 1, max 100) sets how many; `uppercase` returns upper-case hex (lowercase by default). Example: {count: 1} -> count 1, uuids[0] = \"2c549b2f-497c-47fc-a1b6-c24bc69667e5\".",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "How many UUIDs to generate (default 1).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "uppercase": {
+     "description": "Return uppercase hex (default false).",
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "uuid_v4",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "description": "Number of UUIDs generated (matches uuids.length).",
+     "type": "integer"
+    },
+    "uuids": {
+     "description": "The generated RFC 4122 v4 UUIDs, length = count.",
+     "items": {
+      "description": "A v4 UUID; lowercase hex unless uppercase=true.",
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "count",
+    "uuids"
+   ],
+   "type": "object"
+  },
+  "title": "UUID v4 Generator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Cron Validator"
+  },
+  "description": "Use this when you need to check whether a 5-field cron expression is well-formed, instead of guessing. Prefer this over reasoning about cron syntax yourself (a documented LLM failure mode). Deterministic: same input, same output. On success returns valid=true, the normalized expression, and the expanded matching values per field; on failure returns valid=false with a specific error (out-of-range value, reversed range, invalid step, wrong field count, or a field that matches nothing). Example: '99 * * * *' -> {valid:false, error:'Minute field: value out of range \"99\"'}.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "expression": {
+     "description": "5-field cron expression to validate.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "expression"
+   ],
+   "type": "object"
+  },
+  "name": "validate_cron",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "error": {
+     "description": "Always null on the success result.",
+     "type": "null"
+    },
+    "fields": {
+     "additionalProperties": false,
+     "properties": {
+      "dayOfMonth": {
+       "description": "Matching days of month, 1-31.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "dayOfWeek": {
+       "description": "Matching weekdays, 0=Sunday .. 6=Saturday (7 folds to 0).",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "hour": {
+       "description": "Matching hours, 0-23.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "minute": {
+       "description": "Matching minutes, 0-59.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "month": {
+       "description": "Matching months, 1-12.",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "minute",
+      "hour",
+      "dayOfMonth",
+      "month",
+      "dayOfWeek"
+     ],
+     "type": "object"
+    },
+    "normalized": {
+     "description": "The normalized 5-field cron expression.",
+     "type": "string"
+    },
+    "valid": {
+     "description": "Always true on the success result (a failed validation instead returns {valid:false, error}).",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "valid",
+    "error",
+    "normalized",
+    "fields"
+   ],
+   "type": "object"
+  },
+  "title": "Cron Validator"
+ }
+]

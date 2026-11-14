@@ -1,0 +1,139 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search documentation"
+  },
+  "description": "Search the Smarter Weather developer documentation index (quickstart, REST API, MCP server, errors, rate limits, SDKs, pricing, API keys). Returns up to 5 matching entries with title, URL, and an actionable summary. No authentication required.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "Search terms, e.g. \"authenticate rest api\" (max 200 chars)",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "get_documentation",
+  "output_schema": {},
+  "title": "Search Smarter Weather documentation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get developer plans"
+  },
+  "description": "Current developer-platform plans and pricing: Free, Developer, and Professional tiers with monthly price, included API-call allowance, and overage rates. One metered allowance spans REST and MCP usage. No authentication required.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_plans",
+  "output_schema": {},
+  "title": "Get Smarter Weather developer plans"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "resourceUri": "ui://onboarding-widget/v1/index.html"
+   },
+   "ui/resourceUri": "ui://onboarding-widget/v1/index.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Sign up"
+  },
+  "description": "Returns the Smarter Weather developer sign-up URL (with MCP referral attribution). Present the URL so the user can create a free account in a browser (Clerk, no credit card). After they finish, reconnect this MCP server with OAuth and call create_api_key, then configure_mcp. No authentication required.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "sign_up",
+  "output_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "instructions": {
+     "type": "string"
+    },
+    "signupUrl": {
+     "type": "string"
+    },
+    "widget": {
+     "additionalProperties": false,
+     "description": "sw-ui-spec widget block rendered by the MCP Apps onboarding widget (ui://onboarding-widget/v1/index.html). Additive; safe to ignore.",
+     "properties": {
+      "entries": {
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "component": {
+          "type": "string"
+         },
+         "props": {
+          "additionalProperties": {},
+          "propertyNames": {
+           "type": "string"
+          },
+          "type": "object"
+         }
+        },
+        "required": [
+         "component",
+         "props"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "spec": {
+       "const": "sw-ui-spec",
+       "type": "string"
+      }
+     },
+     "required": [
+      "spec",
+      "entries"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "signupUrl",
+    "instructions"
+   ],
+   "type": "object"
+  },
+  "title": "Get the Smarter Weather sign-up URL"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Start trial"
+  },
+  "description": "Does not mint from the hosted server. Prefer `npx -y @smarterweather/mcp-onboarding@latest trial` (no MCP host), or add the stdio bridge and call start_trial there. Both write SMARTERWEATHER_API_KEY to .env and never print the bearer. If you already run the package and still see this, restart it on @latest.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "start_trial",
+  "output_schema": {},
+  "title": "Start a Smarter Weather trial API key"
+ }
+]

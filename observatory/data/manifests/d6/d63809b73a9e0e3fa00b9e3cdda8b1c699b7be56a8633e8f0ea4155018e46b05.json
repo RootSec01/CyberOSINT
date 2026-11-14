@@ -1,0 +1,662 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The grants the ADEME, the French ecological transition agency, awarded to one French company since 2021,\nfrom its open dataset of financial aid: date of the agreement, amount in euros, purpose, aid scheme and\ndecision reference, most recent first, with the total count.\n\nUse this to answer \"did X receive public aid from the ADEME\", \"what subsidies did X get for its energy\ntransition\".\n\nThe dataset covers the ADEME alone: it is not all the public money a company received, and a company with\nno ADEME grant may have received aid from another body. Grants are matched on the SIRET, never on the name.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "siren": {
+     "description": "The nine-digit SIREN of a French legal entity. Spaces, dots and dashes are accepted. This is not a SIRET: drop the last five digits of a SIRET to get the SIREN.",
+     "pattern": "^[0-9][0-9 .-]{8,12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "siren"
+   ],
+   "type": "object"
+  },
+  "name": "get_french_company_ademe_grants",
+  "output_schema": {
+   "properties": {
+    "date": {
+     "format": "date",
+     "type": "string"
+    },
+    "empreinte": {
+     "type": "string"
+    },
+    "fait": {
+     "type": "object"
+    },
+    "source": {
+     "properties": {
+      "nom": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nom",
+      "url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "fait",
+    "source",
+    "date",
+    "empreinte"
+   ],
+   "type": "object"
+  },
+  "title": "ADEME grants received by a French company"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "What the French official gazette printed about companies you already track, since a date.\nAnswers \"did anything happen to these companies\", \"any news on X since my last check\".\n\nUp to 20 companies per call. Every 5 companies spend one unit of the rate\nlimit (30 per minute per address, rounded up per call), so pass them in ONE call rather than one call each.\n\nEntries are filtered on the PUBLICATION date, not the date of the act. The two differ by 16 days at\nthe median, so a window filtered on the act would miss a judgment ruled before your last visit and\nprinted after. An empty list means nothing was published, not that nothing happened.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "since": {
+     "description": "Publication date to look back to, ISO 8601. Defaults to 30 days ago.",
+     "format": "date",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "siren": {
+     "description": "The companies to look at. One call for all of them, not one call each.",
+     "items": {
+      "description": "The nine-digit SIREN of a French legal entity. Spaces, dots and dashes are accepted. This is not a SIRET: drop the last five digits of a SIRET to get the SIREN.",
+      "pattern": "^[0-9][0-9 .-]{8,12}$",
+      "type": "string"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "siren"
+   ],
+   "type": "object"
+  },
+  "name": "get_french_company_announcements",
+  "output_schema": {
+   "properties": {
+    "date": {
+     "format": "date",
+     "type": "string"
+    },
+    "empreinte": {
+     "type": "string"
+    },
+    "fait": {
+     "type": "object"
+    },
+    "source": {
+     "properties": {
+      "nom": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nom",
+      "url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "fait",
+    "source",
+    "date",
+    "empreinte"
+   ],
+   "type": "object"
+  },
+  "title": "What the gazette published recently"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The annual accounts one French company filed with the business register, fiscal year by fiscal year:\nrevenue, gross margin, EBITDA, EBIT, net income, and the thirteen ratios the INPI computes from them\n(margins, financial autonomy, debt, liquidity, working capital, customer and supplier payment delays).\n\nUse this to answer \"what is the revenue of X\", \"is X profitable\", \"how has the turnover of X evolved\",\n\"how indebted is X\".\n\nAccounts of the legal entity under this SIREN and consolidated accounts of its group are listed apart\nand NEVER add up: a holding files a revenue of zero beside a group revenue in the billions. Quote the\nperimeter with the figure. Filings kept confidential are not listed, and a missing fiscal year is not a\nfiscal year at zero. Amounts are in euros as filed.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "siren": {
+     "description": "The nine-digit SIREN of a French legal entity. Spaces, dots and dashes are accepted. This is not a SIRET: drop the last five digits of a SIRET to get the SIREN.",
+     "pattern": "^[0-9][0-9 .-]{8,12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "siren"
+   ],
+   "type": "object"
+  },
+  "name": "get_french_company_financials",
+  "output_schema": {
+   "properties": {
+    "date": {
+     "format": "date",
+     "type": "string"
+    },
+    "empreinte": {
+     "type": "string"
+    },
+    "fait": {
+     "type": "object"
+    },
+    "source": {
+     "properties": {
+      "nom": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nom",
+      "url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "fait",
+    "source",
+    "date",
+    "empreinte"
+   ],
+   "type": "object"
+  },
+  "title": "French company filed accounts"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The state aid published for one French company in the European Commission transparency register:\ngrant date, amount or tax-aid bracket, objective, instrument, granting authority (Bpifrance, regions,\nministries) and aid scheme, most recent first, with the total count.\n\nUse this to answer \"what public aid did X receive\", \"did the State fund X\".\n\nThe register lists aid above a publication threshold only. Some ADEME grants are in both this tool and\nthe ADEME one: never add the two. Matched on the SIREN, never on the name.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "siren": {
+     "description": "The nine-digit SIREN of a French legal entity. Spaces, dots and dashes are accepted. This is not a SIRET: drop the last five digits of a SIRET to get the SIREN.",
+     "pattern": "^[0-9][0-9 .-]{8,12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "siren"
+   ],
+   "type": "object"
+  },
+  "name": "get_french_company_state_aid",
+  "output_schema": {
+   "properties": {
+    "date": {
+     "format": "date",
+     "type": "string"
+    },
+    "empreinte": {
+     "type": "string"
+    },
+    "fait": {
+     "type": "object"
+    },
+    "source": {
+     "properties": {
+      "nom": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nom",
+      "url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "fait",
+    "source",
+    "date",
+    "empreinte"
+   ],
+   "type": "object"
+  },
+  "title": "State aid received by a French company (EU transparency register)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Every dated change the French official gazette recorded for one company: share capital, legal name,\nlegal form, registered office, stated activity, plus insolvency judgments and the current insolvency\nstatus.\n\nUse this to answer \"when did X change\", \"how has X evolved\", \"has X ever been in receivership\".\n\nDo NOT use it to get the current state of a company (today's officers, today's address, today's\nheadcount): this server only publishes what CHANGED. A field that never moved is not in the answer.\nCoverage starts at 2008; a company may exist and have published nothing.\n\nAnnouncements that merely cite the SIREN without describing the company are excluded; on large\nfranchised networks that is around 40% of what a naive search returns.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "siren": {
+     "description": "The nine-digit SIREN of a French legal entity. Spaces, dots and dashes are accepted. This is not a SIRET: drop the last five digits of a SIRET to get the SIREN.",
+     "pattern": "^[0-9][0-9 .-]{8,12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "siren"
+   ],
+   "type": "object"
+  },
+  "name": "get_french_company_timeline",
+  "output_schema": {
+   "properties": {
+    "date": {
+     "format": "date",
+     "type": "string"
+    },
+    "empreinte": {
+     "type": "string"
+    },
+    "fait": {
+     "type": "object"
+    },
+    "source": {
+     "properties": {
+      "nom": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nom",
+      "url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "fait",
+    "source",
+    "date",
+    "empreinte"
+   ],
+   "type": "object"
+  },
+  "title": "French company timeline"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Insolvency openings in France over the last twelve complete months, against the twelve before, with\nthe monthly series and a split by nature (liquidation, receivership, safeguard).\n\nScope: the whole country by default, or one department, or one trade. Pass at most one of them.\n\nThis counts OPENING judgments only, and it counts judgments, not companies. The current month is\nnever included: still running, it would read as a collapse.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "department": {
+     "description": "French department code. Two digits, 2A and 2B for Corsica, three digits overseas. Omit for the whole country.",
+     "enum": [
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "2A",
+      "2B",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44",
+      "45",
+      "46",
+      "47",
+      "48",
+      "49",
+      "50",
+      "51",
+      "52",
+      "53",
+      "54",
+      "55",
+      "56",
+      "57",
+      "58",
+      "59",
+      "60",
+      "61",
+      "62",
+      "63",
+      "64",
+      "65",
+      "66",
+      "67",
+      "68",
+      "69",
+      "70",
+      "71",
+      "72",
+      "73",
+      "74",
+      "75",
+      "76",
+      "77",
+      "78",
+      "79",
+      "80",
+      "81",
+      "82",
+      "83",
+      "84",
+      "85",
+      "86",
+      "87",
+      "88",
+      "89",
+      "90",
+      "91",
+      "92",
+      "93",
+      "94",
+      "95",
+      "971",
+      "972",
+      "973",
+      "974",
+      "976"
+     ],
+     "type": "string"
+    },
+    "trade": {
+     "description": "Trade, read from the words of the activity declared in the gazette. Omit for all trades.",
+     "enum": [
+      "restauration",
+      "batiment",
+      "renovation",
+      "commerce-de-detail",
+      "bar",
+      "habillement",
+      "plomberie",
+      "nettoyage",
+      "alimentation",
+      "boulangerie",
+      "traiteur",
+      "transport",
+      "informatique",
+      "conseil",
+      "coiffure",
+      "taxi",
+      "evenementiel",
+      "electricite",
+      "esthetique",
+      "garage",
+      "jardinage",
+      "immobilier",
+      "securite",
+      "boucherie",
+      "hebergement"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_french_insolvency_barometer",
+  "output_schema": {
+   "$defs": {
+    "window": {
+     "properties": {
+      "from": {
+       "examples": [
+        "2025-08"
+       ],
+       "type": "string"
+      },
+      "openings": {
+       "type": "integer"
+      },
+      "to": {
+       "examples": [
+        "2026-07"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "from",
+      "to",
+      "openings"
+     ],
+     "type": "object"
+    }
+   },
+   "properties": {
+    "date": {
+     "format": "date",
+     "type": "string"
+    },
+    "empreinte": {
+     "type": "string"
+    },
+    "fait": {
+     "properties": {
+      "by_department": {
+       "description": "Ranking over the window, largest first. Country scope only.",
+       "items": {
+        "properties": {
+         "code": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         },
+         "openings": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "code",
+         "name",
+         "openings"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "by_nature": {
+       "items": {
+        "properties": {
+         "nature": {
+          "enum": [
+           "liquidation",
+           "receivership",
+           "safeguard"
+          ],
+          "type": "string"
+         },
+         "openings": {
+          "type": [
+           "integer",
+           "null"
+          ]
+         }
+        },
+        "required": [
+         "nature",
+         "openings"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "change_percent": {
+       "description": "Null when the reference is zero: a place with no failure last year did not explode.",
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "monthly": {
+       "items": {
+        "properties": {
+         "month": {
+          "examples": [
+           "2026-07"
+          ],
+          "type": "string"
+         },
+         "openings": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "month",
+         "openings"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "page_url": {
+       "description": "The page that shows the same thing to a human.",
+       "type": "string"
+      },
+      "reference": {
+       "$ref": "#/$defs/window"
+      },
+      "scope": {
+       "properties": {
+        "code": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "kind": {
+         "enum": [
+          "country",
+          "department",
+          "trade"
+         ],
+         "type": "string"
+        },
+        "name": {
+         "description": "In French: a published value, not a label.",
+         "type": "string"
+        }
+       },
+       "required": [
+        "kind",
+        "code",
+        "name"
+       ],
+       "type": "object"
+      },
+      "window": {
+       "$ref": "#/$defs/window"
+      }
+     },
+     "required": [
+      "scope",
+      "window",
+      "reference",
+      "monthly",
+      "by_nature",
+      "page_url"
+     ],
+     "type": "object"
+    },
+    "source": {
+     "properties": {
+      "nom": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nom",
+      "url"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "fait",
+    "source",
+    "date",
+    "empreinte"
+   ],
+   "type": "object"
+  },
+  "title": "French insolvency barometer"
+ }
+]

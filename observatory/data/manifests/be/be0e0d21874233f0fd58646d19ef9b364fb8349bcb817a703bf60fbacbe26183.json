@@ -1,0 +1,33 @@
+[
+ {
+  "description": "Verdict lookup is a paid HTTP x402 call (GET /verdict, $0.01); MCP returns the payment instructions.",
+  "input_schema": {
+   "properties": {
+    "endpoint": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_verdict",
+  "output_schema": {}
+ },
+ {
+  "description": "Packet pricing sheet (free).",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "pricing",
+  "output_schema": {}
+ },
+ {
+  "description": "Fresh settled probes collect payment on the HTTP x402 surface (POST /probe); refused over MCP.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "run_probe",
+  "output_schema": {}
+ }
+]

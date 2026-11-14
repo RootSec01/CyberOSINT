@@ -1,0 +1,179 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create upload link"
+  },
+  "description": "Relay a file of any size up to 100 MB. Save the file to local disk first, call this with its path, then run the returned curl command in your shell to upload it. The download link works as soon as the upload finishes. Requires outbound network access to code.easyllms.com; if curl is blocked, ask the user to allow that domain in their sandbox network settings (on claude.ai: Settings > Capabilities > Code execution).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "content_type": {
+     "description": "Optional MIME type; guessed from the extension otherwise.",
+     "type": "string"
+    },
+    "filename": {
+     "description": "Optional name shown to the downloader; defaults to the file name in path.",
+     "type": "string"
+    },
+    "path": {
+     "description": "Local path of the file you saved, e.g. /tmp/report.pdf. Used to build the curl command.",
+     "type": "string"
+    },
+    "ttl_hours": {
+     "description": "Hours until the download link expires. Default 24, maximum 168 (7 days).",
+     "maximum": 168,
+     "minimum": 0.1,
+     "type": "number"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "create_upload_link",
+  "output_schema": {},
+  "title": "Create upload link"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Delete file"
+  },
+  "description": "Delete a relayed file before it expires. Requires the delete_token returned at upload.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "delete_token": {
+     "description": "delete_token returned at upload.",
+     "type": "string"
+    },
+    "id": {
+     "description": "File id or download URL.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "delete_token"
+   ],
+   "type": "object"
+  },
+  "name": "delete_file",
+  "output_schema": {},
+  "title": "Delete file"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get file info"
+  },
+  "description": "Look up a relayed file by id or download URL: name, size, type, expiry and download link.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "File id or download URL returned by an upload tool.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_file_info",
+  "output_schema": {},
+  "title": "Get file info"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read file"
+  },
+  "description": "Read a relayed file's content (up to 1 MB) so an agent can pick up a file someone else relayed. Text comes back as text, images as images, other files as base64.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "File id or download URL from this relay.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "read_file",
+  "output_schema": {},
+  "title": "Read file"
+ },
+ {
+  "_meta": {
+   "openai/fileParams": [
+    "file"
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Relay attached file"
+  },
+  "description": "ChatGPT only: relay a file from the conversation (the host passes it as a file reference) and get a temporary download link.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "file": {
+     "description": "File reference provided by the host.",
+     "properties": {
+      "download_url": {
+       "type": "string"
+      },
+      "file_id": {
+       "type": "string"
+      },
+      "file_name": {
+       "type": "string"
+      },
+      "mime_type": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "download_url"
+     ],
+     "type": "object"
+    },
+    "filename": {
+     "description": "Optional file name override.",
+     "type": "string"
+    },
+    "ttl_hours": {
+     "description": "Hours until the download link expires. Default 24, maximum 168 (7 days).",
+     "maximum": 168,
+     "minimum": 0.1,
+     "type": "number"
+    }
+   },
+   "required": [
+    "file"
+   ],
+   "type": "object"
+  },
+  "name": "relay_attached_file",
+  "output_schema": {},
+  "title": "Relay attached file"
+ }
+]

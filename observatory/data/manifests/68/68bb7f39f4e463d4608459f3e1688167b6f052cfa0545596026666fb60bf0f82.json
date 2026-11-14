@@ -1,0 +1,116 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the full entry of one tool by id or name, including zh/en description, tags, and detail page links.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Tool id (e.g. 1)",
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "name": {
+     "description": "Exact tool name (e.g. ChatGPT)",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_tool",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the latest tools by listing date (falls back to id order when no date is set).",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max results, default 10, max 25",
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "latest_tools",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List all 16 tool categories with tool counts in each.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List featured tools from the LingYi Tools directory.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Max results, default 10, max 25",
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_featured",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search the LingYi Tools AI directory (bilingual zh/en) by keyword, category, or pricing. Featured tools are ranked first.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Category id, e.g. chatbot, imageGeneration, codeAssistant",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max results, default 10, max 25",
+     "type": "integer"
+    },
+    "pricing": {
+     "description": "Pricing filter, e.g. free, freemium, paid",
+     "type": "string"
+    },
+    "query": {
+     "description": "Keyword matched against name, descriptions and tags (zh + en)",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_tools",
+  "output_schema": {}
+ }
+]

@@ -1,0 +1,242 @@
+[
+ {
+  "description": "The columns, which of them are numeric, the row count and the provenance banner of the HomeCover HQ dataset. Call this first to learn the schema.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "dataset_columns",
+  "output_schema": {},
+  "title": "Dataset columns and shape"
+ },
+ {
+  "description": "The rows of the HomeCover HQ dataset whose column is any of the given values, in the order given, for \"X vs Y\" questions.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "values": {
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 10,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "column",
+    "values"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_compare",
+  "output_schema": {},
+  "title": "Compare rows side by side"
+ },
+ {
+  "description": "The source, the date it was computed, the licence and the citation for the HomeCover HQ dataset. Read this to attribute a figure correctly.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "dataset_provenance",
+  "output_schema": {},
+  "title": "Where this data comes from, and how to cite it"
+ },
+ {
+  "description": "The rows of the HomeCover HQ dataset where a column equals a value exactly (case-insensitive).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "value": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "column",
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_row",
+  "output_schema": {},
+  "title": "Look a row up by an exact key"
+ },
+ {
+  "description": "Rows of the HomeCover HQ dataset whose cells contain the query (case-insensitive), up to 50.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "text to look for in any cell",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_search",
+  "output_schema": {},
+  "title": "Search the dataset"
+ },
+ {
+  "description": "count, min, max, mean, median and sum of a numeric column of the HomeCover HQ dataset (grouping commas and currency are handled; non-numeric rows are excluded and counted).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "column"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_stats",
+  "output_schema": {},
+  "title": "Summary statistics for a numeric column"
+ },
+ {
+  "description": "The highest (or lowest) rows of the HomeCover HQ dataset by a numeric column: \"which is the most/least X\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "ascending": {
+     "description": "true for the lowest first; default highest first",
+     "type": "boolean"
+    },
+    "column": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "column"
+   ],
+   "type": "object"
+  },
+  "name": "dataset_top",
+  "output_schema": {},
+  "title": "Rank rows by a numeric column"
+ },
+ {
+  "description": "Read first. States plainly what submit_enquiry does on HomeCover HQ: it starts an enquiry with human providers who quote directly. Nothing is bought, ordered or paid; no quote is guaranteed; it is free. Also returns who receives the details, the consent wording, and how the person confirms.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enquiry_describe",
+  "output_schema": {},
+  "title": "What you get: an ENQUIRY with a human (not a purchase, not a guaranteed quote)"
+ },
+ {
+  "description": "Every field of the HomeCover HQ enquiry: key, label, type, whether required, help text and the allowed options where there are any. Pass answers to submit_enquiry keyed by field key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enquiry_fields",
+  "output_schema": {},
+  "title": "The questions the enquiry asks"
+ },
+ {
+  "description": "Submits an enquiry to HomeCover HQ: NOT a purchase, NOT a guaranteed quote. Step 1: call with the answers (keyed by field key from enquiry_fields) and consent=true; it validates and returns a summary, the consent line and a confirmation token; show the person the summary and the consent line. Step 2: only if the person agrees, call again with the same answers, consent=true and the confirmation token; the enquiry is then submitted, and the person receives an email with a link they must click before any provider sees it. Consent means the person has read and agreed to: \"Send my contact details to up to three insurance agents, chosen by HomeCover HQ, who'll contact me directly. I'll be emailed each firm's name as my details go to it, and can stop any more firms getting them.\"",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "answers": {
+     "additionalProperties": {
+      "type": [
+       "string",
+       "number",
+       "boolean"
+      ]
+     },
+     "description": "the person's answers, keyed by field key",
+     "type": "object"
+    },
+    "confirmation": {
+     "description": "the confirmation token from step 1, after the person has approved the summary",
+     "type": "string"
+    },
+    "consent": {
+     "description": "true only when the person has agreed to: Send my contact details to up to three insurance agents, chosen by HomeCover HQ, who'll contact me directly. I'll be emailed each firm's name as my details go to it, and can stop any more firms getting them.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "answers",
+    "consent"
+   ],
+   "type": "object"
+  },
+  "name": "submit_enquiry",
+  "output_schema": {},
+  "title": "Submit an ENQUIRY to human providers (two steps; not a purchase)"
+ }
+]

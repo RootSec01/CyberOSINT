@@ -1,0 +1,551 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an event"
+  },
+  "description": "Get one event (experience) by id: description, price categories, durations, booking rules. bookingkit API: GET /v3/events/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "event_id": {
+     "description": "The event id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "event_id"
+   ],
+   "type": "object"
+  },
+  "name": "bookingkit_get_event",
+  "output_schema": {},
+  "title": "Get an event"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an order"
+  },
+  "description": "Get one order by id: customer, tickets, price, status, additional fields. bookingkit API: GET /v3/orders/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "order_id": {
+     "description": "The order id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_id"
+   ],
+   "type": "object"
+  },
+  "name": "bookingkit_get_order",
+  "output_schema": {},
+  "title": "Get an order"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a vendor"
+  },
+  "description": "Get one vendor by id. bookingkit API: GET /v3/vendors/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "vendor_id": {
+     "description": "The vendor id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "vendor_id"
+   ],
+   "type": "object"
+  },
+  "name": "bookingkit_get_vendor",
+  "output_schema": {},
+  "title": "Get a vendor"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List categories"
+  },
+  "description": "List event categories. Use the ids to filter bookingkit_list_events. bookingkit API: GET /v3/categories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_categories",
+  "output_schema": {},
+  "title": "List categories"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List coupons"
+  },
+  "description": "List discount coupons. bookingkit API: GET /v3/coupons.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept": {
+     "description": "Comma separated list of ids to return only.",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_coupons",
+  "output_schema": {},
+  "title": "List coupons"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List dates (availability)"
+  },
+  "description": "List bookable dates with free capacity. Give event_id for one event, else all events. Use available=true to see only dates with free places. bookingkit API: GET /v3/events/{id}/dates or GET /v3/dates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept_vendors": {
+     "description": "Comma separated vendor ids.",
+     "type": "string"
+    },
+    "available": {
+     "description": "true = only dates with at least one free place.",
+     "type": "boolean"
+    },
+    "delta_since": {
+     "description": "Only dates changed since this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "end_date": {
+     "description": "Dates on or before this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "event_id": {
+     "description": "Only dates of this event id.",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "start_date": {
+     "description": "Dates on or after this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_event_dates",
+  "output_schema": {},
+  "title": "List dates (availability)"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List events (experiences)"
+  },
+  "description": "List events (the bookable experiences, tours and activities) with prices, durations and categories. Optionally limit to one vendor. bookingkit API: GET /v3/events or GET /v3/vendors/{vendor_id}/events.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept": {
+     "description": "Comma separated list of ids to return only.",
+     "type": "string"
+    },
+    "available_from": {
+     "description": "Only events with at least one date on or after this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "category": {
+     "description": "Only events in this category id (see bookingkit_list_categories).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "delta_since": {
+     "description": "Only events changed since this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "match": {
+     "description": "Search text in event name.",
+     "type": "string"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "type": {
+     "description": "Filter by event type.",
+     "enum": [
+      "BOOKING",
+      "REQUEST",
+      "ALL"
+     ],
+     "type": "string"
+    },
+    "vendor_id": {
+     "description": "Only events of this vendor id.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_events",
+  "output_schema": {},
+  "title": "List events (experiences)"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List payments of an order"
+  },
+  "description": "List the payments recorded for one order. bookingkit API: GET /v3/orders/{id}/payments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "order_id": {
+     "description": "The order id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_id"
+   ],
+   "type": "object"
+  },
+  "name": "bookingkit_list_order_payments",
+  "output_schema": {},
+  "title": "List payments of an order"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List tickets of an order"
+  },
+  "description": "List the tickets (one per booked event date and price category) of one order. bookingkit API: GET /v3/orders/{id}/tickets.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "order_id": {
+     "description": "The order id.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_id"
+   ],
+   "type": "object"
+  },
+  "name": "bookingkit_list_order_tickets",
+  "output_schema": {},
+  "title": "List tickets of an order"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List orders (bookings)"
+  },
+  "description": "List orders (bookings) with customer, tickets and status. Filter by order date, event date, status or order code. Optionally limit to one vendor. bookingkit API: GET /v3/orders or GET /v3/vendors/{id}/orders.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept_code": {
+     "description": "Comma separated order codes (booking reference codes).",
+     "type": "string"
+    },
+    "delta_since": {
+     "description": "Only orders created or changed since this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "end_date": {
+     "description": "Orders placed on or before this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "end_event_date": {
+     "description": "Orders with a ticket for a date on or before this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "match": {
+     "description": "Search text in customer name/email.",
+     "type": "string"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "order": {
+     "description": "Sort: date, name or vendor_id; prefix - for descending (e.g. -date).",
+     "type": "string"
+    },
+    "start_date": {
+     "description": "Orders placed on or after this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "start_event_date": {
+     "description": "Orders with a ticket for a date on or after this time.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
+     "type": "string"
+    },
+    "status": {
+     "description": "Order status.",
+     "enum": [
+      "ACCEPTED",
+      "CANCELED",
+      "PENDING",
+      "DECLINED",
+      "OPEN",
+      "ALL"
+     ],
+     "type": "string"
+    },
+    "vendor_id": {
+     "description": "Only orders of this vendor id.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_orders",
+  "output_schema": {},
+  "title": "List orders (bookings)"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List products"
+  },
+  "description": "List additional products (extras such as merchandise or add-ons) sold with bookings. bookingkit API: GET /v3/products.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept_vendors": {
+     "description": "Comma separated vendor ids.",
+     "type": "string"
+    },
+    "available": {
+     "description": "true = only available products.",
+     "type": "boolean"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_products",
+  "output_schema": {},
+  "title": "List products"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List users"
+  },
+  "description": "List the users (staff accounts) of the vendor. bookingkit API: GET /v3/users.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_users",
+  "output_schema": {},
+  "title": "List users"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List vendors"
+  },
+  "description": "List the vendors (bookingkit customers: tour, activity and attraction providers) the API client can access. A vendor client sees only its own vendor. bookingkit API: GET /v3/vendors.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept": {
+     "description": "Comma separated list of ids to return only.",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "match": {
+     "description": "Search text in vendor name/email.",
+     "type": "string"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_vendors",
+  "output_schema": {},
+  "title": "List vendors"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List vouchers"
+  },
+  "description": "List gift vouchers with code, value, status and redemption data. bookingkit API: GET /v3/vouchers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "accept": {
+     "description": "Comma separated list of ids to return only.",
+     "type": "string"
+    },
+    "fields": {
+     "description": "Comma separated list of properties to return.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of results per page.",
+     "exclusiveMinimum": 0,
+     "maximum": 200,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of results to skip (for paging).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "bookingkit_list_vouchers",
+  "output_schema": {},
+  "title": "List vouchers"
+ }
+]

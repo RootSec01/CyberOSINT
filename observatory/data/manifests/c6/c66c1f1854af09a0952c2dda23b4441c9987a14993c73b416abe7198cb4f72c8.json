@@ -1,0 +1,3337 @@
+[
+ {
+  "description": "按公司标签、时间段和地区聚合融资事件数、披露金额事件数、获投公司数和融资总额，适合回答某赛道或标签集合在全国/城市之间的融资统计和同比、环比对比；date_ranges 和 regions 可省略，默认最近30天和全国；统计默认包含未披露水下事件。",
+  "input_schema": {
+   "properties": {
+    "date_ranges": {
+     "anyOf": [
+      {
+       "items": {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Ranges"
+    },
+    "event_category": {
+     "default": "investment",
+     "title": "Event Category",
+     "type": "string"
+    },
+    "exclude_round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Exclude Round Ids"
+    },
+    "include_round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Include Round Ids"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "regions": {
+     "anyOf": [
+      {
+       "items": {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Regions"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    },
+    "tag_match_mode": {
+     "default": "union",
+     "title": "Tag Match Mode",
+     "type": "string"
+    }
+   },
+   "title": "aggregate_funding_by_tags_toolArguments",
+   "type": "object"
+  },
+  "name": "aggregate_funding_by_tags",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "aggregate_funding_by_tags_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按死亡/关闭公司筛选条件聚合分析完整融资历史，返回样本数量、融资事件数、披露融资总额、关闭前最后融资至关闭间隔、最后融资轮次分布、关闭原因分布和代表案例。适合赛道失败复盘、融资失效分析和项目反证尽调；输出历史样本参照，不预测存续公司是否关闭。",
+  "input_schema": {
+   "properties": {
+    "api_key": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Api Key"
+    },
+    "born_year_end": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year End"
+    },
+    "born_year_start": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year Start"
+    },
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "close_date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Close Date End"
+    },
+    "close_date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Close Date Start"
+    },
+    "closure_parent_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Closure Parent Type Ids"
+    },
+    "closure_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Closure Type Ids"
+    },
+    "fund_status_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Status Ids"
+    },
+    "funded_only": {
+     "default": false,
+     "title": "Funded Only",
+     "type": "boolean"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "last_funding_gap_days_max": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Last Funding Gap Days Max"
+    },
+    "last_funding_gap_days_min": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Last Funding Gap Days Min"
+    },
+    "last_round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Last Round Ids"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "representative_limit": {
+     "default": 10,
+     "title": "Representative Limit",
+     "type": "integer"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    },
+    "tag_match_mode": {
+     "default": "union",
+     "title": "Tag Match Mode",
+     "type": "string"
+    }
+   },
+   "title": "analyze_closed_company_cohort_toolArguments",
+   "type": "object"
+  },
+  "name": "analyze_closed_company_cohort",
+  "output_schema": {
+   "additionalProperties": true,
+   "title": "analyze_closed_company_cohort_toolDictOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按行业、标签、地区、成立年份、发展阶段、公司资质、关闭日期、关闭原因或一级关闭原因统计死亡/关闭公司数量。适合回答某赛道倒闭公司有多少家、某年度关闭公司数量、某原因下关闭公司总数；不要为了计数遍历 search_closed_companies 分页。",
+  "input_schema": {
+   "properties": {
+    "born_year_end": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year End"
+    },
+    "born_year_start": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year Start"
+    },
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "close_date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Close Date End"
+    },
+    "close_date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Close Date Start"
+    },
+    "closure_parent_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Closure Parent Type Ids"
+    },
+    "closure_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Closure Type Ids"
+    },
+    "fund_status_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Status Ids"
+    },
+    "is_horse_club": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Horse Club"
+    },
+    "is_unicorn": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Unicorn"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "qualification_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Qualification Type Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    },
+    "tag_match_mode": {
+     "default": "union",
+     "title": "Tag Match Mode",
+     "type": "string"
+    }
+   },
+   "title": "count_closed_companies_toolArguments",
+   "type": "object"
+  },
+  "name": "count_closed_companies",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "count_closed_companies_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按公司关键词、行业、标签、中国/海外地区、成立年份、发展阶段、千里马、独角兽、公司资质等条件统计对外可见公司总数。适合回答多少家公司、总计几家、数量是多少；不要为了计数遍历 search_companies 分页。",
+  "input_schema": {
+   "properties": {
+    "born_year_end": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year End"
+    },
+    "born_year_start": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year Start"
+    },
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "fund_status_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Status Ids"
+    },
+    "is_horse_club": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Horse Club"
+    },
+    "is_unicorn": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Unicorn"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "qualification_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Qualification Type Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    },
+    "tag_match_mode": {
+     "default": "union",
+     "title": "Tag Match Mode",
+     "type": "string"
+    }
+   },
+   "title": "count_companies_toolArguments",
+   "type": "object"
+  },
+  "name": "count_companies",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "count_companies_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按公司ID分页查询公司融资历史，返回轮次、金额、币种、投资方、FA和估值等信息。",
+  "input_schema": {
+   "properties": {
+    "company_id": {
+     "title": "Company Id",
+     "type": "integer"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    }
+   },
+   "required": [
+    "company_id"
+   ],
+   "title": "get_company_funding_events_toolArguments",
+   "type": "object"
+  },
+  "name": "get_company_funding_events",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_company_funding_events_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按公司ID查询公司画像，包括公司简称、工商全称 registered_name、行业、标签、地区、简介、最新融资和历史投资方等字段；工商名称、工商注册名称均对应 registered_name。",
+  "input_schema": {
+   "properties": {
+    "company_id": {
+     "title": "Company Id",
+     "type": "integer"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    }
+   },
+   "required": [
+    "company_id"
+   ],
+   "title": "get_company_profile_toolArguments",
+   "type": "object"
+  },
+  "name": "get_company_profile",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_company_profile_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按机构ID查询投资机构画像，包括投资案例数、最近投资时间和活跃行业摘要。",
+  "input_schema": {
+   "properties": {
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "investor_id": {
+     "title": "Investor Id",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "investor_id"
+   ],
+   "title": "get_investor_profile_toolArguments",
+   "type": "object"
+  },
+  "name": "get_investor_profile",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_investor_profile_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "查询小型字典选项，用于把自然语言条件映射为ID，例如行业、子行业、融资轮次、省份、发展阶段、机构类型、公司资质、死亡原因和快讯类型（newsletter_type）。不传 lookup_type 时只返回字典类型和数量摘要。标签数量较大，不要用本工具获取标签全集；赛道或标签词映射请调用 search_tags。",
+  "input_schema": {
+   "properties": {
+    "lookup_type": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Lookup Type"
+    }
+   },
+   "title": "get_lookup_options_toolArguments",
+   "type": "object"
+  },
+  "name": "get_lookup_options",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_lookup_options_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按人物ID查询人物画像，包括当前职位、当前在职公司、当前在职投资机构、教育经历、过往工作经历和公开社交账号等字段。",
+  "input_schema": {
+   "properties": {
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "person_id": {
+     "title": "Person Id",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "person_id"
+   ],
+   "title": "get_person_profile_toolArguments",
+   "type": "object"
+  },
+  "name": "get_person_profile",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_person_profile_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按公司动态汇总融资事件等值人民币金额并排序，支持公司标签、行业、地区、时间和轮次过滤；适合回答某赛道公司融资总额TOP排名，并可排除IPO上市、IPO上市后等轮次；统计默认包含未披露水下事件。",
+  "input_schema": {
+   "properties": {
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "company_tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Company Tag Ids"
+    },
+    "company_tag_match_mode": {
+     "default": "union",
+     "title": "Company Tag Match Mode",
+     "type": "string"
+    },
+    "date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date End"
+    },
+    "date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Start"
+    },
+    "exclude_round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Exclude Round Ids"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "include_round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Include Round Ids"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "limit": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Limit"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    }
+   },
+   "title": "rank_companies_by_funding_toolArguments",
+   "type": "object"
+  },
+  "name": "rank_companies_by_funding",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "rank_companies_by_funding_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "批量把用户给出的公司简称或工商全称解析为 IT桔子 company_id，返回每个输入名称的候选匹配；工商名称、工商注册名称、工商全称对应字段 registered_name。适合处理用户给定的一批公司名单，例如先解析19家独角兽公司，再调用 get_company_funding_events 查询融资历史。",
+  "input_schema": {
+   "properties": {
+    "exact_only": {
+     "default": false,
+     "title": "Exact Only",
+     "type": "boolean"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "limit_per_name": {
+     "default": 5,
+     "title": "Limit Per Name",
+     "type": "integer"
+    },
+    "names": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Names",
+     "type": "array"
+    }
+   },
+   "required": [
+    "names"
+   ],
+   "title": "resolve_companies_toolArguments",
+   "type": "object"
+  },
+  "name": "resolve_companies",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "resolve_companies_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "分页查询死亡/关闭公司库。按公司关键词、行业、标签、中国/海外地区、成立年份、发展阶段、千里马、独角兽、公司资质、关闭日期、关闭原因或一级关闭原因筛选，返回公司画像、最新融资摘要、关闭日期和死亡原因。适合回答最近倒闭了哪些公司、某赛道死亡公司清单、某关闭原因下有哪些公司。如用户只问总数、多少家、数量，优先使用 count_closed_companies。",
+  "input_schema": {
+   "properties": {
+    "born_year_end": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year End"
+    },
+    "born_year_start": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year Start"
+    },
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "close_date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Close Date End"
+    },
+    "close_date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Close Date Start"
+    },
+    "closure_parent_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Closure Parent Type Ids"
+    },
+    "closure_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Closure Type Ids"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "fund_status_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Status Ids"
+    },
+    "is_horse_club": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Horse Club"
+    },
+    "is_unicorn": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Unicorn"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "qualification_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Qualification Type Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    },
+    "tag_match_mode": {
+     "default": "union",
+     "title": "Tag Match Mode",
+     "type": "string"
+    }
+   },
+   "title": "search_closed_companies_toolArguments",
+   "type": "object"
+  },
+  "name": "search_closed_companies",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_closed_companies_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按公司关键词、行业、标签、中国/海外地区、成立年份、发展阶段、千里马、独角兽、公司资质等条件分页查询对外可见公司，适合回答有哪些公司、按名称找公司和补充项目背景；工商名称、工商注册名称、工商全称对应字段 registered_name。如用户只问总数、多少家、数量，优先使用 count_companies。",
+  "input_schema": {
+   "properties": {
+    "born_year_end": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year End"
+    },
+    "born_year_start": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Born Year Start"
+    },
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "fund_status_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Status Ids"
+    },
+    "is_horse_club": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Horse Club"
+    },
+    "is_unicorn": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Unicorn"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "qualification_type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Qualification Type Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    },
+    "tag_match_mode": {
+     "default": "union",
+     "title": "Tag Match Mode",
+     "type": "string"
+    }
+   },
+   "title": "search_companies_toolArguments",
+   "type": "object"
+  },
+  "name": "search_companies",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_companies_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "查询企业对外投资案例，按组织关系归并公司和机构投资主体；适合回答某赛道企业做过哪些对外投资，例如具身智能企业投了哪些公司；高权限套餐可查看未披露水下事件标识。",
+  "input_schema": {
+   "properties": {
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date End"
+    },
+    "date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Start"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "investor_company_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Investor Company Ids"
+    },
+    "investor_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Investor Scope Ids"
+    },
+    "investor_sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Investor Sub Scope Ids"
+    },
+    "investor_tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Investor Tag Ids"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Round Ids"
+    },
+    "target_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Target Scope Ids"
+    },
+    "target_sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Target Sub Scope Ids"
+    }
+   },
+   "title": "search_company_investment_cases_toolArguments",
+   "type": "object"
+  },
+  "name": "search_company_investment_cases",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_company_investment_cases_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按时间、行业、标签、轮次等条件分页查询事件。event_type 表示物理来源：invse 融资/轮次事件、merger 并购事件；event_category 表示业务分类：investment 投资轮次、listing 上市相关、merger 并购；也可直接使用 ipo、上市、并购 等常见词面，服务端会自动归一化；支持 event_ids 精确/批量查询已知事件，并可用 has_fa=true 只返回已披露 FA 的事件；is_underwater 可筛选未披露水下事件，尝鲜版和标准版不可查看水下事件明细。",
+  "input_schema": {
+   "properties": {
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date End"
+    },
+    "date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Start"
+    },
+    "event_category": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Event Category"
+    },
+    "event_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Event Ids"
+    },
+    "event_type": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Event Type"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "has_fa": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Has Fa"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    },
+    "round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Round Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    },
+    "tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tag Ids"
+    }
+   },
+   "title": "search_events_toolArguments",
+   "type": "object"
+  },
+  "name": "search_events",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_events_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "查询结构化FA服务案例，支持按 event_ids 精确取回已知事件的 FA；返回FA机构、被服务公司、融资轮次、金额、时间和行业等信息；高权限套餐可查看未披露水下事件标识。",
+  "input_schema": {
+   "properties": {
+    "company_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Company Ids"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date End"
+    },
+    "date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Start"
+    },
+    "event_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Event Ids"
+    },
+    "fa_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fa Ids"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Round Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    }
+   },
+   "title": "search_fa_cases_toolArguments",
+   "type": "object"
+  },
+  "name": "search_fa_cases",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_fa_cases_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按机构ID分页查询机构投资案例，可按被投公司标签、行业和轮次筛选，适合回答某机构投过哪些具身智能、机器人、AI等标签公司；高权限套餐可查看未披露水下事件标识。",
+  "input_schema": {
+   "properties": {
+    "company_tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Company Tag Ids"
+    },
+    "company_tag_match_mode": {
+     "default": "union",
+     "title": "Company Tag Match Mode",
+     "type": "string"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "investor_id": {
+     "title": "Investor Id",
+     "type": "integer"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Round Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    }
+   },
+   "required": [
+    "investor_id"
+   ],
+   "title": "search_investor_cases_toolArguments",
+   "type": "object"
+  },
+  "name": "search_investor_cases",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_investor_cases_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按机构名称关键词搜索投资机构，返回机构ID、案例数、最近投资时间和活跃行业。",
+  "input_schema": {
+   "properties": {
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "is_fa": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Fa"
+    },
+    "is_government_guidance_fund": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Government Guidance Fund"
+    },
+    "is_state_owned": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is State Owned"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "prop_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Prop Ids"
+    }
+   },
+   "title": "search_investors_toolArguments",
+   "type": "object"
+  },
+  "name": "search_investors",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_investors_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按快讯类型、标题/正文关键词和发布时间分页查询快讯、创投电报，默认按发布时间倒序；适合回答今天创投电报有哪些、最近24小时某赛道快讯、本周融资快讯汇总。快讯类型ID请用 get_lookup_options(lookup_type=\"newsletter_type\") 获取；需要关联到公司或事件时在 fields 里加 main_body_type、main_body_id、item_id，main_body_type 为 1 时 main_body_id 是 company_id，为 2 时是 investor_id。",
+  "input_schema": {
+   "properties": {
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "date_end": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date End"
+    },
+    "date_start": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Date Start"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "type_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Type Ids"
+    }
+   },
+   "title": "search_newsletters_toolArguments",
+   "type": "object"
+  },
+  "name": "search_newsletters",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_newsletters_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按人物姓名、人物类型、地区、当前公司、当前投资机构、教育经历或过往工作经历搜索人物画像，返回对外可见人物的当前任职、教育经历和过往工作经历等字段。",
+  "input_schema": {
+   "properties": {
+    "cities": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cities"
+    },
+    "current_company_keyword": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Current Company Keyword"
+    },
+    "current_investor_keyword": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Current Investor Keyword"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "education_keyword": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Education Keyword"
+    },
+    "ever_job_keyword": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Ever Job Keyword"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "is_on_job": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is On Job"
+    },
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "person_type_keyword": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Person Type Keyword"
+    },
+    "provinces": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provinces"
+    }
+   },
+   "title": "search_people_toolArguments",
+   "type": "object"
+  },
+  "name": "search_people",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_people_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按人物ID或人物姓名分页查询人物投资案例，可按被投公司标签、行业和轮次筛选，适合回答某位投资人个人参与投资过哪些公司；高权限套餐可查看未披露水下事件标识。",
+  "input_schema": {
+   "properties": {
+    "company_tag_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Company Tag Ids"
+    },
+    "company_tag_match_mode": {
+     "default": "union",
+     "title": "Company Tag Match Mode",
+     "type": "string"
+    },
+    "cursor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Cursor"
+    },
+    "fields": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fields"
+    },
+    "is_underwater": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Is Underwater"
+    },
+    "page_size": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Page Size"
+    },
+    "person_id": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Person Id"
+    },
+    "person_keyword": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Person Keyword"
+    },
+    "round_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Round Ids"
+    },
+    "scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scope Ids"
+    },
+    "sub_scope_ids": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sub Scope Ids"
+    }
+   },
+   "title": "search_person_investment_cases_toolArguments",
+   "type": "object"
+  },
+  "name": "search_person_investment_cases",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_person_investment_cases_toolOutput",
+   "type": "object"
+  }
+ },
+ {
+  "description": "按关键词搜索标签，适合把用户输入的赛道词如人工智能、机器人、低空经济映射为 tag_id。",
+  "input_schema": {
+   "properties": {
+    "keyword": {
+     "default": "",
+     "title": "Keyword",
+     "type": "string"
+    },
+    "limit": {
+     "default": 50,
+     "title": "Limit",
+     "type": "integer"
+    }
+   },
+   "title": "search_tags_toolArguments",
+   "type": "object"
+  },
+  "name": "search_tags",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "additionalProperties": true,
+     "title": "Result",
+     "type": "object"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_tags_toolOutput",
+   "type": "object"
+  }
+ }
+]

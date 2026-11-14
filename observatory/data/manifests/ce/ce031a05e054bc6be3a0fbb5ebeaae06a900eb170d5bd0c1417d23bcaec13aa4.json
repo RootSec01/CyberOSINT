@@ -1,0 +1,347 @@
+[
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Side-by-side comparison of 2-5 symbols: quote, RSI/MACD/ADX, trend, 30d return, latest pattern.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbols": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbols"
+   ],
+   "type": "object"
+  },
+  "name": "compare_stocks",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Recent single-bar candlestick patterns (HAMMER, DOJI, ENGULFING, ...) newest first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 20,
+     "type": "integer"
+    },
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_candlestick_patterns",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Multi-bar chart patterns (DOUBLE_TOP, HEAD_AND_SHOULDERS, ...). 'ACTIVE' = PENDING/CONFIRMED.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "status": {
+     "default": "ACTIVE",
+     "type": "string"
+    },
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_chart_patterns",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Demand/supply zones (DBR/RBR/RBD/DBD) split into demand_zones and supply_zones.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "status": {
+     "default": "ACTIVE",
+     "type": "string"
+    },
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_demand_supply_zones",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Latest fibonacci retracement swings (UP/DOWN) with 236/382/500/618/786 levels.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_fibonacci_levels",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Market-wide snapshot: indices, top_gainers, top_losers, most_active, breadth.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_market_overview",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Recent OHLCV candles. timeframe in {daily, 15min, 5min}; limit capped at 500; newest first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 50,
+     "type": "integer"
+    },
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_ohlc_data",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Latest price snapshot for an NSE stock — last close, prev close, change %, day H/L, volume.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbol": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_stock_quote",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Pivot points + historical support/resistance levels, ordered by price desc.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_support_resistance",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Latest technical indicators (EMAs, SMAs, RSI, MACD, BB, ADX, Stoch, ATR, OBV, VWAP).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbol": {
+     "type": "string"
+    },
+    "timeframe": {
+     "default": "daily",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_technical_indicators",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Volume diagnostic: top 5min hotspots + peak slot + OBV 20-day trend + today/20-day volume ratio.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbol": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_volume_analysis",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "description": "Filter the active universe. Keys: rsi_min, rsi_max, adx_min, trend, near_demand_zone, pattern, min_volume_ratio, sector. At least one required.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "filters": {
+     "additionalProperties": true,
+     "type": "object"
+    }
+   },
+   "required": [
+    "filters"
+   ],
+   "type": "object"
+  },
+  "name": "screen_stocks",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  }
+ }
+]

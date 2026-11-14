@@ -1,0 +1,466 @@
+[
+ {
+  "description": "World or regional GDP nowcast with coverage and each economy's contribution (pp).",
+  "input_schema": {
+   "properties": {
+    "aggregate": {
+     "enum": [
+      "world",
+      "high-income",
+      "emerging-developing",
+      "north-america",
+      "europe",
+      "european-union",
+      "euro-area",
+      "europe-central-asia",
+      "east-asia-pacific",
+      "south-asia",
+      "latin-america-caribbean",
+      "middle-east-north-africa",
+      "sub-saharan-africa"
+     ],
+     "type": "string"
+    },
+    "quarter": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "aggregate"
+   ],
+   "type": "object"
+  },
+  "name": "get_aggregate",
+  "output_schema": {}
+ },
+ {
+  "description": "Maritime chokepoint monitor: daily ship transits (7-day average) through 28 chokepoints (Hormuz, Bab el-Mandeb, Suez, Cape of Good Hope, Panama, Malacca, Bosporus, Gibraltar, ...) vs normal (Jan-Oct 2023) and vs last year, status flag, cargo mix now vs normal, plus the Chokepoint Stress Index (0-100, 100 = worst week since 2023) and the Suez share of Suez+Cape transits.",
+  "input_schema": {
+   "properties": {
+    "chokepoint": {
+     "description": "Name fragment, e.g. 'Hormuz'; omit for all",
+     "type": "string"
+    },
+    "weeks": {
+     "default": 26,
+     "description": "Weeks of Stress Index history",
+     "maximum": 400,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_chokepoints",
+  "output_schema": {}
+ },
+ {
+  "description": "Listed companies in a GICS-aligned sector, industry group, industry or sub-industry (worldgdp.org classification from filed activity codes: SEC SIC codes for US listings, TSE 33 sectors for Japan, industry profiles for primary listings above $500m in ~35 other markets): name, ticker, exchange, company country, market cap (USD m), latest weekly price and currency, 3-month weekly closes. Pair with get_sectors to set survey readings next to the stocks they affect.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 50,
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "market": {
+     "default": "all",
+     "description": "all, or a company country code (US, JP, DE, UK, FR, CN, KR, IN, ...; EL = Greece)",
+     "type": "string"
+    },
+    "node": {
+     "description": "GICS-aligned code ('45', '4530', '45301020') or name fragment ('semiconductors')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "node"
+   ],
+   "type": "object"
+  },
+  "name": "get_companies",
+  "output_schema": {}
+ },
+ {
+  "description": "Current GDP nowcast for one economy: headline (% SAAR), 70% range, days to official release, recent daily path, component contributions and the latest data releases that moved it.",
+  "input_schema": {
+   "properties": {
+    "days": {
+     "default": 30,
+     "description": "Length of daily path to return",
+     "maximum": 120,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "economy": {
+     "description": "Economy code: us (United States), cn (China), jp (Japan), de (Germany), in (India), uk (United Kingdom), fr (France), it (Italy), ca (Canada), br (Brazil), es (Spain), mx (Mexico), kr (South Korea), au (Australia), nl (Netherlands), ch (Switzerland), pl (Poland), be (Belgium), se (Sweden), ie (Ireland), at (Austria), pt (Portugal), fi (Finland), gr (Greece), dk (Denmark), no (Norway), ro (Romania), bg (Bulgaria), tr (Türkiye), ru (Russia), id (Indonesia), th (Thailand), sg (Singapore), tw (Taiwan), hk (Hong Kong), my (Malaysia), ph (Philippines), nz (New Zealand), ar (Argentina), co (Colombia), cl (Chile), sa (Saudi Arabia), kw (Kuwait), ae (United Arab Emirates), eg (Egypt), ma (Morocco), za (South Africa), ng (Nigeria)",
+     "enum": [
+      "us",
+      "cn",
+      "jp",
+      "de",
+      "in",
+      "uk",
+      "fr",
+      "it",
+      "ca",
+      "br",
+      "es",
+      "mx",
+      "kr",
+      "au",
+      "nl",
+      "ch",
+      "pl",
+      "be",
+      "se",
+      "ie",
+      "at",
+      "pt",
+      "fi",
+      "gr",
+      "dk",
+      "no",
+      "ro",
+      "bg",
+      "tr",
+      "ru",
+      "id",
+      "th",
+      "sg",
+      "tw",
+      "hk",
+      "my",
+      "ph",
+      "nz",
+      "ar",
+      "co",
+      "cl",
+      "sa",
+      "kw",
+      "ae",
+      "eg",
+      "ma",
+      "za",
+      "ng"
+     ],
+     "type": "string"
+    },
+    "quarter": {
+     "description": "e.g. 2026Q3; defaults to the current quarter. The last 6 quarters are available (released ones as archived final nowcasts with the official first estimate)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "economy"
+   ],
+   "type": "object"
+  },
+  "name": "get_nowcast",
+  "output_schema": {}
+ },
+ {
+  "description": "World trade by product (HS 2022): 96 product groups (HS chapters) and every HS 4-digit heading with world exports of US$5bn or more. For a product: world exports (US$ bn, latest BACI year, annual change), largest exporters and importers (share, tonnes, US$ per tonne for goods priced by weight), who sells to whom, the HS 6-digit lines inside, an IMF commodity price where one maps, and live monthly signals (main exporters' monthly exports y/y from UN Comtrade; weekly ship tonnage for chapters). Omit product for the largest groups; give an HS code ('27', '2709') or a name fragment ('crude', 'chips', 'soybeans').",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 15,
+     "description": "Rows of exporters/importers/headings to return",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "product": {
+     "description": "HS chapter (2 digits), HS heading (4 digits) or name fragment; omit for the product-group list",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_products",
+  "output_schema": {}
+ },
+ {
+  "description": "Upcoming data releases that feed the nowcasts, with expected dates.",
+  "input_schema": {
+   "properties": {
+    "days": {
+     "default": 14,
+     "maximum": 60,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "economy": {
+     "description": "Omit for all economies",
+     "enum": [
+      "us",
+      "cn",
+      "jp",
+      "de",
+      "in",
+      "uk",
+      "fr",
+      "it",
+      "ca",
+      "br",
+      "es",
+      "mx",
+      "kr",
+      "au",
+      "nl",
+      "ch",
+      "pl",
+      "be",
+      "se",
+      "ie",
+      "at",
+      "pt",
+      "fi",
+      "gr",
+      "dk",
+      "no",
+      "ro",
+      "bg",
+      "tr",
+      "ru",
+      "id",
+      "th",
+      "sg",
+      "tw",
+      "hk",
+      "my",
+      "ph",
+      "nz",
+      "ar",
+      "co",
+      "cl",
+      "sa",
+      "kw",
+      "ae",
+      "eg",
+      "ma",
+      "za",
+      "ng"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_release_calendar",
+  "output_schema": {}
+ },
+ {
+  "description": "World Sector Activity Index: monthly readings on the 50 line (50 = as many firms report rising as falling) by GICS-aligned sector, industry group, industry and sub-industry, for the World, regions (EUROPE, NAMERICA) and countries (EU, EA, US, DE, FR, IT, ES, ...). Built from national business surveys (European Commission NACE subsectors; US Census Business Trends and Outlook Survey) through worldgdp.org's own classification crosswalk. Measures: out (output), new (new orders), emp (employment), fut (future activity), px (prices charged). Default readings are bias-adjusted (each series centred on its own long-run average so countries compare like for like); set adjusted=false for raw survey readings. Give node (GICS code like '45' or '4530', or a name fragment) to rank its children and get its history; omit for the 11 sectors.",
+  "input_schema": {
+   "properties": {
+    "adjusted": {
+     "default": true,
+     "type": "boolean"
+    },
+    "geo": {
+     "description": "WORLD (default), EUROPE, NAMERICA, EU, EA, US or a European country code (DE, FR, IT, ES, NL, PL, ...)",
+     "type": "string"
+    },
+    "measure": {
+     "default": "out",
+     "enum": [
+      "out",
+      "new",
+      "emp",
+      "fut",
+      "px"
+     ],
+     "type": "string"
+    },
+    "months": {
+     "default": 24,
+     "description": "Months of history for the node (output; long history at sector and industry-group level)",
+     "maximum": 300,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "node": {
+     "description": "GICS-aligned code ('20', '2010', '201060', '20106020') or name fragment ('semiconductors', 'banks'); omit for all sectors",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_sectors",
+  "output_schema": {}
+ },
+ {
+  "description": "Live track record (every published nowcast vs the official first estimate, no backtest) plus accuracy grade (A+ to C: hit rates within ±1pp/±2pp, error vs a naive forecast, direction calls), model version history and backtest errors (RMSE, pp SAAR, by horizon) of an economy's nowcast versus official GDP.",
+  "input_schema": {
+   "properties": {
+    "economy": {
+     "enum": [
+      "us",
+      "cn",
+      "jp",
+      "de",
+      "in",
+      "uk",
+      "fr",
+      "it",
+      "ca",
+      "br",
+      "es",
+      "mx",
+      "kr",
+      "au",
+      "nl",
+      "ch",
+      "pl",
+      "be",
+      "se",
+      "ie",
+      "at",
+      "pt",
+      "fi",
+      "gr",
+      "dk",
+      "no",
+      "ro",
+      "bg",
+      "tr",
+      "ru",
+      "id",
+      "th",
+      "sg",
+      "tw",
+      "hk",
+      "my",
+      "ph",
+      "nz",
+      "ar",
+      "co",
+      "cl",
+      "sa",
+      "kw",
+      "ae",
+      "eg",
+      "ma",
+      "za",
+      "ng"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "economy"
+   ],
+   "type": "object"
+  },
+  "name": "get_track_record",
+  "output_schema": {}
+ },
+ {
+  "description": "Global Trade Nowcast: freight by mode (rail, road, air, land border: y/y lanes for the US, Canada, Mexico, Germany) and weekly seaborne trade volumes (tonnes moved by sea, from IMF PortWatch satellite ship tracking) for the world, the euro area and covered economies: exports, imports and net trade, 4-week and 13-week y/y, latest month y/y, split by cargo class (tanker, container, dry bulk, general cargo, ro-ro) with the goods and sectors each carries. Omit economy for a summary of all; give one for its weekly history.",
+  "input_schema": {
+   "properties": {
+    "economy": {
+     "description": "Economy code (e.g. us, cn, de), 'euro-area' or 'world'; omit for all",
+     "type": "string"
+    },
+    "weeks": {
+     "default": 26,
+     "description": "Weeks of 4-week y/y history to return (latest last)",
+     "maximum": 400,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_trade",
+  "output_schema": {}
+ },
+ {
+  "description": "US industry breadth from the ISM Report On Business rankings: which of ISM's 18 manufacturing or 18 services industries reported growth (strongest first) or contraction (steepest first) each month, overall and for new orders, production/business activity, employment and prices. Rank signal +1 (strongest growth) to -1 (steepest contraction), 0 = no change reported. Derived breadth measure, not an index level.",
+  "input_schema": {
+   "properties": {
+    "months": {
+     "default": 6,
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "question": {
+     "default": "headline",
+     "enum": [
+      "headline",
+      "new_orders",
+      "production",
+      "business_activity",
+      "employment",
+      "prices"
+     ],
+     "type": "string"
+    },
+    "survey": {
+     "default": "mfg",
+     "enum": [
+      "mfg",
+      "srv"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_us_industries",
+  "output_schema": {}
+ },
+ {
+  "description": "Weekly Economic Pulse: weekly economic activity index (momentum gauge from high-frequency data such as electricity demand, freight, travel, card spending, jobless claims and job postings; standard deviations from average 13-week growth, 0 = average, not a GDP forecast). Omit economy for the latest reading of every covered economy; give one for its weekly history. Covered: us, de, uk, fr, it, ca, es, au, nl, pl, be, pt, gr, bg, dubai, euro-area, world.",
+  "input_schema": {
+   "properties": {
+    "economy": {
+     "description": "Economy code; omit for all",
+     "enum": [
+      "us",
+      "de",
+      "uk",
+      "fr",
+      "it",
+      "ca",
+      "es",
+      "au",
+      "nl",
+      "pl",
+      "be",
+      "pt",
+      "gr",
+      "bg",
+      "dubai",
+      "euro-area",
+      "world"
+     ],
+     "type": "string"
+    },
+    "weeks": {
+     "default": 26,
+     "description": "Weeks of history to return (latest last)",
+     "maximum": 1100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_weekly_pulse",
+  "output_schema": {}
+ },
+ {
+  "description": "List modelled economies and aggregates with the current-quarter GDP nowcast (% q/q SAAR) and share of world GDP.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_economies",
+  "output_schema": {}
+ }
+]

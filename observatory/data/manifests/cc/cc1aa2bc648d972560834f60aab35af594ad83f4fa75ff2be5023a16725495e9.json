@@ -1,0 +1,627 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Send a request to a listing's x402 endpoint through Agentropolis and get the seller's raw response back (status, headers, body). Use it only for listings whose search result has buy='relay_x402' (links.call present); for any other listing, call the seller directly using get_kit_manifest. Flow: call without payment, receive HTTP 402 with the seller's payment requirements unchanged, sign a payment with your own wallet to the seller's payTo, then call again with payment_signature (x402 v2) or x_payment (v1). Agentropolis holds no keys or funds, never changes payTo or amount and charges no fee, but a signed payment you pass is forwarded and may be settled by the seller, so real money can move. Limits: seller's own https host only, 256 KB request, 2 MB response, 25 s timeout (longer for slow first-party kits), 20 calls/min per client. Example: {\"id\":\"seenly.seenly-token-preflight\",\"endpoint\":\"/api/token-preflight\",\"method\":\"POST\",\"body\":{\"chain\":\"base\",\"tokenAddress\":\"0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed\"}}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "body": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "additionalProperties": {},
+       "propertyNames": {
+        "type": "string"
+       },
+       "type": "object"
+      }
+     ],
+     "description": "Request body. An object is sent as JSON; a string is sent as-is with content_type."
+    },
+    "content_type": {
+     "description": "Content-Type for a string body, e.g. 'text/plain'. Ignored for object bodies (sent as application/json).",
+     "type": "string"
+    },
+    "endpoint": {
+     "description": "Path (e.g. '/api/script') or full https URL on the seller's own host. Defaults to the listing's primary endpoint.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Listing id exactly as returned by search_kits results[].id, e.g. 'seenly.seenly-token-preflight' or 'mcp.io-github-owner-name'.",
+     "minLength": 3,
+     "type": "string"
+    },
+    "method": {
+     "description": "HTTP method; defaults to POST when a body is given, else GET.",
+     "enum": [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE"
+     ],
+     "type": "string"
+    },
+    "payment_signature": {
+     "description": "Signed PAYMENT-SIGNATURE header value (x402 v2) from your own wallet; forwarded unchanged. Omit on the first call.",
+     "type": "string"
+    },
+    "query": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Query-string parameters to append, e.g. {\"q\":\"news\"}.",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "x_payment": {
+     "description": "Signed X-PAYMENT header value (x402 v1) from your own wallet; forwarded unchanged. Omit on the first call.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "call_kit",
+  "output_schema": {},
+  "title": "Call an x402 listing through the non-custodial pass-through"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Build a URL that searches Coinbase's x402 Bazaar (Agentic.Market) for a query. Use it when you want x402 services that may be missing from the Agentropolis index; it only returns a link for you or your user to open. Agentropolis makes no request to Coinbase and does not cache or republish Bazaar data (their terms forbid it). Read-only. Example: {\"q\":\"web search\"}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "q": {
+     "description": "Search words to prefill on Agentic.Market, e.g. 'image generation'. Omit for the home page.",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_bazaar_link",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "links": {
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "name": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "links"
+   ],
+   "type": "object"
+  },
+  "title": "Get a search link for Coinbase's x402 Bazaar"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the full Agentropolis record for one listing by id: summary, pricing, payment-verified trust evidence (verified buyers, settlements, wash flags, disclosed test sales), badge tiers, sources and links. Use it after search_kits to judge whether a listing is worth using; use get_kit_manifest instead when you need the machine-readable invoke contract (endpoints, schemas, payment offers). Read-only, no auth; logs an anonymous detail view for seller analytics. Unknown ids return an error result with error 'not_found'. Example: {\"id\":\"seenly.seenly-token-preflight\"}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Listing id exactly as returned by search_kits results[].id, e.g. 'seenly.seenly-token-preflight' or 'mcp.io-github-owner-name'.",
+     "minLength": 3,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_kit",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "badges": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "id": {
+     "type": "string"
+    },
+    "kind": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "tiers": {
+     "description": "Badge tiers: earned (Verified, Live-Tested, Trusted) and paid/showcase (Agentropolis Pro)"
+    },
+    "trust": {
+     "description": "Payment-verified trust; score null = no evidence"
+    }
+   },
+   "required": [
+    "id",
+    "name",
+    "kind",
+    "badges"
+   ],
+   "type": "object"
+  },
+  "title": "Get one listing's details, trust evidence and price"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the kit.json v0.1 manifest for one listing: how to call it (HTTP, MCP or A2A endpoints), input/output schema references, payment offers (rail, network, asset, payTo, amount), discovery files and a trust summary. Use it when you are about to call a listing yourself; use get_kit for human-readable details and trust evidence, or call_kit to call an x402 listing through Agentropolis. Read-only, no auth. For seller-published kits this mirrors the seller's own kit.json; for seeded listings it is generated from public metadata and may be incomplete, so prefer the seller's live 402 challenge for exact prices. Example: {\"id\":\"seenly.seenly-pitch-kit\"}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Listing id exactly as returned by search_kits results[].id, e.g. 'seenly.seenly-token-preflight' or 'mcp.io-github-owner-name'.",
+     "minLength": 3,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_kit_manifest",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "invoke": {
+     "items": {},
+     "type": "array"
+    },
+    "kit": {
+     "description": "Manifest version, '0.1'",
+     "type": "string"
+    },
+    "offers": {
+     "items": {},
+     "type": "array"
+    }
+   },
+   "required": [
+    "kit",
+    "id"
+   ],
+   "type": "object"
+  },
+  "title": "Get one listing's kit.json invoke contract"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get 30-day x402 paid-usage statistics per category, with wash trading filtered out: services with paid usage, verified buyers, settlements, median listed price and listings excluded for wash signals. Use it for market sizing or price benchmarking; to find individual tools use search_kits. Read-only, no parameters. Data: x402-list.com measured settlements (CC BY 4.0, attribute when quoting) plus Agentropolis wash filtering. Buyer counts are summed per service, so a wallet that pays several services is counted once per service. Same data as /stats and the weekly reports at /reports.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_market_snapshot",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "attribution": {
+     "type": "string"
+    },
+    "caveat": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "report": {
+     "type": "string"
+    },
+    "rows": {
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "category": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "category"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "report",
+    "attribution",
+    "caveat",
+    "rows"
+   ],
+   "type": "object"
+  },
+  "title": "Get wash-filtered x402 paid-usage stats by category"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List Agentropolis platform features with status (live, partial, stub, planned), endpoint and guardrails: badges, the x402 relay, seller claims and analytics, sponsored placement, market data, billing. Use it to check whether a platform capability exists before relying on it; it describes Agentropolis itself, not listings. Read-only, no parameters. Stub endpoints answer HTTP 501; payments_enabled shows whether Agentropolis charges for anything (currently false).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_roadmap",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "items": {
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "status": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "status"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "payments_enabled": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "payments_enabled",
+    "items"
+   ],
+   "type": "object"
+  },
+  "title": "List Agentropolis features and their status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Explain how Agentropolis computes trust scores (method hub-trust-v0.1) and ranks search results: which payment evidence counts, wash-trading exclusions, low-sample caps, why our own test purchases never count, and what a null score means. Use it to interpret the trust and badge fields from search_kits or get_kit; it returns the method, not any listing's score. Read-only, no parameters.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_trust_method",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "exclusions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "method": {
+     "type": "string"
+    },
+    "ranking": {
+     "type": "string"
+    },
+    "score": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "method",
+    "score",
+    "exclusions",
+    "ranking"
+   ],
+   "type": "object"
+  },
+  "title": "Explain how trust scores and ranking work"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List every category in the Agentropolis index with its listing count, largest first (about 18 snake_case ids such as web_search, crypto_onchain_data, llm_inference). Use it to pick a valid value for search_kits' category filter or to see what the index covers; for paid-usage numbers per category use get_market_snapshot. Read-only, no parameters. Category pages with prices and verified buyers: /categories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "categories": {
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "category": {
+        "type": "string"
+       },
+       "count": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "category",
+       "count"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "categories"
+   ],
+   "type": "object"
+  },
+  "title": "List index categories with listing counts"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the registries and directories Agentropolis ingests or deliberately excludes, with each source's license or terms decision, robots handling and listing count (e.g. Official MCP Registry CC0, x402-list.com CC BY 4.0; Coinbase Bazaar link-out only). Use it to check provenance or the attribution required before citing results; it does not search listings (use search_kits). Read-only, no parameters.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_sources",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "meta": {
+     "additionalProperties": {},
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "sources": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "meta",
+    "sources"
+   ],
+   "type": "object"
+  },
+  "title": "List data sources, licenses and exclusions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search the Agentropolis index of 52,264 agent-usable listings (MCP servers, x402/MPP pay-per-call HTTP APIs, A2A agents and kits) by task keywords, with optional filters. Use it first when you need a tool for a task; then use get_kit for one listing's trust evidence and price, or get_kit_manifest for how to call it. Not for browsing categories (list_categories) or market totals (get_market_snapshot). Read-only, no auth, never pays. Ranking: BM25 text relevance, boosted by payment-verified trust and the earned Live-Tested badge; trust.score null means no payment evidence (not a negative signal). results[] is organic; featured[] is a separate, labelled Agentropolis Pro row (today only our own first-party kits, no fee paid) and sponsored[] is a separate, labelled 'Sponsored' array of hand-approved paid placements (usually empty; never affects ranking or trust; pass sponsored:false to omit it). Listed prices are hints; the seller's live HTTP 402 challenge is authoritative. Each search is logged anonymously (query text, no raw IP). Example: {\"q\":\"web search\",\"rail\":\"x402\",\"max_price_usd\":0.01,\"min_trust\":40}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category": {
+     "description": "Category id from list_categories, e.g. 'web_search' or 'crypto_onchain_data'. Comma-separate to allow several.",
+     "type": "string"
+    },
+    "kind": {
+     "description": "Restrict to one listing type: kit (packaged task API), http_api (pay-per-call HTTP API), mcp_server, a2a_agent. Omit for all.",
+     "enum": [
+      "kit",
+      "http_api",
+      "mcp_server",
+      "a2a_agent"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of organic results to return, 1-25 (default 10).",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_price_usd": {
+     "description": "Only listings whose lowest listed price per call/unit is at most this many US dollars, e.g. 0.01. Listings without a known price are excluded when set.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "min_trust": {
+     "description": "Only listings with a payment-verified trust score of at least this value (0-100). Excludes listings with no payment evidence.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "number"
+    },
+    "paid_only": {
+     "description": "true = only listings that accept a payment rail (x402 or MPP).",
+     "type": "boolean"
+    },
+    "q": {
+     "description": "What the agent needs, in plain words: 'web search', 'transcribe audio with speakers', 'postgres', 'token honeypot check'. Keywords beat full sentences.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "rail": {
+     "description": "Only listings that accept this payment rail: x402 (USDC on-chain, per call) or mpp (Machine Payments Protocol).",
+     "enum": [
+      "x402",
+      "mpp"
+     ],
+     "type": "string"
+    },
+    "sponsored": {
+     "description": "Set false to omit the labelled sponsored[] array. Default true.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "search_kits",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "properties": {
+    "featured": {
+     "description": "Labelled Agentropolis Pro row, separate from organic results",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "id": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "featured_label": {
+     "type": "string"
+    },
+    "ranking": {
+     "description": "How results were ranked",
+     "type": "string"
+    },
+    "results": {
+     "description": "Organic results: id, name, kind, summary, pricing, trust, badges, tiers, invoke, links (page, kit_manifest, call when relayable, go), buy (relay_x402 or link_out)",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "kind"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "search_id": {
+     "description": "Anonymous id for this search",
+     "type": "string"
+    },
+    "sponsored": {
+     "description": "Labelled Sponsored placements, hand-approved; separate from results; never affects ranking or trust. Usually empty.",
+     "items": {},
+     "type": "array"
+    },
+    "total": {
+     "description": "Organic matches before limit",
+     "type": "number"
+    }
+   },
+   "required": [
+    "total",
+    "results",
+    "featured",
+    "featured_label",
+    "sponsored",
+    "ranking"
+   ],
+   "type": "object"
+  },
+  "title": "Search tools, paid APIs and MCP servers by task"
+ }
+]

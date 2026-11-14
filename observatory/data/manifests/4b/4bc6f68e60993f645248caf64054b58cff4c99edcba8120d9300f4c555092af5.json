@@ -1,0 +1,387 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Estimate monthly APIT/PAYE, employee and employer EPF, ETF, stamp duty, net pay, and employer cost for regular primary employment in Sri Lanka.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "epfEtfEarningsBase": {
+     "description": "EPF/ETF-eligible monthly earnings; defaults to gross salary",
+     "maximum": 100000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "grossSalary": {
+     "description": "Gross monthly employment income in Sri Lankan rupees",
+     "maximum": 100000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "otherEmployeeDeductions": {
+     "default": 0,
+     "description": "Optional non-statutory employee deductions, such as a loan repayment",
+     "maximum": 100000000,
+     "minimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "grossSalary"
+   ],
+   "type": "object"
+  },
+  "name": "calculate_sri_lanka_payslip",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "apit": {
+     "type": "number"
+    },
+    "caution": {
+     "type": "string"
+    },
+    "currency": {
+     "const": "LKR",
+     "type": "string"
+    },
+    "employeeEpf": {
+     "type": "number"
+    },
+    "employerCost": {
+     "type": "number"
+    },
+    "employerEpf": {
+     "type": "number"
+    },
+    "employerEtf": {
+     "type": "number"
+    },
+    "epfEtfEarningsBase": {
+     "type": "number"
+    },
+    "grossSalary": {
+     "type": "number"
+    },
+    "methodologyUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "netPay": {
+     "type": "number"
+    },
+    "otherEmployeeDeductions": {
+     "type": "number"
+    },
+    "payslipGeneratorUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "sourceTableYear": {
+     "const": "2025/26",
+     "type": "string"
+    },
+    "sources": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "authority": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "url": {
+        "format": "uri",
+        "type": "string"
+       }
+      },
+      "required": [
+       "authority",
+       "topic",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "stampDuty": {
+     "type": "number"
+    },
+    "totalEmployeeDeductions": {
+     "type": "number"
+    },
+    "yearOfAssessment": {
+     "const": "2026/27",
+     "type": "string"
+    }
+   },
+   "required": [
+    "yearOfAssessment",
+    "sourceTableYear",
+    "currency",
+    "grossSalary",
+    "epfEtfEarningsBase",
+    "apit",
+    "employeeEpf",
+    "employerEpf",
+    "employerEtf",
+    "stampDuty",
+    "otherEmployeeDeductions",
+    "totalEmployeeDeductions",
+    "netPay",
+    "employerCost",
+    "methodologyUrl",
+    "payslipGeneratorUrl",
+    "caution",
+    "sources"
+   ],
+   "type": "object"
+  },
+  "title": "Calculate a Sri Lanka payslip"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the maintained APIT, EPF, ETF, and stamp-duty assumptions with official Sri Lankan sources and scope limits.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_sri_lanka_payroll_reference",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "citation": {
+     "type": "string"
+    },
+    "currency": {
+     "const": "LKR",
+     "type": "string"
+    },
+    "effectiveFrom": {
+     "const": "2025-04-01",
+     "type": "string"
+    },
+    "employeeEpfRate": {
+     "type": "number"
+    },
+    "employerEpfRate": {
+     "type": "number"
+    },
+    "employerEtfRate": {
+     "type": "number"
+    },
+    "excludedCases": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "machineReadableMethodologyUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "methodologyUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "monthlyApitRelief": {
+     "type": "number"
+    },
+    "openApiUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "period": {
+     "const": "monthly",
+     "type": "string"
+    },
+    "provenanceNote": {
+     "type": "string"
+    },
+    "scope": {
+     "type": "string"
+    },
+    "sourceTableYear": {
+     "const": "2025/26",
+     "type": "string"
+    },
+    "sources": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "authority": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "url": {
+        "format": "uri",
+        "type": "string"
+       }
+      },
+      "required": [
+       "authority",
+       "topic",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "stampDutyAboveThreshold": {
+     "type": "number"
+    },
+    "stampDutyThreshold": {
+     "type": "number"
+    },
+    "yearOfAssessment": {
+     "const": "2026/27",
+     "type": "string"
+    }
+   },
+   "required": [
+    "yearOfAssessment",
+    "sourceTableYear",
+    "effectiveFrom",
+    "currency",
+    "period",
+    "scope",
+    "monthlyApitRelief",
+    "employeeEpfRate",
+    "employerEpfRate",
+    "employerEtfRate",
+    "stampDutyThreshold",
+    "stampDutyAboveThreshold",
+    "provenanceNote",
+    "excludedCases",
+    "methodologyUrl",
+    "machineReadableMethodologyUrl",
+    "openApiUrl",
+    "citation",
+    "sources"
+   ],
+   "type": "object"
+  },
+  "title": "Get the Sri Lanka payroll reference"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the fields and checks needed to prepare or review a Sri Lankan employee payslip.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_sri_lanka_payslip_checklist",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "earnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "employeeDeductions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "employerContributions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "evidenceNote": {
+     "type": "string"
+    },
+    "generatorUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "guideUrl": {
+     "format": "uri",
+     "type": "string"
+    },
+    "identityAndPeriod": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "sources": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "authority": {
+        "type": "string"
+       },
+       "topic": {
+        "type": "string"
+       },
+       "url": {
+        "format": "uri",
+        "type": "string"
+       }
+      },
+      "required": [
+       "authority",
+       "topic",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "verificationChecks": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "identityAndPeriod",
+    "earnings",
+    "employeeDeductions",
+    "employerContributions",
+    "verificationChecks",
+    "evidenceNote",
+    "guideUrl",
+    "generatorUrl",
+    "sources"
+   ],
+   "type": "object"
+  },
+  "title": "Get a Sri Lanka payslip checklist"
+ }
+]

@@ -1,0 +1,1136 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Add lead comment"
+  },
+  "description": "WRITE: add a comment (an internal note) to a lead, optionally typed as an activity such as a call or meeting. It is visible to the lead's team in noCRM.io and sends nothing to the customer. Not idempotent. POST /leads/{id}/comments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "activity_id": {
+     "description": "Activity type id (see nocrm_list_activities), for example the id of 'Call'.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "content": {
+     "description": "The comment text.",
+     "maxLength": 20000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id",
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_add_lead_comment",
+  "output_schema": {},
+  "title": "Add lead comment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Add lead to client folder"
+  },
+  "description": "WRITE: file a lead under a client folder. POST /leads/{id}/add_to_client.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_id": {
+     "description": "Client folder id (see nocrm_list_client_folders).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id",
+    "client_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_add_lead_to_client_folder",
+  "output_schema": {},
+  "title": "Add lead to client folder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Assign lead"
+  },
+  "description": "WRITE: assign a lead to a user (id or email), replacing its current owner. The owner may get a notification from noCRM.io. POST /leads/{id}/assign.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "user_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "The new owner (id or email)."
+    }
+   },
+   "required": [
+    "lead_id",
+    "user_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_assign_lead",
+  "output_schema": {},
+  "title": "Assign lead"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create client folder"
+  },
+  "description": "WRITE: create a client folder (an account that groups leads). Not idempotent. POST /clients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "description": {
+     "description": "For example the address.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "name": {
+     "description": "Folder name, usually the company.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    },
+    "user_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "Owner (id or email)."
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_create_client_folder",
+  "output_schema": {},
+  "title": "Create client folder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create lead"
+  },
+  "description": "WRITE: create a new lead. The description holds the contact's details, one 'Label: value' per line (for example 'Firstname: Ada', 'Email: ada@example.com', 'Phone: ...'); noCRM.io reads those lines. Without user_id the lead is created unassigned; a pipeline step can only be set when the lead is assigned. Not idempotent: calling twice creates two leads. POST /leads.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "description": {
+     "description": "Contact details and notes, one 'Label: value' per line.",
+     "maxLength": 20000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "step": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "Pipeline step id or exact name. Needs user_id."
+    },
+    "tags": {
+     "description": "Tags (created if new).",
+     "items": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "title": {
+     "description": "Lead title, usually the company name.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    },
+    "user_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "Owner (id or email). Omit for an unassigned lead."
+    }
+   },
+   "required": [
+    "title",
+    "description"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_create_lead",
+  "output_schema": {},
+  "title": "Create lead"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get client folder"
+  },
+  "description": "One client folder by id, with its contact fields and owner. GET /clients/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_id": {
+     "description": "Client folder id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "client_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_get_client_folder",
+  "output_schema": {},
+  "title": "Get client folder"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get lead"
+  },
+  "description": "One lead by id: title, step, status, amount, probability, tags, owner, client folder, team, reminder, and the full description with the contact's details. GET /leads/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_get_lead",
+  "output_schema": {},
+  "title": "Get lead"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Find duplicate leads"
+  },
+  "description": "Leads that noCRM.io detects as possible duplicates of this lead (same email or key field). GET /leads/{id}/duplicates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_get_lead_duplicates",
+  "output_schema": {},
+  "title": "Find duplicate leads"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get user"
+  },
+  "description": "One user by id or email address. GET /users/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "user": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "A user id or the user's email address (see nocrm_list_users)."
+    }
+   },
+   "required": [
+    "user"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_get_user",
+  "output_schema": {},
+  "title": "Get user"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List activity types"
+  },
+  "description": "The activity types (call, email, meeting and their outcomes) that can be set on a comment or reminder. GET /activities.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nocrm_list_activities",
+  "output_schema": {},
+  "title": "List activity types"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List client folders"
+  },
+  "description": "Client folders (accounts that group several leads), ordered by name by default. GET /clients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "direction": {
+     "description": "Default asc.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "order": {
+     "description": "Order by name (default) or id.",
+     "enum": [
+      "name",
+      "id"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_client_folders",
+  "output_schema": {},
+  "title": "List client folders"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List custom fields"
+  },
+  "description": "The custom fields defined for leads or client folders. GET /fields.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "type": {
+     "description": "Only fields of this type.",
+     "enum": [
+      "lead",
+      "client"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_fields",
+  "output_schema": {},
+  "title": "List custom fields"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List post-sales follow-ups"
+  },
+  "description": "Post-sales processes (task checklists created from a template) of one lead OR of one user. Needs lead_id or user_id. Post-sales is a higher-edition feature (HTTP 403 otherwise). GET /follow_ups.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lead_id": {
+     "description": "Follow-ups of this lead.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Only these statuses.",
+     "items": {
+      "enum": [
+       "todo",
+       "standby",
+       "done"
+      ],
+      "type": "string"
+     },
+     "maxItems": 3,
+     "minItems": 1,
+     "type": "array"
+    },
+    "user_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "Follow-ups of this user (id or email)."
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_follow_ups",
+  "output_schema": {},
+  "title": "List post-sales follow-ups"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List lead attachments"
+  },
+  "description": "File attachments on a lead (names, ids, sizes, links). GET /leads/{id}/attachments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_list_lead_attachments",
+  "output_schema": {},
+  "title": "List lead attachments"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List lead comments"
+  },
+  "description": "The comments (notes, logged calls/meetings/emails) on a lead, newest first by default. GET /leads/{id}/comments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "direction": {
+     "description": "Sort by date (default desc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_list_lead_comments",
+  "output_schema": {},
+  "title": "List lead comments"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List lead history"
+  },
+  "description": "The timeline of a lead: creation, assignments, step and status changes, amount changes, comments and emails sent, with who did it and when. Filter by date range, action type or user. GET /leads/{id}/action_histories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "action_type": {
+     "description": "Only this kind of action.",
+     "enum": [
+      "client_assigned",
+      "step_changed",
+      "status_changed",
+      "amount_set",
+      "user_assigned",
+      "lead_created",
+      "comment_added",
+      "email_sent"
+     ],
+     "type": "string"
+    },
+    "direction": {
+     "description": "Sort by id (default asc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "from": {
+     "description": "From this date (yyyy-mm-dd).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "limit": {
+     "description": "Results per call, 1-100 (default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Skip this many results (default 0). Pass the previous reply's next_offset.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "to": {
+     "description": "Until this date (yyyy-mm-dd).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_list_lead_history",
+  "output_schema": {},
+  "title": "List lead history"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List leads"
+  },
+  "description": "List or search sales leads (noCRM.io's opportunities), newest first by default, with title, pipeline step, status, amount, probability, tags, owner, next reminder and the contact details in the description. Filter by status, step (names or ids, not mixed), owner, tags, email, starred or a date range. Unassigned leads are excluded unless include_unassigned is true. GET /leads.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "date_range_type": {
+     "description": "Which date start_date/end_date apply to (default creation).",
+     "enum": [
+      "creation",
+      "update",
+      "next_action",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "direction": {
+     "description": "Sort direction (default desc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "email": {
+     "description": "Only leads whose description or comments contain this email address.",
+     "maxLength": 200,
+     "minLength": 3,
+     "type": "string"
+    },
+    "end_date": {
+     "description": "Until this date (yyyy-mm-dd), by date_range_type.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "include_unassigned": {
+     "description": "Also return leads that have no owner (default false).",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Results per call, 1-100 (default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Skip this many results (default 0). Pass the previous reply's next_offset.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "order": {
+     "description": "Sort attribute (default id).",
+     "enum": [
+      "id",
+      "creation_date",
+      "last_update",
+      "next_action",
+      "sale_step",
+      "amount",
+      "probability",
+      "probalized_amount",
+      "alphabetically"
+     ],
+     "type": "string"
+    },
+    "starred": {
+     "description": "true = only starred leads.",
+     "type": "boolean"
+    },
+    "start_date": {
+     "description": "From this date (yyyy-mm-dd), by date_range_type.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "status": {
+     "description": "Only leads in these statuses (todo = to do, standby = waiting for a reminder date).",
+     "items": {
+      "enum": [
+       "todo",
+       "standby",
+       "won",
+       "cancelled",
+       "lost"
+      ],
+      "type": "string"
+     },
+     "maxItems": 5,
+     "minItems": 1,
+     "type": "array"
+    },
+    "steps": {
+     "anyOf": [
+      {
+       "items": {
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       },
+       "maxItems": 30,
+       "minItems": 1,
+       "type": "array"
+      },
+      {
+       "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       },
+       "maxItems": 30,
+       "minItems": 1,
+       "type": "array"
+      }
+     ],
+     "description": "Only leads in these pipeline steps: exact step names OR step ids (not mixed). See nocrm_list_steps."
+    },
+    "tags": {
+     "description": "Only leads carrying ALL of these tags.",
+     "items": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    },
+    "updated_after": {
+     "description": "Only leads updated on or after this date (yyyy-mm-dd). Do not combine with date_range_type.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "user_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "Only leads owned by this user (id or email)."
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_leads",
+  "output_schema": {},
+  "title": "List leads"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List pipelines"
+  },
+  "description": "The sales pipelines of the account (one unless the multiple-pipelines feature is on). GET /pipelines.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nocrm_list_pipelines",
+  "output_schema": {},
+  "title": "List pipelines"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List predefined tags"
+  },
+  "description": "The account's predefined tags (admin keys only; an HTTP 401 unauthorized_non_admin means the key lacks rights). GET /predefined_tags.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nocrm_list_predefined_tags",
+  "output_schema": {},
+  "title": "List predefined tags"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List pipeline steps"
+  },
+  "description": "The steps (stages) of the sales pipeline in order, with ids, positions and their pipeline. Use the ids or names when filtering leads or moving a lead. GET /steps.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "direction": {
+     "description": "Order by position (default asc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_steps",
+  "output_schema": {},
+  "title": "List pipeline steps"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List teams"
+  },
+  "description": "Sales teams with their members and who manages each. The Teams feature must be on in the account (HTTP 403 otherwise). GET /teams.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "nocrm_list_teams",
+  "output_schema": {},
+  "title": "List teams"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List unassigned leads"
+  },
+  "description": "Leads that have no owner yet (for example web-form or API leads waiting to be handed to a salesperson). GET /leads/unassigned.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Results per call, 1-100 (default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_unassigned_leads",
+  "output_schema": {},
+  "title": "List unassigned leads"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List users"
+  },
+  "description": "The users (salespeople) of the account with name, email, phone, role (admin or not) and whether they are active or deactivated. Deleted users are included, flagged is_disabled. GET /users.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "email": {
+     "description": "Only the user with this email.",
+     "maxLength": 200,
+     "minLength": 3,
+     "type": "string"
+    },
+    "firstname": {
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "lastname": {
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "role": {
+     "description": "Default all.",
+     "enum": [
+      "all",
+      "admin",
+      "non-admin"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "description": "Default all.",
+     "enum": [
+      "all",
+      "activated",
+      "deactivated"
+     ],
+     "type": "string"
+    },
+    "teams": {
+     "description": "Only users in these teams (ids or names).",
+     "items": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       },
+       {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       }
+      ]
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "nocrm_list_users",
+  "output_schema": {},
+  "title": "List users"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Summarize activities on selected leads"
+  },
+  "description": "Count logged activity comments by their author and activity type/outcome for 1–20 selected leads in an inclusive date range. Choose a reporting time zone (default UTC) and optionally user ids. Calls GET /activities once and GET /leads/{id}/comments once per lead, up to 21 vendor requests before retries. Parent grouping combines outcomes such as answered/unanswered under Call without double counting. This is a lead-scoped report: excludes activities without a lead, other leads, ordinary notes and reminders; it cannot reproduce account-wide Statistics > Activity. Use noCRM's Team's activity export for that report. Unknown activity ids remain in the counts with a null name. A failed or malformed source returns an error, never partial totals.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "from": {
+     "description": "First reporting day, inclusive (yyyy-mm-dd).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "group_by": {
+     "description": "outcome (default) keeps answered/unanswered distinct; parent_activity combines them under their parent activity.",
+     "enum": [
+      "outcome",
+      "parent_activity"
+     ],
+     "type": "string"
+    },
+    "lead_ids": {
+     "description": "Explicit lead ids to report on, 1–20. Discover them with nocrm_list_leads; this tool does not scan the account.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "type": "array"
+    },
+    "time_zone": {
+     "description": "IANA time zone used to assign timestamps to days, e.g. Europe/Prague. Default UTC; choose the account's zone to compare with UI dates.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "to": {
+     "description": "Last reporting day, inclusive (yyyy-mm-dd).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "user_ids": {
+     "description": "Only activities authored by these users, regardless of the lead's owner. See nocrm_list_users.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "lead_ids",
+    "from",
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_summarize_lead_activities",
+  "output_schema": {},
+  "title": "Summarize activities on selected leads"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update lead"
+  },
+  "description": "WRITE: change a lead: title, status (won, lost, cancelled, todo or standby), pipeline step, amount, probability, star, estimated closing date, tags (replaces the lead's tag list), or append text to the description (existing description text is never replaced). Moving to standby needs remind_date. Only the fields you pass change. PUT /leads/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "amount": {
+     "description": "Deal amount in the account currency.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "append_description": {
+     "description": "Text added at the end of the description.",
+     "maxLength": 20000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "estimated_closing_date": {
+     "description": "yyyy-mm-dd, in the account's time zone.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "lead_id": {
+     "description": "noCRM.io lead id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "probability": {
+     "description": "Win probability, percent.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "remind_date": {
+     "description": "Reminder date yyyy-mm-dd (required for standby).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "remind_time": {
+     "description": "Reminder time HH:MM, 24 h, in 15-minute steps.",
+     "pattern": "^([01]\\d|2[0-3]):(00|15|30|45)$",
+     "type": "string"
+    },
+    "reminder_note": {
+     "description": "Note stored with the reminder.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "starred": {
+     "type": "boolean"
+    },
+    "status": {
+     "description": "New status. standby needs remind_date.",
+     "enum": [
+      "todo",
+      "standby",
+      "won",
+      "cancelled",
+      "lost"
+     ],
+     "type": "string"
+    },
+    "step": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "maxLength": 200,
+       "minLength": 1,
+       "type": "string"
+      }
+     ],
+     "description": "Move to this step (id or exact name; prefer the id when pipelines share names)."
+    },
+    "tags": {
+     "description": "The lead's tags after the update (replaces the current list; new tags are created).",
+     "items": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 30,
+     "type": "array"
+    },
+    "title": {
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "lead_id"
+   ],
+   "type": "object"
+  },
+  "name": "nocrm_update_lead",
+  "output_schema": {},
+  "title": "Update lead"
+ }
+]

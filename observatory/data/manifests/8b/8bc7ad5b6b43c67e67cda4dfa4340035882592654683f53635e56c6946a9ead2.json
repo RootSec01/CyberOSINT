@@ -1,0 +1,221 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "「株式会社コンテンシャル」のページの本文を、最初から最後まで返します。search で見つけたサービスの内容、支援事例の取り組み、お知らせの詳細、SEO Note!! の記事や月ごとのレポートをくわしく読むときに使います。",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "探した結果の id（ページの URL）。ページの URL かパスでも可（日本語のままでも可）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "metadata": {
+     "type": "object"
+    },
+    "text": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "title",
+    "text",
+    "url"
+   ],
+   "type": "object"
+  },
+  "title": "ページの中身を読む"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "「株式会社コンテンシャル」（seo.contencial.co.jp）の以前の名前の機能です（すでにつないでいる人のために残しています）。fetch と同じようにページの本文を返しますが、返す形が違います。新しく使うときは fetch を使ってください。",
+  "input_schema": {
+   "properties": {
+    "url": {
+     "description": "ページの URL かパス（日本語のままでも可）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "get_page",
+  "output_schema": {},
+  "title": "ページの中身を読む（以前の名前）"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "「株式会社コンテンシャル」に読み込まれているページの一覧（タイトルと URL）を返します。/service/ はサービス、/casestudy/ は支援事例、/news/ はお知らせ、/seo-note/ は SEO Note!!（/seo-note/report/ が月ごとの振り返り）、/company/ は会社情報、/tag/ は記事のタグ別の一覧です。事例やお知らせをまとめて挙げたいときに使います。",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 50,
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_pages",
+  "output_schema": {},
+  "title": "どんなページがあるか見る"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "「株式会社コンテンシャル」（SEO 対策の会社）の公式サイトから、言葉に当てはまる箇所を抜粋つきで探します。事業とサービスの内容（SEO コンサルティング、WEB 広告など）、支援事例、特許・連載・提携などのお知らせ、SEO メディア「SEO Note!!」の解説記事と毎月の SEO 振り返りレポートを探せます。この会社やサービスについて質問されたら、まずこれを使ってください。「特許」「2026年8月 レポート」のように短い言葉で探します。",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "探したい言葉（例: 料金 支払い方法）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {
+   "properties": {
+    "candidates": {
+     "items": {
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "results": {
+     "items": {
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "text": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "サイトの中を探す"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "「株式会社コンテンシャル」（seo.contencial.co.jp）の以前の名前の機能です（すでにつないでいる人のために残しています）。search と同じようにサイトの中を探しますが、返す形が違います。新しく使うときは search を使ってください。",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 5,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "探したい言葉（例: 料金 支払い方法）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_pages",
+  "output_schema": {},
+  "title": "サイトの中を探す（以前の名前）"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "「株式会社コンテンシャル」の概要を返します。代表取締役の柏崎剛のもとで、SEO 対策とサイト改善のコンサルティング、ツール開発、SEO メディアの運営を手がける会社の公式サイトです。どんな会社か、何を頼めるかを最初に知りたいときに使います。",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "site_overview",
+  "output_schema": {},
+  "title": "サイトの概要を知る"
+ }
+]

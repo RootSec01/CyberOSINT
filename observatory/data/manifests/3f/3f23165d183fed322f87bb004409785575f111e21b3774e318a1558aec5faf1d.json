@@ -1,0 +1,213 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Analyze Amazon Review Sample"
+  },
+  "description": "Analyzes up to 100 recent reviews (~30-90 seconds). Bright Data can take longer. Use only when Amazon review-sample analysis is explicitly requested; use `check_product_trust` for an existing evidence score or `compare_products` to rank listings. On-demand sampling without your cookie; reviews are sorted within the returned sample, but the provider does not guarantee the listing's newest 100. May trigger paid Bright Data collection and writes a seven-day analysis cache. force_refresh bypasses that cache and may start another paid scrape. A later explicit call without force_refresh resumes a pending job without a new scrape. Heuristics do not prove authenticity.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "force_refresh": {
+     "default": false,
+     "description": "Bypass the seven-day cache; may start a new paid review scrape. Leave false to reuse cache or resume a pending job.",
+     "type": "boolean"
+    },
+    "product_id": {
+     "description": "Native retailer product ID, such as an Amazon ASIN (e.g. 'B0BXYCS74H').",
+     "maxLength": 128,
+     "minLength": 1,
+     "type": "string"
+    },
+    "retailer": {
+     "description": "Marketplace containing the listing: amazon, walmart, target, or bestbuy.",
+     "enum": [
+      "amazon",
+      "walmart",
+      "target",
+      "bestbuy"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "retailer",
+    "product_id"
+   ],
+   "type": "object"
+  },
+  "name": "analyze_reviews",
+  "output_schema": {},
+  "title": "Analyze Amazon Review Sample"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check Product Trust Score"
+  },
+  "description": "Return the GoBuy Evidence Score (0-100) and complete signal breakdown for a single retailer listing on Amazon, Walmart, Target, or Best Buy. This is the GPV-1 gate evaluator: score >= 55 PASS, 35-54 FLAG, < 35 or not-indexed BLOCK. The returned verdict is an evidence tier (strong/moderate/weak), not a computed GPV-1 checkout decision. Use this for individual product lookups. To compare and rank multiple products, use `compare_products` instead. Use `analyze_reviews` only for explicitly requested Amazon review-sample analysis; this lookup never fetches reviews. Read-only — does not modify any state or place orders. Scores describe available marketplace records, not product quality or purchase recommendations.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "product_id": {
+     "description": "Native retailer product ID, such as an Amazon ASIN (e.g. 'B0BXYCS74H').",
+     "maxLength": 128,
+     "minLength": 1,
+     "type": "string"
+    },
+    "retailer": {
+     "description": "Marketplace containing the listing: amazon, walmart, target, or bestbuy.",
+     "enum": [
+      "amazon",
+      "walmart",
+      "target",
+      "bestbuy"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "retailer",
+    "product_id"
+   ],
+   "type": "object"
+  },
+  "name": "check_product_trust",
+  "output_schema": {},
+  "title": "Check Product Trust Score"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check Store Trust and Readiness Score"
+  },
+  "description": "Retrieve a previously scored independent store or Shopify storefront by domain: agent-readiness, trust signals, structured data, and review system. Use this first for an existing store score; it is read-only and does not crawl. If not scored yet, use `scan_store` for an explicit fresh scan. For a retailer product listing rather than a storefront, use `check_product_trust`.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "maxLength": 253,
+     "pattern": "^(?=.{1,253}$)[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "check_store_score",
+  "output_schema": {},
+  "title": "Check Store Trust and Readiness Score"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Compare and Rank Products"
+  },
+  "description": "Fetch Evidence Scores for 2-20 retailer listings and rank them by GoBuy Evidence Score (highest first). Use this when an agent is choosing between multiple products. For a single product lookup, use `check_product_trust` instead. Read-only — does not modify any state or place orders, and never fetches reviews. Unindexed products rank last. This is not purchase advice.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "products": {
+     "description": "Array of 2-20 product references to compare and rank.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "product_id": {
+        "description": "Native retailer product ID, such as an Amazon ASIN (e.g. 'B0BXYCS74H').",
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+       },
+       "retailer": {
+        "description": "Marketplace containing the listing: amazon, walmart, target, or bestbuy.",
+        "enum": [
+         "amazon",
+         "walmart",
+         "target",
+         "bestbuy"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "retailer",
+       "product_id"
+      ],
+      "type": "object"
+     },
+     "maxItems": 20,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "products"
+   ],
+   "type": "object"
+  },
+  "name": "compare_products",
+  "output_schema": {},
+  "title": "Compare and Rank Products"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Scan and Score Store Live"
+  },
+  "description": "Score any online store live with a fresh crawl (~20 seconds). Use when `check_store_score` returns 404 or a fresh scan is explicitly requested. Use `check_store_score` instead to retrieve an existing result without crawling. Requires a full HTTP(S) URL and updates the stored store score; repeated calls can trigger new scans. For marketplace product evidence, use `check_product_trust` instead. Docs: https://docs-gobuy.pages.dev",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "scan_store",
+  "output_schema": {},
+  "title": "Scan and Score Store Live"
+ }
+]

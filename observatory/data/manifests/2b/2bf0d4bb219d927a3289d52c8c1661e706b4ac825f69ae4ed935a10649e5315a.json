@@ -1,0 +1,346 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find free ready-made PriorStates Studio Gallery apps for a need described in plain words, in English, Chinese, Spanish or Portuguese (e.g. 'split a dinner bill', 'keep my receipts for taxes', '分账', 'recibos'). Returns the best matches with what each does, a page link, a screenshot and how to open it. If nothing fits, Studio can make a new app from the description.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "language": {
+     "description": "Language for the reply's app text and links: en, zh (Simplified Chinese), zh-hant (Traditional Chinese), es, pt. Default en (zh when the need is written in Chinese).",
+     "enum": [
+      "en",
+      "zh",
+      "zh-hant",
+      "es",
+      "pt"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 3,
+     "description": "How many apps at most (1-10, default 3).",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "need": {
+     "description": "What the person wants to do, in their own words.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "need"
+   ],
+   "type": "object"
+  },
+  "name": "find_apps",
+  "output_schema": {
+   "properties": {
+    "apps": {
+     "items": {
+      "properties": {
+       "gallery_page": {
+        "type": "string"
+       },
+       "group": {
+        "type": "string"
+       },
+       "group_id": {
+        "type": "string"
+       },
+       "icon": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "open_on_web": {
+        "type": "string"
+       },
+       "screenshot": {
+        "type": "string"
+       },
+       "what_it_does": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "what_it_does",
+       "gallery_page"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "confident": {
+     "type": "boolean"
+    },
+    "language": {
+     "type": "string"
+    },
+    "make_new": {
+     "properties": {
+      "text": {
+       "type": "string"
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "need": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "need",
+    "language",
+    "apps",
+    "confident"
+   ],
+   "type": "object"
+  },
+  "title": "Find a free app for a need"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Full details of one PriorStates Studio Gallery app by id (from find_apps or list_apps): what it does, what it needs (permissions in plain words), its page, screenshot and how to open it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "App id, e.g. expense-split.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "language": {
+     "description": "Language for the reply's app text and links: en, zh (Simplified Chinese), zh-hant (Traditional Chinese), es, pt. Default en (zh when the need is written in Chinese).",
+     "enum": [
+      "en",
+      "zh",
+      "zh-hant",
+      "es",
+      "pt"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_app",
+  "output_schema": {
+   "properties": {
+    "app": {
+     "type": "object"
+    },
+    "how_to_get": {
+     "type": "string"
+    },
+    "needs": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "app",
+    "needs"
+   ],
+   "type": "object"
+  },
+  "title": "Details of one Gallery app"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "What PriorStates Studio is (makes small apps by asking; a Gallery of free apps), the price, and the links for every platform: web, Android (Google Play and APK), iPhone/iPad, macOS/Windows/Linux, Microsoft Store.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "language": {
+     "description": "Language for the reply's app text and links: en, zh (Simplified Chinese), zh-hant (Traditional Chinese), es, pt. Default en (zh when the need is written in Chinese).",
+     "enum": [
+      "en",
+      "zh",
+      "zh-hant",
+      "es",
+      "pt"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_studio",
+  "output_schema": {
+   "properties": {
+    "languages": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "name": {
+     "type": "string"
+    },
+    "platforms": {
+     "items": {
+      "properties": {
+       "platform": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "price": {
+     "type": "string"
+    },
+    "what": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "what",
+    "price",
+    "platforms"
+   ],
+   "type": "object"
+  },
+  "title": "What PriorStates Studio is and where to get it"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Every free app in the PriorStates Studio Gallery, by group (money, side business, home, health, learning, groups, work). Optional group filter by id or name.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "group": {
+     "description": "Group id (money, business, home, health, learn, groups, work) or its name.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "language": {
+     "description": "Language for the reply's app text and links: en, zh (Simplified Chinese), zh-hant (Traditional Chinese), es, pt. Default en (zh when the need is written in Chinese).",
+     "enum": [
+      "en",
+      "zh",
+      "zh-hant",
+      "es",
+      "pt"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_apps",
+  "output_schema": {
+   "properties": {
+    "groups": {
+     "items": {
+      "properties": {
+       "apps": {
+        "items": {
+         "properties": {
+          "gallery_page": {
+           "type": "string"
+          },
+          "group": {
+           "type": "string"
+          },
+          "group_id": {
+           "type": "string"
+          },
+          "icon": {
+           "type": "string"
+          },
+          "id": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "open_on_web": {
+           "type": "string"
+          },
+          "screenshot": {
+           "type": "string"
+          },
+          "what_it_does": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "name",
+          "what_it_does",
+          "gallery_page"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "icon": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "total": {
+     "type": "integer"
+    }
+   },
+   "required": [
+    "groups",
+    "total"
+   ],
+   "type": "object"
+  },
+  "title": "All free Gallery apps"
+ }
+]

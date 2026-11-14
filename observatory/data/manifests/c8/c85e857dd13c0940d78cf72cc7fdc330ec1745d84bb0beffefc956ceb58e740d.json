@@ -1,0 +1,224 @@
+[
+ {
+  "description": "Browse active Vegas Weekend Roll Call community threads (open 8-way VIP booth seat splits, 1:1 even-ratio guestlist squads, and Sphere-to-club crawl crews) so solo travelers, couples, and small groups can split tables at $608-$694/seat all-in.",
+  "input_schema": {
+   "properties": {
+    "mode": {
+     "description": "Optional filter: all, table_share, ratio_squad, club_hop, live_checkin",
+     "type": "string"
+    },
+    "venueSlug": {
+     "description": "Optional venue slug filter (e.g. xs-nightclub, omnia-nightclub, sphere-las-vegas)",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "browse_or_join_roll_call_table_shares",
+  "output_schema": {}
+ },
+ {
+  "description": "Calculate true out-the-door Las Vegas VIP table cost including 8.375% Clark County sales tax, 9.0% Nevada Live Entertainment Tax (when applicable), venue fee, and 20% gratuity.",
+  "input_schema": {
+   "properties": {
+    "appliesNevadaLet": {
+     "description": "True for live-DJ clubs/shows (9% LET), false for fine-dining PDRs (0% LET)",
+     "type": "boolean"
+    },
+    "baseMinUsd": {
+     "description": "Quoted pre-tax table minimum in USD",
+     "type": "number"
+    },
+    "totalGuests": {
+     "description": "Total guests splitting the table",
+     "type": "number"
+    }
+   },
+   "required": [
+    "baseMinUsd",
+    "totalGuests"
+   ],
+   "type": "object"
+  },
+  "name": "calculate_nevada_table_split",
+  "output_schema": {}
+ },
+ {
+  "description": "Retrieve verified $0 free nightclub/dayclub guestlist M/F ratio and cutoff rules across 25 Las Vegas clubs/pools plus complimentary house limo $0-cover bypass rules across licensed Las Vegas gentlemen’s clubs.",
+  "input_schema": {
+   "properties": {
+    "mode": {
+     "description": "Optional filter: \"all\" (default), \"guestlist\" (nightclubs/dayclubs), or \"free_limo\" (gentlemens-clubs)",
+     "type": "string"
+    },
+    "venueSlug": {
+     "description": "Optional single venue slug to check exact ratio or free house limo rules",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_free_limo_and_guestlist_rules",
+  "output_schema": {}
+ },
+ {
+  "description": "Retrieve LasVegasTonight.com proprietary Zillow-style TableEstimate™ (real-time all-in booth clearing price w/ 38.875% NRS 368A.200 tax/LET/grat/fee waterfall and 8-person split) and VibeCred™ (0-100 composite club & venue score across Crowd Voltage, Talent, Value, Door Speed & Verified Spend) for any venue or top leaderboard.",
+  "input_schema": {
+   "properties": {
+    "venueSlug": {
+     "description": "Optional single venue slug (e.g. xs-nightclub, omnia-nightclub, sphere-las-vegas, the-pinky-ring-bellagio)",
+     "type": "string"
+    },
+    "vertical": {
+     "description": "Optional vertical filter if listing top VibeCred™ venues",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_proprietary_vibecred_and_table_estimate",
+  "output_schema": {}
+ },
+ {
+  "description": "Retrieve any of the 20 Las Vegas Casino-Resort After-Dark Campuses (Wynn/Encore, Cosmopolitan, Caesars Palace, Venetian/Palazzo, Fontainebleau, Resorts World, Bellagio, ARIA/Park MGM, MGM Grand/Mandalay, Sphere/LINQ, Circa, Virgin, Mirage/Hard Rock corridor, Paris/Planet Hollywood, Palms, Rio, Strat, Red Rock, Durango, Green Valley Ranch) with indoor skybridges, 3-stop walkable dinner-to-show-to-club chains, and child venue Nevada split math, or omit slug to list all 20 hubs.",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "description": "Optional resort hub slug, e.g. wynn-and-encore, cosmopolitan-las-vegas, caesars-palace, venetian-and-palazzo, fontainebleau-las-vegas, resorts-world-las-vegas, bellagio-las-vegas, aria-and-park-mgm, mgm-grand-and-mandalay-bay, sphere-linq-and-cromwell",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_resort_nightlife_hub",
+  "output_schema": {}
+ },
+ {
+  "description": "Retrieve full venue specifications, Nevada LET tax multiplier, architectural table sections, Uber/valet pin, dress code, 2026 door telemetry, parent resort nightlife hub, and walkable neighbor resorts for a venue slug.",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "description": "Venue slug, e.g. xs-nightclub, omnia-nightclub, liv-nightclub, encore-beach-club",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_venue_details",
+  "output_schema": {}
+ },
+ {
+  "description": "List all major Las Vegas surge weekends (Formula 1, NYE, Super Bowl, March Madness, EDC Week, CES, Memorial Day, UFC Fight Week, Halloween, SEMA, NFR Rodeo Week, Fantasy Drafts) with table multipliers and indoor bridge traffic rules.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_major_event_weekends",
+  "output_schema": {}
+ },
+ {
+  "description": "Search 119 verified Las Vegas nightclubs, dayclubs, evening shows, mega-sportsbooks, supper clubs, speakeasies, gentlemen’s clubs, and late-night experiences with out-the-door Nevada table split pricing.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Maximum results to return (default 10, max 30)",
+     "type": "number"
+    },
+    "query": {
+     "description": "Optional keyword, resort name, or music format search",
+     "type": "string"
+    },
+    "vertical": {
+     "description": "Optional category filter: nightclubs, dayclubs, shows, dining-and-buyouts, lounges-and-speakeasies, gentlemens-clubs, experiences",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_las_vegas_venues",
+  "output_schema": {}
+ },
+ {
+  "description": "Search all 109 Las Vegas DJs, Sphere visual residencies, Strip theater concert headliners, hip-hop performers, comedians, and magicians with DropScore™ (0-100) ratings, exact stage-drop times, TableEstimate™ splits, guestlist cutoff probability, and playable Apple Music track previews.",
+  "input_schema": {
+   "properties": {
+    "artistSlug": {
+     "description": "Optional exact artist slug (e.g. calvin-harris, anyma, bruno-mars, dom-dolla, dave-chappelle)",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max entertainers to return (default 12, max 40)",
+     "type": "number"
+    },
+    "query": {
+     "description": "Optional artist name, genre, or category search (e.g. \"Calvin Harris\", \"Sphere\", \"Bruno Mars\", \"comedy\", \"tech-house\")",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "shop_vegas_entertainers",
+  "output_schema": {}
+ },
+ {
+  "description": "Submit a real $0-due-online Las Vegas VIP table hold, free guestlist entry, complimentary strip-club house limo pickup, or corporate private-dining buyout request directly to the LasVegasTonight.com VIP Desk and receive an official LVT-XXXX-1234 confirmation code and out-the-door Nevada split sheet.",
+  "input_schema": {
+   "properties": {
+    "contactInput": {
+     "description": "Guest mobile phone number (for SMS confirmation) or email address (for itemized HTML split sheet)",
+     "type": "string"
+    },
+    "girlsCount": {
+     "description": "Optional count of women in party (important for ratio/guestlist checks)",
+     "type": "number"
+    },
+    "guestEmail": {
+     "description": "Optional email address if contactInput is a mobile number, to also email the itemized Nevada split sheet",
+     "type": "string"
+    },
+    "guestName": {
+     "description": "Guest full name for the VIP podium or guestlist check-in",
+     "type": "string"
+    },
+    "guysCount": {
+     "description": "Optional count of men in party (important for ratio/guestlist checks)",
+     "type": "number"
+    },
+    "notes": {
+     "description": "Optional arrival window, preferred table section, or celebration notes",
+     "type": "string"
+    },
+    "partySize": {
+     "description": "Total guests in party (default 8)",
+     "type": "number"
+    },
+    "pickupHotel": {
+     "description": "Optional Strip/Downtown pickup hotel valet for complimentary gentlemen’s club house limo dispatch",
+     "type": "string"
+    },
+    "requestType": {
+     "description": "One of: vip_table, free_guestlist, free_strip_club_limo, corporate_buyout",
+     "type": "string"
+    },
+    "selectedDate": {
+     "description": "Target date in YYYY-MM-DD format (optional)",
+     "type": "string"
+    },
+    "venueSlug": {
+     "description": "Target venue slug (e.g. xs-nightclub, omnia-nightclub, sapphire-gentlemens-club, delilah-wynn)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "venueSlug",
+    "contactInput"
+   ],
+   "type": "object"
+  },
+  "name": "submit_vip_table_or_guestlist_hold",
+  "output_schema": {}
+ }
+]

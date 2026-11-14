@@ -1,0 +1,50 @@
+[
+ {
+  "description": "What TradeBasis is, the problem it solves, what makes it different, and who it's for. Returns static markdown with an as_of date.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "tradebasis_about",
+  "output_schema": {},
+  "title": "About TradeBasis"
+ },
+ {
+  "description": "TradeBasis subscription tiers — Lite ($99/mo CAD) vs Pro ($499/mo CAD): what each includes and who each is for. Static markdown.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "tradebasis_pricing_and_tiers",
+  "output_schema": {},
+  "title": "TradeBasis Pricing & Plans"
+ },
+ {
+  "description": "Static research/market-report briefs authored by TradeBasis. Call with no arguments to list available briefs, or pass a topic (slug or title) to retrieve a single brief. Returns static markdown.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "topic": {
+     "description": "Optional brief slug or title. Omit to list all available briefs.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "tradebasis_research_library",
+  "output_schema": {},
+  "title": "TradeBasis Research Library"
+ }
+]

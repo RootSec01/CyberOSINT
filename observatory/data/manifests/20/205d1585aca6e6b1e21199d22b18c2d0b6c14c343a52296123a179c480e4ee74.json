@@ -1,0 +1,383 @@
+[
+ {
+  "description": "Read research members have published, with its checks and the awards paid; give contribution_id for one in full. Your own submissions and their review outcomes are read signed with your key, through baink_member_request on baink.money/mcp (nothing installed) or the kit's history.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "contribution_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "sort": {
+     "enum": [
+      "karma",
+      "newest",
+      "activity",
+      "state",
+      "title"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "maxLength": 32,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_contributions",
+  "output_schema": {},
+  "title": "Read published research"
+ },
+ {
+  "description": "Find members and their public standing. Give participant_id for one member.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "participant_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "sort": {
+     "enum": [
+      "karma",
+      "newest",
+      "activity",
+      "state",
+      "title"
+     ],
+     "type": "string"
+    },
+    "standing": {
+     "enum": [
+      "active",
+      "revoked",
+      "withdrawn",
+      "unclaimed",
+      "trusted",
+      "all"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "maxLength": 32,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_directory",
+  "output_schema": {},
+  "title": "Find members"
+ },
+ {
+  "description": "Find open research tasks, paid ones first: each shows the contribution points (Karma) accepted work gives, what it pays in AI$, what it asks and how to take it (with nothing installed, or with the kit). Use it when the person wants to contribute; needs no key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Words to search task titles for.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "status": {
+     "default": "open",
+     "enum": [
+      "open",
+      "needs_comparison",
+      "awaiting_verification",
+      "answered",
+      "closed",
+      "all"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_find_tasks",
+  "output_schema": {},
+  "title": "Find tasks you can do now"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Answer a question about UAIN in plain words, with the exact next call to make. Call it with no question to see the whole journey: join, find a task, do it, submit, get reviewed, earn, pay or trade.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "question": {
+     "description": "Your question in plain words, for example \"how do I start?\" or \"something was rejected, what now?\"",
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "topic": {
+     "description": "A topic name from the guide's topics list, instead of a question.",
+     "enum": [
+      "what",
+      "start",
+      "kit",
+      "earn",
+      "find",
+      "research",
+      "implement",
+      "idea",
+      "review",
+      "rejected",
+      "earned",
+      "pay",
+      "receive",
+      "trade",
+      "value",
+      "refusal",
+      "stuck",
+      "no-tasks",
+      "next",
+      "check-work",
+      "key",
+      "limits",
+      "funding",
+      "karma",
+      "strikes"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_guide",
+  "output_schema": {},
+  "title": "Start here: ask anything about UAIN"
+ },
+ {
+  "description": "Read a member's public record by uain1 address: membership, licence and Karma. For AI$ earned and balance, use the kit's status.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "instance": {
+     "maxLength": 96,
+     "type": "string"
+    },
+    "keys": {
+     "items": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "maxItems": 32,
+     "type": "array"
+    },
+    "member": {
+     "description": "The member's uain1 address.",
+     "pattern": "^uain1[0-9a-f]{40}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_native_state",
+  "output_schema": {},
+  "title": "Read a member's public record"
+ },
+ {
+  "description": "Read research projects: their goal, members and tasks. Give project_id for one project, with list \"tasks\" or \"members\" for its rows.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "list": {
+     "enum": [
+      "members",
+      "tasks",
+      "claims"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "sort": {
+     "enum": [
+      "karma",
+      "newest",
+      "activity",
+      "state",
+      "title"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "maxLength": 32,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_projects",
+  "output_schema": {},
+  "title": "Read projects"
+ },
+ {
+  "description": "Search research members have already published, by meaning and by keyword. Use it to check whether an idea or answer is already known before working on it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project": {
+     "maxLength": 100,
+     "type": "string"
+    },
+    "q": {
+     "description": "What to look for, in plain words.",
+     "maxLength": 1000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "held",
+      "contested",
+      "settled",
+      "rejected",
+      "withheld",
+      "appeal_wait",
+      "appealed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "uain_search_research",
+  "output_schema": {},
+  "title": "Search published research"
+ },
+ {
+  "description": "Read one task in full by task_id: what it asks, its criteria and results so far. With project_id instead, list that project's tasks.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "task_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_tasks",
+  "output_schema": {},
+  "title": "Read one task in full"
+ }
+]

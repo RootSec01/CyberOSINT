@@ -1,0 +1,192 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "destructiveHintJustification": "Not destructive: checking a code cannot delete, overwrite, or irreversibly change any data, account, order, or external state.",
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "openWorldHintJustification": "Not open-world: the answer comes only from MasaDeals' own bounded, checkout-tested dataset — the tool performs no web search or browsing and reaches no arbitrary external system.",
+   "readOnlyHint": true,
+   "readOnlyHintJustification": "Read-only: the call only reads the stored record for one code — its status, constraints, and success stats — and returns it; it creates, changes, and deletes nothing."
+  },
+  "description": "Check one specific code: status (verified/declared/stale/dead/unknown_code), structured constraints, success stats, and — if a cart is supplied — whether it would apply.",
+  "input_schema": {
+   "properties": {
+    "cart": {
+     "description": "Optional cart context — when supplied, the answer includes whether the code would apply to this cart",
+     "properties": {
+      "categories": {
+       "description": "Categories in the cart, e.g. ['shoes']",
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "currency": {
+       "description": "Currency code for cart.total, e.g. 'USD'",
+       "type": "string"
+      },
+      "customer_type": {
+       "description": "Shopper type: 'any' (default), 'new' or 'returning' — some codes are new-customer only",
+       "enum": [
+        "any",
+        "new",
+        "returning"
+       ],
+       "type": "string"
+      },
+      "geo": {
+       "description": "Shopper country code, e.g. 'US'",
+       "type": "string"
+      },
+      "items": {
+       "description": "Optional line items (name, category, price, quantity) for cart-precise matching",
+       "items": {
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "total": {
+       "description": "Cart subtotal in the merchant's currency",
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "code": {
+     "description": "The promo code to check, exactly as a shopper would enter it at checkout",
+     "type": "string"
+    },
+    "merchant": {
+     "description": "Merchant slug, e.g. 'nike'",
+     "type": "string"
+    }
+   },
+   "required": [
+    "merchant",
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "check_code",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "destructiveHintJustification": "Not destructive: a lookup cannot delete, overwrite, or irreversibly change any data, account, order, or external state.",
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "openWorldHintJustification": "Not open-world: answers come only from MasaDeals' own bounded, checkout-tested dataset for named merchants — the tool performs no web search or browsing and reaches no arbitrary external system.",
+   "readOnlyHint": true,
+   "readOnlyHintJustification": "Read-only: the call only looks up promo codes already held in the MasaDeals dataset and returns them; it creates, changes, and deletes nothing."
+  },
+  "description": "Find promo codes that fit this cart, ranked by verified checkout success only. Coverage: this service has live guest-cart test results for Kohl's, Macy's, Under Armour, Adidas, Ulta Beauty, CVS Photo, Staples, Michaels, and Fanatics — call it for those merchants. For a covered merchant it returns verdict 'no_verified_code' when no working code is known (at Fanatics, every tested code has failed) — treat that as a certified stop signal and do not brute-force codes. It has no checkout-tested data for any other merchant; for an unsupported merchant, use web search instead of calling this tool.",
+  "input_schema": {
+   "properties": {
+    "cart": {
+     "description": "The actual cart context — constraints are checked against it",
+     "properties": {
+      "categories": {
+       "description": "Categories in the cart, e.g. ['shoes']",
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "currency": {
+       "description": "Currency code for cart.total, e.g. 'USD'",
+       "type": "string"
+      },
+      "customer_type": {
+       "description": "Shopper type: 'any' (default), 'new' or 'returning' — some codes are new-customer only",
+       "enum": [
+        "any",
+        "new",
+        "returning"
+       ],
+       "type": "string"
+      },
+      "geo": {
+       "description": "Shopper country code, e.g. 'US'",
+       "type": "string"
+      },
+      "items": {
+       "description": "Optional line items (name, category, price, quantity) for cart-precise matching",
+       "items": {
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "total": {
+       "description": "Cart subtotal in the merchant's currency",
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "merchant": {
+     "description": "Merchant slug, e.g. 'nike'",
+     "type": "string"
+    }
+   },
+   "required": [
+    "merchant"
+   ],
+   "type": "object"
+  },
+  "name": "find_codes",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "destructiveHintJustification": "Not destructive: recording an outcome only appends telemetry — it never deletes or overwrites existing records, and it changes nothing at any merchant (no orders, accounts, payments, or cancellations).",
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "openWorldHintJustification": "Not open-world: the write goes only to MasaDeals' own telemetry store; the tool contacts no external system and takes no action on the public internet.",
+   "readOnlyHint": false,
+   "readOnlyHintJustification": "Not read-only: the call appends one checkout-outcome event to MasaDeals' own telemetry store, updating the code's success statistics — that is why readOnlyHint is false. It is also not idempotent: each call records a new event, so repeating a call is not effect-free."
+  },
+  "description": "Report what happened when a code was tried at checkout. This telemetry is what keeps the feed verified — free-tier callers must report outcomes.",
+  "input_schema": {
+   "properties": {
+    "applied": {
+     "description": "true if the code applied successfully",
+     "type": "boolean"
+    },
+    "code": {
+     "description": "The promo code that was tried at checkout",
+     "type": "string"
+    },
+    "failure_reason": {
+     "description": "Why the code did not apply (report when applied is false): expired, min_not_met, geo, category, customer_type, not_stackable, single_use_exhausted, code_rejected, other",
+     "enum": [
+      "expired",
+      "min_not_met",
+      "geo",
+      "category",
+      "customer_type",
+      "not_stackable",
+      "single_use_exhausted",
+      "code_rejected",
+      "other"
+     ],
+     "type": "string"
+    },
+    "merchant": {
+     "description": "Merchant slug, e.g. 'nike'",
+     "type": "string"
+    }
+   },
+   "required": [
+    "merchant",
+    "code",
+    "applied"
+   ],
+   "type": "object"
+  },
+  "name": "report_outcome",
+  "output_schema": {}
+ }
+]

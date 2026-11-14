@@ -1,0 +1,167 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check links on a page"
+  },
+  "description": "Fetch ONE public web page and check up to 200 of its links and assets: broken links (4xx/5xx, hosts that don't exist, connection errors, timeouts), redirect chains hop by hop (long chains, loops, https-to-http downgrades), mixed content and links that may just block bots (401/403/429, flagged maybe_bot_blocked). Not a crawler: other pages are not visited. Private/loopback/metadata targets are refused, including names that resolve to them. Takes up to about 45 seconds. Returns counts plus up to 25 problem links. Read-only. Same engine and limits as GET /api/check.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "assets": {
+     "description": "Also check images, scripts, stylesheets, iframes and media (default true). false = only <a>/<area> links.",
+     "type": "boolean"
+    },
+    "max": {
+     "description": "How many links to check, 1-200 (default 200).",
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "url": {
+     "description": "Public http(s) page URL, e.g. https://example.com/. A URL without a scheme is treated as https://.",
+     "maxLength": 2048,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "check_links",
+  "output_schema": {
+   "properties": {
+    "checked_at": {
+     "type": "string"
+    },
+    "final_url": {
+     "type": "string"
+    },
+    "not_checked_count": {
+     "type": "integer"
+    },
+    "page_hops": {
+     "items": {
+      "properties": {
+       "location": {
+        "type": "string"
+       },
+       "status": {
+        "type": "integer"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url"
+      ],
+      "type": "object"
+     },
+     "maxItems": 11,
+     "type": "array"
+    },
+    "page_redirects": {
+     "type": "integer"
+    },
+    "page_status": {
+     "type": "integer"
+    },
+    "problems": {
+     "description": "Links needing attention (broken first, then blocked, unchecked, redirects with flags such as long_chain or https_downgrade, then other flagged links). At most 25 here; see problems_total.",
+     "items": {
+      "properties": {
+       "category": {
+        "enum": [
+         "broken",
+         "blocked",
+         "unchecked",
+         "redirect",
+         "ok"
+        ],
+        "type": "string"
+       },
+       "error_code": {
+        "type": "string"
+       },
+       "final_url": {
+        "type": "string"
+       },
+       "flags": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "redirects": {
+        "type": "integer"
+       },
+       "status": {
+        "description": "Final HTTP status (omitted when nothing was fetched).",
+        "type": "integer"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "url",
+       "category"
+      ],
+      "type": "object"
+     },
+     "maxItems": 25,
+     "type": "array"
+    },
+    "problems_returned": {
+     "type": "integer"
+    },
+    "problems_total": {
+     "type": "integer"
+    },
+    "summary": {
+     "additionalProperties": {
+      "type": "integer"
+     },
+     "description": "Counts: linksFound, uniqueLinks, checked, ok, redirected, broken, blocked, unchecked, mixedContent, insecureLinks, longChains, redirectLoops, maybeBotBlocked, resolvesPrivate.",
+     "type": "object"
+    },
+    "truncated": {
+     "description": "True when not every link on the page was checked (link cap, budget or time limit).",
+     "type": "boolean"
+    },
+    "truncated_reasons": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "url": {
+     "description": "The page URL as requested.",
+     "type": "string"
+    },
+    "version": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "page_status",
+    "summary",
+    "truncated",
+    "problems",
+    "problems_total"
+   ],
+   "type": "object"
+  },
+  "title": "Check one web page for broken links and redirect chains"
+ }
+]

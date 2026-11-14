@@ -1,0 +1,676 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Analyze supply-chain concentration & data gaps"
+  },
+  "description": "Use this tool to analyse a fashion/textile supply base from product data (supplier, country of manufacture, composition, facility id): per-supplier data scores, country shares, country concentration index (HHI), fibre mix and data-quality gaps that block traceability and DPPs. Up to 200 products. Deterministic, no account needed.",
+  "input_schema": {
+   "properties": {
+    "products": {
+     "description": "Products with supplier, country, composition and optional facility_id.",
+     "items": {
+      "type": "object"
+     },
+     "maxItems": 200,
+     "type": "array"
+    }
+   },
+   "required": [
+    "products"
+   ],
+   "type": "object"
+  },
+  "name": "analyze_supply_chain",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "products_analyzed",
+      "country_shares"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Build GS1 Digital Link"
+  },
+  "description": "Use this tool to turn a GTIN/EAN (plus optional lot and serial number) into a conformant GS1 Digital Link URL, the QR payload required for Sunrise 2027 retail QR codes and EU Digital Product Passport data carriers. If the GTIN check digit is wrong it explains why and suggests the corrected number. Deterministic, no account needed.",
+  "input_schema": {
+   "properties": {
+    "base": {
+     "description": "Optional https resolver origin you control; default https://id.cycle-platform.com",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "gtin": {
+     "description": "GTIN-8/12/13/14 or EAN.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "lot": {
+     "description": "Optional batch/lot (GS1 AI 10, ≤20 chars).",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "serial": {
+     "description": "Optional serial number (GS1 AI 21, ≤20 chars).",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "required": [
+    "gtin"
+   ],
+   "type": "object"
+  },
+  "name": "build_gs1_digital_link",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "digital_link",
+      "gtin14"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check DPP requirements & timeline"
+  },
+  "description": "Use this tool when a company or user asks WHAT the EU Digital Product Passport (DPP) requires, WHEN it becomes mandatory, which ESPR/AGEC/French milestones apply to textile or fashion products, or whether the DPP is already obligatory. Returns the regulatory reference timeline with its recorded review status, the mandatory data fields a textile DPP needs, and honest notes on what is in force vs pending delegated acts. Deterministic, no account needed. Informational, not legal advice.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "sector": {
+     "description": "Supported sector: textile or fashion. Other sectors return unsupported_sector rather than textile rules.",
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "check_dpp_requirements",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "sector",
+      "timeline",
+      "verification_status",
+      "last_verified_at"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Create GS1 data carrier"
+  },
+  "description": "Use this tool to generate the printable data carrier (QR content) of a twin: a GS1 Digital Link URL (Sunrise 2027 standard) if you pass a valid GTIN, or a serialized twin URL fallback without one. The URL resolves to the product's live twin the moment it is created - it is connected, not a loose QR. Invalid GTINs are rejected before printing. Requires an organisation API key. OPTIONAL: pass allocation={channel|retailer, shipment?, region?, units?} to link the serial to its intended retail channel (channel-aware serialization: future scans of that unit resolve their channel, always labelled INFERRED).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "allocation": {
+     "additionalProperties": false,
+     "properties": {
+      "channel": {
+       "maxLength": 80,
+       "type": "string"
+      },
+      "region": {
+       "maxLength": 80,
+       "type": "string"
+      },
+      "retailer": {
+       "maxLength": 80,
+       "type": "string"
+      },
+      "shipment": {
+       "maxLength": 80,
+       "type": "string"
+      },
+      "units": {
+       "maximum": 100000000,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "gtin": {
+     "maxLength": 120,
+     "type": "string"
+    },
+    "idempotency_key": {
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    },
+    "product_id": {
+     "maxLength": 120,
+     "type": "string"
+    },
+    "serial": {
+     "maxLength": 20,
+     "type": "string"
+    },
+    "sku": {
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "create_data_carrier",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "created",
+      "carrier"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Publish versioned DPP"
+  },
+  "description": "Use this tool to publish the canonical versioned passport of a product in your organisation. A valid GTIN is required. Returns its real UPI, content hash, version, environment and separate provisional/official validation states. It never submits to the EU Registry or claims certification. Requires dpp:write or legacy create scope.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "granularity": {
+     "enum": [
+      "model",
+      "batch",
+      "item"
+     ]
+    },
+    "gtin": {
+     "maxLength": 14,
+     "type": "string"
+    },
+    "idempotency_key": {
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    },
+    "lot": {
+     "maxLength": 20,
+     "type": "string"
+    },
+    "product_id": {
+     "maxLength": 120,
+     "type": "string"
+    },
+    "serial": {
+     "maxLength": 20,
+     "type": "string"
+    },
+    "sku": {
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "create_dpp",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "created"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Create product twins"
+  },
+  "description": "Use this tool when an organisation wants to CREATE live Digital Product Twins in Cycle from its product data (after validating with validate_dpp_readiness). INPUT: array of products (same flexible shape as validate_dpp_readiness). OUTPUT: per product, a persistent id and a LIVE twin URL (scannable product page), plus DPP readiness and missing fields. Requires an organisation API key (Authorization: Bearer). Up to 100 products per call.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "idempotency_key": {
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    },
+    "products": {
+     "items": {
+      "type": "object"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "products"
+   ],
+   "type": "object"
+  },
+  "name": "create_product_twin",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "created",
+      "existing",
+      "failed",
+      "products"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Draft a Digital Product Passport"
+  },
+  "description": "Use this tool to generate a draft EU Digital Product Passport (DPP) JSON document for a textile/fashion product from its data and GTIN: unique product identifier (GS1 Digital Link UPI), Core-vocabulary fields, product data, validation results and the missing fields. Free and stateless (nothing is stored); publishing it at a resolvable UPI is offered with a free Cycle workspace. Not legal advice.",
+  "input_schema": {
+   "properties": {
+    "base": {
+     "description": "Optional https resolver origin you control.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "granularity": {
+     "enum": [
+      "model",
+      "batch",
+      "item"
+     ]
+    },
+    "gtin": {
+     "description": "GTIN/EAN of the product.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "language": {
+     "description": "ISO 639-1, default en.",
+     "maxLength": 5,
+     "type": "string"
+    },
+    "lot": {
+     "description": "Lot for batch granularity.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "product": {
+     "description": "Product data with any keys: name, sku, description, brand, composition, country, supplier, care, compliance.",
+     "type": "object"
+    },
+    "product_group": {
+     "description": "Default textiles.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "serial": {
+     "description": "Serial for item granularity.",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "required": [
+    "product"
+   ],
+   "type": "object"
+  },
+  "name": "draft_dpp_document",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "document",
+      "upi"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Estimate textile footprint & regulatory flags"
+  },
+  "description": "Use this tool to estimate the environmental and regulatory profile of textile/fashion products from their fibre composition (plus category, country, optional weight): CO2e per unit with factor sources (Base IMPACTS/PEF), water use, synthetic share, French microfibre notice, PFAS check flag, forced-labour risk by country and an EPR fee estimate. Up to 200 products. Deterministic screening estimates, no account needed.",
+  "input_schema": {
+   "properties": {
+    "product": {
+     "description": "A single product.",
+     "type": "object"
+    },
+    "products": {
+     "description": "Products with composition (e.g. '80% cotton, 20% polyester'), category, country, optional weight_kg.",
+     "items": {
+      "type": "object"
+     },
+     "maxItems": 200,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "estimate_textile_impact",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "items",
+      "results"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Map product data to DPP fields"
+  },
+  "description": "Use this tool when a user has product information in ANY form (a pasted product sheet or label text, a CSV export with a header row, or loose JSON) and wants to know how it maps to EU Digital Product Passport fields for textiles. Returns the mapped fields with where each came from, a readiness score, the missing mandatory fields with how to obtain each one, and a GTIN check. Up to 200 rows. Deterministic, never invents data, no account needed.",
+  "input_schema": {
+   "properties": {
+    "csv": {
+     "description": "CSV/TSV/semicolon text with a header row; one product per row.",
+     "maxLength": 200000,
+     "type": "string"
+    },
+    "product": {
+     "description": "One product object with any keys (Shopify export, PIM row...).",
+     "type": "object"
+    },
+    "products": {
+     "description": "Several product objects.",
+     "items": {
+      "type": "object"
+     },
+     "maxItems": 200,
+     "type": "array"
+    },
+    "text": {
+     "description": "Free-text product sheet or label (key: value lines, '62% cotton', 'Made in Portugal'...).",
+     "maxLength": 20000,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "map_product_to_dpp",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "items",
+      "results"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Resolve Digital Product Passport"
+  },
+  "description": "Use this tool to get the published EU Digital Product Passport (DPP) behind a GS1 Digital Link QR or a GTIN (optionally with lot/serial). Returns the versioned, immutable passport JSON (Core vocabulary), its version and hash when Cycle hosts it; otherwise says who hosts the link and how to request it. Read-only, no account needed.",
+  "input_schema": {
+   "properties": {
+    "digital_link": {
+     "description": "GS1 Digital Link URL from a QR code, e.g. https://id.cycle-platform.com/01/09506000134352/21/U1",
+     "maxLength": 600,
+     "type": "string"
+    },
+    "gtin": {
+     "description": "GTIN if you have no link.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "lot": {
+     "description": "Optional lot.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "serial": {
+     "description": "Optional serial.",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "resolve_digital_link",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "found"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Validate DPP document"
+  },
+  "description": "Use this tool to check a Digital Product Passport JSON document before publishing or registering it: required Core fields, UPI format, granularity, status, dates, language and content-specification release URIs, plus the status of the official EU JSON Schema (honestly reported as unavailable until published). No account needed.",
+  "input_schema": {
+   "properties": {
+    "document": {
+     "description": "The DPP JSON document.",
+     "type": "object"
+    },
+    "product_group": {
+     "description": "Product group, default 'textiles'.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "required": [
+    "document"
+   ],
+   "type": "object"
+  },
+  "name": "validate_dpp_document",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "provisional",
+      "official",
+      "ready_to_submit"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Validate DPP readiness"
+  },
+  "description": "Use this tool when a company needs to know whether its product catalogue is READY for the EU Digital Product Passport (DPP/ESPR): pass an array of products (any reasonable JSON shape: name, sku, description, brand, composition/material, country of origin, supplier, care instructions...) and get a rule-based readiness score 0-100 per product plus the exact missing fields, and an aggregate with the single field that unlocks the most products. INPUT: array of product objects (flexible keys). OUTPUT: per-product score, ready flag, missing field labels; aggregate with top_missing_fields and unlock_hint. Deterministic internal data-completeness rules; not an official textile schema or certification. Up to 200 products per call. No account needed.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "products": {
+     "description": "Products to validate. Flexible keys accepted: name/title, sku, description, brand/vendor, composition/material/fabric, country/origin/manufacturing_country, supplier, care/care_instructions, compliance, certifications.",
+     "items": {
+      "type": "object"
+     },
+     "maxItems": 200,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "validate_dpp_readiness",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "products_validated",
+      "products",
+      "readiness_kind",
+      "official_validation"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Validate GS1 identifier"
+  },
+  "description": "Use this tool to verify a GTIN/EAN barcode number (check digit, GS1 mod-10) or a GS1 Digital Link URL (the QR standard behind Sunrise 2027 retail QR codes and DPP data carriers). Returns whether the identifier is valid, the normalised GTIN-14, and the exact error if not. Use it before printing labels or QR codes so they conform to GS1. Deterministic, no account needed.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "digital_link": {
+     "description": "GS1 Digital Link URL to validate (e.g. https://id.example.com/01/09506000134352/21/SER123).",
+     "maxLength": 600,
+     "type": "string"
+    },
+    "gtin": {
+     "description": "GTIN/EAN-8/12/13/14 to validate.",
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "validate_gs1_identifier",
+  "output_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "error"
+     ]
+    },
+    {
+     "required": [
+      "valid"
+     ]
+    }
+   ],
+   "type": "object"
+  }
+ }
+]

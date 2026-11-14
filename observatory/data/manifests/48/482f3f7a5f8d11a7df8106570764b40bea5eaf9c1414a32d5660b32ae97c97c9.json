@@ -1,0 +1,155 @@
+[
+ {
+  "description": "Run the IT support cost calculator calculator: Monthly support fee; Annual support fee; Out-of-scope project work; Year-one total, excluding VAT. Missing inputs fall back to their documented defaults.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "addonsPerUser": {
+     "default": 0,
+     "description": "Add-ons per user per month",
+     "maximum": 500,
+     "minimum": 0,
+     "type": "number"
+    },
+    "hourlyRate": {
+     "default": 95,
+     "description": "Project hourly rate",
+     "maximum": 1000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "onboarding": {
+     "default": 2000,
+     "description": "Onboarding or transition fee (one-off)",
+     "maximum": 200000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "projectHours": {
+     "default": 0,
+     "description": "Project hours expected in year one",
+     "maximum": 5000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "ratePerServer": {
+     "default": 75,
+     "description": "Rate per device per month",
+     "maximum": 1000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "ratePerUser": {
+     "default": 45,
+     "description": "Rate per user per month",
+     "maximum": 500,
+     "minimum": 0,
+     "type": "number"
+    },
+    "servers": {
+     "default": 2,
+     "description": "Managed servers and network devices",
+     "maximum": 500,
+     "minimum": 0,
+     "type": "number"
+    },
+    "users": {
+     "default": 25,
+     "description": "Supported users",
+     "maximum": 5000,
+     "minimum": 1,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calculate",
+  "output_schema": {},
+  "title": "IT support cost calculator"
+ },
+ {
+  "description": "The inputs this calculator takes (with units, ranges and defaults), the outputs it returns, and the assumptions and tables behind it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "calculator_describe",
+  "output_schema": {},
+  "title": "What IT support cost calculator computes"
+ },
+ {
+  "description": "Read first. States plainly what submit_enquiry does on IT Support Cost Calculator: it starts an enquiry with human providers who quote directly. Nothing is bought, ordered or paid; no quote is guaranteed; it is free. Also returns who receives the details, the consent wording, and how the person confirms.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enquiry_describe",
+  "output_schema": {},
+  "title": "What you get: an ENQUIRY with a human (not a purchase, not a guaranteed quote)"
+ },
+ {
+  "description": "Every field of the IT Support Cost Calculator enquiry: key, label, type, whether required, help text and the allowed options where there are any. Pass answers to submit_enquiry keyed by field key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enquiry_fields",
+  "output_schema": {},
+  "title": "The questions the enquiry asks"
+ },
+ {
+  "description": "Submits an enquiry to IT Support Cost Calculator: NOT a purchase, NOT a guaranteed quote. Step 1: call with the answers (keyed by field key from enquiry_fields) and consent=true; it validates and returns a summary, the consent line and a confirmation token; show the person the summary and the consent line. Step 2: only if the person agrees, call again with the same answers, consent=true and the confirmation token; the enquiry is then submitted, and the person receives an email with a link they must click before any provider sees it. Consent means the person has read and agreed to: \"Send my contact details to up to three relevant IT support providers, chosen by IT Support Cost Calculator, who'll contact me directly. I'll be emailed each firm's name as my details go to it, and can stop any more firms getting them.\"",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "answers": {
+     "additionalProperties": {
+      "type": [
+       "string",
+       "number",
+       "boolean"
+      ]
+     },
+     "description": "the person's answers, keyed by field key",
+     "type": "object"
+    },
+    "confirmation": {
+     "description": "the confirmation token from step 1, after the person has approved the summary",
+     "type": "string"
+    },
+    "consent": {
+     "description": "true only when the person has agreed to: Send my contact details to up to three relevant IT support providers, chosen by IT Support Cost Calculator, who'll contact me directly. I'll be emailed each firm's name as my details go to it, and can stop any more firms getting them.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "answers",
+    "consent"
+   ],
+   "type": "object"
+  },
+  "name": "submit_enquiry",
+  "output_schema": {},
+  "title": "Submit an ENQUIRY to human providers (two steps; not a purchase)"
+ }
+]

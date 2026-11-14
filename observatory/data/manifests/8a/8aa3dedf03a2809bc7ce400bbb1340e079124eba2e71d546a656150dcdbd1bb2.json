@@ -1,0 +1,21 @@
+[
+ {
+  "description": "Fetch a photo from the Holiday Photo Plus library and display it inline in the chat. `name` is the filename of the photo as it lives in the repo's `public/holidayphotos/` folder (e.g. 'Photo1.png'). A substring also matches. Omit `name` to get a random photo.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Photo pathname, filename, or substring. Omit for a random photo.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_photo",
+  "output_schema": {}
+ }
+]

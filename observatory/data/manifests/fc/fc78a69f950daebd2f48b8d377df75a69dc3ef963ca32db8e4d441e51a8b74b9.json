@@ -1,0 +1,596 @@
+[
+ {
+  "description": "Advisories broken down by severity rather than counted, with identifiers and dates. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "advisory_severity",
+  "output_schema": {}
+ },
+ {
+  "description": "Read a whole manifest and return every reading on record for it, ordered by how much a reviewer would want to know. One call instead of one per dependency. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "filename": {
+     "type": "string"
+    },
+    "manifest": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "manifest"
+   ],
+   "type": "object"
+  },
+  "name": "audit_manifest",
+  "output_schema": {}
+ },
+ {
+  "description": "For a container base image: its size, when it was last rebuilt, and whether the OS underneath it is still supported. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "image": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "image"
+   ],
+   "type": "object"
+  },
+  "name": "base_image_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Call this before adding a dependency. Returns only the facts a reviewer would be annoyed to discover afterwards: whether the publisher has withdrawn the package, whether it runs scripts on the installing machine, whether its repository is archived, how many advisories are on record, whether the licence is source-available, and how long since it was actually published. Each fact carries the address of the body that published it. It does not say whether to install; it says what is on record.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "check_before_install",
+  "output_schema": {}
+ },
+ {
+  "description": "Check whether a runtime, database or framework release is still receiving security fixes, and what to move to. Covers about two dozen products read daily from endoflife.date.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cycle": {
+     "description": "Release line, e.g. 3.9 or 20. Omit for every cycle.",
+     "type": "string"
+    },
+    "product": {
+     "description": "Product as endoflife.date spells it, e.g. python, nodejs, postgresql.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "product"
+   ],
+   "type": "object"
+  },
+  "name": "check_eol",
+  "output_schema": {}
+ },
+ {
+  "description": "Read the current standing of one open-source package: downloads with the window they cover, OpenSSF scorecard, advisory count, licence, whether the repository is archived, and when it was last pushed to.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "check_package",
+  "output_schema": {}
+ },
+ {
+  "description": "Recorded incidents for a hosting or API provider over a window, kept after the provider’s own status page dropped them.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "maximum": 730,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "provider": {
+     "description": "Provider slug, e.g. cloudflare, openai, github. Omit for every provider.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "check_provider",
+  "output_schema": {}
+ },
+ {
+  "description": "Read a whole dependency list at once and report what is archived, what carries advisories, what has a source-available licence, and what has not been pushed to in a year. Use when reviewing a package.json, requirements.txt, Cargo.toml, composer.json or Gemfile.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "names": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "names"
+   ],
+   "type": "object"
+  },
+  "name": "check_stack",
+  "output_schema": {}
+ },
+ {
+  "description": "Hold two watched repositories against each other across downloads, OpenSSF scorecard, advisories, forks, stars and findings on record. Compares only; it does not pick a winner.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "a": {
+     "description": "Repository as owner/name.",
+     "type": "string"
+    },
+    "b": {
+     "description": "Repository as owner/name.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "a",
+    "b"
+   ],
+   "type": "object"
+  },
+  "name": "compare_repositories",
+  "output_schema": {}
+ },
+ {
+  "description": "What changed for a set of packages since a given date, read from the daily archive. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "names": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "since": {
+     "description": "YYYY-MM-DD.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "names",
+    "since"
+   ],
+   "type": "object"
+  },
+  "name": "diff_since",
+  "output_schema": {}
+ },
+ {
+  "description": "Whether the domains a package points at — homepage, funding, documentation — still resolve to a registered owner. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "domain_risk",
+  "output_schema": {}
+ },
+ {
+  "description": "Given a finding id, return what was measured, when, by whom, and the address it can be checked at. For an agent quoting a figure into a review. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "explain_finding",
+  "output_schema": {}
+ },
+ {
+  "description": "Find language models by price and context window, from a catalogue read daily across sixty providers. Use this before choosing a model: prices move without announcement and training data is out of date on the day it ships.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "maxPrice": {
+     "description": "Maximum USD per million prompt tokens.",
+     "type": "number"
+    },
+    "minContext": {
+     "description": "Minimum context window in tokens.",
+     "type": "integer"
+    },
+    "provider": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "find_model",
+  "output_schema": {}
+ },
+ {
+  "description": "Packages that ask for funding, beside how heavily they are installed and how many people write them. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "funding_gap",
+  "output_schema": {}
+ },
+ {
+  "description": "For a technology tag: questions asked against questions answered, over time. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "tag": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "tag"
+   ],
+   "type": "object"
+  },
+  "name": "help_availability",
+  "output_schema": {}
+ },
+ {
+  "description": "List every reading this server can return, what each one measures, and which require a key. Call this first if unsure which tool answers a question.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_readings",
+  "output_schema": {}
+ },
+ {
+  "description": "Every recorded price for a model, with the date each was read. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "model": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "model"
+   ],
+   "type": "object"
+  },
+  "name": "model_price_history",
+  "output_schema": {}
+ },
+ {
+  "description": "Models that were in the catalogue and no longer are, with the date last seen. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "model_withdrawn",
+  "output_schema": {}
+ },
+ {
+  "description": "How the published artefact size has moved over time. Returns the readings taken, not a verdict. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "package_weight_history",
+  "output_schema": {}
+ },
+ {
+  "description": "A provider’s recorded incidents, grouped by the component that failed, over the whole archive rather than the window its status page shows. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "provider": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "provider"
+   ],
+   "type": "object"
+  },
+  "name": "provider_incidents",
+  "output_schema": {}
+ },
+ {
+  "description": "When a provider last changed its terms or pricing page, from a stored fingerprint of the page. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "provider": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "provider_terms_changed",
+  "output_schema": {}
+ },
+ {
+  "description": "How long a provider takes to acknowledge an incident: the interval between an incident starting and its first public update. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "provider": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "provider_transparency",
+  "output_schema": {}
+ },
+ {
+  "description": "Recorded outages of the package registries themselves, kept after their status pages drop them. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "registry_health",
+  "output_schema": {}
+ },
+ {
+  "description": "Support end dates for the runtimes a dependency set requires, including any already past. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "names": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "names"
+   ],
+   "type": "object"
+  },
+  "name": "runtime_deadlines",
+  "output_schema": {}
+ },
+ {
+  "description": "Find watched repositories whose name contains a string, with their current readings. Use it to discover what is covered before calling the other tools.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_repositories",
+  "output_schema": {}
+ },
+ {
+  "description": "Days between an advisory being published and a release appearing that postdates it, per package and as a distribution. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "time_to_fix",
+  "output_schema": {}
+ },
+ {
+  "description": "Whether a name is one edit away from a more widely installed package. States that both names exist; which one was meant is the caller’s call. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "typosquat_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Add a package to the caller’s own private watchlist, so later readings are about their stack rather than the public one. The list is private to the key that created it. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "watch_add",
+  "output_schema": {}
+ },
+ {
+  "description": "Everything that has changed across the caller’s private watchlist since a given date: withdrawals, licence changes, advisories, archived repositories and runtimes going out of support. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "since": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "watch_changes",
+  "output_schema": {}
+ },
+ {
+  "description": "How many accounts hold publish rights on a package, as the registry lists them. Answers who can put code on your machine, which is a different question from who writes it. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Package name as the registry spells it.",
+     "type": "string"
+    },
+    "registry": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "registry",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "who_can_publish",
+  "output_schema": {}
+ },
+ {
+  "description": "Packages whose own publisher has withdrawn them and which are still being installed heavily, with the download figure and the publisher’s notice. Requires a key; see https://sighttrue.com/pricing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "withdrawn_but_installed",
+  "output_schema": {}
+ }
+]

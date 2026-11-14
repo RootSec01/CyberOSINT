@@ -1,0 +1,1311 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Fetch the frequently asked questions for a tag on a Stack Exchange site — Stack Exchange's own \"frequently asked\" selection, returned in its order, not ranked by score; compare the scores yourself. Returns a question list without bodies; use stackexchange_get_thread to read the full body and answers for any result. Results past the pageSize cap are reachable with the `page` parameter. Use this tool to find the questions a community keeps coming back to on a topic (e.g. tag \"javascript\" on stackoverflow). Use stackexchange_search_questions for free-text search rather than tag-based browsing.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "default": 1,
+     "description": "Page of results to return, 1-based (default 1). Page 2 with pageSize 10 returns results 11–20. Each page is a separate upstream call and costs one API quota unit, which matters on the keyless 300/day tier. Without STACKEXCHANGE_API_KEY, Stack Exchange refuses any page above 25.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageSize": {
+     "default": 10,
+     "description": "Number of results to return (1–30, default 10).",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "site": {
+     "default": "stackoverflow",
+     "description": "Stack Exchange site — the api_site_parameter (e.g. \"stackoverflow\", \"superuser\") or the site's domain (e.g. \"superuser.com\"). Defaults to \"stackoverflow\". Call stackexchange_list_sites to discover valid values.",
+     "type": "string"
+    },
+    "tag": {
+     "description": "Tag to look up (e.g. \"python\", \"javascript\", \"docker\"). Must match exactly.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "tag"
+   ],
+   "type": "object"
+  },
+  "name": "stackexchange_get_tag_faq",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "questions",
+      "tag",
+      "site",
+      "page",
+      "attribution",
+      "quotaRemaining",
+      "quotaMax"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "attribution": {
+     "description": "Content license notice. Stack Exchange content is licensed under CC BY-SA 4.0 and requires attribution.",
+     "type": "string"
+    },
+    "cap": {
+     "description": "The pageSize cap applied to this request.",
+     "type": "number"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `invalid_site`: The provided site value is not a valid Stack Exchange network site identifier. `invalid_parameter`: Stack Exchange rejected a request parameter and named the field rather than reporting a bad site. `quota_exceeded`: The Stack Exchange API quota_remaining has reached 0. `throttled`: Stack Exchange is throttling this server's IP address, or its backoff window outlasts what the call can wait. `pacer_shed`: The call would wait in this server's queue to Stack Exchange longer than its time budget allows. `paging_depth_limit`: Stack Exchange refused the requested page because paging above page 25 needs a key. `invalid_api_key`: Stack Exchange does not recognize the API key this server is configured with. `upstream_unavailable`: Stack Exchange reported itself temporarily unavailable or failing internally, or answered with a body that is not the expected JSON envelope. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "invalid_site",
+          "invalid_parameter",
+          "quota_exceeded",
+          "throttled",
+          "pacer_shed",
+          "paging_depth_limit",
+          "invalid_api_key",
+          "upstream_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "notice": {
+     "description": "Actionable guidance when results are empty or filtered.",
+     "type": "string"
+    },
+    "page": {
+     "description": "The 1-based page these results came from — 1 when the input omitted page.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "questions": {
+     "description": "The frequently asked questions for the specified tag, in Stack Exchange's order — not sorted by score.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A Stack Exchange FAQ question with score, answer count, tags, and dates.",
+      "properties": {
+       "answerCount": {
+        "description": "Total number of answers.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "creationDate": {
+        "description": "ISO 8601 timestamp of when the question was asked — use it to judge whether the advice is still current.",
+        "type": "string"
+       },
+       "isAnswered": {
+        "description": "True when the question has an accepted answer or at least one positively-scored answer.",
+        "type": "boolean"
+       },
+       "lastActivityDate": {
+        "description": "ISO 8601 timestamp of the most recent activity on the question (edit, answer, or comment).",
+        "type": "string"
+       },
+       "link": {
+        "description": "Direct URL to the question.",
+        "type": "string"
+       },
+       "questionId": {
+        "description": "Question ID — pass to stackexchange_get_thread to fetch the full thread.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "score": {
+        "description": "Question score (upvotes minus downvotes).",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "tags": {
+        "description": "Tags applied to this question.",
+        "items": {
+         "description": "A tag applied to this question.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "title": {
+        "description": "Question title.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "questionId",
+       "title",
+       "link",
+       "score",
+       "answerCount",
+       "isAnswered",
+       "tags"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "quotaMax": {
+     "description": "Maximum API quota calls per day (300 keyless, ~10,000 with API key).",
+     "type": "number"
+    },
+    "quotaRemaining": {
+     "description": "Remaining API quota calls for the current day.",
+     "type": "number"
+    },
+    "shown": {
+     "description": "Number of results returned.",
+     "type": "number"
+    },
+    "site": {
+     "description": "Stack Exchange site used for this lookup, as passed in site.",
+     "type": "string"
+    },
+    "tag": {
+     "description": "Tag name used for this FAQ lookup.",
+     "type": "string"
+    },
+    "truncated": {
+     "description": "True when results were capped at pageSize.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get Stack Exchange Tag FAQ"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Fetch a complete Q&A thread — question body and all answers, accepted answer first then sorted by score, rendered as clean markdown with fenced code blocks. Accepts a full Stack Exchange question URL, which is read from the site its host names (e.g. \"https://unix.stackexchange.com/questions/88490/how-do-i-use-a-heredoc\"), or an integer question ID read from site (e.g. \"11227809\"). HTML is normalized to markdown automatically; attribution (author + link) included per CC BY-SA 4.0. Get question IDs from stackexchange_search_questions or stackexchange_get_tag_faq.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "includeComments": {
+     "default": false,
+     "description": "Fetch the comment thread under the question and under every returned answer (default false). Comments are where a stale answer usually gets corrected (\"this breaks on v3\", \"use X instead now\"), so set this when the answer's continued accuracy matters. Costs 2 extra API calls against the daily quota regardless of how many answers are returned.",
+     "type": "boolean"
+    },
+    "maxAnswers": {
+     "default": 10,
+     "description": "Maximum number of answers to include (1–100, default 10). Answers are sorted: accepted first, then by score.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "questionIdOrUrl": {
+     "description": "Numeric question ID (e.g. \"11227809\") or a full Stack Exchange question URL (e.g. \"https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster\"). A URL carries its own site: the question is read from the URL's host, so question IDs from any Stack Exchange site resolve correctly. A URL whose host is not a Stack Exchange site is read from site when one is given, and fails as invalid_site otherwise.",
+     "type": "string"
+    },
+    "site": {
+     "description": "Stack Exchange site a numeric question ID belongs to — the api_site_parameter (e.g. \"stackoverflow\", \"unix\") or the site's domain (e.g. \"unix.stackexchange.com\"). Defaults to \"stackoverflow\". Not needed with a URL, which names its own site: a site naming a different one is ignored, or used when the URL host is not a Stack Exchange site, and either way reported as siteConflict. Call stackexchange_list_sites to discover valid values.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "questionIdOrUrl"
+   ],
+   "type": "object"
+  },
+  "name": "stackexchange_get_thread",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "questionId",
+      "title",
+      "link",
+      "score",
+      "tags",
+      "bodyMarkdown",
+      "answers",
+      "quotaRemaining",
+      "quotaMax"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "acceptedAnswerId": {
+     "description": "ID of the accepted answer when one exists.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "answerCount": {
+     "description": "Total answers the question has upstream. When greater than the returned answers[] length, more answers exist — raise maxAnswers to fetch them.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "answers": {
+     "description": "Answers sorted: accepted answer first, then by score descending.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A single Q&A answer with markdown body, score, dates, and author attribution.",
+      "properties": {
+       "answerId": {
+        "description": "Numeric answer ID.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "authorLink": {
+        "description": "Answer author profile URL when available.",
+        "type": "string"
+       },
+       "authorName": {
+        "description": "Answer author display name when available.",
+        "type": "string"
+       },
+       "authorReputation": {
+        "description": "Answer author reputation when available.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "authorUserId": {
+        "description": "Answer author numeric user ID when available — pass to stackexchange_get_user to fetch the full profile.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "bodyMarkdown": {
+        "description": "Answer body normalized from HTML to markdown.",
+        "type": "string"
+       },
+       "comments": {
+        "description": "Comments on this answer, newest first, present only when includeComments is true. An empty array means this post has no comments; an absent array means its comment state is unknown — either comments were not requested, or the batched fetch was cut short before this post contributed any. Never read an absent array as \"no comments\".",
+        "items": {
+         "additionalProperties": false,
+         "description": "A single comment with markdown body, score, date, and author attribution.",
+         "properties": {
+          "authorLink": {
+           "description": "Comment author profile URL when available.",
+           "type": "string"
+          },
+          "authorName": {
+           "description": "Comment author display name when available.",
+           "type": "string"
+          },
+          "bodyMarkdown": {
+           "description": "Comment body normalized from HTML to markdown.",
+           "type": "string"
+          },
+          "commentId": {
+           "description": "Numeric comment ID.",
+           "maximum": 9007199254740991,
+           "minimum": -9007199254740991,
+           "type": "integer"
+          },
+          "creationDate": {
+           "description": "ISO 8601 timestamp of when the comment was posted — the newest comments carry the freshest corrections.",
+           "type": "string"
+          },
+          "score": {
+           "description": "Comment score — comments can score below zero.",
+           "maximum": 9007199254740991,
+           "minimum": -9007199254740991,
+           "type": "integer"
+          }
+         },
+         "required": [
+          "commentId",
+          "score",
+          "bodyMarkdown"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "commentsTruncated": {
+        "description": "True when this answer's comments[] is a partial list — more exist upstream than were returned.",
+        "type": "boolean"
+       },
+       "creationDate": {
+        "description": "ISO 8601 timestamp of when the answer was posted — an old answer may predate the current API.",
+        "type": "string"
+       },
+       "isAccepted": {
+        "description": "True when this is the accepted answer.",
+        "type": "boolean"
+       },
+       "lastActivityDate": {
+        "description": "ISO 8601 timestamp of the most recent edit or activity on the answer.",
+        "type": "string"
+       },
+       "score": {
+        "description": "Answer score (upvotes minus downvotes).",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       }
+      },
+      "required": [
+       "answerId",
+       "score",
+       "isAccepted",
+       "bodyMarkdown"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "authorLink": {
+     "description": "Question author profile URL when available.",
+     "type": "string"
+    },
+    "authorName": {
+     "description": "Question author display name when available.",
+     "type": "string"
+    },
+    "authorUserId": {
+     "description": "Question author numeric user ID when available — pass to stackexchange_get_user to fetch the full profile.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "bodyMarkdown": {
+     "description": "Question body normalized from HTML to markdown.",
+     "type": "string"
+    },
+    "cap": {
+     "description": "The maxAnswers cap applied to this request.",
+     "type": "number"
+    },
+    "comments": {
+     "description": "Comments on the question, newest first, present only when includeComments is true. An empty array means this post has no comments; an absent array means its comment state is unknown — either comments were not requested, or the batched fetch was cut short before this post contributed any. Never read an absent array as \"no comments\".",
+     "items": {
+      "additionalProperties": false,
+      "description": "A single comment with markdown body, score, date, and author attribution.",
+      "properties": {
+       "authorLink": {
+        "description": "Comment author profile URL when available.",
+        "type": "string"
+       },
+       "authorName": {
+        "description": "Comment author display name when available.",
+        "type": "string"
+       },
+       "bodyMarkdown": {
+        "description": "Comment body normalized from HTML to markdown.",
+        "type": "string"
+       },
+       "commentId": {
+        "description": "Numeric comment ID.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "creationDate": {
+        "description": "ISO 8601 timestamp of when the comment was posted — the newest comments carry the freshest corrections.",
+        "type": "string"
+       },
+       "score": {
+        "description": "Comment score — comments can score below zero.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       }
+      },
+      "required": [
+       "commentId",
+       "score",
+       "bodyMarkdown"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "commentsCap": {
+     "description": "Maximum comments carried per post — a post at this count reports commentsTruncated.",
+     "type": "number"
+    },
+    "commentsTruncated": {
+     "description": "True when the question's comments[] is a partial list — more exist upstream than were returned.",
+     "type": "boolean"
+    },
+    "creationDate": {
+     "description": "ISO 8601 timestamp of when the question was asked — use it to judge whether the advice is still current.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `question_not_found`: The question lookup returns an empty result set — SE returns HTTP 200 with no items for unknown question IDs rather than 404. `invalid_site`: The site value, or the host of a question URL, is not a Stack Exchange network site. `invalid_id_or_url`: The input is neither an integer ID nor text holding a /questions/{id} path, or Stack Exchange refused the ID. `invalid_parameter`: Stack Exchange rejected a request parameter other than the question ID, and named the field. `quota_exceeded`: The Stack Exchange API quota_remaining has reached 0. `throttled`: Stack Exchange is throttling this server's IP address, or its backoff window outlasts what the call can wait. `pacer_shed`: The call would wait in this server's queue to Stack Exchange longer than its time budget allows. `invalid_api_key`: Stack Exchange does not recognize the API key this server is configured with. `upstream_unavailable`: Stack Exchange reported itself temporarily unavailable or failing internally, or answered with a body that is not the expected JSON envelope. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "question_not_found",
+          "invalid_site",
+          "invalid_id_or_url",
+          "invalid_parameter",
+          "quota_exceeded",
+          "throttled",
+          "pacer_shed",
+          "invalid_api_key",
+          "upstream_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "lastActivityDate": {
+     "description": "ISO 8601 timestamp of the most recent activity on the question (edit, answer, or comment).",
+     "type": "string"
+    },
+    "link": {
+     "description": "Direct URL to the question.",
+     "type": "string"
+    },
+    "questionId": {
+     "description": "Numeric question ID — identifies this thread on the site.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "quotaMax": {
+     "description": "Maximum API quota calls per day (300 keyless, ~10,000 with API key).",
+     "type": "number"
+    },
+    "quotaRemaining": {
+     "description": "Remaining API quota calls for the current day.",
+     "type": "number"
+    },
+    "score": {
+     "description": "Question score (upvotes minus downvotes).",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "shown": {
+     "description": "Number of answers returned.",
+     "type": "number"
+    },
+    "siteConflict": {
+     "additionalProperties": false,
+     "description": "Present only when questionIdOrUrl is a URL and site names a different site — says which of the two the question was read from.",
+     "properties": {
+      "resolvedBy": {
+       "description": "Which one the question was read from: \"url_host\" when site was ignored in favor of the URL's own site, \"site\" when the URL host is not a Stack Exchange site and site was used instead.",
+       "enum": [
+        "url_host",
+        "site"
+       ],
+       "type": "string"
+      },
+      "site": {
+       "description": "The site value passed.",
+       "type": "string"
+      },
+      "urlHost": {
+       "description": "Host of the question URL.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "resolvedBy",
+      "urlHost",
+      "site"
+     ],
+     "type": "object"
+    },
+    "tags": {
+     "description": "Tags applied to this question.",
+     "items": {
+      "description": "A tag applied to this question.",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "title": {
+     "description": "Question title.",
+     "type": "string"
+    },
+    "truncated": {
+     "description": "True when answers were capped at maxAnswers.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get Stack Exchange Q&A Thread"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Fetch a Stack Exchange user profile by numeric user ID: reputation, badge counts, answer and question counts, account and last-access dates, and top tags by answer score. Useful for credibility context on an answer author — pass the authorUserId from any question or answer in stackexchange_get_thread output. Returns profile fields plus up to 10 top tags by answer score.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "site": {
+     "default": "stackoverflow",
+     "description": "Stack Exchange site the user ID belongs to — the api_site_parameter (e.g. \"stackoverflow\", \"superuser\") or the site's domain (e.g. \"superuser.com\"). User IDs are per-site, so pass the site of the thread the authorUserId came from. Defaults to \"stackoverflow\". Call stackexchange_list_sites to discover valid values.",
+     "type": "string"
+    },
+    "userId": {
+     "description": "Numeric user ID (at most 2147483647) — use the authorUserId field from a question or answer in stackexchange_get_thread output.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "userId"
+   ],
+   "type": "object"
+  },
+  "name": "stackexchange_get_user",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "userId",
+      "displayName",
+      "link",
+      "reputation",
+      "topTags",
+      "quotaRemaining",
+      "quotaMax"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "answerCount": {
+     "description": "Total number of answers posted when provided by the API.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "badgeCounts": {
+     "additionalProperties": false,
+     "description": "Badge counts when provided by the API.",
+     "properties": {
+      "bronze": {
+       "description": "Number of bronze badges.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "gold": {
+       "description": "Number of gold badges.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "silver": {
+       "description": "Number of silver badges.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "creationDate": {
+     "description": "ISO 8601 timestamp of when the account was created — the account age.",
+     "type": "string"
+    },
+    "displayName": {
+     "description": "Display name shown on the site.",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `user_not_found`: The user lookup returns an empty result set — SE returns HTTP 200 with no items for unknown user IDs rather than 404. `invalid_user_id`: userId is above 2147483647 — Stack Exchange user IDs are 32-bit signed integers. `invalid_site`: The provided site value is not a valid Stack Exchange network site identifier. `invalid_parameter`: Stack Exchange rejected a request parameter and named the field rather than reporting a bad site. `quota_exceeded`: The Stack Exchange API quota_remaining has reached 0. `throttled`: Stack Exchange is throttling this server's IP address, or its backoff window outlasts what the call can wait. `pacer_shed`: The call would wait in this server's queue to Stack Exchange longer than its time budget allows. `invalid_api_key`: Stack Exchange does not recognize the API key this server is configured with. `upstream_unavailable`: Stack Exchange reported itself temporarily unavailable or failing internally, or answered with a body that is not the expected JSON envelope. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "user_not_found",
+          "invalid_user_id",
+          "invalid_site",
+          "invalid_parameter",
+          "quota_exceeded",
+          "throttled",
+          "pacer_shed",
+          "invalid_api_key",
+          "upstream_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "lastAccessDate": {
+     "description": "ISO 8601 timestamp of the last time the user accessed the site — a stale value means the author is unlikely to respond.",
+     "type": "string"
+    },
+    "link": {
+     "description": "Direct URL to the user profile.",
+     "type": "string"
+    },
+    "location": {
+     "description": "User-provided location string when available.",
+     "type": "string"
+    },
+    "questionCount": {
+     "description": "Total number of questions posted when provided by the API.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "quotaMax": {
+     "description": "Maximum API quota calls per day (300 keyless, ~10,000 with API key).",
+     "type": "number"
+    },
+    "quotaRemaining": {
+     "description": "Remaining API quota calls for the current day.",
+     "type": "number"
+    },
+    "reputation": {
+     "description": "User reputation score.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "topTags": {
+     "description": "Top tags by answer score (up to 10). Empty array for new users with no answers.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A tag the user has answered in, with answer count and score.",
+      "properties": {
+       "answerCount": {
+        "description": "Number of answers in this tag.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "answerScore": {
+        "description": "Total answer score in this tag.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "tagName": {
+        "description": "Tag name.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tagName"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "userId": {
+     "description": "Numeric user ID on this Stack Exchange site.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "websiteUrl": {
+     "description": "User-provided website URL when available.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get Stack Exchange User Profile"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Enumerate all sites in the Stack Exchange network — name, api_site_parameter, audience, and URL. The api_site_parameter value is what other tools accept as the `site` input (e.g. \"stackoverflow\", \"superuser\", \"serverfault\"). Results are fetched live and optionally filtered by name. Use this tool to discover valid site parameters before calling other stackexchange_* tools.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "filter": {
+     "description": "Optional case-insensitive name filter — returns only sites whose name contains all provided tokens. Omit to return all sites.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "stackexchange_list_sites",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "sites",
+      "totalCount",
+      "quotaRemaining",
+      "quotaMax"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `quota_exceeded`: The Stack Exchange API quota_remaining reached 0 during the site page walk. `throttled`: Stack Exchange is throttling this server's IP address, or its backoff window outlasts what the call can wait. `pacer_shed`: The call would wait in this server's queue to Stack Exchange longer than its time budget allows. `invalid_parameter`: Stack Exchange rejected a parameter of the /sites request and named the field. `invalid_api_key`: Stack Exchange does not recognize the API key this server is configured with. `upstream_unavailable`: Stack Exchange reported itself temporarily unavailable or failing internally, or answered with a body that is not the expected JSON envelope. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "quota_exceeded",
+          "throttled",
+          "pacer_shed",
+          "invalid_parameter",
+          "invalid_api_key",
+          "upstream_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "notice": {
+     "description": "Actionable guidance when results are empty or filtered.",
+     "type": "string"
+    },
+    "quotaMax": {
+     "description": "Maximum API quota calls per day (300 keyless, ~10,000 with API key).",
+     "type": "number"
+    },
+    "quotaRemaining": {
+     "description": "Remaining API quota calls for the current day.",
+     "type": "number"
+    },
+    "sites": {
+     "description": "Stack Exchange network sites matching the optional name filter.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A Stack Exchange network site entry.",
+      "properties": {
+       "apiSiteParameter": {
+        "description": "Value to pass as the `site` parameter on all other stackexchange_* tools (e.g. \"stackoverflow\").",
+        "type": "string"
+       },
+       "audience": {
+        "description": "Intended audience description when provided by the API.",
+        "type": "string"
+       },
+       "name": {
+        "description": "Human-readable site name (e.g. \"Stack Overflow\").",
+        "type": "string"
+       },
+       "siteUrl": {
+        "description": "Public URL of the site.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "apiSiteParameter",
+       "siteUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "totalCount": {
+     "description": "Total number of sites returned after filtering.",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Stack Exchange Sites"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search questions across a Stack Exchange site. Returns ranked questions with title, score, answer count, accepted status, tags, ask and last-activity dates, and a short excerpt of the question body — not the full body. Results supply question_id values for stackexchange_get_thread, which fetches the full question body and all answers. Results past the pageSize cap are reachable with the `page` parameter. Use the `site` parameter to target a specific community (e.g. \"stackoverflow\", \"superuser\", \"unix\"); call stackexchange_list_sites to discover valid site values.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "acceptedOnly": {
+     "description": "When true, return only questions that have an accepted answer.",
+     "type": "boolean"
+    },
+    "minScore": {
+     "description": "Minimum question score — excludes questions with lower scores. Setting minScore orders results by score (votes), which may differ from the requested sort.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "default": 1,
+     "description": "Page of results to return, 1-based (default 1). Page 2 with pageSize 10 returns results 11–20. Each page is a separate upstream call and costs one API quota unit, which matters on the keyless 300/day tier. Without STACKEXCHANGE_API_KEY, Stack Exchange refuses any page above 25.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageSize": {
+     "default": 10,
+     "description": "Number of results to return (1–30, default 10).",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Full-text search query (e.g. \"python async generator send value\").",
+     "type": "string"
+    },
+    "site": {
+     "default": "stackoverflow",
+     "description": "Stack Exchange site to search — the api_site_parameter (e.g. \"stackoverflow\", \"superuser\", \"serverfault\") or the site's domain (e.g. \"serverfault.com\"). Defaults to \"stackoverflow\". Call stackexchange_list_sites to discover valid values.",
+     "type": "string"
+    },
+    "sort": {
+     "default": "relevance",
+     "description": "Result ordering: \"relevance\" (default, best match), \"votes\" (highest score first), \"activity\" (most recently active), \"newest\" (most recently created).",
+     "enum": [
+      "relevance",
+      "votes",
+      "activity",
+      "newest"
+     ],
+     "type": "string"
+    },
+    "tags": {
+     "description": "Filter results to questions with all specified tags.",
+     "items": {
+      "description": "A single tag to filter by (e.g. \"python\", \"async\").",
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "stackexchange_search_questions",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "questions",
+      "page",
+      "attribution",
+      "quotaRemaining",
+      "quotaMax",
+      "appliedSort"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "appliedSort": {
+     "description": "Sort Stack Exchange applied to these results.",
+     "enum": [
+      "relevance",
+      "votes",
+      "activity",
+      "newest"
+     ],
+     "type": "string"
+    },
+    "attribution": {
+     "description": "Content license notice. Stack Exchange content is licensed under CC BY-SA 4.0 and requires attribution.",
+     "type": "string"
+    },
+    "cap": {
+     "description": "The pageSize cap applied to this request.",
+     "type": "number"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `invalid_site`: The provided site value is not a valid Stack Exchange network site identifier. `invalid_parameter`: Stack Exchange rejected a request parameter and named the field rather than reporting a bad site. `quota_exceeded`: The Stack Exchange API quota_remaining has reached 0. `throttled`: Stack Exchange is throttling this server's IP address, or its backoff window outlasts what the call can wait. `pacer_shed`: The call would wait in this server's queue to Stack Exchange longer than its time budget allows. `paging_depth_limit`: Stack Exchange refused the requested page because paging above page 25 needs a key. `invalid_api_key`: Stack Exchange does not recognize the API key this server is configured with. `upstream_unavailable`: Stack Exchange reported itself temporarily unavailable or failing internally, or answered with a body that is not the expected JSON envelope. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "invalid_site",
+          "invalid_parameter",
+          "quota_exceeded",
+          "throttled",
+          "pacer_shed",
+          "paging_depth_limit",
+          "invalid_api_key",
+          "upstream_unavailable"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "notice": {
+     "description": "Actionable guidance when results are empty or filtered.",
+     "type": "string"
+    },
+    "page": {
+     "description": "The 1-based page these results came from — 1 when the input omitted page.",
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "questions": {
+     "description": "Questions matching the search query, ordered by the specified sort.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A Stack Exchange question with score, answer count, tags, dates, and optional excerpt.",
+      "properties": {
+       "answerCount": {
+        "description": "Total number of answers.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "creationDate": {
+        "description": "ISO 8601 timestamp of when the question was asked — use it to judge whether the advice is still current.",
+        "type": "string"
+       },
+       "excerpt": {
+        "description": "Opening prose of the question body, trimmed to roughly 300 characters and ending in \"…\" when cut. Code blocks and markdown structure are omitted; absent when the question body is nothing but code.",
+        "type": "string"
+       },
+       "isAnswered": {
+        "description": "True when the question has an accepted answer or at least one positively-scored answer.",
+        "type": "boolean"
+       },
+       "lastActivityDate": {
+        "description": "ISO 8601 timestamp of the most recent activity on the question (edit, answer, or comment).",
+        "type": "string"
+       },
+       "link": {
+        "description": "Direct URL to the question.",
+        "type": "string"
+       },
+       "questionId": {
+        "description": "Question ID — pass to stackexchange_get_thread to fetch the full thread.",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "score": {
+        "description": "Question score (upvotes minus downvotes).",
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "tags": {
+        "description": "Tags applied to this question.",
+        "items": {
+         "description": "A tag applied to this question.",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "title": {
+        "description": "Question title.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "questionId",
+       "title",
+       "link",
+       "score",
+       "answerCount",
+       "isAnswered",
+       "tags"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "quotaMax": {
+     "description": "Maximum API quota calls per day (300 keyless, ~10,000 with API key).",
+     "type": "number"
+    },
+    "quotaRemaining": {
+     "description": "Remaining API quota calls for the current day.",
+     "type": "number"
+    },
+    "shown": {
+     "description": "Number of results returned.",
+     "type": "number"
+    },
+    "sortOverrideReason": {
+     "description": "Present only when appliedSort differs from the requested sort; says why.",
+     "type": "string"
+    },
+    "truncated": {
+     "description": "True when results were capped at pageSize.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Search Stack Exchange Questions"
+ }
+]

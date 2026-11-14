@@ -1,0 +1,83 @@
+[
+ {
+  "description": "Базовий адміністративний профіль території.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_basic_profileArguments",
+   "type": "object"
+  },
+  "name": "get_basic_profile",
+  "output_schema": {}
+ },
+ {
+  "description": "Офіційна назва, код та тип території.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_identityArguments",
+   "type": "object"
+  },
+  "name": "get_identity",
+  "output_schema": {}
+ },
+ {
+  "description": "Отримати назву та ЄДРПОУ обласної ради.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_regional_councilArguments",
+   "type": "object"
+  },
+  "name": "get_regional_council",
+  "output_schema": {}
+ },
+ {
+  "description": "Джерело базових адміністративних даних.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_sourcesArguments",
+   "type": "object"
+  },
+  "name": "get_sources",
+  "output_schema": {}
+ },
+ {
+  "description": "Адміністративна ієрархія території від області до поточної одиниці.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_territory_hierarchyArguments",
+   "type": "object"
+  },
+  "name": "get_territory_hierarchy",
+  "output_schema": {}
+ },
+ {
+  "description": "Привітання, можливості та плани MCP цієї території.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_welcomeArguments",
+   "type": "object"
+  },
+  "name": "get_welcome",
+  "output_schema": {}
+ },
+ {
+  "description": "Пошук знань території та всіх її адміністративних предків.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 20,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "default": "",
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "title": "search_territory_knowledgeArguments",
+   "type": "object"
+  },
+  "name": "search_territory_knowledge",
+  "output_schema": {}
+ }
+]

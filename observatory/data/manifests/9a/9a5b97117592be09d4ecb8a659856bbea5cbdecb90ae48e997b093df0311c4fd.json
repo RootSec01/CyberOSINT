@@ -1,0 +1,305 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Authenticate"
+  },
+  "description": "MCP.AI for IDE agents (Cursor, etc.): log in in the browser, copy the access token. Best: add it to this server's config as a header `Authorization: Bearer <token>` for a permanent, non-expiring connection. Or paste it here for a session-only login: call with { token: \"<jwt>\" } after the user pastes, or with no args to get the link.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "token": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "authenticate",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Connection Status"
+  },
+  "description": "Returns connection status and URLs. When all providers are connected, returns authenticated:true and empty pending[]. When credentials are missing, returns connect_url for the toolkit and per-install URLs.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "connect",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Marketplace"
+  },
+  "description": "The official mcp.ai marketplace — the in-platform catalog of every MCP/tool, AND the way to run them. Covers capability requests like \"find an MCP that does X\", \"consulta um CPF\", \"is there a tool for Y\". Core flow: action=search discovers MCPs by intent → describe returns one MCP's full profile (every tool with its id + params, pricing, auth) so you pick the right tool_id → invoke RUNS that tool. KEY: invoke works even when the MCP is NOT installed — it runs the tool pontualmente (one-off), without adding the MCP to the toolkit and without bloating the tool list. If the MCP needs a credential/login, invoke returns a connect link; if it is paid and the wallet is empty, invoke returns a checkout/top-up link (the user opens it, then you retry). Use install only to make an MCP PERMANENT in the active toolkit (its tools then show up natively in future sessions); prefer invoke for a single/occasional use. list_tools lists what is callable right now. subscribe/cancel handle per-MCP billing; report_bug sends feedback; request_mcp asks us to build a NEW MCP when nothing fits. Search/describe flag installed_in_toolkit vs installed_in_workspace. Writes (install/uninstall/subscribe/cancel and the one-off install behind invoke) require workspace owner/admin. It also carries the mcp.ai PROMPT LIBRARY, which is about ready-made prompt TEXT rather than MCPs: search_prompts finds one, get_prompt returns its full text with {{variables}} filled, and publish_prompt saves a prompt and returns a shareable mcp.ai/p/<slug> link that opens without login.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "action": {
+     "default": "search",
+     "enum": [
+      "search",
+      "describe",
+      "install",
+      "uninstall",
+      "subscribe",
+      "cancel",
+      "resume",
+      "report_bug",
+      "request_mcp",
+      "list_tools",
+      "invoke",
+      "search_prompts",
+      "get_prompt",
+      "publish_prompt"
+     ],
+     "type": "string"
+    },
+    "arguments": {
+     "default": "{}",
+     "type": "string"
+    },
+    "cancel_comment": {
+     "default": "",
+     "type": "string"
+    },
+    "cancel_reason": {
+     "enum": [
+      "too_expensive",
+      "missing_features",
+      "switched_service",
+      "unused",
+      "customer_service",
+      "too_complex",
+      "low_quality",
+      "other"
+     ],
+     "type": "string"
+    },
+    "conversation": {
+     "default": "[]",
+     "type": "string"
+    },
+    "immediate": {
+     "default": false,
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 10,
+     "type": "number"
+    },
+    "mcp_id": {
+     "default": "",
+     "type": "string"
+    },
+    "message": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_body": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_category": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_description": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_slug": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_targets": {
+     "default": [],
+     "items": {
+      "enum": [
+       "claude",
+       "chatgpt",
+       "cursor",
+       "lovable"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "prompt_title": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_tool": {
+     "default": "",
+     "type": "string"
+    },
+    "prompt_vars": {
+     "default": "{}",
+     "type": "string"
+    },
+    "query": {
+     "default": "",
+     "type": "string"
+    },
+    "report_context": {
+     "default": "",
+     "type": "string"
+    },
+    "request_details": {
+     "default": "",
+     "type": "string"
+    },
+    "request_name": {
+     "default": "",
+     "type": "string"
+    },
+    "tier_slug": {
+     "default": "",
+     "type": "string"
+    },
+    "tool_id": {
+     "default": "",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "marketplace",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "pref_ma_balsas_cnd_consultar"
+  },
+  "description": "Prefeitura MA Balsas: Certidão Negativa de Débitos, consulta em fonte oficial. Hospedado pela plataforma, sem credenciais da plataforma, pague por consulta com crédito pré-pago. Consulta informação de fontes e órgãos oficiais brasileiros (a mesma disponível ao cidadão), não é dado sigiloso. O cliente é o controlador dos dados e responde pela finalidade legítima (LGPD).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cnpj": {
+     "type": "string"
+    },
+    "cpf": {
+     "type": "string"
+    },
+    "finalidade_certidao": {
+     "type": "string"
+    },
+    "tipo_certidao": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "tipo_certidao",
+    "finalidade_certidao"
+   ],
+   "type": "object"
+  },
+  "name": "pref_ma_balsas_cnd_consultar",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Report Bug"
+  },
+  "description": "Report a bug, missing feature, or send feedback. Include the conversation array with recent messages for reproduction.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "context": {
+     "default": "",
+     "type": "string"
+    },
+    "conversation": {
+     "default": "[]",
+     "type": "string"
+    },
+    "message": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "report_bug",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Show Version"
+  },
+  "description": "Show the current MCP platform and adapter versions.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "show_version",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Toolkit Info"
+  },
+  "description": "Returns the current toolkit state: installed MCPs, their connection status, the accounts connected to each one, and how many catalog tools each exposes.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "toolkit_info",
+  "output_schema": {}
+ }
+]

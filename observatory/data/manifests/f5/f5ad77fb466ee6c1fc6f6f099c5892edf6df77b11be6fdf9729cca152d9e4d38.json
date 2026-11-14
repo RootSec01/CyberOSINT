@@ -1,0 +1,51 @@
+[
+ {
+  "description": "Read the current economics, activation status, requirements and safety boundaries. This tool is read-only: it never registers, accepts terms, submits identity or creates a credential.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "evaluate_opportunity",
+  "output_schema": {},
+  "title": "Evaluate Agent Revenue opportunity"
+ },
+ {
+  "description": "Read one current public Plushwipes dataset for product, asset, claim, review, service, policy or opportunity analysis. No private data or credentials are accessed.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "resource": {
+     "enum": [
+      "opportunity",
+      "products",
+      "approved_assets",
+      "claims_boundary",
+      "review_evidence",
+      "customer_service",
+      "program_policy"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "resource"
+   ],
+   "type": "object"
+  },
+  "name": "get_public_resource",
+  "output_schema": {},
+  "title": "Read a public campaign resource"
+ },
+ {
+  "description": "Create a dry-run registration checklist and template for owner review. This tool never sends a registration request, accepts terms, submits owner identity or creates a credential.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "prepare_activation",
+  "output_schema": {},
+  "title": "Prepare an activation plan"
+ }
+]

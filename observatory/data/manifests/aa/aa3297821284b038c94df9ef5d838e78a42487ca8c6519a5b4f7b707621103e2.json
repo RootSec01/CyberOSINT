@@ -1,0 +1,61 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Liest aktuelle Preise und Verfügbarkeit für das Schwarzwald-Chalet Scheuermatthof, die Ferienwohnung im Scheuermatthof und das Ferienhaus Im Birkenweg in Linx. Liefert auch von Beds24 bestätigte alternative Termine und alternative Objekte. Nur aufrufen, wenn Objekt, Anreise, Abreise und Erwachsenenanzahl bekannt sind. Fehlt eine Kinderangabe, wird children=0 verwendet. Kinderalter dürfen nicht erfragt oder übertragen werden. Führt keine Buchung oder Zahlung aus.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "description": "Anzahl der Erwachsenen.",
+     "maximum": 26,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "checkin": {
+     "description": "Anreisedatum im Format YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkout": {
+     "description": "Abreisedatum im Format YYYY-MM-DD; der Abreisetag ist keine Übernachtung.",
+     "format": "date",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "children": {
+     "default": 0,
+     "description": "Optionale Anzahl der Kinder. Wenn der Nutzer keine Kinder nennt, 0 verwenden und nicht eigens nachfragen. Kinderalter niemals erfragen, schätzen oder übertragen.",
+     "maximum": 26,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "objekt": {
+     "description": "Anzufragendes Objekt. chalet = Schwarzwald-Chalet Scheuermatthof, fewo = Ferienwohnung im Scheuermatthof, linx = Ferienhaus Im Birkenweg, alle = alle drei Objekte.",
+     "enum": [
+      "chalet",
+      "fewo",
+      "linx",
+      "alle"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "objekt",
+    "checkin",
+    "checkout",
+    "adults"
+   ],
+   "type": "object"
+  },
+  "name": "get_live_prices_and_availability",
+  "output_schema": {},
+  "title": "Live-Preise und Verfügbarkeit abrufen"
+ }
+]

@@ -1,0 +1,194 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find every cocktail in the catalogue that uses one specific ingredient. Matching is a case- and diacritic-insensitive substring match against each cocktail's ingredient names, so \"gin\" will also match \"sloe gin\" and \"ginger beer\" — use a more specific term if that matters. Returns up to 60 summary results (name, URL, family, glassware) in catalogue order. Takes one ingredient only; for \"what can I make from X, Y, and Z?\" use find_makeable_cocktails instead, which handles multiple ingredients and reports near-misses.",
+  "input_schema": {
+   "properties": {
+    "ingredient": {
+     "description": "A single ingredient term. One value only; passing a comma-separated list is treated as one literal string and will rarely match. Use find_makeable_cocktails for multi-ingredient queries.",
+     "examples": [
+      "gin",
+      "lime juice",
+      "Campari"
+     ],
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "ingredient"
+   ],
+   "type": "object"
+  },
+  "name": "find_cocktails_by_ingredient",
+  "output_schema": {},
+  "title": "Find cocktails by ingredient"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find every cocktail that appears in a given film or TV show. Case- and diacritic-insensitive substring match against both the title and the scene description, so a character or actor works too — e.g. \"Casablanca\", \"Bond\", \"Hemingway\". Each result names the cocktail, the film/show title, the year, and the scene. Returns up to 60 appearances ordered oldest year first, then by cocktail name. A single cocktail can appear multiple times if it shows up in multiple scenes that match. Use this only for on-screen appearances; for a drink by name use search_cocktails, and to browse the whole catalogue use list_cocktails.",
+  "input_schema": {
+   "properties": {
+    "movie": {
+     "description": "A film or TV show title, full or partial",
+     "examples": [
+      "Casablanca",
+      "Bond",
+      "Hemingway"
+     ],
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "movie"
+   ],
+   "type": "object"
+  },
+  "name": "find_cocktails_in_movie",
+  "output_schema": {},
+  "title": "Find cocktails in a movie"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Given the ingredients you have on hand, find every cocktail you can make completely — one where you already have all of its ingredients. Garnishes are treated as optional and plain water is assumed available; soda and tonic water are not. Matching is word-based, not substring: \"gin\" matches \"London dry gin\" but not \"ginger beer\", and generic terms do not match product-class extras (\"gin\" will not cover \"sloe gin\" or \"orange bitters\"). Returns two lists: \"makeable\" (drinks you can make now, up to 60) and \"almostMakeable\" (drinks exactly one ingredient short, up to 25, each naming the missing ingredient). Drinks needing two or more extra ingredients are omitted entirely. Both lists are ordered simplest first — fewest distinct ingredients in the full recipe, then alphabetical by name. Use this for multi-ingredient \"what can I make?\" questions; for a single ingredient use find_cocktails_by_ingredient.",
+  "input_schema": {
+   "properties": {
+    "ingredients": {
+     "description": "The ingredients you have available — spirits, liqueurs, juices, mixers, etc.",
+     "examples": [
+      [
+       "gin",
+       "sweet vermouth",
+       "Campari",
+       "lime"
+      ]
+     ],
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "ingredients"
+   ],
+   "type": "object"
+  },
+  "name": "find_makeable_cocktails",
+  "output_schema": {},
+  "title": "Find makeable cocktails"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the full recipe for one cocktail by name: ingredients with measures and units, preparation steps, garnish, glassware, family, page URL, and any film or TV appearances. Matching is case- and diacritic-insensitive: it tries an exact name match first, then falls back to the first substring match. Returns one cocktail object, or an { error } if nothing matches. Use this when you have a specific drink name; if the name is ambiguous or you want a list, call search_cocktails first.",
+  "input_schema": {
+   "properties": {
+    "name": {
+     "description": "The cocktail name. Exact is best; partial names work but resolve to the first substring match, so prefer search_cocktails when the name is uncertain.",
+     "examples": [
+      "Negroni",
+      "Margarita"
+     ],
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "get_cocktail_recipe",
+  "output_schema": {},
+  "title": "Get cocktail recipe"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the whole catalogue: every cocktail as a summary (name, page URL, family, glassware), in catalogue order, optionally restricted to one drink family. Unlike search_cocktails and find_cocktails_by_ingredient — which cap their results and need a query — this takes no query and returns every matching cocktail, so use it to browse or enumerate the full set of 500 drinks (or a whole family) when there is nothing specific to search for. For one named drink use get_cocktail_recipe; to discover by ingredient use find_cocktails_by_ingredient.",
+  "input_schema": {
+   "properties": {
+    "family": {
+     "description": "Optional drink family — one of: Spirit-Forward, Sour, Highball, Fizz & Collins, Spritz, Champagne Cocktail, Tiki, Punch, Flip & Nog, Hot Drink, Shot. Matched exactly (case- and diacritic-insensitive); an unknown family returns an empty list. Omit to list the entire catalogue.",
+     "examples": [
+      "Sour",
+      "Tiki"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_cocktails",
+  "output_schema": {},
+  "title": "List cocktails"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Suggest one cocktail picked uniformly at random from the catalogue (or from one family if \"family\" is given) and return its full recipe — ingredients with measures, preparation steps, garnish, glassware, page URL, and any film or TV appearances. Each call returns an independent draw, so repeated calls give different drinks. The \"family\" filter matches the family name exactly (case- and diacritic-insensitive); if no cocktail matches that family the call silently falls back to the full catalogue rather than erroring. Use this only when the user wants a suggestion or inspiration with no specific drink in mind. For a named cocktail use get_cocktail_recipe; for \"anything with gin\" use find_cocktails_by_ingredient; for \"what can I make from what I have\" use find_makeable_cocktails.",
+  "input_schema": {
+   "properties": {
+    "family": {
+     "description": "Optional drink family — one of: Spirit-Forward, Sour, Highball, Fizz & Collins, Spritz, Champagne Cocktail, Tiki, Punch, Flip & Nog, Hot Drink, Shot. Other values fall back to the full catalogue. Omit for an unrestricted random pick.",
+     "examples": [
+      "Tiki",
+      "Sour"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "random_cocktail",
+  "output_schema": {},
+  "title": "Random cocktail"
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search the cocktail catalogue by name (substring, case- and diacritic-insensitive, so \"carre\" matches \"Carré\"). Returns up to 25 summary results — name, page URL, family, glassware — ranked exact match first, then prefix, then suffix, then any substring. Use this when the user names a drink (even fuzzily) and you want to confirm it exists or disambiguate similar names; once you have a single name, call get_cocktail_recipe for the full recipe. For ingredient-based discovery use find_cocktails_by_ingredient instead.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "Cocktail name or part of one — a single drink name, not an ingredient or category.",
+     "examples": [
+      "Negroni",
+      "margarita",
+      "carre"
+     ],
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_cocktails",
+  "output_schema": {},
+  "title": "Search cocktails"
+ }
+]

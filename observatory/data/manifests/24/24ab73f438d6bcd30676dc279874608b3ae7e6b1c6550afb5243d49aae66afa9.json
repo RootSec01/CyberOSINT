@@ -1,0 +1,1408 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Bundle of cards (paid, cheaper than singly)"
+  },
+  "description": "Paid USDC on Base. Call when you need every card in a set at once (chips filings, major central banks, BRICS central banks), cheaper than buying them singly. Same JSON as the single cards. Ids, prices and contents follow (also in list_filers). Bundles: SEMIS ($0.30: AMD, MRVL, NVDA, AVGO, TSM, MU, AMAT, INTC, ASML); CENTRALBANKS ($0.20: BOE, FED, ECB, BOJ, RBA, BOC, SNB); BRICS ($0.20: BCB, IND, ZAF, CHN, RUS, IDN, ETH, EGY, IRN); AI ($0.25: NVDA, MSFT, GOOGL, META, AMD, AVGO, ORCL, PLTR). Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Bundle id",
+     "enum": [
+      "SEMIS",
+      "CENTRALBANKS",
+      "BRICS",
+      "AI"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_bundle",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "bundle": {
+     "type": "string"
+    },
+    "cards": {
+     "type": "array"
+    },
+    "count": {
+     "type": "number"
+    },
+    "ids": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "price": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "bundle",
+    "ids",
+    "cards"
+   ],
+   "type": "object"
+  },
+  "title": "Bundle of cards (paid, cheaper than singly)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Inflation (CPI) card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need the latest inflation (CPI or HICP) print for a covered country or area, with headline, core and selected categories, each item cited to the statistics office. Free: sample_macro id CPI (US). CPI ids: US, UK, EA, JP. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "CPI id (country or area)",
+     "enum": [
+      "US",
+      "UK",
+      "EA",
+      "JP"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_cpi",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "agency": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "indicator": {
+     "type": "string"
+    },
+    "items": {
+     "type": "array"
+    },
+    "next_release": {
+     "type": "object"
+    },
+    "reference_period": {
+     "type": "string"
+    },
+    "release_title": {
+     "type": "string"
+    },
+    "released": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "indicator",
+    "agency",
+    "source_url",
+    "items"
+   ],
+   "type": "object"
+  },
+  "title": "Inflation (CPI) card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "SEC filing diff card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need what changed in a company's latest SEC filing (10-Q, 10-K, 8-K or 6-K) vs the prior period, not the headline: each change cited to EDGAR with a materiality rating and why it matters. Free: sample_delta. Tickers: AMD, MRVL, NVDA, AVGO, TSM, MU, AMAT, AAPL, MSFT, META, TSLA, ORCL, INTC, ASML, MSTR, JPM, BAC, GS, WFC, NFLX, JNJ, BRK, PLTR, SPCX, GOOGL, LLY, LRCX, BA, AMZN, SMCI, ARM. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "Ticker",
+     "enum": [
+      "AMD",
+      "MRVL",
+      "NVDA",
+      "AVGO",
+      "TSM",
+      "MU",
+      "AMAT",
+      "AAPL",
+      "MSFT",
+      "META",
+      "TSLA",
+      "ORCL",
+      "INTC",
+      "ASML",
+      "MSTR",
+      "JPM",
+      "BAC",
+      "GS",
+      "WFC",
+      "NFLX",
+      "JNJ",
+      "BRK",
+      "PLTR",
+      "SPCX",
+      "GOOGL",
+      "LLY",
+      "LRCX",
+      "BA",
+      "AMZN",
+      "SMCI",
+      "ARM"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_filing_delta",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "accession": {
+     "type": "string"
+    },
+    "changes": {
+     "type": "array"
+    },
+    "company": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "comparison_basis": {
+     "type": "string"
+    },
+    "filing_date": {
+     "type": "string"
+    },
+    "filing_type": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "high_materiality_count": {
+     "type": "number"
+    },
+    "new_material_items_count": {
+     "type": "number"
+    },
+    "period": {
+     "type": "string"
+    },
+    "period_end": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "ticker": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker",
+    "filing_type",
+    "source_url",
+    "changes"
+   ],
+   "type": "object"
+  },
+  "title": "SEC filing diff card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Company guidance-change card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need how a company's own forecast moved between its last two results releases (8-K Item 2.02 Ex. 99.1): each item labelled raised, lowered, maintained, initiated or withdrawn, or result vs forecast, with old and new quotes and an EDGAR citation. Free sample over HTTP: /sample/guidance/{ticker}. Tickers: NFLX. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "Ticker",
+     "enum": [
+      "NFLX"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_guidance",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "accession": {
+     "type": "string"
+    },
+    "changes": {
+     "type": "array"
+    },
+    "company": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "comparison_basis": {
+     "type": "string"
+    },
+    "filing_date": {
+     "type": "string"
+    },
+    "filing_type": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "high_materiality_count": {
+     "type": "number"
+    },
+    "new_material_items_count": {
+     "type": "number"
+    },
+    "period": {
+     "type": "string"
+    },
+    "period_end": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "ticker": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker",
+    "filing_type",
+    "source_url",
+    "changes"
+   ],
+   "type": "object"
+  },
+  "title": "Company guidance-change card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Insider trades card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need what a company's officers and directors filed on SEC Form 4 and 4/A in the last 30 days: each trade graded high, medium or low by the FilingDelta rubric (not SEC grading), with figures and an EDGAR XML citation. Free sample over HTTP: /sample/insider/{ticker}. Tickers: NVDA. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "Ticker",
+     "enum": [
+      "NVDA"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_insider",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "accession": {
+     "type": "string"
+    },
+    "changes": {
+     "type": "array"
+    },
+    "company": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "comparison_basis": {
+     "type": "string"
+    },
+    "filing_date": {
+     "type": "string"
+    },
+    "filing_type": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "high_materiality_count": {
+     "type": "number"
+    },
+    "new_material_items_count": {
+     "type": "number"
+    },
+    "period": {
+     "type": "string"
+    },
+    "period_end": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "ticker": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker",
+    "filing_type",
+    "source_url",
+    "changes"
+   ],
+   "type": "object"
+  },
+  "title": "Insider trades card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Macro release card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need the latest US CPI, nonfarm payrolls or GDP release as cited items with the official source. Free: sample_macro. Macro ids: NFP, GDP, CPI. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Macro release id",
+     "enum": [
+      "NFP",
+      "GDP",
+      "CPI"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_macro",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "agency": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "indicator": {
+     "type": "string"
+    },
+    "items": {
+     "type": "array"
+    },
+    "next_release": {
+     "type": "object"
+    },
+    "reference_period": {
+     "type": "string"
+    },
+    "release_title": {
+     "type": "string"
+    },
+    "released": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "indicator",
+    "agency",
+    "source_url",
+    "items"
+   ],
+   "type": "object"
+  },
+  "title": "Macro release card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Central-bank decision card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need the latest central-bank rate decision (hike, hold or cut) for a major or emerging-market bank: policy rate, change in bps, vote, next meeting and official source. Free: sample_policy. Policy ids: BOE, FED, ECB, BOJ, RBA, BOC, SNB, NOR, SWE, MEX, BOK, TUR, IND, ZAF, CHN, IDN, ETH, RUS, EGY, IRN, BCB, NZL. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Central bank id",
+     "enum": [
+      "BOE",
+      "FED",
+      "ECB",
+      "BOJ",
+      "RBA",
+      "BOC",
+      "SNB",
+      "NOR",
+      "SWE",
+      "MEX",
+      "BOK",
+      "TUR",
+      "IND",
+      "ZAF",
+      "CHN",
+      "IDN",
+      "ETH",
+      "RUS",
+      "EGY",
+      "IRN",
+      "BCB",
+      "NZL"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_policy",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "bank_rate": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "card_type": {
+     "type": "string"
+    },
+    "change_bps": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "decision": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "institution": {
+     "type": "string"
+    },
+    "previous_bank_rate": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "summary": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "institution",
+    "source_url"
+   ],
+   "type": "object"
+  },
+  "title": "Central-bank decision card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Guidance vs results (say-do) card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need whether a company delivered on the outlook in its prior earnings release: each guided figure compared with the reported figure in the next 10-Q, marked delivered or missed, with EDGAR citations. Free sample over HTTP: /sample/saydo/{ticker}. Tickers: NVDA, AMD, INTC. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "Ticker",
+     "enum": [
+      "NVDA",
+      "AMD",
+      "INTC"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_saydo",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "accession": {
+     "type": "string"
+    },
+    "changes": {
+     "type": "array"
+    },
+    "company": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "comparison_basis": {
+     "type": "string"
+    },
+    "filing_date": {
+     "type": "string"
+    },
+    "filing_type": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "high_materiality_count": {
+     "type": "number"
+    },
+    "new_material_items_count": {
+     "type": "number"
+    },
+    "period": {
+     "type": "string"
+    },
+    "period_end": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "ticker": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker",
+    "filing_type",
+    "source_url",
+    "changes"
+   ],
+   "type": "object"
+  },
+  "title": "Guidance vs results (say-do) card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Insider trades around the 10-Q card (paid $0.05)"
+  },
+  "description": "Paid $0.05 USDC on Base. Call when you need what a company's officers and directors bought or sold (SEC Form 4 and 4/A) in the 30 days either side of its latest 10-Q: each trade graded high, medium or low by the FilingDelta rubric (not SEC grading), with figures and EDGAR citations. Free sample over HTTP: /sample/window/{ticker}. Tickers: NVDA, AMD, INTC. Others return 404 (no charge).",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "Ticker",
+     "enum": [
+      "NVDA",
+      "AMD",
+      "INTC"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "get_window",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "accession": {
+     "type": "string"
+    },
+    "changes": {
+     "type": "array"
+    },
+    "company": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "comparison_basis": {
+     "type": "string"
+    },
+    "filing_date": {
+     "type": "string"
+    },
+    "filing_type": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "high_materiality_count": {
+     "type": "number"
+    },
+    "new_material_items_count": {
+     "type": "number"
+    },
+    "period": {
+     "type": "string"
+    },
+    "period_end": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "ticker": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker",
+    "filing_type",
+    "source_url",
+    "changes"
+   ],
+   "type": "object"
+  },
+  "title": "Insider trades around the 10-Q card (paid $0.05)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List coverage and prices"
+  },
+  "description": "Free. Call first: the current coverage list (SEC filers, central banks, US macro and CPI ids, bundles) with prices, payTo, card dates and content hashes. Compact by default (ids, prices, as_of, content_hash); pass full: true for the whole /catalog. Tickers: AMD, MRVL, NVDA, AVGO, TSM, MU, AMAT, AAPL, MSFT, META, TSLA, ORCL, INTC, ASML, MSTR, JPM, BAC, GS, WFC, NFLX, JNJ, BRK, PLTR, SPCX, GOOGL, LLY, LRCX, BA, AMZN, SMCI, ARM. Policy ids: BOE, FED, ECB, BOJ, RBA, BOC, SNB, NOR, SWE, MEX, BOK, TUR, IND, ZAF, CHN, IDN, ETH, RUS, EGY, IRN, BCB, NZL. Macro ids: NFP, GDP, CPI. CPI ids: US, UK, EA, JP. Bundles: SEMIS, CENTRALBANKS, BRICS, AI.",
+  "input_schema": {
+   "properties": {
+    "full": {
+     "description": "true returns the full /catalog JSON; default false returns the compact list",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_filers",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "asset": {
+     "type": "string"
+    },
+    "bundles": {
+     "type": "array"
+    },
+    "cards": {
+     "type": "array"
+    },
+    "filers": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "macro": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "network": {
+     "type": "string"
+    },
+    "payTo": {
+     "type": "string"
+    },
+    "policy": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "service": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "filers",
+    "policy",
+    "cards"
+   ],
+   "type": "object"
+  },
+  "title": "List coverage and prices"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Request data we don't cover"
+  },
+  "description": "Free: ask for a ticker, bank or release we lack. what required (500 chars max), no links/HTML. Limit 5/hour, 20/wallet/day. Returns ok.",
+  "input_schema": {
+   "properties": {
+    "contact": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "frequency": {
+     "maxLength": 50,
+     "type": "string"
+    },
+    "price_usd": {
+     "minimum": 0,
+     "type": "number"
+    },
+    "wallet": {
+     "pattern": "^0x[0-9a-fA-F]{40}$",
+     "type": "string"
+    },
+    "what": {
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "what"
+   ],
+   "type": "object"
+  },
+  "name": "request_data",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "error": {
+     "type": "string"
+    },
+    "ok": {
+     "type": "boolean"
+    },
+    "status": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "status",
+    "ok"
+   ],
+   "type": "object"
+  },
+  "title": "Request data we don't cover"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Free sample inflation (CPI) card"
+  },
+  "description": "Free sample inflation card for a covered country or area (US, UK, EA, JP), no payment: a trimmed view of the latest card (comparison_basis says how many items), same schema as get_cpi, with access, items_hidden, gated_fields and buy_with. Use it to test before paying for get_cpi. CPI ids: US, UK, EA, JP.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "CPI id (country or area)",
+     "enum": [
+      "US",
+      "UK",
+      "EA",
+      "JP"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "sample_cpi",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "agency": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "indicator": {
+     "type": "string"
+    },
+    "items": {
+     "type": "array"
+    },
+    "next_release": {
+     "type": "object"
+    },
+    "reference_period": {
+     "type": "string"
+    },
+    "release_title": {
+     "type": "string"
+    },
+    "released": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "indicator",
+    "agency",
+    "source_url",
+    "items"
+   ],
+   "type": "object"
+  },
+  "title": "Free sample inflation (CPI) card"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Free sample filing-change card"
+  },
+  "description": "Free sample of get_filing_delta for any covered ticker, no payment: one change in full (as in the paid card) and every other change as a teaser with category, section and materiality, plus direction, a size bucket and magnitude_basis (what the bucket measures, e.g. single_level) where the paid figures give them. Also hidden counts, gated_fields and buy_with. Use it to test before paying. Tickers: AMD, MRVL, NVDA, AVGO, TSM, MU, AMAT, AAPL, MSFT, META, TSLA, ORCL, INTC, ASML, MSTR, JPM, BAC, GS, WFC, NFLX, JNJ, BRK, PLTR, SPCX, GOOGL, LLY, LRCX, BA, AMZN, SMCI, ARM.",
+  "input_schema": {
+   "properties": {
+    "ticker": {
+     "description": "Ticker",
+     "enum": [
+      "AMD",
+      "MRVL",
+      "NVDA",
+      "AVGO",
+      "TSM",
+      "MU",
+      "AMAT",
+      "AAPL",
+      "MSFT",
+      "META",
+      "TSLA",
+      "ORCL",
+      "INTC",
+      "ASML",
+      "MSTR",
+      "JPM",
+      "BAC",
+      "GS",
+      "WFC",
+      "NFLX",
+      "JNJ",
+      "BRK",
+      "PLTR",
+      "SPCX",
+      "GOOGL",
+      "LLY",
+      "LRCX",
+      "BA",
+      "AMZN",
+      "SMCI",
+      "ARM"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker"
+   ],
+   "type": "object"
+  },
+  "name": "sample_delta",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "accession": {
+     "type": "string"
+    },
+    "changes": {
+     "type": "array"
+    },
+    "company": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "comparison_basis": {
+     "type": "string"
+    },
+    "filing_date": {
+     "type": "string"
+    },
+    "filing_type": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "high_materiality_count": {
+     "type": "number"
+    },
+    "new_material_items_count": {
+     "type": "number"
+    },
+    "period": {
+     "type": "string"
+    },
+    "period_end": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "ticker": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "ticker",
+    "filing_type",
+    "source_url",
+    "changes"
+   ],
+   "type": "object"
+  },
+  "title": "Free sample filing-change card"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Free sample macro release card"
+  },
+  "description": "Free sample US macro card (CPI, payrolls, GDP): a trimmed view of the latest card (comparison_basis says how many items), same schema as get_macro, no payment. Macro ids: NFP, GDP, CPI.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Macro release id",
+     "enum": [
+      "NFP",
+      "GDP",
+      "CPI"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "sample_macro",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "agency": {
+     "type": "string"
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "indicator": {
+     "type": "string"
+    },
+    "items": {
+     "type": "array"
+    },
+    "next_release": {
+     "type": "object"
+    },
+    "reference_period": {
+     "type": "string"
+    },
+    "release_title": {
+     "type": "string"
+    },
+    "released": {
+     "type": "string"
+    },
+    "source_url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "indicator",
+    "agency",
+    "source_url",
+    "items"
+   ],
+   "type": "object"
+  },
+  "title": "Free sample macro release card"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Free sample central-bank card"
+  },
+  "description": "Free sample rate-decision card for any covered central bank, no payment: the bank's PREVIOUS meeting as a full card, same schema as get_policy (decision, rate, change, vote, dissent, source link), with access \"full\", sample_of \"previous_meeting\" and a disclaimer. A latest object gives the current meeting only as {meeting_date, access \"paid\", content_hash, buy_with}; the current decision itself is in the paid get_policy card. Policy ids: BOE, FED, ECB, BOJ, RBA, BOC, SNB, NOR, SWE, MEX, BOK, TUR, IND, ZAF, CHN, IDN, ETH, RUS, EGY, IRN, BCB, NZL.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "Central bank id",
+     "enum": [
+      "BOE",
+      "FED",
+      "ECB",
+      "BOJ",
+      "RBA",
+      "BOC",
+      "SNB",
+      "NOR",
+      "SWE",
+      "MEX",
+      "BOK",
+      "TUR",
+      "IND",
+      "ZAF",
+      "CHN",
+      "IDN",
+      "ETH",
+      "RUS",
+      "EGY",
+      "IRN",
+      "BCB",
+      "NZL"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "sample_policy",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "bank_rate": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "card_type": {
+     "type": "string"
+    },
+    "change_bps": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "decision": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "generated_at": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "institution": {
+     "type": "string"
+    },
+    "previous_bank_rate": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "source_url": {
+     "type": "string"
+    },
+    "summary": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "institution",
+    "source_url"
+   ],
+   "type": "object"
+  },
+  "title": "Free sample central-bank card"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search coverage"
+  },
+  "description": "Free: find a covered company, central bank or US macro release by name or topic. Returns the tool to call. Missing? Use request_data.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_coverage",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "count": {
+     "type": "number"
+    },
+    "hint": {
+     "type": "string"
+    },
+    "matches": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "free_tool": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "paid_tool": {
+        "type": "string"
+       },
+       "price": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "kind",
+       "name"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query",
+    "count",
+    "matches"
+   ],
+   "type": "object"
+  },
+  "title": "Search coverage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "What's new since a date"
+  },
+  "description": "Free: cards changed since a date, each with a one-line headline (name, card date, next update) and content_hash so you skip re-buying unchanged cards. Missing coverage? Use request_data.",
+  "input_schema": {
+   "properties": {
+    "since": {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "whats_new",
+  "output_schema": {
+   "additionalProperties": true,
+   "properties": {
+    "bundles": {
+     "type": "array"
+    },
+    "cards": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "as_of": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "content_hash": {
+        "type": "string"
+       },
+       "free_tool": {
+        "type": "string"
+       },
+       "headline": {
+        "type": "string"
+       },
+       "id": {
+        "type": "string"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "next_update": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "next_update_note": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "paid_tool": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "kind",
+       "content_hash",
+       "free_tool",
+       "paid_tool"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "count": {
+     "type": "number"
+    },
+    "note": {
+     "type": "string"
+    },
+    "since": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "count",
+    "cards"
+   ],
+   "type": "object"
+  },
+  "title": "What's new since a date"
+ }
+]

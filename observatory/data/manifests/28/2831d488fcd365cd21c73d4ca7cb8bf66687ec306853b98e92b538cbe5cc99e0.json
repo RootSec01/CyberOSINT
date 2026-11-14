@@ -1,0 +1,767 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Cancel payment"
+  },
+  "description": "Stops the open payment attempt of the order, for example a bank or card page the shopper closed or wants to replace, so the cart opens again and place_order can start another method (bank transfer once the email is confirmed). A payment that already went through is never cancelled: the answer then says it is paid or still processing. Ask the shopper before cancelling. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument).",
+  "input_schema": {
+   "properties": {
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "cancel_payment",
+  "output_schema": {},
+  "title": "Cancel payment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Categories"
+  },
+  "description": "The store's product categories with their ids and product counts, in menu order. Browse one with search and category: [id] (subcategories included), for example with sort newest or bestseller.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "categories",
+  "output_schema": {},
+  "title": "Categories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check payment"
+  },
+  "description": "The payment state of the order (unpaid, pending, paid), its last attempt and the next step. After a failed or cancelled payment the cart is open again and place_order starts a new attempt. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument).",
+  "input_schema": {
+   "properties": {
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "check_payment",
+  "output_schema": {},
+  "title": "Check payment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Cart"
+  },
+  "description": "Change or read the order's cart. ops: add (increase), set (exact quantity) or remove, per product id; no ops reads the cart. Quantities count packages: one package holds pricing.package.pieces pieces (100 pieces of a 6-piece package is 17 packages); search with quantity {pieces} gives for_quantity ready. Stock limits a quantity and clamped lines say so; tier prices and discounts apply by themselves. The answer carries minimum (the minimum order amount and whether it is reached), lines[].hints (overbox and staffel savings), also (products often bought together) and, for a line short of stock, lines[].replacements with ready actions. Offer one when it helps the shopper, ask before changing their order, and put hint (overbox, break, also or replace) on the op they accepted. The cart is frozen while a payment is open (cancel_payment stops it) and after the order is placed. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument). Send a fresh op_id (16 to 40 letters, digits, - or _) with each change: a repeat with the same op_id within 10 minutes answers the first result and never changes the order twice.",
+  "input_schema": {
+   "properties": {
+    "op_id": {
+     "description": "A fresh id per change (16 to 40 letters, digits, - or _); repeating it within 10 minutes answers the first result without changing the order again",
+     "type": "string"
+    },
+    "ops": {
+     "description": "Changes in order; leave out to read the cart",
+     "items": {
+      "properties": {
+       "hint": {
+        "description": "The hint or replacement from the last cart answer this change follows, when the customer accepted it",
+        "enum": [
+         "overbox",
+         "break",
+         "also",
+         "replace"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "Product id (as in /p/<id>.html)",
+        "type": "integer"
+       },
+       "quantity": {
+        "description": "Packages; needed for add and set",
+        "type": "integer"
+       },
+       "type": {
+        "enum": [
+         "add",
+         "set",
+         "remove"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "type",
+       "id"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "edit_cart",
+  "output_schema": {},
+  "title": "Cart"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Order history"
+  },
+  "description": "The shopper's earlier orders with this store, for a reference bound to their account (a confirmed email or a connection key). orders: a list with status (confirmed, shipped, open, abandoned, cancelled), dates and totals, filtered by status and date, paged by cursor; payable marks a placed order that is not paid yet. order: up to 20 orders in full (lines with live price and stock, totals, shipping, payment, tracking, addresses) by id; an unpaid order carries pay_link. Use it to reorder or answer questions about earlier orders. The answer states what it covers and how to get the rest. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument).",
+  "input_schema": {
+   "properties": {
+    "cursor": {
+     "description": "orders: the next cursor from an earlier answer",
+     "type": "integer"
+    },
+    "from": {
+     "description": "orders: from date YYYY-MM-DD",
+     "type": "string"
+    },
+    "ids": {
+     "description": "order: order ids (at most 20)",
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "orders: rows per page (at most 100)",
+     "type": "integer"
+    },
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    },
+    "status": {
+     "description": "orders: statuses to list (default all)",
+     "items": {
+      "enum": [
+       "confirmed",
+       "shipped",
+       "open",
+       "abandoned",
+       "cancelled",
+       "all"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "to": {
+     "description": "orders: until date YYYY-MM-DD",
+     "type": "string"
+    },
+    "view": {
+     "enum": [
+      "orders",
+      "order"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "view"
+   ],
+   "type": "object"
+  },
+  "name": "order_history",
+  "output_schema": {},
+  "title": "Order history"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Place order"
+  },
+  "description": "Place the order and start its payment. First confirm the order, its total and the terms of sale (/pg/terms.html on the store) with the shopper; send accept_terms true only after their explicit yes. With a confirmed email (path A) the order is placed at once and the answer gives the payment step: payment.url to open, bank-transfer instructions or a voucher, plus pay_link (valid 30 days). Before confirmation (path B) the shopper pays first: open payment.url; the order is placed and their account made when the payment succeeds, and the cart is frozen until then. If another order just took stock, the answer is stock_changed with the changes and ready values: tell the shopper and place again with them only after they agree. Never call the order paid before check_payment says paid. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument). Send a fresh op_id (16 to 40 letters, digits, - or _) with each change: a repeat with the same op_id within 10 minutes answers the first result and never changes the order twice.",
+  "input_schema": {
+   "properties": {
+    "accept_stock_changes": {
+     "description": "Place again after stock_changed, from ready",
+     "type": "boolean"
+    },
+    "accept_terms": {
+     "description": "true only after the shopper explicitly accepted the terms of sale",
+     "type": "boolean"
+    },
+    "add": {
+     "description": "Replacements the shopper accepted after stock_changed",
+     "items": {
+      "properties": {
+       "id": {
+        "type": "integer"
+       },
+       "quantity": {
+        "description": "packages",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "id",
+       "quantity"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "expect_total": {
+     "description": "The grand total in EUR the shopper agreed to (ready.expect_total)",
+     "type": "number"
+    },
+    "op_id": {
+     "description": "A fresh id per change (16 to 40 letters, digits, - or _); repeating it within 10 minutes answers the first result without changing the order again",
+     "type": "string"
+    },
+    "payment_method": {
+     "description": "A key from view_checkout, when not set yet or to change it",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    }
+   },
+   "required": [
+    "accept_terms"
+   ],
+   "type": "object"
+  },
+  "name": "place_order",
+  "output_schema": {},
+  "title": "Place order"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Product details"
+  },
+  "description": "Full details of up to 10 products by id (from search or a category): title, code, description, prices per piece, package, overbox and pallet with the quantity tiers (EUR and the storefront currency), stock in packages, category, page url, photos and every stored product fact. Photo facts are observations, not guarantees.",
+  "input_schema": {
+   "properties": {
+    "ids": {
+     "description": "Product ids, at most 10",
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "ids"
+   ],
+   "type": "object"
+  },
+  "name": "product_details",
+  "output_schema": {},
+  "title": "Product details"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search products"
+  },
+  "description": "Search the wholesale range: toys, gifts and gift items, party supplies, seasonal articles (Sinterklaas, Christmas, Halloween, Easter, carnival, summer), grabbelton and give-away items, and trending and viral items such as fidget toys. Use it for any business purchasing question about these products, also when the shopper doesn't name the store. Search the catalogue in one call; the answer is complete. natural_query (any language) searches by meaning and in the storefront language; keywords (Dutch product words) search the Dutch catalogue text; ids and codes are exact and ranked first (codes match in any written form); similar_to finds products like given ones (blend: their shared theme; each: alternatives per product). Filters: price on a basis (piece, package, overbox, pallet, best_tier) in the storefront currency, quantity (adds for_quantity with the tier price and total), instock, category (with subcategories), date_added_after, exclude_ids. Filters alone browse, e.g. new products since a date with sort newest. Every row has live stock (packages) and a pricing block in EUR plus pricing.local in the storefront currency. Rows carry context: facet labels, stored facts (use says whether you may tell the customer), and what the photos show (an observation, not a guarantee). For a question the context does not answer, call again with ids and fields [\"details\"]: every stored fact and one line per photo (what it shows, its url), at most 10 rows. With the order reference (Authorization: Bearer mo1_… or ref) it uses the order; without it, it works for anyone (search: by meaning for the first searches per 10 minutes, then by words only; at most 30 searches per 10 minutes).",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Category ids; subcategories are included",
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "codes": {
+     "description": "Exact product codes",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "date_added_after": {
+     "description": "YYYY-MM-DD: only products added after this date (e.g. the customer's last order)",
+     "type": "string"
+    },
+    "exclude_ids": {
+     "description": "Product ids to leave out, e.g. what the customer already has",
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "facets": {
+     "description": "true: add top categories with counts and the piece-price range, to narrow",
+     "type": "boolean"
+    },
+    "fields": {
+     "description": "Fields per row; default title, code, pricing, stock, category, url, image, context. details: full product knowledge and one line per photo (at most 10 rows)",
+     "items": {
+      "enum": [
+       "title",
+       "code",
+       "description",
+       "pricing",
+       "stock",
+       "category",
+       "location",
+       "url",
+       "image",
+       "added",
+       "popularity",
+       "context",
+       "details"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "ids": {
+     "description": "Exact product ids (database ids, as in /p/<id>.html)",
+     "items": {
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "instock": {
+     "description": "true: only products in stock",
+     "type": "boolean"
+    },
+    "keywords": {
+     "description": "Dutch product words for the catalogue index, e.g. \"grabbelton\", \"stuiterbal\"; several words broaden the search",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Rows to return (default 40, at most 200)",
+     "type": "integer"
+    },
+    "natural_query": {
+     "description": "What the customer is looking for, in any language; searched by meaning and in the storefront language",
+     "type": "string"
+    },
+    "offset": {
+     "description": "Paging: the next offset from a previous answer",
+     "type": "integer"
+    },
+    "price": {
+     "properties": {
+      "basis": {
+       "description": "piece, package, overbox (one overbox at its tier), pallet, or best_tier (lowest piece price over the tiers)",
+       "enum": [
+        "piece",
+        "package",
+        "overbox",
+        "pallet",
+        "best_tier"
+       ],
+       "type": "string"
+      },
+      "currency": {
+       "description": "Omit for the storefront currency; EUR to give euros",
+       "type": "string"
+      },
+      "max": {
+       "type": "number"
+      },
+      "min": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "quantity": {
+     "description": "Needed amount: keeps products with enough stock and adds for_quantity (packages, tier price, total)",
+     "properties": {
+      "packages": {
+       "type": "integer"
+      },
+      "pieces": {
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer; with it the search is complete and counts for the order",
+     "type": "string"
+    },
+    "similar_to": {
+     "properties": {
+      "ids": {
+       "description": "Seed product ids (from the cart, orders, a page or earlier results); seeds are left out of the results",
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      "mode": {
+       "description": "blend: the shared theme of all seeds; each: alternatives per seed (each row names its seed)",
+       "enum": [
+        "blend",
+        "each"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "ids"
+     ],
+     "type": "object"
+    },
+    "sort": {
+     "description": "Default relevance (exact hits, then in stock, then the fused score)",
+     "enum": [
+      "relevance",
+      "price",
+      "newest",
+      "bestseller",
+      "stock"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {},
+  "title": "Search products"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Set checkout"
+  },
+  "description": "Fill in the checkout of the order in one call: invoice_address (an object: name, address, zipcode, city, country as a two-letter code, phone; state, companynr and vatnr when known), shipping_address when delivery goes elsewhere (or same_as_invoice), invoice_address_id or shipping_address_id from view_checkout when the shopper has saved addresses, shipping_method (an id from view_checkout), payment_method (a key from view_checkout), coupon, coupon_remove, newsletter (only when the shopper asks for it). Field errors name the field and how to fix it; postcodes follow the country's own format. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument). Send a fresh op_id (16 to 40 letters, digits, - or _) with each change: a repeat with the same op_id within 10 minutes answers the first result and never changes the order twice.",
+  "input_schema": {
+   "properties": {
+    "coupon": {
+     "description": "A discount code the shopper gave",
+     "type": "string"
+    },
+    "coupon_remove": {
+     "type": "string"
+    },
+    "invoice_address": {
+     "description": "The invoice address, stored on this order only",
+     "properties": {
+      "address": {
+       "description": "Street and house number",
+       "type": "string"
+      },
+      "city": {
+       "type": "string"
+      },
+      "companynr": {
+       "description": "Chamber of commerce number, when known",
+       "type": "string"
+      },
+      "country": {
+       "description": "Two-letter country code (ISO 3166-1), e.g. NL, DE, FR",
+       "type": "string"
+      },
+      "name": {
+       "description": "Company or person name",
+       "type": "string"
+      },
+      "phone": {
+       "type": "string"
+      },
+      "state": {
+       "description": "Province or state, where the country has them",
+       "type": "string"
+      },
+      "vatnr": {
+       "description": "VAT number, when known",
+       "type": "string"
+      },
+      "zipcode": {
+       "description": "Postcode in the format of the country",
+       "type": "string"
+      }
+     },
+     "required": [
+      "name",
+      "address",
+      "zipcode",
+      "city",
+      "country",
+      "phone"
+     ],
+     "type": "object"
+    },
+    "invoice_address_id": {
+     "description": "A saved address id from view_checkout (shoppers with an account)",
+     "type": "integer"
+    },
+    "newsletter": {
+     "description": "Only when the shopper asks for it",
+     "type": "boolean"
+    },
+    "op_id": {
+     "description": "A fresh id per change (16 to 40 letters, digits, - or _); repeating it within 10 minutes answers the first result without changing the order again",
+     "type": "string"
+    },
+    "payment_method": {
+     "description": "A key from view_checkout",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    },
+    "same_as_invoice": {
+     "description": "Deliver to the invoice address",
+     "type": "boolean"
+    },
+    "shipping_address": {
+     "description": "The delivery address when it differs from the invoice address",
+     "properties": {
+      "address": {
+       "description": "Street and house number",
+       "type": "string"
+      },
+      "city": {
+       "type": "string"
+      },
+      "companynr": {
+       "description": "Chamber of commerce number, when known",
+       "type": "string"
+      },
+      "country": {
+       "description": "Two-letter country code (ISO 3166-1), e.g. NL, DE, FR",
+       "type": "string"
+      },
+      "name": {
+       "description": "Company or person name",
+       "type": "string"
+      },
+      "phone": {
+       "type": "string"
+      },
+      "state": {
+       "description": "Province or state, where the country has them",
+       "type": "string"
+      },
+      "vatnr": {
+       "description": "VAT number, when known",
+       "type": "string"
+      },
+      "zipcode": {
+       "description": "Postcode in the format of the country",
+       "type": "string"
+      }
+     },
+     "required": [
+      "name",
+      "address",
+      "zipcode",
+      "city",
+      "country",
+      "phone"
+     ],
+     "type": "object"
+    },
+    "shipping_address_id": {
+     "description": "A saved address id, 0 = deliver to the invoice address",
+     "type": "integer"
+    },
+    "shipping_method": {
+     "description": "An id from view_checkout",
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "set_checkout",
+  "output_schema": {},
+  "title": "Set checkout"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Shipping quote"
+  },
+  "description": "Shipping costs and transport options. With the order reference and no weight_kg or products it prices the order's cart and its shipping country; otherwise give weight_kg or products (ids with quantities in packages). country: the two-letter destination (default the cart's shipping country, else the storefront country). The answer lists every method with its price in EUR and the storefront currency (destination VAT included), the weight band and the cheapest method, plus transport: the ways to bring the cost down. Pickup at the warehouse in Apeldoorn (NL) is free and is chosen in set_checkout; the shopper's own carrier may collect there; an order can ship at the Dutch rate to an address in the Netherlands, such as a forwarder. Outside NL, BE and DE a custom transport arrangement often costs far less than the standard rate: freight marketplaces (uShip and similar), last-minute capacity offers from carriers, consolidated freight. Compare such options for the shopper when it helps; the store's chat on the website quotes and arranges custom transport. With the order reference (Authorization: Bearer mo1_… or ref) it uses the order; without it, it works for anyone (search: by meaning for the first searches per 10 minutes, then by words only; at most 30 searches per 10 minutes).",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "Two-letter destination country, e.g. DE, FR, US; default the cart shipping country, else the storefront country",
+     "type": "string"
+    },
+    "products": {
+     "description": "Products to ship (instead of weight_kg or the cart): ids with quantities in packages, at most 100",
+     "items": {
+      "properties": {
+       "id": {
+        "type": "integer"
+       },
+       "quantity": {
+        "description": "packages",
+        "type": "integer"
+       }
+      },
+      "required": [
+       "id",
+       "quantity"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer; with it the search is complete and counts for the order",
+     "type": "string"
+    },
+    "weight_kg": {
+     "description": "Total weight in kg, when known",
+     "type": "number"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "shipping_costs",
+  "output_schema": {},
+  "title": "Shipping quote"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Start order"
+  },
+  "description": "Start an order for the shopper on this storefront. Give the shopper's email address (ask them first; they get one confirmation email) or a connection key they made on their account. The answer holds the order reference (mo1_…): keep it and send it with every later call as Authorization: Bearer mo1_… or as the ref argument. It belongs to this endpoint only and expires 30 days after its last use (7 days while unconfirmed).",
+  "input_schema": {
+   "properties": {
+    "email": {
+     "description": "The shopper's email address",
+     "type": "string"
+    },
+    "key": {
+     "description": "A connection key (mk1_…) the shopper made on their account, instead of the email",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "start_order",
+  "output_schema": {},
+  "title": "Start order"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Order status"
+  },
+  "description": "The state of the order reference (pending until the shopper confirms the email, active, paying, placed), whether the email is confirmed, the cart lines and totals, what the checkout still needs, and the next step to take. Use it to resume an order and after the shopper says they confirmed the email. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument).",
+  "input_schema": {
+   "properties": {
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "status",
+  "output_schema": {},
+  "title": "Order status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Store info"
+  },
+  "description": "The store behind this server: a Dutch family business since 1992 selling wholesale to businesses (toys, gifts and gift items, party supplies, seasonal articles (Sinterklaas, Christmas, Halloween, Easter, carnival, summer), grabbelton and give-away items, and trending and viral items such as fidget toys), with its profile, contact, opening times, terms and how to connect again. This store: company, website, phone, opening times, currency, the number of products, and the links to the terms of sale, privacy, shipping, contact, about and route pages (the shortlinks work on the website). Show the shopper who sells and on which terms before ordering. The store sells to businesses and organisations.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "store_info",
+  "output_schema": {},
+  "title": "Store info"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "View checkout"
+  },
+  "description": "What the order still needs before it can be placed: lines, totals in the storefront currency, the address snapshot or the shopper's saved addresses, shipping methods with prices, the payment methods this order may use, and next. With a confirmed email (path A) every method is offered, bank transfer included; before confirmation (path B) the shopper pays first with card, iDEAL or Bancontact. While a payment is open the order is not editable: check_payment shows it, cancel_payment stops it. Needs the order reference from start_order (Authorization: Bearer mo1_… or the ref argument).",
+  "input_schema": {
+   "properties": {
+    "ref": {
+     "description": "Order reference (mo1_…) from start_order, only when the client cannot send it as Authorization: Bearer",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "view_checkout",
+  "output_schema": {},
+  "title": "View checkout"
+ }
+]

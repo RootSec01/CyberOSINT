@@ -1,0 +1,183 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "A website's SEO score"
+  },
+  "description": "One website on sale by its id (3f9a1c07b2e85d64): its SEO score, the share of Triremes' checks of what search engines can read on its homepage that it fails, weighted by how serious each check is (0% means no gaps; higher is worse), with its label (No gaps, Lightly flawed, Flawed, Badly flawed or Catastrophic), the checks it failed by name, when it was measured, its price, how many times it has been sold and the time of each sale, and its page. A website with no SEO score yet is being measured: being_measured is true, it has no price and it can be bought once it has an SEO score.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "site_id": {
+     "description": "The website's id, as search_website_gaps gives it.",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "required": [
+    "site_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_website_gap_score",
+  "output_schema": {},
+  "title": "A website's SEO score"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search problems"
+  },
+  "description": "Search the problems people have that Triremes lists, biggest first: each with its title, tier, how many reports and when the first and the last were, the day Triremes listed it, its summary as its page shows it, whether it is sold as a lead (businesses that have it) or an idea report, its price, how many times a lead has been sold and when it last was, and its page. Leads and idea reports are bought on that page.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "The next_cursor of the answer before, for the next page.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "kind": {
+     "description": "Only leads, or only idea reports.",
+     "enum": [
+      "lead",
+      "idea_report"
+     ],
+     "type": "string"
+    },
+    "max_sold": {
+     "description": "Only leads sold at most this many times; 0 for those never sold.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words to find in a problem's title or summary; empty for every problem.",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_problems",
+  "output_schema": {},
+  "title": "Search problems"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search websites with poor SEO / AEO"
+  },
+  "description": "Search the business websites Triremes measured with gaps in what search engines and AI answer engines can read, each one sold on its own: what kind of business and where, its SEO score and its label, the checks it failed by name, when it was measured, its price, how many times it has been sold and when it last was, and its page. The business, its website and its contacts are bought on that page. One with no SEO score yet is being measured (being_measured): no price, and it can be bought once it has an SEO score.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "business": {
+     "description": "A kind of business, such as Dentists or Roofing Contractors; when several kinds match, the answer lists them.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "city": {
+     "description": "A city.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "country": {
+     "description": "A country, as its two-letter ISO code (US, DE).",
+     "maxLength": 2,
+     "type": "string"
+    },
+    "cursor": {
+     "description": "The next_cursor of the answer before, for the next page.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "gap": {
+     "description": "Only websites that fail this check, by its id: https (Homepage not on HTTPS), redirects (More than 2 redirects to the homepage), mixed_content (HTTP resources on an HTTPS homepage), ttfb (First byte after more than 1800 ms), title_missing (No homepage title), title_long (Homepage title over 60 characters), title_short (Homepage title under 30 characters), meta_description (No meta description), h1 (No h1 heading), canonical (No canonical link), viewport (No viewport tag), open_graph (No Open Graph title or image), noindex (Homepage marked noindex), robots_blocks_all (robots.txt blocks all crawlers), sitemap (No sitemap), structured_data (No structured data (JSON-LD)), structured_data_invalid (Structured data that is not valid JSON).",
+     "enum": [
+      "https",
+      "redirects",
+      "mixed_content",
+      "ttfb",
+      "title_missing",
+      "title_long",
+      "title_short",
+      "meta_description",
+      "h1",
+      "canonical",
+      "viewport",
+      "open_graph",
+      "noindex",
+      "robots_blocks_all",
+      "sitemap",
+      "structured_data",
+      "structured_data_invalid"
+     ],
+     "type": "string"
+    },
+    "gap_score": {
+     "description": "Only websites with an SEO score in this band: catastrophic (Catastrophic: 100%), badly-flawed (Badly flawed: 50% to 99%), flawed (Flawed: 20% to 49%), lightly-flawed (Lightly flawed: 1% to 19%), no-gaps (No gaps: 0%); or in this 10% step: 0 (0%), 1-10 ... 91-100.",
+     "enum": [
+      "catastrophic",
+      "badly-flawed",
+      "flawed",
+      "lightly-flawed",
+      "no-gaps",
+      "0",
+      "1-10",
+      "11-20",
+      "21-30",
+      "31-40",
+      "41-50",
+      "51-60",
+      "61-70",
+      "71-80",
+      "81-90",
+      "91-100"
+     ],
+     "type": "string"
+    },
+    "max_sold": {
+     "description": "Only websites sold at most this many times; 0 for those never sold.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words to find, each somewhere in a website's kind of business, city, region, country or the names of the checks it fails, such as \"dentists austin\" or \"roofing sitemap\"; empty for every website.",
+     "maxLength": 100,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_website_gaps",
+  "output_schema": {},
+  "title": "Search websites with poor SEO / AEO"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Free samples"
+  },
+  "description": "The free sample lead, idea report and website with poor SEO / AEO: what a buyer gets, on pages anyone may read.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "show_samples",
+  "output_schema": {},
+  "title": "Free samples"
+ }
+]

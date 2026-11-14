@@ -1,0 +1,2883 @@
+[
+ {
+  "_meta": {},
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Cancel Booking (step 2 of 2)"
+  },
+  "description": "Second of two steps to cancel a booking: cancels it and starts any refund due. Irreversible. Requires the confirmation code and the single-use token that request_cancel_token emailed to the guest; a missing, expired or already-used token is rejected. get_cancellation_policy shows the refund terms that apply.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cancelToken": {
+     "description": "Single-use cancellation token from the email request_cancel_token sent to the guest.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "confirmationCode": {
+     "description": "8-char booking confirmation code, e.g. K7X9M2P4",
+     "pattern": "^[A-Za-z0-9]{4,32}$",
+     "type": "string"
+    },
+    "reason": {
+     "description": "Guest-provided cancellation reason (at least 3 characters)",
+     "minLength": 3,
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmationCode",
+    "cancelToken",
+    "reason"
+   ],
+   "type": "object"
+  },
+  "name": "cancel_booking",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "gatewaySettlementEta": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "refundAmount": {
+     "type": "number"
+    },
+    "refundStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "refundAmount",
+    "refundStatus",
+    "gatewaySettlementEta"
+   ],
+   "type": "object"
+  },
+  "title": "Cancel Booking (step 2 of 2)"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://booking/booking-mcp-app-v2.html",
+   "ui": {
+    "resourceUri": "ui://booking/booking-mcp-app-v2.html"
+   },
+   "ui/resourceUri": "ui://booking/booking-mcp-app-v2.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check Booking Status"
+  },
+  "description": "Returns the current status of a booking request (waiting for the hotel, confirmed or cancelled) by the confirmation code request_booking returned.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "confirmationCode": {
+     "description": "confirmationCode from request_booking structuredContent (e.g. 'K7X9M2P4')",
+     "pattern": "^[A-Za-z0-9]{4,32}$",
+     "type": "string"
+    },
+    "language": {
+     "default": "en",
+     "description": "Response language",
+     "enum": [
+      "en",
+      "vi"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmationCode"
+   ],
+   "type": "object"
+  },
+  "name": "check_booking_status",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "bookingId": {
+     "type": "string"
+    },
+    "checkIn": {
+     "type": "string"
+    },
+    "checkOut": {
+     "type": "string"
+    },
+    "confirmationCode": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "guestEmail": {
+     "type": "string"
+    },
+    "guestName": {
+     "type": "string"
+    },
+    "paidAt": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "paymentLinkUrl": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "paymentMethod": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "paymentStatus": {
+     "type": "string"
+    },
+    "propertyName": {
+     "type": "string"
+    },
+    "roomNumber": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "bookingId",
+    "confirmationCode",
+    "status",
+    "paymentStatus",
+    "paymentMethod",
+    "paymentLinkUrl",
+    "paidAt",
+    "checkIn",
+    "checkOut",
+    "roomNumber",
+    "guestName",
+    "guestEmail",
+    "propertyName"
+   ],
+   "type": "object"
+  },
+  "title": "Check Booking Status"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "visibility": [
+     "model"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Compare a Hotel from Its Link"
+  },
+  "description": "Compares prices for the one hotel behind a link from Booking.com, Agoda, Traveloka, Trip.com, Hotels.com or Airbnb: finds the same hotel on the other sites and lists each site's price for the whole stay, cheapest first, with a link to each. The dates and guests in the link are used when it has them, otherwise checkIn, checkOut and adults. Share links and links inside pasted text work too. Takes about 10-30 seconds.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "default": 2,
+     "description": "Number of adults, used when the link does not say (default 2).",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "checkIn": {
+     "description": "Check-in date YYYY-MM-DD, used when the link has no dates.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkOut": {
+     "description": "Check-out date YYYY-MM-DD, used when the link has no dates.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "childAges": {
+     "description": "Age of each child for supported family quotes.",
+     "items": {
+      "maximum": 17,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "language": {
+     "description": "Optional UI language hint. Only used when queryText gives no signal.",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Short excerpt (one sentence at most) of the guest's latest message in their own words, used only to detect the reply language; it is not stored or forwarded. It carries no names, contact details or other parts of the conversation.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "url": {
+     "description": "The hotel link as the user pasted it, e.g. 'https://www.agoda.com/radisson-hotel-danang/hotel/da-nang-vn.html'.",
+     "maxLength": 4096,
+     "minLength": 8,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url",
+    "checkIn",
+    "checkOut"
+   ],
+   "type": "object"
+  },
+  "name": "compare_hotel_link",
+  "output_schema": {},
+  "title": "Compare a Hotel from Its Link"
+ },
+ {
+  "_meta": {},
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get Cancellation Policy"
+  },
+  "description": "Returns the cancellation terms for one rate plan at an OpenTravel partner hotel: whether it is refundable, the free-cancellation window, the refund percentage, a plain-language summary and, given the check-in date, the exact free-cancellation deadline. Takes the propertyId and the ratePlanId from get_hotel_detail.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "checkInDate": {
+     "description": "Check-in date YYYY-MM-DD — required to compute the exact free-cancel deadline",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "language": {
+     "description": "Reply language. Falls back to queryText, then English.",
+     "enum": [
+      "en",
+      "vi"
+     ],
+     "type": "string"
+    },
+    "propertyId": {
+     "description": "OpenTravel propertyId UUID from search results",
+     "format": "uuid",
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Short excerpt of the guest's request, used only to pick the reply language.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "ratePlanId": {
+     "description": "ratePlanId from get_hotel_detail roomTypes[].ratePlanId",
+     "format": "uuid",
+     "type": "string"
+    }
+   },
+   "required": [
+    "propertyId",
+    "ratePlanId",
+    "checkInDate"
+   ],
+   "type": "object"
+  },
+  "name": "get_cancellation_policy",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "computedDeadline": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "freeCancelUntilHours": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "nonRefundable": {
+     "type": "boolean"
+    },
+    "policyText": {
+     "type": "string"
+    },
+    "ratePlanId": {
+     "type": "string"
+    },
+    "refundPercentAfterWindow": {
+     "type": [
+      "number",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "ratePlanId",
+    "nonRefundable",
+    "freeCancelUntilHours",
+    "refundPercentAfterWindow",
+    "policyText",
+    "computedDeadline"
+   ],
+   "type": "object"
+  },
+  "title": "Get Cancellation Policy"
+ },
+ {
+  "_meta": {},
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Stored Flight Fare Calendar"
+  },
+  "description": "Reads stored one-way fares per adult for a route and month, with observation dates and source. Missing days have no stored price. It does not start searches or predict future fares.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cabin": {
+     "default": "economy",
+     "enum": [
+      "economy",
+      "premium_economy",
+      "business",
+      "first"
+     ],
+     "type": "string"
+    },
+    "destination": {
+     "pattern": "^[A-Z]{3}$",
+     "type": "string"
+    },
+    "month": {
+     "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+     "type": "string"
+    },
+    "origin": {
+     "pattern": "^[A-Z]{3}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "origin",
+    "destination",
+    "month"
+   ],
+   "type": "object"
+  },
+  "name": "get_flight_fare_calendar",
+  "output_schema": {},
+  "title": "Stored Flight Fare Calendar"
+ },
+ {
+  "_meta": {},
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Stored Flight Price Insight"
+  },
+  "description": "Reads a stored Google Flights price assessment and historical series for one departure day and one adult. A missing insight means insufficient stored data. It is not a live fare or a prediction.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cabin": {
+     "default": "economy",
+     "enum": [
+      "economy",
+      "premium_economy",
+      "business",
+      "first"
+     ],
+     "type": "string"
+    },
+    "date": {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "destination": {
+     "pattern": "^[A-Z]{3}$",
+     "type": "string"
+    },
+    "origin": {
+     "pattern": "^[A-Z]{3}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "origin",
+    "destination",
+    "date"
+   ],
+   "type": "object"
+  },
+  "name": "get_flight_price_insight",
+  "output_schema": {},
+  "title": "Stored Flight Price Insight"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://hotel-detail/hotel-detail-mcp-app-v6.html",
+   "ui": {
+    "resourceUri": "ui://hotel-detail/hotel-detail-mcp-app-v6.html"
+   },
+   "ui/resourceUri": "ui://hotel-detail/hotel-detail-mcp-app-v6.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get Hotel Detail (by propertyId / OpenTravel-direct)"
+  },
+  "description": "Prices and availability for one OpenTravel direct-listed hotel over a date range, with its photos, amenities and room types, each room with its rate plan and total price. Takes the propertyId from search results (source 'OPENTRAVEL_DIRECT'), or a hotel name plus city for a known direct listing. get_hotel_info returns the same hotel's static facts without dates.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "default": 2,
+     "description": "Number of adults (default 2)",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "checkIn": {
+     "description": "Check-in date YYYY-MM-DD. Must be today or later.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkOut": {
+     "description": "Check-out date YYYY-MM-DD. Must be after checkIn.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "children": {
+     "default": 0,
+     "description": "Number of children (default 0)",
+     "maximum": 20,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "city": {
+     "description": "City of the hotel — required when resolving by hotelName.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "hotelName": {
+     "description": "Fallback name for a confirmed OpenTravel direct listing when propertyId is unavailable",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "language": {
+     "description": "Preferred UI language (en/vi/de/ja/ko/zh/fr/es/ru/th/id).",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "propertyId": {
+     "description": "OpenTravel propertyId UUID from search results (opentravelResults[].propertyId).",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Optional short excerpt of the current request, used only to detect the UI language; it is not stored or forwarded.",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "checkIn",
+    "checkOut"
+   ],
+   "type": "object"
+  },
+  "name": "get_hotel_detail",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "adults": {
+     "type": "number"
+    },
+    "bookingUrl": {
+     "type": "string"
+    },
+    "checkIn": {
+     "type": "string"
+    },
+    "checkOut": {
+     "type": "string"
+    },
+    "discovery": {
+     "type": "boolean"
+    },
+    "language": {
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "nights": {
+     "type": "number"
+    },
+    "property": {
+     "additionalProperties": true,
+     "properties": {
+      "address": {
+       "type": "string"
+      },
+      "checkInTime": {
+       "type": "string"
+      },
+      "checkOutTime": {
+       "type": "string"
+      },
+      "city": {
+       "type": "string"
+      },
+      "country": {
+       "type": "string"
+      },
+      "description": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "facilities": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "id": {
+       "type": "string"
+      },
+      "photos": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "propertyId": {
+       "type": "string"
+      },
+      "title": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "propertyId",
+      "title",
+      "address",
+      "city",
+      "country",
+      "checkInTime",
+      "checkOutTime",
+      "photos",
+      "facilities"
+     ],
+     "type": "object"
+    },
+    "roomTypes": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "adultsMax": {
+        "type": "number"
+       },
+       "availableCount": {
+        "type": "number"
+       },
+       "childrenMax": {
+        "type": "number"
+       },
+       "currency": {
+        "type": "string"
+       },
+       "description": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "facilities": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "id": {
+        "type": "string"
+       },
+       "perNightRates": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "amount": {
+           "type": "number"
+          },
+          "date": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "date",
+          "amount"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "photos": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "ratePlanId": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "size": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "totalPrice": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "adultsMax",
+       "childrenMax",
+       "photos",
+       "facilities",
+       "availableCount",
+       "totalPrice",
+       "currency",
+       "perNightRates"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "property",
+    "roomTypes",
+    "nights",
+    "checkIn",
+    "checkOut",
+    "adults",
+    "language"
+   ],
+   "type": "object"
+  },
+  "title": "Get Hotel Detail (by propertyId / OpenTravel-direct)"
+ },
+ {
+  "_meta": {},
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Hotel Info (no dates needed)"
+  },
+  "description": "Static facts about an OpenTravel direct-listed hotel, with no check-in or check-out date required: photo gallery, property description, address, facilities (parking, pool, pets and so on), check-in and check-out times, the house cancellation policy, and each room type's description, floor area, capacity, photos and in-room facilities. Carries no prices and no availability — get_hotel_detail covers those for a specific date range. Takes the propertyId UUID from search results.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "language": {
+     "description": "Preferred reply language (en/vi/de/ja/ko/zh).",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "propertyId": {
+     "description": "OpenTravel propertyId UUID from search results (opentravelResults[].propertyId).",
+     "format": "uuid",
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Optional short excerpt of the current request, used only to detect the reply language; it is not stored or forwarded.",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "propertyId"
+   ],
+   "type": "object"
+  },
+  "name": "get_hotel_info",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "cancellationPolicy": {
+     "additionalProperties": true,
+     "properties": {
+      "freeCancelUntilHours": {
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "nonRefundable": {
+       "type": "boolean"
+      },
+      "policyText": {
+       "type": "string"
+      },
+      "refundPercentAfterWindow": {
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "source": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "nonRefundable",
+      "freeCancelUntilHours",
+      "refundPercentAfterWindow",
+      "policyText"
+     ],
+     "type": "object"
+    },
+    "property": {
+     "additionalProperties": true,
+     "properties": {
+      "address": {
+       "type": "string"
+      },
+      "checkInTime": {
+       "type": "string"
+      },
+      "checkOutTime": {
+       "type": "string"
+      },
+      "city": {
+       "type": "string"
+      },
+      "country": {
+       "type": "string"
+      },
+      "description": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "facilities": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "id": {
+       "type": "string"
+      },
+      "photos": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "title": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "title",
+      "description",
+      "address",
+      "city",
+      "country",
+      "checkInTime",
+      "checkOutTime",
+      "photos",
+      "facilities"
+     ],
+     "type": "object"
+    },
+    "roomTypes": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "adultsMax": {
+        "type": "number"
+       },
+       "childrenMax": {
+        "type": "number"
+       },
+       "description": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "facilities": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "id": {
+        "type": "string"
+       },
+       "photos": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "size": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "description",
+       "size",
+       "adultsMax",
+       "childrenMax",
+       "photos",
+       "facilities"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "property",
+    "roomTypes"
+   ],
+   "type": "object"
+  },
+  "title": "Hotel Info (no dates needed)"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://ota-detail/ota-detail-mcp-app-v4.html",
+   "ui": {
+    "resourceUri": "ui://ota-detail/ota-detail-mcp-app-v4.html"
+   },
+   "ui/resourceUri": "ui://ota-detail/ota-detail-mcp-app-v4.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Hotel Detail by Name (one specific hotel)"
+  },
+  "description": "Full detail (rooms, live prices, facilities, photos, reviews) from Booking.com for one named hotel over a date range, for requests about a single hotel rather than a whole city (search_hotels_live lists a city). The name is resolved through the city's listings, so it takes the hotel name together with its city; a Booking.com URL from an earlier result skips that lookup. OpenTravel direct listings are covered by get_hotel_detail. The fetch is live and takes up to about two minutes; under heavy load it can return not-found.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "default": 2,
+     "description": "Number of adults (default 2)",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "checkIn": {
+     "description": "Check-in date YYYY-MM-DD. Must be today or later.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkOut": {
+     "description": "Check-out date YYYY-MM-DD. Must be after checkIn.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "childAges": {
+     "description": "Age of each child. Child-aware room detail is limited to Booking.com and Agoda app adapters.",
+     "items": {
+      "maximum": 17,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "city": {
+     "description": "City of the hotel, used to resolve the name, e.g. 'Da Nang'. Required with hotelName.",
+     "type": "string"
+    },
+    "hotelName": {
+     "description": "Name of the hotel, e.g. 'Mercure Danang French Village Bana Hills'. Required unless propertyUrl is given.",
+     "type": "string"
+    },
+    "language": {
+     "description": "Optional UI language. Indonesian (id) cannot be detected from text, so for Indonesian this is how the language is set.",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "propertyUrl": {
+     "description": "Booking.com property URL from an earlier result (hotel.prices.booking.url); skips the name lookup.",
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Short excerpt (one sentence at most) of the guest's latest message in their own words, used only to detect the reply language; it is not stored or forwarded. It carries no names, contact details or other parts of the conversation.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "rooms": {
+     "default": 1,
+     "description": "Number of rooms (default 1)",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "checkIn",
+    "checkOut"
+   ],
+   "type": "object"
+  },
+  "name": "get_ota_hotel_detail",
+  "output_schema": {},
+  "title": "Hotel Detail by Name (one specific hotel)"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "visibility": [
+     "app",
+     "model"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Poll Flight Results"
+  },
+  "description": "Returns the current results of a flight search session started by search_flights_live: outbound and return options with airline, flight number, times, stops, the cheapest fare and every site's fare with its booking link (offers). Results can be partial while the search runs; status reads 'completed' or 'failed' when it ends.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 15,
+     "description": "Maximum results per direction. Zero returns the full structured page for the widget.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Starting result index per direction.",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "sessionId": {
+     "description": "Session ID from search_flights_live",
+     "format": "uuid",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sessionId"
+   ],
+   "type": "object"
+  },
+  "name": "poll_flight_results",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "adults": {
+     "type": "number"
+    },
+    "cabin": {
+     "type": "string"
+    },
+    "cached": {
+     "type": "boolean"
+    },
+    "departureDate": {
+     "type": "string"
+    },
+    "destination": {
+     "type": "string"
+    },
+    "language": {
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "origin": {
+     "type": "string"
+    },
+    "outboundFlights": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "agent": {
+        "type": "string"
+       },
+       "airline": {
+        "type": "string"
+       },
+       "airlineCode": {
+        "type": "string"
+       },
+       "arrival": {
+        "additionalProperties": true,
+        "properties": {
+         "airport": {
+          "type": "string"
+         },
+         "city": {
+          "type": "string"
+         },
+         "date": {
+          "type": "string"
+         },
+         "time": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "airport",
+         "city",
+         "time",
+         "date"
+        ],
+        "type": "object"
+       },
+       "bookingUrl": {
+        "type": "string"
+       },
+       "cabin": {
+        "type": "string"
+       },
+       "currency": {
+        "type": "string"
+       },
+       "departure": {
+        "additionalProperties": true,
+        "properties": {
+         "airport": {
+          "type": "string"
+         },
+         "city": {
+          "type": "string"
+         },
+         "date": {
+          "type": "string"
+         },
+         "time": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "airport",
+         "city",
+         "time",
+         "date"
+        ],
+        "type": "object"
+       },
+       "duration": {
+        "type": "number"
+       },
+       "flightNumber": {
+        "type": "string"
+       },
+       "legs": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "airline": {
+           "type": "string"
+          },
+          "arrivalAirport": {
+           "type": "string"
+          },
+          "arrivalDate": {
+           "type": "string"
+          },
+          "arrivalTime": {
+           "type": "string"
+          },
+          "departureAirport": {
+           "type": "string"
+          },
+          "departureDate": {
+           "type": "string"
+          },
+          "departureTime": {
+           "type": "string"
+          },
+          "duration": {
+           "type": "number"
+          },
+          "flightNumber": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "departureAirport",
+          "arrivalAirport",
+          "departureTime",
+          "arrivalTime",
+          "departureDate",
+          "arrivalDate",
+          "airline",
+          "flightNumber",
+          "duration"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "offers": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "agent": {
+           "type": "string"
+          },
+          "agentCode": {
+           "type": "string"
+          },
+          "bookingUrl": {
+           "type": "string"
+          },
+          "currency": {
+           "type": "string"
+          },
+          "price": {
+           "type": "number"
+          },
+          "pricePerTraveler": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "agent",
+          "agentCode",
+          "price",
+          "pricePerTraveler",
+          "currency",
+          "bookingUrl"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "price": {
+        "type": "number"
+       },
+       "stopCities": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "stops": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "airline",
+       "airlineCode",
+       "flightNumber",
+       "departure",
+       "arrival",
+       "duration",
+       "stops",
+       "stopCities",
+       "price",
+       "currency",
+       "cabin",
+       "bookingUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "returnDate": {
+     "type": "string"
+    },
+    "returnFlights": {
+     "items": {
+      "$ref": "#/properties/outboundFlights/items"
+     },
+     "type": "array"
+    },
+    "sessionId": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "totalOutbound": {
+     "type": "number"
+    },
+    "totalReturn": {
+     "type": "number"
+    },
+    "tripType": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "sessionId",
+    "status",
+    "cached",
+    "origin",
+    "destination",
+    "departureDate",
+    "adults",
+    "cabin",
+    "tripType",
+    "outboundFlights",
+    "returnFlights",
+    "totalOutbound",
+    "totalReturn"
+   ],
+   "type": "object"
+  },
+  "title": "Poll Flight Results"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "visibility": [
+     "app",
+     "model"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Poll Search Results"
+  },
+  "description": "Returns the current results of a hotel search session started by search_hotels_live: hotels with their price from each source, and OpenTravel direct listings with the propertyId that get_hotel_detail and get_hotel_info take. Results can be partial while the search runs; status reads 'completed' once every source has answered.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "area": {
+     "description": "Optional override for the area filter captured at search time",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "hotelName": {
+     "description": "Optional override for the hotel-name filter captured at search time",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "limit": {
+     "default": 50,
+     "description": "Max hotels to return; 0 = all (default 50)",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "nights": {
+     "description": "Number of nights",
+     "maximum": 365,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Skip first N hotels for pagination (default 0)",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "priceCurrency": {
+     "description": "ISO 4217 code of priceMin/priceMax; defaults to the UI language's currency",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "priceMax": {
+     "description": "Optional override for the maximum-price filter",
+     "maximum": 1000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "priceMin": {
+     "description": "Optional override for the minimum-price filter",
+     "maximum": 1000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "sessionId": {
+     "description": "Session ID from search_hotels_live",
+     "pattern": "^[A-Za-z0-9_-]{1,64}(\\.[A-Za-z0-9_-]{1,16})?$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sessionId",
+    "nights"
+   ],
+   "type": "object"
+  },
+  "name": "poll_search_results",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "agodaStatus": {
+     "type": "string"
+    },
+    "bookingStatus": {
+     "type": "string"
+    },
+    "cached": {
+     "type": "boolean"
+    },
+    "checkIn": {
+     "type": "string"
+    },
+    "checkOut": {
+     "type": "string"
+    },
+    "city": {
+     "type": "string"
+    },
+    "fxRates": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "type": "object"
+    },
+    "hasMore": {
+     "type": "boolean"
+    },
+    "hotels": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "imageUrl": {
+        "type": "string"
+       },
+       "location": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "prices": {
+        "additionalProperties": true,
+        "properties": {
+         "agoda": {
+          "additionalProperties": true,
+          "properties": {
+           "currency": {
+            "type": "string"
+           },
+           "price": {
+            "type": "number"
+           },
+           "url": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "price",
+           "currency",
+           "url"
+          ],
+          "type": "object"
+         },
+         "airbnb": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "booking": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "expedia": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "hotelscom": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "official": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "priceline": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "traveloka": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "tripcom": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         }
+        },
+        "type": "object"
+       },
+       "rating": {
+        "type": "number"
+       },
+       "reviewCount": {
+        "type": "number"
+       },
+       "stars": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "name",
+       "stars",
+       "rating",
+       "reviewCount",
+       "imageUrl",
+       "location",
+       "prices"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "language": {
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "type": "number"
+    },
+    "longStayNotice": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "nights": {
+     "type": "number"
+    },
+    "offset": {
+     "type": "number"
+    },
+    "opentravelIndicativeResults": {
+     "items": {
+      "$ref": "#/properties/opentravelResults/items"
+     },
+     "type": "array"
+    },
+    "opentravelResults": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "address": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "availableRoomTypes": {
+        "type": "number"
+       },
+       "cheapestPrice": {
+        "type": "number"
+       },
+       "city": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "country": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "countryCode": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "currency": {
+        "type": "string"
+       },
+       "indicativeNote": {
+        "type": "string"
+       },
+       "mainImageUrl": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "name": {
+        "type": "string"
+       },
+       "nights": {
+        "type": "number"
+       },
+       "priceType": {
+        "enum": [
+         "available",
+         "indicative"
+        ],
+        "type": "string"
+       },
+       "propertyId": {
+        "type": "string"
+       },
+       "source": {
+        "const": "OPENTRAVEL_DIRECT",
+        "type": "string"
+       },
+       "totalForStay": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "propertyId",
+       "name",
+       "address",
+       "city",
+       "mainImageUrl",
+       "cheapestPrice",
+       "totalForStay",
+       "currency",
+       "nights",
+       "source",
+       "priceType"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "opentravelStatus": {
+     "type": "string"
+    },
+    "progress": {
+     "type": "number"
+    },
+    "sessionId": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "tier": {
+     "type": "string"
+    },
+    "tier2AgodaStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "tier2BookingStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "tier2TravelokaStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "totalHotels": {
+     "type": "number"
+    },
+    "travelokaStatus": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "city",
+    "checkIn",
+    "checkOut",
+    "nights",
+    "status",
+    "progress",
+    "bookingStatus",
+    "agodaStatus",
+    "travelokaStatus",
+    "totalHotels",
+    "hotels",
+    "offset",
+    "limit",
+    "hasMore",
+    "tier",
+    "tier2AgodaStatus",
+    "tier2BookingStatus",
+    "tier2TravelokaStatus",
+    "opentravelStatus",
+    "opentravelResults",
+    "opentravelIndicativeResults",
+    "fxRates"
+   ],
+   "type": "object"
+  },
+  "title": "Poll Search Results"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "visibility": [
+     "app"
+    ]
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Record Travel Interaction"
+  },
+  "description": "Records a widget navigation action without contact details, booking references or URLs.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "ota_handoff",
+      "direct_detail",
+      "followup"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "action"
+   ],
+   "type": "object"
+  },
+  "name": "record_travel_interaction",
+  "output_schema": {},
+  "title": "Record Travel Interaction"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://booking/booking-mcp-app-v2.html",
+   "ui": {
+    "resourceUri": "ui://booking/booking-mcp-app-v2.html"
+   },
+   "ui/resourceUri": "ui://booking/booking-mcp-app-v2.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Request a Booking (hotel confirms, pay at the hotel)"
+  },
+  "description": "Sends a booking request for a room at an OpenTravel partner hotel. Nothing is charged and no room is held: the hotel confirms the request by email, and the guest pays at the property on arrival. There is no payment step, now or later. Takes the room and rate from get_hotel_detail and the guest's name, phone number and email; when any of these is missing, the result asks for it and, in clients that show widgets, opens a form for it. One request covers several rooms of the same room type (roomCount), with adults and children counted across all of them; each call is a separate request with its own code, so rooms of one type booked call by call reach the hotel as unrelated requests. Returns one confirmation code for the whole request.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "description": "Number of adults across ALL rooms of the request — at least one per room",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "checkIn": {
+     "description": "Check-in date YYYY-MM-DD. Must be today or later.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkOut": {
+     "description": "Check-out date YYYY-MM-DD. Must be after checkIn.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "children": {
+     "default": 0,
+     "description": "Number of children across ALL rooms of the request (default 0)",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "confirmedByUser": {
+     "description": "Explicit guest confirmation of the exact room, dates, party, contact details and total.",
+     "type": "boolean"
+    },
+    "currency": {
+     "description": "Currency of totalAmount, as quoted by get_hotel_detail for the chosen room.",
+     "enum": [
+      "VND",
+      "USD",
+      "EUR"
+     ],
+     "type": "string"
+    },
+    "guestEmail": {
+     "description": "Email address the confirmation is sent to, as the guest gave it; it cannot be changed after the request is sent. When omitted, the result asks the user for it.",
+     "format": "email",
+     "type": "string"
+    },
+    "guestName": {
+     "description": "Full name of the primary guest. When omitted, the result asks the user for it.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "guestPhone": {
+     "description": "Guest phone number; the hotel calls it to confirm the request. When omitted, the result asks the user for it.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "language": {
+     "description": "Optional response language hint. Only used when queryText gives no signal.",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "propertyId": {
+     "description": "OpenTravel propertyId from get_hotel_detail",
+     "format": "uuid",
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Short excerpt (one sentence at most) of the guest's latest message in their own words, used only to detect the reply language; it is not stored or forwarded. It carries no names, contact details or other parts of the conversation.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "quoteId": {
+     "description": "Server-issued quote identifier for the selected room, dates and party, from get_hotel_detail. Valid for ten minutes.",
+     "format": "uuid",
+     "type": "string"
+    },
+    "roomCount": {
+     "default": 1,
+     "description": "How many rooms of this room type the guest wants (default 1). All of them go in this one request, under one confirmation code.",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "roomTypeId": {
+     "description": "roomTypeId from get_hotel_detail roomTypes array",
+     "type": "string"
+    },
+    "totalAmount": {
+     "description": "Total amount for ALL rooms in the property's base currency: the room's price for the stay × roomCount",
+     "type": "number"
+    }
+   },
+   "required": [
+    "propertyId",
+    "checkIn",
+    "checkOut",
+    "roomTypeId",
+    "adults",
+    "totalAmount",
+    "currency"
+   ],
+   "type": "object"
+  },
+  "name": "request_booking",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "assignedRoomId": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "bookingId": {
+     "type": "string"
+    },
+    "confirmationCode": {
+     "type": "string"
+    },
+    "nextStep": {
+     "type": "string"
+    },
+    "paymentRequired": {
+     "type": "boolean"
+    },
+    "quotedAmount": {
+     "type": "number"
+    },
+    "quotedCurrency": {
+     "type": "string"
+    },
+    "roomCount": {
+     "type": "number"
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "bookingId",
+    "confirmationCode",
+    "status",
+    "paymentRequired",
+    "nextStep",
+    "assignedRoomId",
+    "roomCount",
+    "quotedAmount",
+    "quotedCurrency"
+   ],
+   "type": "object"
+  },
+  "title": "Request a Booking (hotel confirms, pay at the hotel)"
+ },
+ {
+  "_meta": {},
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Request Cancellation Link (step 1 of 2)"
+  },
+  "description": "First of two steps to cancel a booking. Emails a single-use cancellation token to the address on the booking, given its confirmation code and that same email address. Nothing is cancelled, charged or refunded by this step. The token expires after 24 hours and works once; cancel_booking completes the cancellation with it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "confirmationCode": {
+     "description": "8-char booking confirmation code, e.g. K7X9M2P4",
+     "pattern": "^[A-Za-z0-9]{4,32}$",
+     "type": "string"
+    },
+    "guestEmail": {
+     "description": "Guest email address — must match the booking primary guest email",
+     "format": "email",
+     "type": "string"
+    }
+   },
+   "required": [
+    "confirmationCode",
+    "guestEmail"
+   ],
+   "type": "object"
+  },
+  "name": "request_cancel_token",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "message": {
+     "type": "string"
+    },
+    "success": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "success",
+    "message"
+   ],
+   "type": "object"
+  },
+  "title": "Request Cancellation Link (step 1 of 2)"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://search-flights/flight-card-mcp-app-v4.html",
+   "ui": {
+    "resourceUri": "ui://search-flights/flight-card-mcp-app-v4.html"
+   },
+   "ui/resourceUri": "ui://search-flights/flight-card-mcp-app-v4.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Search Flights Live"
+  },
+  "description": "Starts a live flight search for a route and date, with an optional return date. The two directions are priced as separate one-way tickets. Fares come from Agoda, Trip.com, Booking.com, Traveloka, Kiwi.com, Mytour.vn, Vietravel Airlines and Google Flights. Origin and destination are 3-letter IATA airport codes (for example SGN, HAN, DAD). Returns a session ID; poll_flight_results returns the results. When the route or date is missing, the result is a question for the user instead of a search.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "default": 1,
+     "description": "Number of adults (default 1)",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "cabin": {
+     "default": "economy",
+     "description": "Cabin class (default economy)",
+     "enum": [
+      "economy",
+      "premium_economy",
+      "business",
+      "first"
+     ],
+     "type": "string"
+    },
+    "departureDate": {
+     "description": "Departure date YYYY-MM-DD, today or later. When omitted, the result asks the user for it.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "destination": {
+     "description": "Arrival airport IATA code, e.g. 'HAN'. When omitted, the result asks the user for it.",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "language": {
+     "description": "Preferred UI language (en/vi/de/ja/ko/zh/fr/es/ru/th/id).",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "origin": {
+     "description": "Departure airport IATA code, e.g. 'SGN'. When omitted, the result asks the user for it.",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "queryText": {
+     "description": "Optional short excerpt of the current request, used only to detect the UI language; it is not stored or forwarded.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "returnDate": {
+     "anyOf": [
+      {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      },
+      {
+       "const": "",
+       "type": "string"
+      }
+     ],
+     "description": "Optional return date YYYY-MM-DD. Results include a separate one-way search for the return direction; a pair is not one combined round-trip ticket."
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_flights_live",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "adults": {
+     "type": "number"
+    },
+    "cabin": {
+     "type": "string"
+    },
+    "cached": {
+     "type": "boolean"
+    },
+    "departureDate": {
+     "type": "string"
+    },
+    "destination": {
+     "type": "string"
+    },
+    "language": {
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "origin": {
+     "type": "string"
+    },
+    "outboundFlights": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "agent": {
+        "type": "string"
+       },
+       "airline": {
+        "type": "string"
+       },
+       "airlineCode": {
+        "type": "string"
+       },
+       "arrival": {
+        "additionalProperties": true,
+        "properties": {
+         "airport": {
+          "type": "string"
+         },
+         "city": {
+          "type": "string"
+         },
+         "date": {
+          "type": "string"
+         },
+         "time": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "airport",
+         "city",
+         "time",
+         "date"
+        ],
+        "type": "object"
+       },
+       "bookingUrl": {
+        "type": "string"
+       },
+       "cabin": {
+        "type": "string"
+       },
+       "currency": {
+        "type": "string"
+       },
+       "departure": {
+        "additionalProperties": true,
+        "properties": {
+         "airport": {
+          "type": "string"
+         },
+         "city": {
+          "type": "string"
+         },
+         "date": {
+          "type": "string"
+         },
+         "time": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "airport",
+         "city",
+         "time",
+         "date"
+        ],
+        "type": "object"
+       },
+       "duration": {
+        "type": "number"
+       },
+       "flightNumber": {
+        "type": "string"
+       },
+       "legs": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "airline": {
+           "type": "string"
+          },
+          "arrivalAirport": {
+           "type": "string"
+          },
+          "arrivalDate": {
+           "type": "string"
+          },
+          "arrivalTime": {
+           "type": "string"
+          },
+          "departureAirport": {
+           "type": "string"
+          },
+          "departureDate": {
+           "type": "string"
+          },
+          "departureTime": {
+           "type": "string"
+          },
+          "duration": {
+           "type": "number"
+          },
+          "flightNumber": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "departureAirport",
+          "arrivalAirport",
+          "departureTime",
+          "arrivalTime",
+          "departureDate",
+          "arrivalDate",
+          "airline",
+          "flightNumber",
+          "duration"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "offers": {
+        "items": {
+         "additionalProperties": true,
+         "properties": {
+          "agent": {
+           "type": "string"
+          },
+          "agentCode": {
+           "type": "string"
+          },
+          "bookingUrl": {
+           "type": "string"
+          },
+          "currency": {
+           "type": "string"
+          },
+          "price": {
+           "type": "number"
+          },
+          "pricePerTraveler": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "agent",
+          "agentCode",
+          "price",
+          "pricePerTraveler",
+          "currency",
+          "bookingUrl"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "price": {
+        "type": "number"
+       },
+       "stopCities": {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       "stops": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "airline",
+       "airlineCode",
+       "flightNumber",
+       "departure",
+       "arrival",
+       "duration",
+       "stops",
+       "stopCities",
+       "price",
+       "currency",
+       "cabin",
+       "bookingUrl"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "returnDate": {
+     "type": "string"
+    },
+    "returnFlights": {
+     "items": {
+      "$ref": "#/properties/outboundFlights/items"
+     },
+     "type": "array"
+    },
+    "sessionId": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "totalOutbound": {
+     "type": "number"
+    },
+    "totalReturn": {
+     "type": "number"
+    },
+    "tripType": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "sessionId",
+    "status",
+    "cached",
+    "origin",
+    "destination",
+    "departureDate",
+    "adults",
+    "cabin",
+    "tripType",
+    "outboundFlights",
+    "returnFlights",
+    "totalOutbound",
+    "totalReturn"
+   ],
+   "type": "object"
+  },
+  "title": "Search Flights Live"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://search-hotels/mcp-app-v17.html",
+   "ui": {
+    "resourceUri": "ui://search-hotels/mcp-app-v17.html"
+   },
+   "ui/resourceUri": "ui://search-hotels/mcp-app-v17.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Search Hotels Live"
+  },
+  "description": "Starts a live hotel search for a city and date range. Prices come from Agoda, Booking.com, Traveloka, Trip.com, Hotels.com and Airbnb, plus direct rates from OpenTravel partner hotels. Returns a session ID; poll_search_results returns the results as they arrive. Optional filters narrow the results by hotel name, area or total price for the stay. Prices depend on the party: it defaults to 2 adults in 1 room, and the result states the party searched and flags when it was defaulted. When the city or dates are missing, the result is a question for the user instead of a search; the stay dates searched are echoed back for confirmation.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "default": 2,
+     "description": "Number of adults (default 2). Prices depend on it.",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "amenities": {
+     "description": "Optional amenities every hotel shown must have, as at least one of its sites lists them: pool, beach, breakfast, parking, gym, spa, airport_shuttle, kitchen, family (family rooms).",
+     "items": {
+      "enum": [
+       "pool",
+       "beach",
+       "breakfast",
+       "parking",
+       "gym",
+       "spa",
+       "airport_shuttle",
+       "kitchen",
+       "family"
+      ],
+      "type": "string"
+     },
+     "maxItems": 9,
+     "type": "array"
+    },
+    "area": {
+     "description": "Optional ward, neighbourhood, beach or landmark within the city, e.g. 'Shoreditch' with city 'London'. A place the search recognises lists the hotels within a few km of it; otherwise it filters the city's hotels by their address.",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "checkIn": {
+     "description": "Check-in date (YYYY-MM-DD), today or later. When omitted, the result asks the user for it.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkOut": {
+     "description": "Check-out date (YYYY-MM-DD), after checkIn. When omitted, the result asks the user for it.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "childAges": {
+     "description": "Age of each child, 0–17. Family quotes are limited to sources that accept this occupancy; unsupported sources are omitted.",
+     "items": {
+      "maximum": 17,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "children": {
+     "default": 0,
+     "description": "Number of children sharing the room (default 0). Child ages determine family quotes; sources without verified occupancy support are omitted.",
+     "maximum": 20,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "city": {
+     "description": "City or broad destination, e.g. 'Da Nang'. When omitted, the result asks the user for it.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "hotelName": {
+     "description": "Optional hotel-name filter when the user names a specific property",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "language": {
+     "description": "Preferred UI language (en/vi/de/ja/ko/zh/fr/es/ru/th/id).",
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "priceCurrency": {
+     "description": "ISO 4217 code of priceMin/priceMax (USD, EUR, VND, …); defaults to the currency of the UI language.",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "priceMax": {
+     "description": "Maximum total price for the whole stay (not per night), in priceCurrency.",
+     "maximum": 1000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "priceMin": {
+     "description": "Minimum total price for the whole stay (not per night), in priceCurrency.",
+     "maximum": 1000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "queryText": {
+     "description": "Optional short excerpt of the current request, used only to detect the UI language; it is not stored or forwarded.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "rooms": {
+     "default": 1,
+     "description": "Number of rooms (default 1).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_hotels_live",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": true,
+   "properties": {
+    "agodaStatus": {
+     "type": "string"
+    },
+    "bookingStatus": {
+     "type": "string"
+    },
+    "cached": {
+     "type": "boolean"
+    },
+    "checkIn": {
+     "type": "string"
+    },
+    "checkOut": {
+     "type": "string"
+    },
+    "city": {
+     "type": "string"
+    },
+    "fxRates": {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "type": "object"
+    },
+    "hasMore": {
+     "type": "boolean"
+    },
+    "hotels": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "imageUrl": {
+        "type": "string"
+       },
+       "location": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "prices": {
+        "additionalProperties": true,
+        "properties": {
+         "agoda": {
+          "additionalProperties": true,
+          "properties": {
+           "currency": {
+            "type": "string"
+           },
+           "price": {
+            "type": "number"
+           },
+           "url": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "price",
+           "currency",
+           "url"
+          ],
+          "type": "object"
+         },
+         "airbnb": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "booking": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "expedia": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "hotelscom": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "official": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "priceline": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "traveloka": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         },
+         "tripcom": {
+          "$ref": "#/properties/hotels/items/properties/prices/properties/agoda"
+         }
+        },
+        "type": "object"
+       },
+       "rating": {
+        "type": "number"
+       },
+       "reviewCount": {
+        "type": "number"
+       },
+       "stars": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "name",
+       "stars",
+       "rating",
+       "reviewCount",
+       "imageUrl",
+       "location",
+       "prices"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "language": {
+     "enum": [
+      "en",
+      "vi",
+      "de",
+      "ja",
+      "ko",
+      "zh",
+      "fr",
+      "es",
+      "ru",
+      "th",
+      "id"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "type": "number"
+    },
+    "longStayNotice": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "nights": {
+     "type": "number"
+    },
+    "offset": {
+     "type": "number"
+    },
+    "opentravelIndicativeResults": {
+     "items": {
+      "$ref": "#/properties/opentravelResults/items"
+     },
+     "type": "array"
+    },
+    "opentravelResults": {
+     "items": {
+      "additionalProperties": true,
+      "properties": {
+       "address": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "availableRoomTypes": {
+        "type": "number"
+       },
+       "cheapestPrice": {
+        "type": "number"
+       },
+       "city": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "country": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "countryCode": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "currency": {
+        "type": "string"
+       },
+       "indicativeNote": {
+        "type": "string"
+       },
+       "mainImageUrl": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "name": {
+        "type": "string"
+       },
+       "nights": {
+        "type": "number"
+       },
+       "priceType": {
+        "enum": [
+         "available",
+         "indicative"
+        ],
+        "type": "string"
+       },
+       "propertyId": {
+        "type": "string"
+       },
+       "source": {
+        "const": "OPENTRAVEL_DIRECT",
+        "type": "string"
+       },
+       "totalForStay": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "propertyId",
+       "name",
+       "address",
+       "city",
+       "mainImageUrl",
+       "cheapestPrice",
+       "totalForStay",
+       "currency",
+       "nights",
+       "source",
+       "priceType"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "opentravelStatus": {
+     "type": "string"
+    },
+    "progress": {
+     "type": "number"
+    },
+    "sessionId": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    },
+    "tier": {
+     "type": "string"
+    },
+    "tier2AgodaStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "tier2BookingStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "tier2TravelokaStatus": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "totalHotels": {
+     "type": "number"
+    },
+    "travelokaStatus": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "city",
+    "checkIn",
+    "checkOut",
+    "nights",
+    "status",
+    "progress",
+    "bookingStatus",
+    "agodaStatus",
+    "travelokaStatus",
+    "totalHotels",
+    "hotels",
+    "offset",
+    "limit",
+    "hasMore",
+    "tier",
+    "tier2AgodaStatus",
+    "tier2BookingStatus",
+    "tier2TravelokaStatus",
+    "opentravelStatus",
+    "opentravelResults",
+    "opentravelIndicativeResults",
+    "fxRates"
+   ],
+   "type": "object"
+  },
+  "title": "Search Hotels Live"
+ }
+]

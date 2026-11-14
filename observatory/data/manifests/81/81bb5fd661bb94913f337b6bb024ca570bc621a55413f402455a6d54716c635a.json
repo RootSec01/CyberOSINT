@@ -1,0 +1,473 @@
+[
+ {
+  "_meta": {
+   "openai/fileParams": [
+    "file"
+   ],
+   "openai/outputTemplate": "ui://widget/pdf-sign-v1-1.0.0-6e48c1c8ad10f03ab5d7b6989ee9345978a156066a9d89f5ec2361b9488a1bae.html",
+   "openai/toolInvocation/invoked": "Signature spots found",
+   "openai/toolInvocation/invoking": "Looking for signature lines…",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://widget/pdf-sign-v1-1.0.0-6e48c1c8ad10f03ab5d7b6989ee9345978a156066a9d89f5ec2361b9488a1bae.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find signature spots"
+  },
+  "description": "Use this when the user wants to sign a PDF, fill in a signature line, find where to sign, or add initials or a date to a PDF form or contract. It reads the PDF's text positions and lists each place labelled Signature, Sign here, Signed, Initials, Date or Name, each blank ____ line, and each empty signature form field, with page, x, y (points from the top-left as displayed), width and a spot id for sign_pdf. Makes no file. Up to 15 MB; the first 50 pages are searched. Does not read scanned PDFs without a text layer (then give page and position to sign_pdf). Do not use for reading or summarizing a contract.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "file": {
+     "description": "The PDF to look in, e.g. contract.pdf.",
+     "properties": {
+      "download_url": {
+       "description": "Temporary download link for the file, supplied by ChatGPT.",
+       "type": "string"
+      },
+      "file_id": {
+       "description": "ChatGPT file id, e.g. file_abc123.",
+       "type": "string"
+      },
+      "file_name": {
+       "description": "Original file name if known, e.g. statement.pdf.",
+       "type": "string"
+      },
+      "mime_type": {
+       "description": "Media type if known, e.g. application/pdf.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "download_url",
+      "file_id"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "file"
+   ],
+   "type": "object"
+  },
+  "name": "find_signature_spots",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "file": {
+     "type": "string"
+    },
+    "has_text": {
+     "type": "boolean"
+    },
+    "note": {
+     "type": "string"
+    },
+    "page_sizes": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "height": {
+        "type": "number"
+       },
+       "page": {
+        "type": "number"
+       },
+       "width": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "page",
+       "width",
+       "height"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "pages": {
+     "type": "number"
+    },
+    "pages_scanned": {
+     "type": "number"
+    },
+    "spots": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "page": {
+        "type": "number"
+       },
+       "source": {
+        "type": "string"
+       },
+       "width": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "id",
+       "page",
+       "x",
+       "y",
+       "width",
+       "label",
+       "kind",
+       "source"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "spots_count": {
+     "additionalProperties": false,
+     "properties": {
+      "shown": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "shown",
+      "total"
+     ],
+     "type": "object"
+    },
+    "warnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "file",
+    "pages",
+    "pages_scanned",
+    "has_text",
+    "spots",
+    "page_sizes",
+    "warnings",
+    "note"
+   ],
+   "type": "object"
+  },
+  "title": "Find signature spots"
+ },
+ {
+  "_meta": {
+   "openai/fileParams": [
+    "file"
+   ],
+   "openai/outputTemplate": "ui://widget/pdf-sign-v1-1.0.0-6e48c1c8ad10f03ab5d7b6989ee9345978a156066a9d89f5ec2361b9488a1bae.html",
+   "openai/toolInvocation/invoked": "Signed copy ready",
+   "openai/toolInvocation/invoking": "Placing the signature…",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://widget/pdf-sign-v1-1.0.0-6e48c1c8ad10f03ab5d7b6989ee9345978a156066a9d89f5ec2361b9488a1bae.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Sign a PDF"
+  },
+  "description": "Use this when the user wants to sign a PDF, e-sign a document, add a signature, initials or a date to a PDF, or put their name on a signature line. It draws a visible mark on a copy of the user's PDF at found spots (ids from find_signature_spots) or at a page and position: a drawn signature (SVG path from the widget pad) or a typed name in an italic font, initials, a date in the chosen format from the user's date, or short text. It returns the signed copy as a download kept for about 1 hour and checks that each mark is in the file. It is not a certified digital signature: no certificate, identity check or audit trail. Does not fill form fields with data and does not send the document to anyone. Do not use for certificate-based digital signatures or for signing on someone else's behalf without their consent.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "date": {
+     "description": "The signing date in the user's own calendar, YYYY-MM-DD, e.g. 2026-11-04. Default: today in time_zone.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "date_format": {
+     "description": "How the date is printed, e.g. MM/DD/YYYY (default).",
+     "enum": [
+      "MM/DD/YYYY",
+      "DD/MM/YYYY",
+      "YYYY-MM-DD",
+      "DD.MM.YYYY",
+      "Month D, YYYY",
+      "D Month YYYY"
+     ],
+     "type": "string"
+    },
+    "file": {
+     "description": "The PDF to sign, e.g. lease.pdf.",
+     "properties": {
+      "download_url": {
+       "description": "Temporary download link for the file, supplied by ChatGPT.",
+       "type": "string"
+      },
+      "file_id": {
+       "description": "ChatGPT file id, e.g. file_abc123.",
+       "type": "string"
+      },
+      "file_name": {
+       "description": "Original file name if known, e.g. statement.pdf.",
+       "type": "string"
+      },
+      "mime_type": {
+       "description": "Media type if known, e.g. application/pdf.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "download_url",
+      "file_id"
+     ],
+     "type": "object"
+    },
+    "flatten_form": {
+     "description": "true: also flatten the PDF's form fields so their current values print as page content. Default false.",
+     "type": "boolean"
+    },
+    "initials": {
+     "description": "Initials to use, e.g. JD. Default: first letters of signer_name.",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "output_name": {
+     "description": "File name for the signed copy, e.g. lease-signed. Default: the original name plus -signed.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "placements": {
+     "description": "Where to put each mark, e.g. [{\"spot\":\"s1\",\"kind\":\"signature\"},{\"spot\":\"s2\",\"kind\":\"date\"}].",
+     "items": {
+      "properties": {
+       "height": {
+        "description": "Height of the mark in points, e.g. 30. Default 30 for a signature, 14 otherwise.",
+        "maximum": 150,
+        "minimum": 6,
+        "type": "number"
+       },
+       "kind": {
+        "description": "What to place, e.g. signature.",
+        "enum": [
+         "signature",
+         "initials",
+         "date",
+         "text"
+        ],
+        "type": "string"
+       },
+       "page": {
+        "description": "1-based page number when no spot is given, e.g. 1.",
+        "maximum": 300,
+        "minimum": 1,
+        "type": "integer"
+       },
+       "spot": {
+        "description": "A spot id from find_signature_spots, e.g. s2. Use this or page + x + y.",
+        "maxLength": 10,
+        "type": "string"
+       },
+       "value": {
+        "description": "Text for kind text (up to 200 characters, e.g. Jane Doe), a YYYY-MM-DD date for kind date, or initials for kind initials (up to 8, e.g. JD).",
+        "maxLength": 800,
+        "type": "string"
+       },
+       "width": {
+        "description": "Room for the mark in points, e.g. 180. Default: the spot width, else 180 for a signature.",
+        "maximum": 500,
+        "minimum": 10,
+        "type": "number"
+       },
+       "x": {
+        "description": "Left edge of the mark in points from the page's left edge as displayed, e.g. 72.",
+        "maximum": 20000,
+        "minimum": 0,
+        "type": "number"
+       },
+       "y": {
+        "description": "Baseline of the mark in points from the page's top edge as displayed, e.g. 700.",
+        "maximum": 20000,
+        "minimum": 0,
+        "type": "number"
+       }
+      },
+      "required": [
+       "kind"
+      ],
+      "type": "object"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "signature_svg": {
+     "description": "A drawn signature as SVG path data with absolute M, L, C, Q, Z only (max 20 KB), e.g. M10 40 C20 10 40 10 50 40. The widget pad sends this.",
+     "maxLength": 20480,
+     "type": "string"
+    },
+    "signer_name": {
+     "description": "The signer's name, up to 80 characters, e.g. Jane Doe. Typed signatures are drawn in an italic font; also used for initials.",
+     "maxLength": 800,
+     "type": "string"
+    },
+    "time_zone": {
+     "description": "The user's IANA time zone for today's date when no date is given, e.g. Europe/Berlin. Default America/New_York.",
+     "maxLength": 60,
+     "type": "string"
+    }
+   },
+   "required": [
+    "file",
+    "placements"
+   ],
+   "type": "object"
+  },
+  "name": "sign_pdf",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "date_used": {
+     "type": "string"
+    },
+    "downloads": {
+     "additionalProperties": false,
+     "properties": {
+      "pdf": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "pdf"
+     ],
+     "type": "object"
+    },
+    "file": {
+     "type": "string"
+    },
+    "flattened": {
+     "type": "boolean"
+    },
+    "marks": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "checked": {
+        "type": "string"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "n": {
+        "type": "number"
+       },
+       "page": {
+        "type": "number"
+       },
+       "shown_as": {
+        "type": "string"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "n",
+       "page",
+       "x",
+       "y",
+       "kind",
+       "shown_as",
+       "checked"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "marks_count": {
+     "additionalProperties": false,
+     "properties": {
+      "shown": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "shown",
+      "total"
+     ],
+     "type": "object"
+    },
+    "marks_found": {
+     "type": "number"
+    },
+    "note": {
+     "type": "string"
+    },
+    "pages": {
+     "type": "number"
+    },
+    "text_expected": {
+     "type": "number"
+    },
+    "text_found": {
+     "type": "number"
+    },
+    "warnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "file",
+    "pages",
+    "marks",
+    "marks_found",
+    "text_found",
+    "text_expected",
+    "flattened",
+    "warnings",
+    "downloads",
+    "note"
+   ],
+   "type": "object"
+  },
+  "title": "Sign a PDF"
+ }
+]

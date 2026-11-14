@@ -1,0 +1,2497 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "readOnlyHint": false,
+   "title": "Add an item to a draft invoice"
+  },
+  "description": "WRITE: add one line item to an invoice that is still a DRAFT (Billomat refuses it for any other status). Does not complete or send the invoice.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "An article id (from billomat_list_articles): title, unit, price and tax missing here are taken from the article."
+    },
+    "description": {
+     "description": "Item description.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "invoice_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The draft invoice id."
+    },
+    "optional": {
+     "description": "Offers only: mark the item as optional (its price is left out of the total).",
+     "type": "boolean"
+    },
+    "quantity": {
+     "description": "Quantity (required unless article_id is given).",
+     "maximum": 1000000000,
+     "minimum": -1000000000,
+     "type": "number"
+    },
+    "reduction": {
+     "description": "Discount: absolute (10) or percent (10%).",
+     "pattern": "^\\d+(\\.\\d+)?%?$",
+     "type": "string"
+    },
+    "tax_name": {
+     "description": "Tax name; with tax_rate overrides the standard tax of the account.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "tax_rate": {
+     "description": "Tax rate in percent; the account's standard rate when omitted.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "number"
+    },
+    "title": {
+     "description": "Item title (required unless article_id is given).",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "type": {
+     "description": "PRODUCT or SERVICE.",
+     "enum": [
+      "PRODUCT",
+      "SERVICE"
+     ],
+     "type": "string"
+    },
+    "unit": {
+     "description": "Unit, e.g. Stunde, Stueck, hour.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "unit_price": {
+     "description": "Unit price, net or gross as net_gross of the document (required unless article_id is given).",
+     "maximum": 1000000000000,
+     "minimum": -1000000000000,
+     "type": "number"
+    }
+   },
+   "required": [
+    "invoice_id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_add_invoice_item",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "readOnlyHint": false,
+   "title": "Create an article"
+  },
+  "description": "WRITE: create a new article (product or service) with a price. Billomat assigns the article number.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "currency_code": {
+     "description": "ISO currency code, e.g. EUR (account default when omitted).",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "description": {
+     "description": "Description.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "purchase_price": {
+     "description": "Purchase price.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "sales_price": {
+     "description": "Sales price (net or gross as the account is set up).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "tax_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Tax rate id (from billomat_list_taxes)."
+    },
+    "title": {
+     "description": "Article title.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "type": {
+     "description": "PRODUCT or SERVICE.",
+     "enum": [
+      "PRODUCT",
+      "SERVICE"
+     ],
+     "type": "string"
+    },
+    "unit_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Unit id (from billomat_list_units)."
+    }
+   },
+   "required": [
+    "title"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_create_article",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "readOnlyHint": false,
+   "title": "Create a client"
+  },
+  "description": "WRITE: create a new client (customer) in Billomat. Billomat assigns the client number. Nothing is sent to the client. Check billomat_list_clients first to avoid duplicates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "city": {
+     "description": "City.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "country_code": {
+     "description": "ISO 3166 alpha-2 country code, e.g. DE, AT, CH.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "currency_code": {
+     "description": "ISO currency code, e.g. EUR (account default when omitted).",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "first_name": {
+     "description": "First name of the contact person.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "last_name": {
+     "description": "Last name of the contact person.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "locale": {
+     "description": "Locale of the documents, e.g. de-DE.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "mobile": {
+     "description": "Mobile phone.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "name": {
+     "description": "Company name.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "note": {
+     "description": "Internal note.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "phone": {
+     "description": "Phone.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "salutation": {
+     "description": "Salutation, e.g. Herr, Frau.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "state": {
+     "description": "State / region.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "street": {
+     "description": "Street and number.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "tax_number": {
+     "description": "Tax number.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "vat_number": {
+     "description": "VAT ID.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "www": {
+     "description": "Website (without http).",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "zip": {
+     "description": "ZIP code.",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_create_client",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "readOnlyHint": false,
+   "title": "Create a draft invoice"
+  },
+  "description": "WRITE: create an invoice as a DRAFT (Entwurf) for a client, with optional line items. The invoice is NOT completed, has no number yet and is NOT sent; review and complete it in Billomat. Nothing is charged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The client id (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "A contact of that client."
+    },
+    "currency_code": {
+     "description": "ISO currency code, e.g. EUR (account default when omitted).",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "date": {
+     "description": "Document date (yyyy-mm-dd; today when omitted).",
+     "type": "string"
+    },
+    "due_days": {
+     "description": "Days until payment is due.",
+     "maximum": 3650,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "intro": {
+     "description": "Introduction text.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "items": {
+     "description": "Line items (up to 200). More can be added to the draft later.",
+     "items": {
+      "properties": {
+       "article_id": {
+        "anyOf": [
+         {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "type": "integer"
+         },
+         {
+          "pattern": "^[1-9]\\d{0,15}$",
+          "type": "string"
+         }
+        ],
+        "description": "An article id (from billomat_list_articles): title, unit, price and tax missing here are taken from the article."
+       },
+       "description": {
+        "description": "Item description.",
+        "maxLength": 5000,
+        "type": "string"
+       },
+       "optional": {
+        "description": "Offers only: mark the item as optional (its price is left out of the total).",
+        "type": "boolean"
+       },
+       "quantity": {
+        "description": "Quantity (required unless article_id is given).",
+        "maximum": 1000000000,
+        "minimum": -1000000000,
+        "type": "number"
+       },
+       "reduction": {
+        "description": "Discount: absolute (10) or percent (10%).",
+        "pattern": "^\\d+(\\.\\d+)?%?$",
+        "type": "string"
+       },
+       "tax_name": {
+        "description": "Tax name; with tax_rate overrides the standard tax of the account.",
+        "maxLength": 100,
+        "type": "string"
+       },
+       "tax_rate": {
+        "description": "Tax rate in percent; the account's standard rate when omitted.",
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number"
+       },
+       "title": {
+        "description": "Item title (required unless article_id is given).",
+        "maxLength": 255,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": {
+        "description": "PRODUCT or SERVICE.",
+        "enum": [
+         "PRODUCT",
+         "SERVICE"
+        ],
+        "type": "string"
+       },
+       "unit": {
+        "description": "Unit, e.g. Stunde, Stueck, hour.",
+        "maxLength": 100,
+        "type": "string"
+       },
+       "unit_price": {
+        "description": "Unit price, net or gross as net_gross of the document (required unless article_id is given).",
+        "maximum": 1000000000000,
+        "minimum": -1000000000000,
+        "type": "number"
+       }
+      },
+      "type": "object"
+     },
+     "maxItems": 200,
+     "type": "array"
+    },
+    "label": {
+     "description": "Label / subject.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "net_gross": {
+     "description": "Whether prices are net or gross.",
+     "enum": [
+      "NET",
+      "GROSS"
+     ],
+     "type": "string"
+    },
+    "note": {
+     "description": "Closing note.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "title": {
+     "description": "Document title.",
+     "maxLength": 255,
+     "type": "string"
+    }
+   },
+   "required": [
+    "client_id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_create_draft_invoice",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "readOnlyHint": false,
+   "title": "Create a draft offer"
+  },
+  "description": "WRITE: create an offer (Angebot) as a DRAFT for a client, with optional line items. The offer is NOT completed, has no number yet and is NOT sent; review and complete it in Billomat.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The client id (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "A contact of that client."
+    },
+    "currency_code": {
+     "description": "ISO currency code, e.g. EUR (account default when omitted).",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "date": {
+     "description": "Document date (yyyy-mm-dd; today when omitted).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Introduction text.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "items": {
+     "description": "Line items (up to 200). More can be added to the draft later.",
+     "items": {
+      "properties": {
+       "article_id": {
+        "anyOf": [
+         {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "type": "integer"
+         },
+         {
+          "pattern": "^[1-9]\\d{0,15}$",
+          "type": "string"
+         }
+        ],
+        "description": "An article id (from billomat_list_articles): title, unit, price and tax missing here are taken from the article."
+       },
+       "description": {
+        "description": "Item description.",
+        "maxLength": 5000,
+        "type": "string"
+       },
+       "optional": {
+        "description": "Offers only: mark the item as optional (its price is left out of the total).",
+        "type": "boolean"
+       },
+       "quantity": {
+        "description": "Quantity (required unless article_id is given).",
+        "maximum": 1000000000,
+        "minimum": -1000000000,
+        "type": "number"
+       },
+       "reduction": {
+        "description": "Discount: absolute (10) or percent (10%).",
+        "pattern": "^\\d+(\\.\\d+)?%?$",
+        "type": "string"
+       },
+       "tax_name": {
+        "description": "Tax name; with tax_rate overrides the standard tax of the account.",
+        "maxLength": 100,
+        "type": "string"
+       },
+       "tax_rate": {
+        "description": "Tax rate in percent; the account's standard rate when omitted.",
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number"
+       },
+       "title": {
+        "description": "Item title (required unless article_id is given).",
+        "maxLength": 255,
+        "minLength": 1,
+        "type": "string"
+       },
+       "type": {
+        "description": "PRODUCT or SERVICE.",
+        "enum": [
+         "PRODUCT",
+         "SERVICE"
+        ],
+        "type": "string"
+       },
+       "unit": {
+        "description": "Unit, e.g. Stunde, Stueck, hour.",
+        "maxLength": 100,
+        "type": "string"
+       },
+       "unit_price": {
+        "description": "Unit price, net or gross as net_gross of the document (required unless article_id is given).",
+        "maximum": 1000000000000,
+        "minimum": -1000000000000,
+        "type": "number"
+       }
+      },
+      "type": "object"
+     },
+     "maxItems": 200,
+     "type": "array"
+    },
+    "label": {
+     "description": "Label / subject.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "net_gross": {
+     "description": "Whether prices are net or gross.",
+     "enum": [
+      "NET",
+      "GROSS"
+     ],
+     "type": "string"
+    },
+    "note": {
+     "description": "Closing note.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "title": {
+     "description": "Document title.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "validity_days": {
+     "description": "Days the offer stays valid.",
+     "maximum": 3650,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "client_id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_create_draft_offer",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an article"
+  },
+  "description": "Get one article with its prices, unit, tax and supplier.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The article id (from billomat_list_articles)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_article",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a client"
+  },
+  "description": "Get one client with address, contact person, bank details, payment terms and revenue.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The client id (from billomat_list_clients)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_client",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get the own company data"
+  },
+  "description": "Show the own company data of the Billomat account (name, address, bank details, tax numbers, currency).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "billomat_get_company",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an order confirmation"
+  },
+  "description": "Get one order confirmation.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The confirmation id (from billomat_list_confirmations)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_confirmation",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a credit note"
+  },
+  "description": "Get one credit note.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The credit note id (from billomat_list_credit_notes)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_credit_note",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get the current user"
+  },
+  "description": "Show the Billomat user the API key belongs to (name, email, role and rights). Use it to check which rights the key has.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "billomat_get_current_user",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a delivery note"
+  },
+  "description": "Get one delivery note.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The delivery note id (from billomat_list_delivery_notes)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_delivery_note",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an incoming invoice"
+  },
+  "description": "Get one incoming invoice with amounts and open amount.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The incoming invoice id (from billomat_list_incoming_invoices)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_incoming_invoice",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an invoice"
+  },
+  "description": "Get one invoice (status, totals, dates, client, payment terms). Its line items come from billomat_list_invoice_items.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The invoice id (from billomat_list_invoices)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_invoice",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get an offer"
+  },
+  "description": "Get one offer (status, totals, validity, client).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The offer id (from billomat_list_offers)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_offer",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a reminder"
+  },
+  "description": "Get one payment reminder.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The reminder id (from billomat_list_reminders)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_reminder",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a supplier"
+  },
+  "description": "Get one supplier with address and bank details.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The supplier id (from billomat_list_suppliers)."
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_get_supplier",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Invoice totals by group"
+  },
+  "description": "Invoice totals grouped by client, status, day, week, month or year (for example group_by=client,year). Takes the same filters as billomat_list_invoices. Read-only.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "group_by": {
+     "description": "Grouping: client, status, day, week, month, year; several separated by commas (the order sets the aggregation).",
+     "pattern": "^(client|status|day|week|month|year)(,(client|status|day|week|month|year))*$",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "invoice_number": {
+     "description": "Invoice number (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "payment_type": {
+     "description": "Payment type(s), e.g. CASH, BANK_TRANSFER, PAYPAL; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, OPEN, PAID, OVERDUE, CANCELED; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "group_by"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_invoice_totals",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List articles"
+  },
+  "description": "List the articles (products and services) with prices, units and tax. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_number": {
+     "description": "Article number.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "currency_code": {
+     "description": "ISO currency code, e.g. EUR (account default when omitted).",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "description": {
+     "description": "Search in the description.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "supplier_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only articles of this supplier."
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "title": {
+     "description": "Title (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "unit_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only articles with this unit (from billomat_list_units)."
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_articles",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List or search clients"
+  },
+  "description": "List the clients (customers) of the account, filtered by name, number, email, contact person, country, note or tags. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_number": {
+     "description": "Client number.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "country_code": {
+     "description": "ISO 3166 alpha-2 country code, e.g. DE, AT, CH.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "first_name": {
+     "description": "First name of the contact person.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "invoice_id": {
+     "description": "Comma-separated invoice ids: the clients of these invoices.",
+     "pattern": "^[1-9]\\d{0,15}(,[1-9]\\d{0,15})*$",
+     "type": "string"
+    },
+    "last_name": {
+     "description": "Last name of the contact person.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "name": {
+     "description": "Company / name (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_clients",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List order confirmations"
+  },
+  "description": "List order confirmations (Auftragsbestaetigungen), filtered by client, status (DRAFT, COMPLETED, CANCELED, CLEARED), number, date range or text. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "confirmation_number": {
+     "description": "Confirmation number (partial, case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, COMPLETED, CANCELED, CLEARED; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_confirmations",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List credit notes"
+  },
+  "description": "List credit notes (Gutschriften), filtered by client, status (DRAFT, OPEN, PAID), date range or text. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "credit_note_number": {
+     "description": "Credit note number (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, OPEN, PAID; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_credit_notes",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List delivery notes"
+  },
+  "description": "List delivery notes (Lieferscheine), filtered by client, status (DRAFT, CREATED), number, date range or text. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "delivery_note_number": {
+     "description": "Delivery note number (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, CREATED; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_delivery_notes",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List incoming invoices"
+  },
+  "description": "List incoming invoices (Eingangsrechnungen, from suppliers), filtered by supplier, status (OPEN, PAID, OVERDUE), number, date range, note or tags. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "from": {
+     "description": "Dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "incoming_number": {
+     "description": "Incoming invoice number.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: OPEN, PAID, OVERDUE; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "supplier_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only incoming invoices of this supplier."
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_incoming_invoices",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List the items of an invoice"
+  },
+  "description": "List the line items (positions) of one invoice.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "invoice_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The invoice id."
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "invoice_id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_list_invoice_items",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List invoice payments"
+  },
+  "description": "List the payments that were recorded on invoices (read-only), optionally for one invoice, a date range or payment types.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "from": {
+     "description": "Payments on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "invoice_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only payments of this invoice."
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "to": {
+     "description": "Payments on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "type": {
+     "description": "Payment type(s), e.g. CASH, BANK_TRANSFER, PAYPAL; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "user_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only payments recorded by this user."
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_invoice_payments",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List invoices"
+  },
+  "description": "List invoices (Rechnungen), filtered by client, status (DRAFT, OPEN, PAID, OVERDUE, CANCELED), number, date range, text or tags. Paged; each invoice carries totals and the open amount.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "invoice_number": {
+     "description": "Invoice number (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "payment_type": {
+     "description": "Payment type(s), e.g. CASH, BANK_TRANSFER, PAYPAL; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, OPEN, PAID, OVERDUE, CANCELED; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_invoices",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List offers"
+  },
+  "description": "List offers (Angebote), filtered by client, status (DRAFT, OPEN, WON, LOST, CANCELED, CLEARED), number, date range or text. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "offer_number": {
+     "description": "Offer number (partial, case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, OPEN, WON, LOST, CANCELED, CLEARED; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_offers",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List recurring invoices"
+  },
+  "description": "List recurring invoices (Abo-Rechnungen): name, cycle (DAILY, WEEKLY, MONTHLY, YEARLY), client and next run. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "cycle": {
+     "description": "Interval.",
+     "enum": [
+      "DAILY",
+      "WEEKLY",
+      "MONTHLY",
+      "YEARLY"
+     ],
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the recurring invoice.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "payment_type": {
+     "description": "Payment type(s), e.g. CASH, BANK_TRANSFER, PAYPAL; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_recurring_invoices",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List reminders"
+  },
+  "description": "List payment reminders (Mahnungen), filtered by client, status (DRAFT, OPEN, OVERDUE, PAID, CANCELED), invoice number, date range or text. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "article_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents containing this article."
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client (from billomat_list_clients)."
+    },
+    "contact_id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "Only documents of this client contact."
+    },
+    "from": {
+     "description": "Documents dated on or after this day (yyyy-mm-dd).",
+     "type": "string"
+    },
+    "intro": {
+     "description": "Free-text search in the introduction text.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "invoice_number": {
+     "description": "Number of the reminded invoice (case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "label": {
+     "description": "Free-text search in the label.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Free-text search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Status filter: DRAFT, OPEN, PAID, OVERDUE, CANCELED; several separated by commas.",
+     "pattern": "^[A-Z_]+(,[A-Z_]+)*$",
+     "type": "string"
+    },
+    "subject": {
+     "description": "Free-text search in the subject.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "to": {
+     "description": "Documents dated on or before this day (yyyy-mm-dd).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_reminders",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List suppliers"
+  },
+  "description": "List the suppliers of the account, filtered by name, email, contact person, country, note or tags. Paged.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "client_number": {
+     "description": "Your customer number at the supplier.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "country_code": {
+     "description": "ISO 3166 alpha-2 country code, e.g. DE, AT, CH.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "first_name": {
+     "description": "First name of the contact person.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "last_name": {
+     "description": "Last name of the contact person.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "name": {
+     "description": "Company / name.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "note": {
+     "description": "Search in the note.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "tags": {
+     "description": "Comma-separated tags (Schlagworte).",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_suppliers",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List tax rates"
+  },
+  "description": "List the tax rates (Steuersaetze) of the account, with the default one.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_taxes",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List units"
+  },
+  "description": "List the units (Einheiten) used for article and item quantities, optionally filtered by name.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "name": {
+     "description": "Unit name (substring, case-insensitive).",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort order: field name plus ASC or DESC, several separated by commas, e.g. \"date DESC\" (default ascending).",
+     "pattern": "^[a-z_]+( (ASC|DESC))?(,[a-z_]+( (ASC|DESC))?)*$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, 1-based (default 1). Use next_page from the previous reply.",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-1000 (default 100).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "billomat_list_units",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "readOnlyHint": false,
+   "title": "Update a client"
+  },
+  "description": "WRITE: change fields of an existing client (only the fields you pass are changed; everything else stays). Read the client first with billomat_get_client. Nothing is sent to the client.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "city": {
+     "description": "City.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "country_code": {
+     "description": "ISO 3166 alpha-2 country code, e.g. DE, AT, CH.",
+     "pattern": "^[A-Za-z]{2}$",
+     "type": "string"
+    },
+    "currency_code": {
+     "description": "ISO currency code, e.g. EUR (account default when omitted).",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "first_name": {
+     "description": "First name of the contact person.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "id": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9007199254740991,
+       "type": "integer"
+      },
+      {
+       "pattern": "^[1-9]\\d{0,15}$",
+       "type": "string"
+      }
+     ],
+     "description": "The client id."
+    },
+    "last_name": {
+     "description": "Last name of the contact person.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "locale": {
+     "description": "Locale of the documents, e.g. de-DE.",
+     "maxLength": 20,
+     "type": "string"
+    },
+    "mobile": {
+     "description": "Mobile phone.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "name": {
+     "description": "Company name.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "note": {
+     "description": "Internal note.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "phone": {
+     "description": "Phone.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "salutation": {
+     "description": "Salutation, e.g. Herr, Frau.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "state": {
+     "description": "State / region.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "street": {
+     "description": "Street and number.",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "tax_number": {
+     "description": "Tax number.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "vat_number": {
+     "description": "VAT ID.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "www": {
+     "description": "Website (without http).",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "zip": {
+     "description": "ZIP code.",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "billomat_update_client",
+  "output_schema": {}
+ }
+]

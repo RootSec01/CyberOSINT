@@ -1,0 +1,201 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Public creator and brand profiles: name, bio, avatar, country, follower counts, verification and account age. Searchable by name, bio, hashtag and country with ?q=. Combine with ?limit=, ?verified=, ?minFollowers= and ?sort=followers|newest. The response includes the total and nextCursor. Priced per creator credited. One cent in USDC per creator credited, with a one cent minimum per request. A page that credits 50 creators costs $0.50. The 402 invoice carries the exact amount before anything is signed. Paid route: USDC 0.01 per creator credited, one cent minimum and 2 maximum, settled over x402 on Celo. Without a payment the call returns the x402 payment requirements instead of data, and the requirements carry the exact amount for the call that was asked for.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "nextCursor from the previous page. Omit for the first page.",
+     "examples": [
+      "eyJpZCI6ImNtbWdnYnRpazAwMDBxcnFiem9udHZzeTM4In0"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rows to return, 1-200, default 10. This is the cost control: the invoice is one cent per creator the page credits, so a bigger page costs more.",
+     "examples": [
+      10
+     ],
+     "type": "integer"
+    },
+    "minFollowers": {
+     "description": "Minimum public follower count, 0-2147483647.",
+     "examples": [
+      1000
+     ],
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search. Matches names, titles, bios, hashtags, country names and country codes on that route. Omit to list everything.",
+     "examples": [
+      "lagos"
+     ],
+     "type": "string"
+    },
+    "sort": {
+     "description": "Follower count descending (default) or newest account first.",
+     "enum": [
+      "followers",
+      "newest"
+     ],
+     "examples": [
+      "followers"
+     ],
+     "type": "string"
+    },
+    "verified": {
+     "description": "Filter public creators by verified status. Omit for both.",
+     "examples": [
+      true
+     ],
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "creator_listings",
+  "output_schema": {},
+  "title": "Creator and brand directory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "One public creator or brand profile by id, with the counts of their published content and catalogued tracks. One creator, so one cent, which is the cheapest way to buy when the agent already knows which profile it needs. Paid route: USDC 0.01 per request, settled over x402 on Celo. Without a payment the call returns the x402 payment requirements instead of data, and the requirements carry the exact amount for the call that was asked for.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "Streamlivr creator id, taken from the listings, posts or catalog response.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "creator_profile",
+  "output_schema": {},
+  "title": "Creator profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Music and audio metadata for African and global repertoire: title, artist, ISRC, artwork, and a playable preview clip when the source provides one. Each row carries a \"label\" block that names its owner and how many public posts draw on it, and an \"attribution\" note. A recording is credited to the artist who owns it, never to the accounts whose posts used it; a recording with no Streamlivr owner is retained by the platform. Searchable by title or artist with ?q= and paginated. Matches how the Streamlivr app indexes audio for video, so agent results line up with in-app search. Priced per creator credited and attributed to each one when the payment settles. One cent in USDC per creator credited, with a one cent minimum per request. A page that credits 50 creators costs $0.50. The 402 invoice carries the exact amount before anything is signed. Paid route: USDC 0.01 per creator credited, one cent minimum and 2 maximum, settled over x402 on Celo. Without a payment the call returns the x402 payment requirements instead of data, and the requirements carry the exact amount for the call that was asked for.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "nextCursor from the previous page. Omit for the first page.",
+     "examples": [
+      "eyJpZCI6ImNtbWdnYnRpazAwMDBxcnFiem9udHZzeTM4In0"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rows to return, 1-200, default 10. This is the cost control: the invoice is one cent per creator the page credits, so a bigger page costs more.",
+     "examples": [
+      10
+     ],
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search. Matches names, titles, bios, hashtags, country names and country codes on that route. Omit to list everything.",
+     "examples": [
+      "lagos"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "music_catalog",
+  "output_schema": {},
+  "title": "Music and audio metadata"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Published public content from every public account: title, caption, hashtags, media type and length, engagement counts, and thumbnail. Each row labels the audio owner and attribution; borrowed sound credits its owner. Searchable by title, caption, tag or the public creator's country with ?q=. Combine with ?limit= and ?sort=newest|views, and follow nextCursor for more. Priced per creator credited. One cent in USDC per creator credited, with a one cent minimum per request. A page that credits 50 creators costs $0.50. The 402 invoice carries the exact amount before anything is signed. Paid route: USDC 0.01 per creator credited, one cent minimum and 2 maximum, settled over x402 on Celo. Without a payment the call returns the x402 payment requirements instead of data, and the requirements carry the exact amount for the call that was asked for.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "nextCursor from the previous page. Omit for the first page.",
+     "examples": [
+      "eyJpZCI6ImNtbWdnYnRpazAwMDBxcnFiem9udHZzeTM4In0"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rows to return, 1-200, default 10. This is the cost control: the invoice is one cent per creator the page credits, so a bigger page costs more.",
+     "examples": [
+      10
+     ],
+     "type": "integer"
+    },
+    "q": {
+     "description": "Free-text search. Matches names, titles, bios, hashtags, country names and country codes on that route. Omit to list everything.",
+     "examples": [
+      "lagos"
+     ],
+     "type": "string"
+    },
+    "sort": {
+     "description": "Newest first (default) or public view count descending.",
+     "enum": [
+      "newest",
+      "views"
+     ],
+     "examples": [
+      "views"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "public_posts",
+  "output_schema": {},
+  "title": "Public content feed"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns liveness and the settlement network the API is running on. Use it to confirm a buyer wallet, facilitator key, and x402 client all work before paying for data. Paid route: USDC 0.01 per request, settled over x402 on Celo. Without a payment the call returns the x402 payment requirements instead of data, and the requirements carry the exact amount for the call that was asked for.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "x402_ping",
+  "output_schema": {},
+  "title": "Payment connectivity check"
+ }
+]

@@ -1,0 +1,24 @@
+[
+ {
+  "description": "Verify whether a merchant has an active GenGEO verification record. Results should be treated as one signal within a broader agent decision framework.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "domain": {
+     "minLength": 3,
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "verify_store",
+  "output_schema": {},
+  "title": "Verify Store"
+ }
+]

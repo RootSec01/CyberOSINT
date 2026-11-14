@@ -1,0 +1,275 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Contacts, addresses, opening hours, licence and the three clinics of EKO-IKSI, a fertility (IVF / ICSI) clinic in Tashkent, Uzbekistan. Use this to tell someone how to reach or visit the clinic.",
+  "input_schema": {
+   "properties": {
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_clinic_information",
+  "output_schema": {},
+  "title": "Clinic information"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "One EKO-IKSI doctor's full profile: position, specialties, experience and biography. Pass the id from list_doctors, or part of the doctor's name.",
+  "input_schema": {
+   "properties": {
+    "doctor": {
+     "description": "The doctor's id from list_doctors (e.g. \"fayoz-aminov\"), or part of their name.",
+     "type": "string"
+    },
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "doctor"
+   ],
+   "type": "object"
+  },
+  "name": "get_doctor",
+  "output_schema": {},
+  "title": "Get doctor"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Every article and news item EKO-IKSI clinic has published, newest first, page by page: title, type, date, link and the card image (null when there is none). `type` picks the blog (article), the news (news) or both; follow `next_page` until it is null to see them all. Use search_articles to find one by topic and read_article for the text.",
+  "input_schema": {
+   "properties": {
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "description": "Which page, from 1 (the default).",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Publications per page (default and at most 50).",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "type": {
+     "description": "article (the blog), news, or any (the default).",
+     "enum": [
+      "article",
+      "news",
+      "any"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_articles",
+  "output_schema": {},
+  "title": "List articles"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "All doctors of EKO-IKSI clinic: name, position, specialties and experience, with a link to each profile. Use get_doctor for one doctor's full biography.",
+  "input_schema": {
+   "properties": {
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_doctors",
+  "output_schema": {},
+  "title": "List doctors"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The treatments and services EKO-IKSI and its two partner clinics offer, grouped by the sections of their price lists. Without `clinic`: an overview of all three clinics' sections and how many services each holds. With `clinic`: every service of that clinic by name. Use search_prices for the prices themselves.",
+  "input_schema": {
+   "properties": {
+    "clinic": {
+     "description": "One clinic, to list every service by name: eko-iksi (the main clinic), eko-iksi-ivf (partner clinic) or oilam (Oilam Medical Centre). Leave empty for an overview of all three.",
+     "enum": [
+      "eko-iksi",
+      "eko-iksi-ivf",
+      "oilam"
+     ],
+     "type": "string"
+    },
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_services",
+  "output_schema": {},
+  "title": "List services"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The full text of one EKO-IKSI article or news item, with the addresses of its images. Pass its URL (from search_articles, or any eko-iksi.uz article address) or its slug.",
+  "input_schema": {
+   "properties": {
+    "article": {
+     "description": "The article's URL (e.g. \"https://eko-iksi.uz/ru/blog/...\") or its slug.",
+     "type": "string"
+    },
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "article"
+   ],
+   "type": "object"
+  },
+  "name": "read_article",
+  "output_schema": {},
+  "title": "Read article"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search the articles and news EKO-IKSI clinic has published about infertility, IVF, ICSI, andrology, gynaecology and the clinic itself. Returns titles, dates, summaries, links and card images; use read_article for the full text, and list_articles to see every publication.",
+  "input_schema": {
+   "properties": {
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "How many results to return (default 10, at most 30).",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words to look for in the title or text. Leave empty for the latest publications.",
+     "type": "string"
+    },
+    "type": {
+     "description": "article, news, or any (the default).",
+     "enum": [
+      "article",
+      "news",
+      "any"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_articles",
+  "output_schema": {},
+  "title": "Search articles"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search the price lists of EKO-IKSI and its two partner clinics in Tashkent (IVF, ICSI, consultations, tests, procedures). Prices are in Uzbek so'm. Search works in Uzbek, Russian or English.",
+  "input_schema": {
+   "properties": {
+    "clinic": {
+     "description": "Only one clinic: eko-iksi (the main clinic), eko-iksi-ivf (partner clinic) or oilam (Oilam Medical Centre). Leave empty for all three.",
+     "enum": [
+      "eko-iksi",
+      "eko-iksi-ivf",
+      "oilam"
+     ],
+     "type": "string"
+    },
+    "language": {
+     "description": "Language of the answer: uz (Uzbek, the site's own language and the default), ru (Russian) or en (English).",
+     "enum": [
+      "uz",
+      "ru",
+      "en"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "How many results to return (default 20, at most 50).",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words from the service name, in any of the three languages — e.g. \"EKO\", \"ЭКО\", \"IVF\", \"androlog\", \"анализ\". Leave empty to list services.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_prices",
+  "output_schema": {},
+  "title": "Search prices"
+ }
+]

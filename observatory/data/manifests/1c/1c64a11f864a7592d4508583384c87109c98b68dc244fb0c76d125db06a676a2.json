@@ -1,0 +1,154 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Create a Stripe Checkout payment link for a fax. Returns payment_url — give this link to the human so they can pay in their browser (agents never handle card details) — and payment_id, which you pass to send_fax after the human has paid. The price is computed server-side from the document or text. The Checkout link expires (see expires_at, ~24h); create a fresh one if the human delays.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cover_text": {
+     "description": "Plain text to fax instead of a document.",
+     "maxLength": 50000,
+     "type": "string"
+    },
+    "document_url": {
+     "description": "Public http(s) URL of the PDF to fax (same one you will pass to send_fax).",
+     "format": "uri",
+     "type": "string"
+    },
+    "pages": {
+     "description": "Page count, if pricing without the document. send_fax re-verifies against the real content.",
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "to": {
+     "description": "Recipient fax number in international format, e.g. +15551234567.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "create_fax_payment",
+  "output_schema": {},
+  "title": "Create a fax payment link"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get the exact price to send a real fax to any US, Canadian, or international fax number via faxer.me. Call this first whenever a user wants to send, transmit, or fax a document or message. Provide document_url (a publicly downloadable PDF), cover_text (plain text that will be rendered onto fax pages), or pages (an estimated page count). Pricing is pay-per-fax ($1.00 first page + $0.25/page, returned in USD cents); no account or API key needed.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cover_text": {
+     "description": "Plain text to fax instead of a document (rendered as PDF pages, ~3000 chars/page).",
+     "maxLength": 50000,
+     "type": "string"
+    },
+    "document_url": {
+     "description": "Public http(s) URL of the PDF to fax. The server downloads it and counts real pages.",
+     "format": "uri",
+     "type": "string"
+    },
+    "pages": {
+     "description": "Estimated page count, if you only need a rough quote.",
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_fax_quote",
+  "output_schema": {},
+  "title": "Get a fax price quote"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check the delivery status of a fax sent with send_fax. Status 'success' means the receiving fax machine confirmed the transmission; 'inprogress'/'queued' mean it is still sending; 'failure' means it could not be delivered. Delivery typically takes 1-5 minutes; poll roughly every 30 seconds.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "fax_id": {
+     "description": "The fax_id returned by send_fax.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "fax_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_fax_status",
+  "output_schema": {},
+  "title": "Check fax delivery status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Transmit a fax. Two ways to pay: (1) human-in-the-loop — pass the payment_id from create_fax_payment after the human has paid the Stripe Checkout link; (2) autonomous machine payment (x402/MPP) — call WITHOUT payment_id and the server replies with a payment challenge (JSON-RPC error -32042) for USDC-on-Tempo or a Stripe Shared Payment Token; pay it and retry with the credential in _meta['org.paymentauth/credential']. Either way the server verifies the payment covers the server-computed price of the actual content before sending via a real fax carrier. One fax per payment; a Checkout payment is only charged once the fax is delivered (the hold is released if it fails), and Stripe machine payments are refunded automatically if the fax fails to send or deliver (on-chain payments are refunded manually).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "cover_subject": {
+     "description": "Optional heading for a cover_text fax.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "cover_text": {
+     "description": "Plain text to fax instead of a document.",
+     "maxLength": 50000,
+     "type": "string"
+    },
+    "document_url": {
+     "description": "Public http(s) URL of the PDF to fax.",
+     "format": "uri",
+     "type": "string"
+    },
+    "payment_id": {
+     "description": "The payment_id from create_fax_payment (Stripe Checkout Session id). Omit to pay autonomously via an x402/MPP machine-payment challenge instead.",
+     "type": "string"
+    },
+    "to": {
+     "description": "Recipient fax number in international format, e.g. +15551234567.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "to"
+   ],
+   "type": "object"
+  },
+  "name": "send_fax",
+  "output_schema": {},
+  "title": "Send the fax"
+ }
+]

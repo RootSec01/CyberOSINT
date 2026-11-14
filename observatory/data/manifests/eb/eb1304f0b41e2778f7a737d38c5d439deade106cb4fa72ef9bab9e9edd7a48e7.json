@@ -1,0 +1,104 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve a public guide's Markdown/MDX text and citation URL using an exact ID returned by search. Interactive component data is available on the linked website.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {},
+  "title": "Read a FiveM Docs guide"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read blip sprites, control IDs/default bindings, or ped names/hashes from the same imported data used on the website. Returns at most 20 rows with source, retrieval date, context and limits. Numeric IDs/hashes match exact values. No code execution or runtime compatibility guarantee.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "dataset": {
+     "enum": [
+      "blips",
+      "controls",
+      "ped-models"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "dataset",
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "lookup",
+  "output_schema": {},
+  "title": "Look up FiveM game references"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find public FiveM guides using short keywords. All query terms must match. Returns up to ten citable results; use fetch to read a guide.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "query": {
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {},
+  "title": "Search FiveM Docs"
+ }
+]

@@ -1,0 +1,909 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create a draft invoice"
+  },
+  "description": "WRITE: saves a new invoice as a DRAFT in A-Cube. Nothing is sent to the SDI until acube_send_draft_invoice. Not idempotent: calling it twice creates two drafts. Validate first with acube_validate_invoice. POST /invoices/draft.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fattura_elettronica_body": {
+     "description": "Exactly one invoice body (an array with one object), snake_case keys: dati_generali (dati_generali_documento...), dati_beni_servizi (dettaglio_linee, dati_riepilogo), optional dati_pagamento. Field names as in the A-Cube Italy API reference.",
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "maxItems": 1,
+     "minItems": 1,
+     "type": "array"
+    },
+    "fattura_elettronica_header": {
+     "additionalProperties": {},
+     "description": "FatturaPA header as A-Cube JSON (snake_case keys): dati_trasmissione (codice_destinatario, pec_destinatario), cedente_prestatore (seller), cessionario_committente (buyer). Give the full header (seller and buyer) for a draft you intend to send: A-Cube only fills in transmission data automatically, and acube_validate_invoice shows what is missing.",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "fattura_elettronica_body"
+   ],
+   "type": "object"
+  },
+  "name": "acube_create_draft_invoice",
+  "output_schema": {},
+  "title": "Create a draft invoice"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Delete a draft invoice"
+  },
+  "description": "WRITE: permanently deletes a draft invoice (a draft only: a sent invoice answers 409). Without confirm: true it only returns the draft. DELETE /invoices/draft/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "confirm": {
+     "description": "Must be true to actually delete. Otherwise the draft is returned as a preview.",
+     "type": "boolean"
+    },
+    "uuid": {
+     "description": "The draft invoice uuid.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_delete_draft_invoice",
+  "output_schema": {},
+  "title": "Delete a draft invoice"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get a business registry configuration"
+  },
+  "description": "One business by fiscal id: name, email, enabled services and its webhook configurations. GET /business-registry-configurations/{fiscalId}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fiscal_id": {
+     "description": "The business's fiscal id (codice fiscale or partita IVA).",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "fiscal_id"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_business_registry_configuration",
+  "output_schema": {},
+  "title": "Get a business registry configuration"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get the current numbering sequence"
+  },
+  "description": "The sequence now in use for a sequence name. Its number is the LAST number used: the next invoice gets that number plus one. GET /numbering-sequences/current/{name}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "name": {
+     "description": "The sequence name.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_current_numbering_sequence",
+  "output_schema": {},
+  "title": "Get the current numbering sequence"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get a draft invoice"
+  },
+  "description": "One draft invoice by uuid, with its FatturaPA JSON content. GET /invoices/draft/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The draft invoice uuid.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_draft_invoice",
+  "output_schema": {},
+  "title": "Get a draft invoice"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get an invoice"
+  },
+  "description": "One invoice by uuid: metadata plus the FatturaPA JSON payload (parties, lines, VAT, payment), or the XML file sent to the SDI. GET /invoices/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "format": {
+     "description": "json (default) or xml.",
+     "enum": [
+      "json",
+      "xml"
+     ],
+     "type": "string"
+    },
+    "uuid": {
+     "description": "The invoice uuid (from acube_list_invoices).",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_invoice",
+  "output_schema": {},
+  "title": "Get an invoice"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get invoice statistics"
+  },
+  "description": "Counters of invoices and notifications for a year (annual; monthly or daily detail only if A-Cube activated it), for the whole account or one fiscal id. GET /invoices/stats/{year}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fiscal_id": {
+     "description": "Only this customer's fiscal id (a business registry configuration).",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "year": {
+     "description": "The year, e.g. 2026.",
+     "maximum": 2100,
+     "minimum": 2000,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "year"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_invoice_stats",
+  "output_schema": {},
+  "title": "Get invoice statistics"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get a background job"
+  },
+  "description": "One background job by uuid with its status and result. GET /jobs/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The job uuid (from acube_list_jobs).",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_job",
+  "output_schema": {},
+  "title": "Get a background job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get an SDI notification"
+  },
+  "description": "One SDI notification by uuid, with its payload. GET /notifications/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The notification uuid (from acube_list_invoice_notifications).",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_notification",
+  "output_schema": {},
+  "title": "Get an SDI notification"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get an electronic receipt"
+  },
+  "description": "One electronic receipt by uuid: type, status, number, date, total and links to voiding or returned receipts (no line items: use acube_get_receipt_details). GET /receipts/{uuid}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The receipt uuid (from acube_list_receipts).",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_receipt",
+  "output_schema": {},
+  "title": "Get an electronic receipt"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get electronic receipt details"
+  },
+  "description": "The line items and VAT, discount and taxable totals of one electronic receipt. GET /receipts/{uuid}/details.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The receipt uuid (from acube_list_receipts).",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_get_receipt_details",
+  "output_schema": {},
+  "title": "Get electronic receipt details"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get the SDI recipient code"
+  },
+  "description": "The account's 7-character SDI recipient code (codice destinatario), the address customers put on invoices they send to you. GET /users/me/recipient-code.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "acube_get_recipient_code",
+  "output_schema": {},
+  "title": "Get the SDI recipient code"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List business registry configurations"
+  },
+  "description": "The businesses (fiscal ids) set up on the account, with which services are on: customer invoices, supplier invoices, receipts, signature, legal storage. GET /business-registry-configurations.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "email": {
+     "description": "Contact email.",
+     "maxLength": 254,
+     "type": "string"
+    },
+    "fiscal_id": {
+     "description": "Exact fiscal id.",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "items_per_page": {
+     "description": "Items per page, 1 to 100 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "name": {
+     "description": "Business name (partial match).",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "receipts_enabled": {
+     "description": "Only businesses with electronic receipts on (true) or off (false).",
+     "type": "boolean"
+    },
+    "supplier_invoice_enabled": {
+     "description": "Only businesses that receive supplier invoices (true) or not (false).",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_business_registry_configurations",
+  "output_schema": {},
+  "title": "List business registry configurations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List draft invoices"
+  },
+  "description": "Draft invoices that were created but not yet sent to the SDI. Same filters as acube_list_invoices. GET /invoices/draft.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "invoice_date_from": {
+     "description": "Invoice date on or after this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "invoice_date_to": {
+     "description": "Invoice date on or before this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "invoice_number": {
+     "description": "Exact invoice number.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "items_per_page": {
+     "description": "Items per page, 1 to 30 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "recipient_name": {
+     "description": "Recipient business name (partial match).",
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_draft_invoices",
+  "output_schema": {},
+  "title": "List draft invoices"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List an invoice's SDI notifications"
+  },
+  "description": "The SDI notifications of one invoice (delivery receipt RC, rejection NS, outcome NE, failed delivery MC, deadline expiry DT...), with their type, date and status: how you tell whether an invoice was delivered or rejected. GET /invoices/{uuid}/notifications.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uuid": {
+     "description": "The invoice uuid.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_list_invoice_notifications",
+  "output_schema": {},
+  "title": "List an invoice's SDI notifications"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List invoices"
+  },
+  "description": "Sent and received Italian e-invoices (SDI) of the account: uuid, invoice number and date, document type (TD01...), sender and recipient, amounts, marking and notification status. Filter by date, number, document type, party name or VAT number. GET /invoices.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_from": {
+     "description": "Created in A-Cube on or after this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "created_to": {
+     "description": "Created in A-Cube on or before this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "document_type": {
+     "description": "SDI document type, e.g. TD01 (invoice), TD04 (credit note), TD17-TD19 (reverse-charge self-invoices).",
+     "maxLength": 10,
+     "type": "string"
+    },
+    "downloaded": {
+     "description": "Only invoices already downloaded (true) or not yet (false).",
+     "type": "boolean"
+    },
+    "invoice_date_from": {
+     "description": "Invoice date on or after this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "invoice_date_to": {
+     "description": "Invoice date on or before this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "invoice_number": {
+     "description": "Exact invoice number.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "items_per_page": {
+     "description": "Items per page, 1 to 30 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "order": {
+     "description": "Sort direction (default desc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "order_by": {
+     "description": "Sort field (default invoice_date).",
+     "enum": [
+      "invoice_date",
+      "invoice_number",
+      "uuid"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "recipient_name": {
+     "description": "Recipient business name (partial match).",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "recipient_vat_number": {
+     "description": "Recipient VAT number code (digits, without the country prefix).",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "sender_name": {
+     "description": "Sender business name (partial match).",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "sender_vat_number": {
+     "description": "Sender VAT number code (digits, without the country prefix).",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "signed": {
+     "description": "Only signed (true) or unsigned (false) invoices.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_invoices",
+  "output_schema": {},
+  "title": "List invoices"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List background jobs"
+  },
+  "description": "Background jobs (invoice, report and zip downloads, F24 and daily receipt report downloads) with status ready, started, completed or error. GET /jobs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fiscal_id": {
+     "description": "Only this business's jobs.",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "items_per_page": {
+     "description": "Items per page, 1 to 30 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "job_type": {
+     "description": "Only this job type.",
+     "enum": [
+      "invoice-download",
+      "invoice-report-download",
+      "invoice-zip-download",
+      "f24-download",
+      "daily-receipt-report-download"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Only jobs in this status.",
+     "enum": [
+      "ready",
+      "started",
+      "completed",
+      "error"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_jobs",
+  "output_schema": {},
+  "title": "List background jobs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List numbering sequences"
+  },
+  "description": "The invoice numbering sequences (name, year, last number). GET /numbering-sequences.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "items_per_page": {
+     "description": "Items per page, 1 to 100 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "sequence_name": {
+     "description": "Only this sequence name.",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "year": {
+     "description": "Only this year.",
+     "maximum": 2100,
+     "minimum": 2000,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_numbering_sequences",
+  "output_schema": {},
+  "title": "List numbering sequences"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List electronic receipts"
+  },
+  "description": "Electronic commercial receipts (scontrini) with number, date, status, type (sale, void, return) and totals. GET /receipts.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "document_date_from": {
+     "description": "Receipt date on or after this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "document_date_to": {
+     "description": "Receipt date on or before this day.",
+     "pattern": "^(\\d{4})-(\\d{2})-(\\d{2})$",
+     "type": "string"
+    },
+    "document_number": {
+     "description": "Exact receipt document number.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "fiscal_id": {
+     "description": "Only this business's receipts (its fiscal id).",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "items_per_page": {
+     "description": "Items per page, 1 to 100 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "description": "Receipt status, as shown in the list.",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "type": {
+     "description": "Receipt type, e.g. sale, void, return.",
+     "maxLength": 30,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_receipts",
+  "output_schema": {},
+  "title": "List electronic receipts"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List webhook configurations"
+  },
+  "description": "The webhooks (events and target URLs) configured on the account. Authentication keys and tokens are never returned. GET /api-configurations.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fiscal_id": {
+     "description": "Only webhooks of this business (fiscal id).",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "items_per_page": {
+     "description": "Items per page, 1 to 30 (default 30). A full page means there may be more: ask for the next page.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "acube_list_webhooks",
+  "output_schema": {},
+  "title": "List webhook configurations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Send a draft invoice to the SDI"
+  },
+  "description": "WRITE: accepts a draft and transmits it to the Sistema di Interscambio. This is a legal act: a sent e-invoice cannot be recalled (only corrected with a credit note) and may be billed by A-Cube. Without confirm: true it only returns the draft for review. Show the draft to the user and get their explicit OK first. POST /invoices/draft/{uuid}/send.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "confirm": {
+     "description": "Must be true to actually send. Otherwise the draft is returned as a preview.",
+     "type": "boolean"
+    },
+    "uuid": {
+     "description": "The draft invoice uuid.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "uuid"
+   ],
+   "type": "object"
+  },
+  "name": "acube_send_draft_invoice",
+  "output_schema": {},
+  "title": "Send a draft invoice to the SDI"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Validate an invoice (no save)"
+  },
+  "description": "Checks an invoice against the FatturaPA rules without creating or sending anything; returns the validation result or A-Cube's errors. POST /invoices/validate.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fattura_elettronica_body": {
+     "description": "Exactly one invoice body (an array with one object), snake_case keys: dati_generali (dati_generali_documento...), dati_beni_servizi (dettaglio_linee, dati_riepilogo), optional dati_pagamento. Field names as in the A-Cube Italy API reference.",
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "maxItems": 1,
+     "minItems": 1,
+     "type": "array"
+    },
+    "fattura_elettronica_header": {
+     "additionalProperties": {},
+     "description": "FatturaPA header as A-Cube JSON (snake_case keys): dati_trasmissione (codice_destinatario, pec_destinatario), cedente_prestatore (seller), cessionario_committente (buyer). Give the full header (seller and buyer) for a draft you intend to send: A-Cube only fills in transmission data automatically, and acube_validate_invoice shows what is missing.",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "fattura_elettronica_body"
+   ],
+   "type": "object"
+  },
+  "name": "acube_validate_invoice",
+  "output_schema": {},
+  "title": "Validate an invoice (no save)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Look up an Italian company"
+  },
+  "description": "Basic registry data of an Italian company by VAT number (name, address, status), optionally with the split-payment check. GET /verify/company/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "check_split_payment": {
+     "description": "Also tell whether the company is subject to split payment.",
+     "type": "boolean"
+    },
+    "id": {
+     "description": "The company's VAT number or fiscal id.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "acube_verify_company",
+  "output_schema": {},
+  "title": "Look up an Italian company"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check a fiscal id"
+  },
+  "description": "Checks whether a codice fiscale or partita IVA is valid. GET /verify/fiscal-id/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "The fiscal id or VAT number to check, e.g. 12345678901.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "acube_verify_fiscal_id",
+  "output_schema": {},
+  "title": "Check a fiscal id"
+ }
+]

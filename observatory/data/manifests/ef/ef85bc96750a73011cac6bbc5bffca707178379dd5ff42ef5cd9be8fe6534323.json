@@ -1,0 +1,119 @@
+[
+ {
+  "description": "Request a Lead Friendly product demo on behalf of a prospect. Routes the request to the sales team and returns the self-serve booking link. Use when a user wants to see/try Lead Friendly.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "company": {
+     "description": "Company name (optional)",
+     "type": "string"
+    },
+    "email": {
+     "description": "Prospect email",
+     "type": "string"
+    },
+    "industry": {
+     "description": "Industry/vertical (optional)",
+     "type": "string"
+    },
+    "message": {
+     "description": "Anything the prospect wants the team to know (optional)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Prospect full name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "email"
+   ],
+   "type": "object"
+  },
+  "name": "book_demo",
+  "output_schema": {}
+ },
+ {
+  "description": "Check whether Lead Friendly can do a specific job (e.g. 'call leads after hours', 'dispatch trucks', 'white-label for my agency'). Pass the job in `query`.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "The capability/job to check, in plain language.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "check_capability",
+  "output_schema": {}
+ },
+ {
+  "description": "Submit a sales lead to Lead Friendly on behalf of a prospect who is interested. Routes to the sales inbox. Does NOT write into any customer's CRM. Use to hand off an interested prospect.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "company": {
+     "description": "Company name (optional)",
+     "type": "string"
+    },
+    "email": {
+     "description": "Prospect email",
+     "type": "string"
+    },
+    "industry": {
+     "description": "Industry/vertical (optional)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Prospect full name",
+     "type": "string"
+    },
+    "notes": {
+     "description": "Context about the prospect's need (optional)",
+     "type": "string"
+    },
+    "phone": {
+     "description": "Prospect phone (optional)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "email"
+   ],
+   "type": "object"
+  },
+  "name": "create_lead",
+  "output_schema": {}
+ },
+ {
+  "description": "Get Lead Friendly's current subscription plans and prices (live from the pricing source of truth). Use to answer 'how much does Lead Friendly cost'.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_pricing",
+  "output_schema": {}
+ },
+ {
+  "description": "List the industry verticals Lead Friendly ships a tailored AI agent template for (e.g. auto dealerships, trucking/dispatch, dental, HVAC). Optional `query` filters by keyword.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "Optional keyword to filter industries (e.g. 'auto', 'medical').",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_industries",
+  "output_schema": {}
+ }
+]

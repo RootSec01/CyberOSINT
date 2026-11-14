@@ -1,0 +1,318 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "排八字 · Bazi chart"
+  },
+  "description": "Calculate a full Bazi chart using the Xiaodao engine: four pillars and details, lunar date, auxiliary palaces, month command, luck start and direction, all twelve ten-year cycles with yearly lists, and focused annual/monthly/daily/hourly facts. The default focus is the chart page current instant at the birth place, using its historical time zone and true-solar day boundaries. focusDate selects a local civil date at noon; detailYears {from,to} adds up to ten inclusive years; allDaysOfMonth adds every day of the focused solar-term month. Ranges must fit the pre-luck and twelve-cycle timeline. Months run from Lichun (Yin) through the following Xiaohan (Chou). Year/month pillars compare the actual instant with solar terms; day/hour pillars use true solar time. earlyLateZi defaults to false (23:00 day change); true uses midnight and separates early/late Zi hours. Luck starts from the birth-to-term interval (3 days per year), forward for yang-year males/yin-year females, reverse otherwise. Input is historical wall-clock time, Gregorian or explicit lunar/leap-month date. Repeated times require a user-selected occurrence; nonexistent times are not calculated. Missing birth boundary choices return needs_input. Chart text stays Chinese; English adds a field glossary. This returns chart facts, not an interpretation. Gregorian date range: 1801-01-01 through 2099-12-31. 公历日期范围：1801-01-01 至 2099-12-31。 Lunar input is checked after conversion to Gregorian. 农历输入先换成公历再查。",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "allDaysOfMonth": {
+     "default": false,
+     "description": "Include all days of the focused solar-term month, including partial boundary days.",
+     "type": "boolean"
+    },
+    "boundaryChoices": {
+     "additionalProperties": false,
+     "description": "User choices for returned time boundaries: SAME uses this time; OTHER uses the other side.",
+     "properties": {
+      "DAY": {
+       "enum": [
+        "SAME",
+        "OTHER"
+       ],
+       "type": "string"
+      },
+      "HOUR": {
+       "enum": [
+        "SAME",
+        "OTHER"
+       ],
+       "type": "string"
+      },
+      "TERM": {
+       "enum": [
+        "SAME",
+        "OTHER"
+       ],
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "calendar": {
+     "default": "SOLAR",
+     "description": "Gregorian (SOLAR) or Chinese lunar (LUNAR) input. Lunar input requires an explicit isLeapMonth.",
+     "enum": [
+      "SOLAR",
+      "LUNAR"
+     ],
+     "type": "string"
+    },
+    "date": {
+     "description": "Birth date, YYYY-MM-DD, in the selected calendar.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "daylightSaving": {
+     "description": "Only supply a user-selected DST choice when the local time occurs twice.",
+     "type": "boolean"
+    },
+    "detailYears": {
+     "additionalProperties": false,
+     "description": "Inclusive calendar-year containers to include in detail, at most ten years, within the supported timeline.",
+     "properties": {
+      "from": {
+       "type": "integer"
+      },
+      "to": {
+       "type": "integer"
+      }
+     },
+     "required": [
+      "from",
+      "to"
+     ],
+     "type": "object"
+    },
+    "earlyLateZi": {
+     "description": "Optional Zi-hour convention. Default false: the day changes at 23:00 true solar time (same as the Xiaodao website default). true keeps the same day until 00:00.",
+     "type": "boolean"
+    },
+    "focusDate": {
+     "description": "Local civil date at the birth place, evaluated at noon; defaults to the current chart-page instant. Must fall within the supported timeline.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "isLeapMonth": {
+     "description": "Required for LUNAR input: whether the supplied lunar month is a leap month.",
+     "type": "boolean"
+    },
+    "language": {
+     "default": "en",
+     "enum": [
+      "zh-CN",
+      "en"
+     ],
+     "type": "string"
+    },
+    "placeId": {
+     "description": "Birth place ID returned by search_birth_place.",
+     "maxLength": 128,
+     "type": "string"
+    },
+    "sex": {
+     "enum": [
+      "MALE",
+      "FEMALE"
+     ],
+     "type": "string"
+    },
+    "time": {
+     "description": "Local wall-clock time, HH:MM.",
+     "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "placeId",
+    "date",
+    "time",
+    "sex"
+   ],
+   "type": "object"
+  },
+  "name": "bazi_chart",
+  "output_schema": {},
+  "title": "排八字 · Bazi chart"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "奇门排盘 · Qimen chart"
+  },
+  "description": "Calculate an hour-based Qimen chart using the chai bu method and rotating plate only. date and time are local Gregorian wall-clock time at placeId (from search_birth_place); omitting placeId uses the same configured reference place as Xiaodao Daily Fortune, named in the result. Historical time zone and DST, longitude and equation of time produce local true solar time, then expressed in Beijing time. All four pillars, solar term and ju use that corrected moment; year/month pillars can differ from Bazi for the same instant. The day changes at 23:00, not selectable. Repeated wall-clock times need an explicit daylightSaving choice; nonexistent times are not calculated. Optional birthYearPillar is a full valid sexagenary pillar, not a numeric year or a single stem; obtain it from bazi_chart first because the year changes at Lichun. Jia uses its hidden Liu Yi stem. Returns nine-palace chart facts and optional birth-year stem locations, without interpretation rules. Chart text stays Chinese; language en adds English conventions and a field glossary. Gregorian date range: 1801-01-01 through 2099-12-31. 公历日期范围：1801-01-01 至 2099-12-31。",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "birthYearPillar": {
+     "description": "Valid full sexagenary birth-year pillar, e.g. 庚午 or 甲戌, obtained from Bazi.",
+     "type": "string"
+    },
+    "date": {
+     "description": "Chart date in the local Gregorian calendar.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "daylightSaving": {
+     "description": "Only supply a user-selected DST choice when the local time occurs twice.",
+     "type": "boolean"
+    },
+    "language": {
+     "default": "en",
+     "enum": [
+      "zh-CN",
+      "en"
+     ],
+     "type": "string"
+    },
+    "placeId": {
+     "description": "Optional event place ID from search_birth_place; omitted uses the website reference place.",
+     "maxLength": 128,
+     "type": "string"
+    },
+    "time": {
+     "description": "Local wall-clock time, HH:MM.",
+     "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "date",
+    "time"
+   ],
+   "type": "object"
+  },
+  "name": "qimen_chart",
+  "output_schema": {},
+  "title": "奇门排盘 · Qimen chart"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "查出生地 · Search birth places"
+  },
+  "description": "Search Xiaodao’s place catalogue for birth place IDs, Chinese and English names, countries and first-level administrative areas. Select the intended place; its stored coordinates and historical time zone rules are used by the calculation tools, not today’s UTC offset.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "language": {
+     "default": "en",
+     "enum": [
+      "zh-CN",
+      "en"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_birth_place",
+  "output_schema": {},
+  "title": "查出生地 · Search birth places"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "真太阳时换算 · True solar time"
+  },
+  "description": "Convert historical local wall-clock time (Gregorian or explicit lunar/leap-month input) using the selected place: remove daylight saving, apply longitude correction (4 minutes per degree relative to the standard meridian), then equation of time. The Xiaodao engine uses the actual instant for equation of time in both hemispheres, with no half-year shift. Longitude and birth date are unchanged. Returns minute-resolution true solar time, historical zone/offset, DST and Zi-hour policy. Repeated clock times require an explicit occurrence; nonexistent times are rejected. earlyLateZi is optional and defaults to false (day changes at 23:00, same as the Xiaodao website default). Missing boundary choices return needs_input. No pillars or lunar date are returned; the Zi-hour policy does not change the displayed solar date. Gregorian date range: 1801-01-01 through 2099-12-31. 公历日期范围：1801-01-01 至 2099-12-31。 Lunar input is checked after conversion to Gregorian. 农历输入先换成公历再查。",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "boundaryChoices": {
+     "additionalProperties": false,
+     "description": "User choices for returned time boundaries: SAME uses this time; OTHER uses the other side.",
+     "properties": {
+      "DAY": {
+       "enum": [
+        "SAME",
+        "OTHER"
+       ],
+       "type": "string"
+      },
+      "HOUR": {
+       "enum": [
+        "SAME",
+        "OTHER"
+       ],
+       "type": "string"
+      },
+      "TERM": {
+       "enum": [
+        "SAME",
+        "OTHER"
+       ],
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "calendar": {
+     "default": "SOLAR",
+     "description": "Gregorian (SOLAR) or Chinese lunar (LUNAR) input. Lunar input requires an explicit isLeapMonth.",
+     "enum": [
+      "SOLAR",
+      "LUNAR"
+     ],
+     "type": "string"
+    },
+    "date": {
+     "description": "Birth date, YYYY-MM-DD, in the selected calendar.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "daylightSaving": {
+     "description": "Only supply a user-selected DST choice when the local time occurs twice.",
+     "type": "boolean"
+    },
+    "earlyLateZi": {
+     "description": "Optional Zi-hour convention. Default false: the day changes at 23:00 true solar time (same as the Xiaodao website default). true keeps the same day until 00:00.",
+     "type": "boolean"
+    },
+    "isLeapMonth": {
+     "description": "Required for LUNAR input: whether the supplied lunar month is a leap month.",
+     "type": "boolean"
+    },
+    "language": {
+     "default": "en",
+     "enum": [
+      "zh-CN",
+      "en"
+     ],
+     "type": "string"
+    },
+    "placeId": {
+     "description": "Birth place ID returned by search_birth_place.",
+     "maxLength": 128,
+     "type": "string"
+    },
+    "time": {
+     "description": "Local wall-clock time, HH:MM.",
+     "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "placeId",
+    "date",
+    "time"
+   ],
+   "type": "object"
+  },
+  "name": "true_solar_time",
+  "output_schema": {},
+  "title": "真太阳时换算 · True solar time"
+ }
+]

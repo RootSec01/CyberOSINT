@@ -1,0 +1,1228 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find comparable cars"
+  },
+  "description": "Given one listing, find comparable ones: same make, similar year, mileage and price band. Use this when the user likes a car but wants alternatives — 'find me something similar', 'the same but cheaper', 'what else is around this price'. Pass `maxPrice` for the cheaper case; without it, comparables are drawn from a band around the reference price. Comparability is by structure (make/model/year/km/price), not by text similarity: it answers 'is this well priced for what it is', which a keyword search cannot.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Maximum number of comparables (default 6, max 20).",
+     "type": "number"
+    },
+    "maxPrice": {
+     "description": "Optional budget ceiling, in EUR. Use it for 'similar but cheaper'; it overrides the default band around the reference price.",
+     "type": "number"
+    },
+    "slug": {
+     "description": "Slug of the reference listing, as returned by search_cars or get_car_detail.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "find_similar_cars",
+  "output_schema": {
+   "properties": {
+    "cars": {
+     "items": {
+      "properties": {
+       "body": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "condition": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "currency": {
+        "description": "ISO 4217 code of this market.",
+        "type": "string"
+       },
+       "district": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "fuel": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "km": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "make": {
+        "type": "string"
+       },
+       "model": {
+        "type": "string"
+       },
+       "power_cv": {
+        "description": "Engine power in metric horsepower (CV/PS).",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "price": {
+        "description": "null means the source does not publish a price (on request).",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "publishedAt": {
+        "description": "ISO 8601 date the listing was first seen at the source.",
+        "type": "string"
+       },
+       "sellerType": {
+        "enum": [
+         "STAND",
+         "PARTICULAR",
+         null
+        ],
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "slug": {
+        "description": "Stable identifier; pass to get_car_detail or find_similar_cars.",
+        "type": "string"
+       },
+       "source": {
+        "description": "Aggregator platform the listing came from; null when published directly with us.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "sourceUrl": {
+        "description": "Original listing URL at the source. Cite this alongside url.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "transmission": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "description": "Canonical listing page on this market's domain.",
+        "type": "string"
+       },
+       "variant": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "year": {
+        "type": [
+         "number",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "slug",
+       "url",
+       "title",
+       "make",
+       "model",
+       "currency",
+       "publishedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "currency": {
+     "type": "string"
+    },
+    "market": {
+     "type": "string"
+    },
+    "reference": {
+     "description": "The listing the comparables are measured against, echoed back for the comparison.",
+     "properties": {
+      "body": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "condition": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "currency": {
+       "description": "ISO 4217 code of this market.",
+       "type": "string"
+      },
+      "district": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "fuel": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "km": {
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "make": {
+       "type": "string"
+      },
+      "model": {
+       "type": "string"
+      },
+      "power_cv": {
+       "description": "Engine power in metric horsepower (CV/PS).",
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "price": {
+       "description": "null means the source does not publish a price (on request).",
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "publishedAt": {
+       "description": "ISO 8601 date the listing was first seen at the source.",
+       "type": "string"
+      },
+      "sellerType": {
+       "enum": [
+        "STAND",
+        "PARTICULAR",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "slug": {
+       "description": "Stable identifier; pass to get_car_detail or find_similar_cars.",
+       "type": "string"
+      },
+      "source": {
+       "description": "Aggregator platform the listing came from; null when published directly with us.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "sourceUrl": {
+       "description": "Original listing URL at the source. Cite this alongside url.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "title": {
+       "type": "string"
+      },
+      "transmission": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "url": {
+       "description": "Canonical listing page on this market's domain.",
+       "type": "string"
+      },
+      "variant": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "year": {
+       "type": [
+        "number",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    },
+    "total": {
+     "description": "Comparables returned.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "market",
+    "reference",
+    "total",
+    "cars"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get car detail"
+  },
+  "description": "Get the complete record of one used-car listing in Portugal by its slug. Use this after search_cars when the user asks about a specific car: full description, features, photos, seller, and the original source URL to cite.",
+  "input_schema": {
+   "properties": {
+    "slug": {
+     "description": "Unique listing slug, as returned by search_cars.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_car_detail",
+  "output_schema": {
+   "properties": {
+    "body": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "color": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "condition": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "currency": {
+     "description": "ISO 4217 code of this market.",
+     "type": "string"
+    },
+    "description": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "district": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "doors": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "engineCc": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "features": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "fuel": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "km": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "make": {
+     "type": "string"
+    },
+    "model": {
+     "type": "string"
+    },
+    "origin": {
+     "description": "NACIONAL = domestic; IMPORTADO = imported.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "photos": {
+     "description": "Up to 5 image URLs.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "power_cv": {
+     "description": "Engine power in metric horsepower (CV/PS).",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "price": {
+     "description": "null means the source does not publish a price (on request).",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "publishedAt": {
+     "description": "ISO 8601 date the listing was first seen at the source.",
+     "type": "string"
+    },
+    "seats": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "sellerType": {
+     "enum": [
+      "STAND",
+      "PARTICULAR",
+      null
+     ],
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "slug": {
+     "description": "Stable identifier; pass to get_car_detail or find_similar_cars.",
+     "type": "string"
+    },
+    "source": {
+     "description": "Aggregator platform the listing came from; null when published directly with us.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "sourceUrl": {
+     "description": "Original listing URL at the source. Cite this alongside url.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "title": {
+     "type": "string"
+    },
+    "transmission": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "url": {
+     "description": "Canonical listing page on this market's domain.",
+     "type": "string"
+    },
+    "variant": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "year": {
+     "type": [
+      "number",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "slug",
+    "url",
+    "title",
+    "make",
+    "model",
+    "currency",
+    "publishedAt"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Used-car price statistics for Portugal"
+  },
+  "description": "Get price statistics for a slice of the Portugal used-car market: how many listings match, the median price, the p25–p75 range, the median price per kilometre and a breakdown by body type. Use this when the user asks what something costs, whether an asking price is fair, or how two makes compare — instead of listing individual cars. Takes the same filters as search_cars and describes exactly the set that tool would return, so the two never disagree. Reports medians and quartiles rather than averages, because car prices have a long right tail and a single luxury listing moves an average.",
+  "input_schema": {
+   "properties": {
+    "bodyType": {
+     "description": "Body style. SEDAN = berlina, HATCHBACK = citadino, COMBI = carrinha, CABRIO = descapotável, MINIVAN = monovolume.",
+     "enum": [
+      "SUV",
+      "SEDAN",
+      "HATCHBACK",
+      "COMBI",
+      "COUPE",
+      "CABRIO",
+      "MINIVAN",
+      "PICKUP"
+     ],
+     "type": "string"
+    },
+    "condition": {
+     "description": "Vehicle condition. new = 0 km / registered this year; semi_new = <2 years and <20 000 km; used = everything else.",
+     "enum": [
+      "new",
+      "used",
+      "semi_new"
+     ],
+     "type": "string"
+    },
+    "district": {
+     "description": "District or region inside the market (e.g. Lisboa, Porto, Berlin, Madrid). Matched exactly.",
+     "type": "string"
+    },
+    "fuel": {
+     "description": "Fuel type. GASOLINE = gasolina, ELECTRIC = eléctrico, HYBRID = full hybrid, PLUG_IN_HYBRID = PHEV.",
+     "enum": [
+      "GASOLINE",
+      "DIESEL",
+      "ELECTRIC",
+      "HYBRID",
+      "PLUG_IN_HYBRID",
+      "LPG"
+     ],
+     "type": "string"
+    },
+    "kmMax": {
+     "description": "Maximum kilometres on the odometer.",
+     "type": "number"
+    },
+    "make": {
+     "description": "Make slug (e.g. toyota, bmw, volkswagen). Not free text — the slug is the same in every market.",
+     "type": "string"
+    },
+    "model": {
+     "description": "Model slug (e.g. corolla, serie-3, golf). Requires `make` to disambiguate.",
+     "type": "string"
+    },
+    "priceMax": {
+     "description": "Maximum price in the market currency. Listings with no published price are excluded by either bound.",
+     "type": "number"
+    },
+    "priceMin": {
+     "description": "Minimum price in the market currency.",
+     "type": "number"
+    },
+    "yearMax": {
+     "description": "Maximum registration year.",
+     "type": "number"
+    },
+    "yearMin": {
+     "description": "Minimum registration year.",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_price_stats",
+  "output_schema": {
+   "properties": {
+    "byBodyType": {
+     "description": "Up to 6 most represented body types, each with its own median.",
+     "items": {
+      "properties": {
+       "body": {
+        "type": "string"
+       },
+       "count": {
+        "type": "number"
+       },
+       "medianPrice": {
+        "type": [
+         "number",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "body",
+       "count"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "count": {
+     "description": "Listings matching the filters, with or without a published price.",
+     "type": "number"
+    },
+    "currency": {
+     "type": "string"
+    },
+    "market": {
+     "type": "string"
+    },
+    "price": {
+     "description": "Price distribution, in percentiles. null when no matching listing publishes a price. There is deliberately no min or max: listings come from third-party sources and the extremes are set by data errors, not by the market.",
+     "properties": {
+      "median": {
+       "description": "The typical price — use this to answer 'how much'.",
+       "type": "number"
+      },
+      "p10": {
+       "description": "The bottom of the market: 10% of listings are cheaper.",
+       "type": "number"
+      },
+      "p25": {
+       "description": "A quarter of listings are priced below this.",
+       "type": "number"
+      },
+      "p75": {
+       "description": "A quarter of listings are priced above this.",
+       "type": "number"
+      },
+      "p90": {
+       "description": "The top of the market: 10% of listings are dearer.",
+       "type": "number"
+      }
+     },
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "pricePerKmMedian": {
+     "description": "Median price per kilometre on the odometer, in the listing currency (order of magnitude 0.05–3). Small = the car has done a lot for its price.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "priced": {
+     "description": "Subset with a published price — the base of every figure below. A large gap to `count` means many listings in this slice are 'price on request'.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "market",
+    "currency",
+    "count",
+    "priced",
+    "byBodyType"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search articles"
+  },
+  "description": "Search editorial articles about the used-car market in Portugal: buying guides, reviews, comparisons and market analysis. Use this when the user asks how something works — financing, warranty, IUC, IPO/ITV, the buying process — rather than asking for listings.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Article category.",
+     "enum": [
+      "GUIA",
+      "REVIEW",
+      "COMPARATIVO",
+      "MERCADO",
+      "GLOSSARIO",
+      "NOTICIA"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Maximum number of results (default 5, max 10).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_articles",
+  "output_schema": {
+   "properties": {
+    "articles": {
+     "items": {
+      "properties": {
+       "category": {
+        "type": "string"
+       },
+       "dek": {
+        "type": "string"
+       },
+       "slug": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "slug",
+       "title",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "articles"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search used cars in Portugal"
+  },
+  "description": "Search current used-car listings for sale in Portugal. Use this whenever the user wants to find, compare or explore cars — by make, model, budget, mileage, fuel or district. Returns price, mileage, fuel, body and a citable listing URL, plus `total`: the exact number of listings matching the filters, which makes this tool usable to answer 'how many' questions. Listings are aggregated from stands and portals and refreshed daily; each result carries `publishedAt`. Prefer the broadest filters that answer the question and report `total` as a floor, not a census.",
+  "input_schema": {
+   "properties": {
+    "bodyType": {
+     "description": "Body style. SEDAN = berlina, HATCHBACK = citadino, COMBI = carrinha, CABRIO = descapotável, MINIVAN = monovolume.",
+     "enum": [
+      "SUV",
+      "SEDAN",
+      "HATCHBACK",
+      "COMBI",
+      "COUPE",
+      "CABRIO",
+      "MINIVAN",
+      "PICKUP"
+     ],
+     "type": "string"
+    },
+    "condition": {
+     "description": "Vehicle condition. new = 0 km / registered this year; semi_new = <2 years and <20 000 km; used = everything else.",
+     "enum": [
+      "new",
+      "used",
+      "semi_new"
+     ],
+     "type": "string"
+    },
+    "district": {
+     "description": "District or region inside the market (e.g. Lisboa, Porto, Berlin, Madrid). Matched exactly.",
+     "type": "string"
+    },
+    "fuel": {
+     "description": "Fuel type. GASOLINE = gasolina, ELECTRIC = eléctrico, HYBRID = full hybrid, PLUG_IN_HYBRID = PHEV.",
+     "enum": [
+      "GASOLINE",
+      "DIESEL",
+      "ELECTRIC",
+      "HYBRID",
+      "PLUG_IN_HYBRID",
+      "LPG"
+     ],
+     "type": "string"
+    },
+    "kmMax": {
+     "description": "Maximum kilometres on the odometer.",
+     "type": "number"
+    },
+    "limit": {
+     "description": "Results per page (default 10, max 20).",
+     "type": "number"
+    },
+    "make": {
+     "description": "Make slug (e.g. toyota, bmw, volkswagen). Not free text — the slug is the same in every market.",
+     "type": "string"
+    },
+    "model": {
+     "description": "Model slug (e.g. corolla, serie-3, golf). Requires `make` to disambiguate.",
+     "type": "string"
+    },
+    "page": {
+     "description": "1-based page number. Use with `total` to walk a large result set.",
+     "type": "number"
+    },
+    "priceMax": {
+     "description": "Maximum price in the market currency. Listings with no published price are excluded by either bound.",
+     "type": "number"
+    },
+    "priceMin": {
+     "description": "Minimum price in the market currency.",
+     "type": "number"
+    },
+    "sort": {
+     "description": "Result order. Default `recent` (most recently seen first).",
+     "enum": [
+      "recent",
+      "price_asc",
+      "price_desc",
+      "km_asc",
+      "year_desc"
+     ],
+     "type": "string"
+    },
+    "yearMax": {
+     "description": "Maximum registration year.",
+     "type": "number"
+    },
+    "yearMin": {
+     "description": "Minimum registration year.",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_cars",
+  "output_schema": {
+   "properties": {
+    "cars": {
+     "items": {
+      "properties": {
+       "body": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "condition": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "currency": {
+        "description": "ISO 4217 code of this market.",
+        "type": "string"
+       },
+       "district": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "fuel": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "km": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "make": {
+        "type": "string"
+       },
+       "model": {
+        "type": "string"
+       },
+       "power_cv": {
+        "description": "Engine power in metric horsepower (CV/PS).",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "price": {
+        "description": "null means the source does not publish a price (on request).",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "publishedAt": {
+        "description": "ISO 8601 date the listing was first seen at the source.",
+        "type": "string"
+       },
+       "sellerType": {
+        "enum": [
+         "STAND",
+         "PARTICULAR",
+         null
+        ],
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "slug": {
+        "description": "Stable identifier; pass to get_car_detail or find_similar_cars.",
+        "type": "string"
+       },
+       "source": {
+        "description": "Aggregator platform the listing came from; null when published directly with us.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "sourceUrl": {
+        "description": "Original listing URL at the source. Cite this alongside url.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "transmission": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "description": "Canonical listing page on this market's domain.",
+        "type": "string"
+       },
+       "variant": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "year": {
+        "type": [
+         "number",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "slug",
+       "url",
+       "title",
+       "make",
+       "model",
+       "currency",
+       "publishedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "currency": {
+     "type": "string"
+    },
+    "hasMore": {
+     "type": "boolean"
+    },
+    "market": {
+     "description": "ISO country code of this market.",
+     "type": "string"
+    },
+    "page": {
+     "type": "number"
+    },
+    "pageSize": {
+     "type": "number"
+    },
+    "shown": {
+     "type": "number"
+    },
+    "total": {
+     "description": "Exact number of listings in this market matching the filters, across all pages.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "market",
+    "currency",
+    "total",
+    "page",
+    "hasMore",
+    "cars"
+   ],
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search cars by description in Portugal"
+  },
+  "description": "Search Portugal listings by describing the car in plain language, matched against listing text by meaning rather than keywords. Use this for wants that are not filter fields — 'a family SUV good in the snow', 'a low-mileage hybrid for the city', 'a used 4x4 to restore'. Prefer search_cars for entirely structural queries (make/model/budget); use this when the request is descriptive. Combine both by passing structural filters here too — they act as hard constraints while the description only ranks. Results are ordered by relevance, so `total` is the number matching the structural filters, not the number that fit the description.",
+  "input_schema": {
+   "properties": {
+    "bodyType": {
+     "description": "Body style. SEDAN = berlina, HATCHBACK = citadino, COMBI = carrinha, CABRIO = descapotável, MINIVAN = monovolume.",
+     "enum": [
+      "SUV",
+      "SEDAN",
+      "HATCHBACK",
+      "COMBI",
+      "COUPE",
+      "CABRIO",
+      "MINIVAN",
+      "PICKUP"
+     ],
+     "type": "string"
+    },
+    "description": {
+     "description": "What the user is looking for, in their own words. Full phrases work better than keywords. Pass the qualities here and the hard limits in the other arguments.",
+     "type": "string"
+    },
+    "fuel": {
+     "description": "Fuel type. GASOLINE = gasolina, ELECTRIC = eléctrico, HYBRID = full hybrid, PLUG_IN_HYBRID = PHEV.",
+     "enum": [
+      "GASOLINE",
+      "DIESEL",
+      "ELECTRIC",
+      "HYBRID",
+      "PLUG_IN_HYBRID",
+      "LPG"
+     ],
+     "type": "string"
+    },
+    "kmMax": {
+     "description": "Maximum kilometres on the odometer.",
+     "type": "number"
+    },
+    "limit": {
+     "description": "Maximum number of results (default 10, max 20).",
+     "type": "number"
+    },
+    "make": {
+     "description": "Make slug (e.g. toyota, bmw, volkswagen). Not free text — the slug is the same in every market.",
+     "type": "string"
+    },
+    "priceMax": {
+     "description": "Maximum price in the market currency. Listings with no published price are excluded by either bound.",
+     "type": "number"
+    },
+    "yearMin": {
+     "description": "Minimum registration year.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "description"
+   ],
+   "type": "object"
+  },
+  "name": "search_cars_by_description",
+  "output_schema": {
+   "properties": {
+    "cars": {
+     "description": "Ordered by relevance to the description, most relevant first.",
+     "items": {
+      "properties": {
+       "body": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "condition": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "currency": {
+        "description": "ISO 4217 code of this market.",
+        "type": "string"
+       },
+       "district": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "fuel": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "km": {
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "make": {
+        "type": "string"
+       },
+       "model": {
+        "type": "string"
+       },
+       "power_cv": {
+        "description": "Engine power in metric horsepower (CV/PS).",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "price": {
+        "description": "null means the source does not publish a price (on request).",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "publishedAt": {
+        "description": "ISO 8601 date the listing was first seen at the source.",
+        "type": "string"
+       },
+       "sellerType": {
+        "enum": [
+         "STAND",
+         "PARTICULAR",
+         null
+        ],
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "slug": {
+        "description": "Stable identifier; pass to get_car_detail or find_similar_cars.",
+        "type": "string"
+       },
+       "source": {
+        "description": "Aggregator platform the listing came from; null when published directly with us.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "sourceUrl": {
+        "description": "Original listing URL at the source. Cite this alongside url.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "title": {
+        "type": "string"
+       },
+       "transmission": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "description": "Canonical listing page on this market's domain.",
+        "type": "string"
+       },
+       "variant": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "year": {
+        "type": [
+         "number",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "slug",
+       "url",
+       "title",
+       "make",
+       "model",
+       "currency",
+       "publishedAt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "currency": {
+     "type": "string"
+    },
+    "market": {
+     "type": "string"
+    },
+    "shown": {
+     "type": "number"
+    },
+    "total": {
+     "description": "Listings matching the structural filters. The description narrows the ranking, not this count.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "market",
+    "total",
+    "shown",
+    "cars"
+   ],
+   "type": "object"
+  }
+ }
+]

@@ -1,0 +1,151 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Карточка события"
+  },
+  "description": "Полная карточка события по id из адреса design-events.fun/event/<id> (или по самому адресу): описание (текст организатора, обрезан до 3000 знаков), время в поясе события, город, формат, направления, ссылка на карточку и на регистрацию, площадка и организатор именами, если подтверждены. У прошедшего события past: true — карточка остаётся архивной страницей.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "id события, как в url карточки.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_event",
+  "output_schema": {},
+  "title": "Карточка события"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Направления афиши"
+  },
+  "description": "Направления (темы) афиши: slug для search_events.directions, название и страница направления на сайте.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_directions",
+  "output_schema": {},
+  "title": "Направления афиши"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Личный план на неделю (Pro)"
+  },
+  "description": "Pro, ранний доступ: личный недельный план по интересам и городу. Pro ещё не открыт — инструмент отвечает ссылкой на заявку. Не обещайте пользователю готовый план из этого инструмента; соберите его сами через search_events.",
+  "input_schema": {
+   "properties": {
+    "city": {
+     "type": "string"
+    },
+    "interests": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "plan_my_week",
+  "output_schema": {},
+  "title": "Личный план на неделю (Pro, ранний доступ)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Найти события"
+  },
+  "description": "События афиши в окне дат: город, онлайн или офлайн, направление, формат, поиск по тексту. Окно по умолчанию — 7 дней с сегодняшнего дня по Москве; задан только date_from — 7 дней от него; только date_to — с сегодня до date_to. Подставленные даты перечислены в applied_filters.defaulted_dates. Отбор — по пересечению интервала события с окном; сначала события, начинающиеся в окне (по началу), затем длящиеся — выставки и т. п. (по дате окончания). Серии — одной карточкой. По умолчанию отдаются только будущие и идущие события; прошедшие (past: true) — только если окно начинается раньше сегодняшнего дня по Москве (не глубже 60 дней). Ответ: краткие карточки (полное описание отдаёт get_event), total, next_cursor для следующей страницы, data_freshness. Если data_freshness = «резервная копия», живой список не прочитался и части событий может не быть — скажите об этом пользователю. Цен и статуса регистрации в данных нет.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "city": {
+     "description": "Город, без регистра; «Питер», «СПб» → Санкт-Петербург.",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "next_cursor из предыдущего ответа, с теми же фильтрами.",
+     "type": "string"
+    },
+    "date_from": {
+     "description": "Начало окна, YYYY-MM-DD, по Москве, включительно; по умолчанию сегодня. Не раньше 60 дней назад.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "date_to": {
+     "description": "Конец окна, YYYY-MM-DD, по Москве, включительно; по умолчанию date_from + 6 дней. Окно не больше 92 дней.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "directions": {
+     "description": "Направления, любое из: ux, ai, brand, marketing, business, typography, books, vibecoding, gamedev, art-direction, illustration, collage, photography, visualization, video, architecture, product-design, fashion, craft, networking, career, creative, art. Названия — в list_directions.",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 10,
+     "type": "array"
+    },
+    "format": {
+     "description": "Формат, точное значение: Выставка, Лекция, Воркшоп / мастер-класс, Конференция, Фестиваль, Экскурсия, Митап, Дискуссия, Кинопоказ, Интенсив, Презентация, Маркет, Хакатон, День открытых дверей, Конкурс, Челлендж, Перформанс.",
+     "type": "string"
+    },
+    "include_ongoing": {
+     "default": true,
+     "description": "Включать события, начавшиеся до окна и ещё идущие.",
+     "type": "boolean"
+    },
+    "include_online": {
+     "default": true,
+     "description": "При заданном городе добавлять онлайн-события.",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "mode": {
+     "description": "Только офлайн или только онлайн.",
+     "enum": [
+      "offline",
+      "online"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "description": "Подстрока в заголовке или описании, без регистра.",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_events",
+  "output_schema": {},
+  "title": "Найти события"
+ }
+]

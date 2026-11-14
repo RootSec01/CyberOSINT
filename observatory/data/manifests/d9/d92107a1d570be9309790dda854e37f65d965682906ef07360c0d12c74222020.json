@@ -1,0 +1,256 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Conferir área atendida"
+  },
+  "description": "Diz se um município está na área atendida pela CSolar Energia para instalação de energia solar. A área atendida é o estado de São Paulo (645 municípios). Informe o município e, se souber, a UF. Não pede nem guarda dados pessoais.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cidade": {
+     "description": "Nome do município, por exemplo Sorocaba.",
+     "maxLength": 80,
+     "minLength": 2,
+     "type": "string"
+    },
+    "uf": {
+     "description": "UF do município, opcional (ex.: SP). Ajuda quando há municípios com o mesmo nome em outros estados.",
+     "maxLength": 2,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "cidade"
+   ],
+   "type": "object"
+  },
+  "name": "check_service_area",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "area_atendida": {
+     "type": "string"
+    },
+    "fale_com_a_csolar": {
+     "description": "Contato com a equipe; null quando é de fora da área.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "mensagem": {
+     "type": "string"
+    },
+    "municipio": {
+     "description": "Nome oficial do município, quando está na lista do site.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "saiba_mais": {
+     "description": "Página do município no site, quando está na área atendida.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "situacao": {
+     "enum": [
+      "atendida",
+      "fora_da_area",
+      "nao_sei"
+     ],
+     "type": "string"
+    },
+    "uf": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "situacao",
+    "municipio",
+    "uf",
+    "area_atendida",
+    "mensagem",
+    "saiba_mais",
+    "fale_com_a_csolar"
+   ],
+   "type": "object"
+  },
+  "title": "Conferir área atendida"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Estimar sistema de energia solar"
+  },
+  "description": "Estima um sistema de energia solar com microinversores a partir do consumo mensal em kWh ou do valor mensal da conta de luz em reais. Devolve potência em kWp, número de módulos, geração mensal, economia mensal, preço instalado e tempo de retorno, pela tabela de preços da CSolar Energia (setembro/2026). O cálculo usa a irradiação da região de Sorocaba/SP; fora da área atendida (estado de São Paulo), os números são só referência. É estimativa, não orçamento. Não pede nem guarda dados pessoais.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cidade": {
+     "description": "Município da instalação, opcional. Não muda o cálculo; serve para dizer se fica na área atendida.",
+     "maxLength": 80,
+     "minLength": 2,
+     "type": "string"
+    },
+    "consumo_kwh_mes": {
+     "description": "Consumo mensal de energia em kWh, como aparece na conta de luz. Aceito de 50 a 20.000 kWh.",
+     "exclusiveMinimum": 0,
+     "maximum": 1000000,
+     "type": "number"
+    },
+    "uf": {
+     "description": "UF do município, opcional (ex.: SP).",
+     "maxLength": 2,
+     "minLength": 2,
+     "type": "string"
+    },
+    "valor_conta_mes": {
+     "description": "Valor mensal da conta de luz em reais. Use quando não souber o consumo em kWh.",
+     "exclusiveMinimum": 0,
+     "maximum": 1000000,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "estimate_solar_system",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "area": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "municipio": {
+         "description": "Nome oficial do município, quando está na lista do site.",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "situacao": {
+         "enum": [
+          "atendida",
+          "fora_da_area",
+          "nao_sei"
+         ],
+         "type": "string"
+        },
+        "uf": {
+         "type": [
+          "string",
+          "null"
+         ]
+        }
+       },
+       "required": [
+        "situacao",
+        "municipio",
+        "uf"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Situação do município informado; null quando não veio cidade."
+    },
+    "aviso": {
+     "type": "string"
+    },
+    "base_do_calculo": {
+     "type": "string"
+    },
+    "consumo_calculado_pela_conta": {
+     "description": "true quando o consumo veio do valor da conta.",
+     "type": "boolean"
+    },
+    "consumo_kwh_mes": {
+     "description": "Consumo usado no cálculo, em kWh por mês.",
+     "type": "number"
+    },
+    "economia_mensal_reais": {
+     "type": "number"
+    },
+    "fale_com_a_csolar": {
+     "description": "Contato com a equipe; null quando o município é de fora da área.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "geracao_mensal_kwh": {
+     "type": "number"
+    },
+    "modulos": {
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "potencia_do_modulo_w": {
+     "maximum": 9007199254740991,
+     "minimum": -9007199254740991,
+     "type": "integer"
+    },
+    "potencia_kwp": {
+     "type": "number"
+    },
+    "preco_instalado_reais": {
+     "description": "Preço do sistema instalado, pela tabela da CSolar.",
+     "type": "number"
+    },
+    "retorno_anos": {
+     "description": "Tempo aproximado para a economia pagar o sistema.",
+     "type": "number"
+    },
+    "saiba_mais": {
+     "description": "Página do site sobre preço de energia solar.",
+     "type": "string"
+    },
+    "tabela_de_precos": {
+     "type": "string"
+    },
+    "tarifa_reais_por_kwh": {
+     "description": "Tarifa usada para converter a conta em consumo.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "consumo_kwh_mes",
+    "consumo_calculado_pela_conta",
+    "tarifa_reais_por_kwh",
+    "potencia_kwp",
+    "modulos",
+    "potencia_do_modulo_w",
+    "geracao_mensal_kwh",
+    "economia_mensal_reais",
+    "preco_instalado_reais",
+    "retorno_anos",
+    "tabela_de_precos",
+    "base_do_calculo",
+    "area",
+    "aviso",
+    "saiba_mais",
+    "fale_com_a_csolar"
+   ],
+   "type": "object"
+  },
+  "title": "Estimar sistema de energia solar"
+ }
+]

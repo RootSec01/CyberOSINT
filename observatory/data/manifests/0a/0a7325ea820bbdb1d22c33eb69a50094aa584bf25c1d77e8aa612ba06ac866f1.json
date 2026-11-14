@@ -1,0 +1,144 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Details van een merk of product"
+  },
+  "description": "De details van een zoekresultaat, op zijn `id`. Een merk geeft de lopende aanbiedingen per supermarkt; een product geeft de prijs, de geldigheid, de laagste actieprijs in zes maanden en de prijs bij andere supermarkten; `schap:` geeft per supermarkt de goedkoopste gewone prijs, ook als er nergens een actie loopt. Altijd met de link naar de pagina.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "title": "fetchArguments",
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "metadata": {
+     "additionalProperties": true,
+     "title": "Metadata",
+     "type": "object"
+    },
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "title",
+    "text",
+    "url",
+    "metadata"
+   ],
+   "title": "Document",
+   "type": "object"
+  },
+  "title": "Details van een merk of product"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Zoek een merk of product"
+  },
+  "description": "Zoek een product of merk bij de supermarkt op naam (bijvoorbeeld 'oatly barista' of 'calvé pindakaas'). Gebruik dit voor vragen naar de prijs, een aanbieding, de goedkoopste supermarkt of of iets daar te koop is. Geeft een merkpagina, de gewone prijzen per supermarkt en productresultaten (verdeeld over de supermarkten) met maat, actieprijs, de prijs vóór de actie en de prijs per eenheid; elk resultaat heeft een `id` voor de details. De productnamen staan in de taal van die winkel, en de zoekfunctie vindt alleen woorden in die taal: Nederlands op www.prijsprofeet.nl en www.prijsprofeet.be ('peanut butter' heet daar 'pindakaas'), Duits op www.prijsprofeet.de ('peanut butter' heet daar 'Erdnussbutter'). Elk connectoradres hoort bij één land: www.prijsprofeet.nl geeft Nederlandse supermarkten, www.prijsprofeet.be Belgische en www.prijsprofeet.de Duitse. De gegevens zijn van PrijsProfeet, en de voorwaarden vragen bij elk gebruik een bronvermelding: PrijsProfeet met de url van elk genoemd product of merk. De prijzen worden elke nacht bijgewerkt, niet wekelijks, en de pagina toont de actuele stand.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "searchArguments",
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {
+   "$defs": {
+    "SearchResult": {
+     "properties": {
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "title": {
+       "title": "Title",
+       "type": "string"
+      },
+      "url": {
+       "title": "Url",
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "title",
+      "url"
+     ],
+     "title": "SearchResult",
+     "type": "object"
+    }
+   },
+   "properties": {
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Notice"
+    },
+    "results": {
+     "items": {
+      "$ref": "#/$defs/SearchResult"
+     },
+     "title": "Results",
+     "type": "array"
+    },
+    "source": {
+     "title": "Source",
+     "type": "string"
+    }
+   },
+   "required": [
+    "results",
+    "source"
+   ],
+   "title": "SearchResults",
+   "type": "object"
+  },
+  "title": "Zoek een merk of product"
+ }
+]

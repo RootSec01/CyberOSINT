@@ -1,0 +1,3959 @@
+[
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Statutory filing deadlines for a company"
+  },
+  "description": "Give the next occurrence of each statutory filing deadline a company faces.\n\n`country=\"NO\"` covers the Norwegian calendar (Regnskapsregisteret, Skatteetaten) for a\ncompany looked up by organisasjonsnummer (orgnr, org.nr) in Brønnøysundregistrene /\nEnhetsregisteret (brreg): årsregnskap, generalforsamling, skattemelding,\naksjonærregisteroppgaven, mva-melding, a-melding. `country=\"GB\"` covers the two\nCompanies House obligations for a company number (CRN): the annual accounts filing and\nthe confirmation statement (CS01). `country=\"SE\"` covers the two Swedish obligations of\nan aktiebolag (AB) or ekonomisk förening (EK) looked up by organisationsnummer at\nBolagsverket: the ordinary general meeting (ordinarie bolagsstämma / årsstämma) at six\nmonths from the financial year end, and the annual report (årsredovisning) at seven,\nwhere the late-filing fee (förseningsavgift) begins.\n\nPass `today` (`YYYY-MM-DD`) for a reproducible answer; it defaults to the server's\ncurrent UTC date. Quote `due_date`, not `statutory_date`, and quote each deadline's\n`applies_because` rather than presenting a date as unconditional fact — that sentence\ncarries the legal form or flag the date rests on, its statute, any assumption still in\nit, and for the UK whether it is Companies House's own figure or one computed here.\n`days_until` goes negative for a filing Companies House still shows as overdue. Swedish\ndates assume a financial year ending 31 December unless you pass `include=[\"filings\"]`,\nwhich substitutes the year end of the last filed annual report where Bolagsverket's\ndocument list holds one; the filing date is an outer limit regardless, since a company\nwhose general meeting was earlier must file earlier. An empty `deadlines` list is a real\nanswer — a bankrupt, deleted or compulsorily-liquidated entity, a branch/sub-unit, or\nany company whose status is not active — and `notes` explains why.\n`registry://rules/{country}` carries each country's full deadline rules, roll-forward\ntreatment and legal sources. `rules_last_reviewed` names the date this country's\nstatutes and day-count arithmetic were last checked against the law — a deadline\ncomputed long after that date should be re-verified before anyone acts on it.\n\nErrors are the `{\"error\": {\"code\", \"message\", \"hint\"}}` envelope this server's\ninstructions set out code by code; `hint` names the next call. This tool looks the\nentity up first, so any `lookup_company` error code can surface here too.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "default": "NO",
+     "description": "ISO-3166-1 alpha-2 — NO Norway, GB United Kingdom, SE Sweden. UK is not a country code here and is rejected. Call list_countries for the live set.",
+     "type": "string"
+    },
+    "id": {
+     "description": "The company's national identifier, normalised for you — a Norwegian organisasjonsnummer (orgnr), a Companies House company number (CRN), or a Swedish organisationsnummer or personnummer. Spaces, dots, hyphens, a NO...MVA suffix and a short CRN are accepted; list_countries gives each country's exact shape.",
+     "examples": [
+      "923609016",
+      "00445790"
+     ],
+     "type": "string"
+    },
+    "include": {
+     "default": [],
+     "description": "Attachment names that can change a *computed* deadline — narrower than lookup_company's include. Today only 'filings': one extra upstream request for the entity's filing history, supplying a real financial year end where 31 December would otherwise be assumed. Empty by default; Norway and the United Kingdom accept it and it changes nothing for them today. Any other value — including one lookup_company accepts, such as 'charges' — is a bad_request naming this tool's allowed set.",
+     "examples": [
+      [
+       "filings"
+      ],
+      []
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "today": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Date to compute deadlines from, YYYY-MM-DD; defaults to the server's current UTC date. Anything else is a bad_request naming the format.",
+     "examples": [
+      "2026-10-01"
+     ]
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "company_deadlines",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "The answer to \"what must this company file, and by when?\".\n\nThis is the **only** shape the deadlines operation returns, on both\nsurfaces (``DECISIONS.md`` D-010): REST\n``GET /v1/{country}/company/{id}/deadlines`` and the MCP tool\n``company_deadlines`` each emit ``model_dump(mode=\"json\")`` of this model,\nunchanged. Neither surface may return a bare ``list[Deadline]``, because a\nlist has nowhere to put ``today`` or ``notes`` — and an empty list without\na note is indistinguishable from a bug.\n\nBuild it with ``Registry.deadline_report(report, today)``; do not construct\nit in a surface.",
+   "properties": {
+    "company_id": {
+     "description": "Canonical national identifier the deadlines were computed for.",
+     "title": "Company Id",
+     "type": "string"
+    },
+    "company_name": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Registered name, so the caller can echo it back to a user.",
+     "title": "Company Name"
+    },
+    "country": {
+     "description": "ISO-3166-1 alpha-2, upper-case.",
+     "title": "Country",
+     "type": "string"
+    },
+    "deadlines": {
+     "description": "One entry per obligation kind, always the next occurrence, sorted by due_date. An empty list is a real answer, not an error — read `notes` for why.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One filing obligation with a concrete calendar date.\n\nDeadlines are *computed*, never fetched: a registry module derives them\nfrom the entity's legal form and status plus a ``today`` parameter, so the\nsame input always produces the same output and tests are deterministic.\n\n``due_date`` is always the date the caller should act on; ``statutory_date``\nis the date the statute names before any weekend/holiday roll-forward.",
+      "properties": {
+       "applies_because": {
+        "description": "One sentence an agent can quote to the user explaining why this deadline applies to this company, including any assumption made.",
+        "title": "Applies Because",
+        "type": "string"
+       },
+       "authority": {
+        "description": "Who receives the filing, e.g. 'Regnskapsregisteret', 'Skatteetaten'.",
+        "title": "Authority",
+        "type": "string"
+       },
+       "country": {
+        "description": "ISO-3166-1 alpha-2, upper-case.",
+        "title": "Country",
+        "type": "string"
+       },
+       "days_until": {
+        "anyOf": [
+         {
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "due_date minus the `today` the calculation was run with. Negative = overdue.",
+        "title": "Days Until"
+       },
+       "due_date": {
+        "description": "The date the caller must actually file by (statutory date rolled forward).",
+        "format": "date",
+        "title": "Due Date",
+        "type": "string"
+       },
+       "kind": {
+        "description": "Stable machine slug for the obligation, e.g. 'annual_accounts', 'tax_return', 'vat_return', 'shareholder_register_statement'. Unique within a country.",
+        "title": "Kind",
+        "type": "string"
+       },
+       "local_name": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "The name a local accountant would use, e.g. 'Årsregnskap'.",
+        "title": "Local Name"
+       },
+       "mandatory": {
+        "default": true,
+        "description": "True when the obligation follows from the legal form alone. False when it depends on facts we cannot see (e.g. VAT turnover threshold) — in that case applies_because explains the assumption.",
+        "title": "Mandatory",
+        "type": "boolean"
+       },
+       "name": {
+        "description": "Short English label, e.g. 'Annual accounts filing'.",
+        "title": "Name",
+        "type": "string"
+       },
+       "period_end": {
+        "anyOf": [
+         {
+          "format": "date",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Last day of the covered period.",
+        "title": "Period End"
+       },
+       "period_label": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Which period this filing covers, e.g. '2025' or '2026 term 3 (May–Jun)'.",
+        "title": "Period Label"
+       },
+       "period_start": {
+        "anyOf": [
+         {
+          "format": "date",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "First day of the covered period.",
+        "title": "Period Start"
+       },
+       "recurrence": {
+        "default": "annual",
+        "description": "How often the obligation repeats.",
+        "enum": [
+         "annual",
+         "bimonthly",
+         "quarterly",
+         "monthly",
+         "one_off"
+        ],
+        "title": "DeadlineRecurrence",
+        "type": "string"
+       },
+       "registry": {
+        "description": "Registry slug that produced this deadline.",
+        "title": "Registry",
+        "type": "string"
+       },
+       "rolled_forward": {
+        "default": false,
+        "description": "True when due_date differs from statutory_date because of a non-working day.",
+        "title": "Rolled Forward",
+        "type": "boolean"
+       },
+       "source_url": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Authoritative page describing the obligation.",
+        "title": "Source Url"
+       },
+       "statutory_date": {
+        "description": "The date named by law, before weekend/holiday roll-forward.",
+        "format": "date",
+        "title": "Statutory Date",
+        "type": "string"
+       }
+      },
+      "required": [
+       "country",
+       "registry",
+       "kind",
+       "name",
+       "authority",
+       "statutory_date",
+       "due_date",
+       "applies_because"
+      ],
+      "title": "Deadline",
+      "type": "object"
+     },
+     "title": "Deadlines",
+     "type": "array"
+    },
+    "notes": {
+     "description": "Caveats to surface to the user, carried over from the company report: why the list is empty, an unclassified legal form, a status that suspends filing.",
+     "items": {
+      "type": "string"
+     },
+     "title": "Notes",
+     "type": "array"
+    },
+    "registry": {
+     "description": "Registry slug, e.g. 'brreg'.",
+     "title": "Registry",
+     "type": "string"
+    },
+    "rules_last_reviewed": {
+     "description": "The date this country's deadline rules — the statutes and their day-count arithmetic — were last checked against the law; a deadline computed long after this date should be re-verified before anyone acts on it.",
+     "format": "date",
+     "title": "Rules Last Reviewed",
+     "type": "string"
+    },
+    "today": {
+     "description": "The date 'next occurrence' was computed from, inclusive. Echoed back so the answer is reproducible and an agent can tell a cached answer from a fresh one.",
+     "format": "date",
+     "title": "Today",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country",
+    "registry",
+    "company_id",
+    "today",
+    "rules_last_reviewed"
+   ],
+   "title": "DeadlineReport",
+   "type": "object"
+  },
+  "title": "Statutory filing deadlines for a company"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Fetch one company record (ChatGPT connector alias for lookup_company)"
+  },
+  "description": "ChatGPT connector alias; other clients should prefer `lookup_company` plus\n`company_deadlines`, which return the CompanyReport and DeadlineReport shapes directly.\nTakes one `id` from `search` — \"{COUNTRY}:{identifier}\", e.g. \"NO:923609016\" — and\nreturns that company's register record and statutory filing deadlines as readable text,\nboth full JSON documents in `metadata`.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "An `id` from a `search` result: '{COUNTRY}:{identifier}', e.g. 'NO:923609016' or 'GB:00445790'.",
+     "examples": [
+      "NO:923609016",
+      "GB:00445790"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "The whole `fetch` response. `text` is a Markdown rendering (§2 of the spec);\n`metadata` carries the full `CompanyReport`/`DeadlineReport` JSON plus flat scalars.",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "metadata": {
+     "additionalProperties": true,
+     "title": "Metadata",
+     "type": "object"
+    },
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "title",
+    "text",
+    "url"
+   ],
+   "title": "ConnectorDocument",
+   "type": "object"
+  },
+  "title": "Fetch one company record (ChatGPT connector alias for lookup_company)"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List supported national company registries"
+  },
+  "description": "List every national company registry this service can answer for right now, with each\none's identifier scheme, source URL, licence, `supported_includes`, and whether the\nupstream register needs a credential (`requires_api_key`, `api_key_env`).\n\nCall it before your first lookup in a country you have not used here, whenever a user\nnames a country you are unsure of, or before guessing an `include` value — never\nhard-code a country list of your own, since it grows as modules are added. Stub modules\nare hidden; only registries that actually answer are listed. No error mode.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_countries",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "The answer to \"which countries can you answer for?\".\n\nThe only shape the discovery operation returns, on both surfaces\n(``DECISIONS.md`` D-012): REST ``GET /v1/countries`` and the MCP tool\n``list_countries``. Before D-012 each surface re-derived this envelope from\n``Registry.describe()`` on its own, which is how the two could have drifted\n— REST validated the dict through a private model that silently *dropped* an\nunrecognised key while MCP passed the raw dict through and *kept* it.",
+   "properties": {
+    "countries": {
+     "description": "One row per registry that can answer right now, sorted by country code.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One supported country/registry pair, as returned by the discovery operation.\n\nBuilt by ``Registry.country_info()`` from the class attributes of a\n:class:`~registry_mcp.core.registry.Registry` subclass — the same nine\nvalues ``Registry.describe()`` has always emitted, now with a type\n(``DECISIONS.md`` D-012).\n\nThis is the country-neutral half of the contract even though its *values*\nname a country: it carries no report data, so unlike every other returned\nmodel it is a row *about* a registry rather than a document *from* one.",
+      "properties": {
+       "api_key_env": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Name of the environment variable holding that credential, e.g. 'COMPANIES_HOUSE_API_KEY'. None when no key is needed. Never the key itself.",
+        "title": "Api Key Env"
+       },
+       "country": {
+        "description": "ISO-3166-1 alpha-2, upper-case, e.g. 'NO'.",
+        "title": "Country",
+        "type": "string"
+       },
+       "id_description": {
+        "description": "One sentence describing the identifier's format.",
+        "title": "Id Description",
+        "type": "string"
+       },
+       "id_example": {
+        "description": "A real, valid identifier the caller can use to smoke-test the service.",
+        "title": "Id Example",
+        "type": "string"
+       },
+       "id_scheme": {
+        "description": "What the national identifier is called locally, e.g. 'organisasjonsnummer'.",
+        "title": "Id Scheme",
+        "type": "string"
+       },
+       "is_stub": {
+        "default": false,
+        "description": "True for example/template modules, which are hidden from the public list unless stubs are explicitly requested.",
+        "title": "Is Stub",
+        "type": "boolean"
+       },
+       "license": {
+        "description": "Licence of the upstream data, e.g. 'NLOD 2.0'.",
+        "title": "License",
+        "type": "string"
+       },
+       "name": {
+        "description": "Human-readable register name.",
+        "title": "Name",
+        "type": "string"
+       },
+       "registry": {
+        "description": "Registry slug, e.g. 'brreg'.",
+        "title": "Registry",
+        "type": "string"
+       },
+       "requires_api_key": {
+        "default": false,
+        "description": "True when this registry's upstream API needs a credential the operator must supply. A self-hosted deployment that has not set it gets upstream_error on every call to this country (DECISIONS.md D-017).",
+        "title": "Requires Api Key",
+        "type": "boolean"
+       },
+       "source_url": {
+        "description": "Base URL of the upstream registry API, for citation.",
+        "title": "Source Url",
+        "type": "string"
+       },
+       "supported_includes": {
+        "description": "Attachment names this registry declares — the closed set of valid values for `include=[…]` on `lookup_company`, sorted. Empty when this registry offers no attachments today. Lets an agent discover what more it can ask for before it asks (DECISIONS.md D-042(d)); an `include` value outside this list raises `bad_request` naming this same set, never a silently empty block.",
+        "items": {
+         "type": "string"
+        },
+        "title": "Supported Includes",
+        "type": "array"
+       }
+      },
+      "required": [
+       "country",
+       "registry",
+       "name",
+       "id_scheme",
+       "id_example",
+       "id_description",
+       "source_url",
+       "license"
+      ],
+      "title": "CountryInfo",
+      "type": "object"
+     },
+     "title": "Countries",
+     "type": "array"
+    }
+   },
+   "title": "CountriesResponse",
+   "type": "object"
+  },
+  "title": "List supported national company registries"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Look up a company in a national business register"
+  },
+  "description": "Look up a company by its national identifier and get the full CompanyReport — legal\nform, status, address, VAT registration where the register publishes it, board and\naccounts duties, employees, and more.\n\n`country=\"NO\"` is the norway company lookup for the norwegian business registry:\nBrønnøysundregistrene / Enhetsregisteret (brreg), by organisasjonsnummer (orgnr,\norg.nr). `country=\"GB\"` is the uk company lookup at Companies House, by company number\n(company registration number, CRN) — \"UK\" is not a country code here. `country=\"SE\"` is\nthe swedish company lookup at Bolagsverket, by organisationsnummer or a sole trader's\n(enskild näringsidkare) personnummer, and by identifier only, since Bolagsverket's free\nAPI has no name search.\n\n`include=[...]` attaches seven second fetches, each with its own provenance and\n`null` unless you ask: `filings` (filing history — do they file, and on time),\n`charges` (registered mortgages and security interests), `insolvency` (winding-up\nand administration), `financials` (annual accounts — turnover, operating result,\nprofit, balance sheet: the solvency question), `lei` (the GLEIF Legal Entity\nIdentifier), `parents` (direct and ultimate parent — this entity's group — from\nGLEIF) and `peppol` (whether an e-invoice would reach them, ahead of Norway's 1\nJanuary 2027 EHF duty). The `include` argument explains each: what it returns, which\ncountries declare it, how to read its nulls.\n\nUse it once you have the identifier — from the user, an invoice, a contract, or a\n`search_company` hit's `id`. Read the returned `notes` before acting: it carries\ncaveats such as bankruptcy, dissolution, a deleted entity, an unclassified legal\nform, or an attachment whose own fetch failed.\n\nThis tool does not perform sanctions, PEP or adverse-media screening, and it does not\nverify bank account details — it returns identity and filing data from the national\nregister only, never a compliance clearance or a confirmed payment detail.\n\nErrors are the `{\"error\": {\"code\", \"message\", \"hint\"}}` envelope this server's\ninstructions set out code by code (D-007); `hint` names the next call. A failed\n*attachment* fetch is not one of them: the base report still comes back, that block\nis left `null`, and `notes` says which attachment failed and why.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "default": "NO",
+     "description": "ISO-3166-1 alpha-2 — NO Norway, GB United Kingdom, SE Sweden. UK is not a country code here and is rejected. Call list_countries for the live set.",
+     "type": "string"
+    },
+    "id": {
+     "description": "The company's national identifier, normalised for you — a Norwegian organisasjonsnummer (orgnr), a Companies House company number (CRN), or a Swedish organisationsnummer or personnummer. Spaces, dots, hyphens, a NO...MVA suffix and a short CRN are accepted; list_countries gives each country's exact shape.",
+     "examples": [
+      "923609016",
+      "00445790"
+     ],
+     "type": "string"
+    },
+    "include": {
+     "default": [],
+     "description": "Attachment names to fetch alongside the base report; empty by default, which costs exactly one upstream request. Each is a second, independent fetch attached at that name with its own provenance, null unless you ask, and this argument is where each of the seven is explained. 'filings' (every country): what the entity has filed, and when — Companies House the whole filing history, Bolagsverket the filed annual reports, Regnskapsregisteret the filed annual accounts; the block's notes says which, and total_count how many more the register holds. 'charges' (GB): registered mortgages and other security interests, in the register's own words. 'insolvency' (GB): winding-up and administration proceedings — a members' voluntary liquidation is a *solvent* wind-up, so is_liquidation: true is not by itself evidence of distress. 'financials' (NO and SE): the register's own figures for the latest filed accounting period — turnover, operating result, profit, balance sheet, equity, liabilities, each beside its currency, never a ratio or a verdict. Norway's come in the 'filings' fetch, Sweden's out of the entity's own filed K2 annual report. A null figure in a present block means the company did not report that line; an absent block means you did not ask, the fetch failed, or — Sweden — it has filed no digital annual report, and notes says which. Britain does not declare it, so 'financials' for GB is a bad_request, never an empty block. 'lei' (every country except Sweden, whose identifier can be a natural person's): the Legal Entity Identifier GLEIF, the Global LEI Foundation, publishes — CC0 and keyless; lei: null in a present block means GLEIF holds none. 'parents' (same countries as 'lei'): the direct and ultimate parent from GLEIF's Level 2 data — the entity that consolidates this one's accounts into its group, not necessarily its majority shareholder. Where GLEIF discloses none, that side carries the entity's own stated reason as a category word such as 'NATURAL_PERSONS' — never a name, and unverified. 'peppol' (Norway): whether an e-invoice can reach the entity over the Peppol network, read live from the SML/SMP walk the way ELMA resolves it, ahead of the 1 January 2027 EHF (Peppol BIS Billing 3.0) duty. registered: null means no authoritative answer — never read it as \"no\"; only an NXDOMAIN or an SMP 404 earns false. Read a country's supported_includes from list_countries first: a value it does not declare is a bad_request naming what it does support, never an empty result.",
+     "examples": [
+      [
+       "filings"
+      ],
+      [
+       "charges",
+       "insolvency"
+      ],
+      [
+       "financials",
+       "lei"
+      ]
+     ],
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "lookup_company",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "Everything `registry-mcp` knows about one registered entity.\n\nThis is the single most important shape in the project. It is returned\nverbatim by ``GET /v1/{country}/company/{id}`` and by the MCP tool\n``lookup_company``.\n\nA registry module fills what its national register publishes and leaves the\nrest ``None``. Nothing here is Norway-specific; ``registries/no/`` maps\nEnhetsregisteret's fields onto it (see ``NORBIZ_SPEC.md`` §3).",
+   "properties": {
+    "activity": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Free-text description of actual activity.",
+     "title": "Activity"
+    },
+    "advertising_protected": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Whether the register marks this entity as protected against direct-marketing use (Danish CVR-loven § 19 'reklamebeskyttelse', Swedish 'reklamspärr'). True: the register marks it. False: the register publishes such a flag for this entity and it is not set. None: this register publishes no such flag at all — the default, and it must never default to False, since False asserts a claim about a register that made none. When True, a country module must also append a `notes` entry containing the phrase 'direct marketing' (case-insensitive) stating the protection — that phrase is the contract this model enforces (see the validator below) — because the marking is a legal condition of passing this record's contact details on, and it must travel with them.",
+     "title": "Advertising Protected"
+    },
+    "bankruptcy_date": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Date bankruptcy was opened.",
+     "title": "Bankruptcy Date"
+    },
+    "business_address": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "A postal or visiting address, flattened to something an LLM can read.\n\n``lines`` keeps the registry's own street/box lines in order; the rest are\nparsed components where the registry provides them.",
+       "properties": {
+        "city": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Post town.",
+         "title": "City"
+        },
+        "country_code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "ISO-3166-1 alpha-2 country code of the address itself.",
+         "title": "Country Code"
+        },
+        "country_name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Country name as registered.",
+         "title": "Country Name"
+        },
+        "lines": {
+         "description": "Street or PO-box lines exactly as the registry supplies them.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Lines",
+         "type": "array"
+        },
+        "municipality": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Municipality name.",
+         "title": "Municipality"
+        },
+        "municipality_code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "National municipality code, if the registry has one.",
+         "title": "Municipality Code"
+        },
+        "postal_code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Postal / ZIP code.",
+         "title": "Postal Code"
+        }
+       },
+       "title": "Address",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Visiting/registered office."
+    },
+    "business_register_registered_at": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Date entered in the commercial/business register, where that is separate.",
+     "title": "Business Register Registered At"
+    },
+    "cached": {
+     "default": false,
+     "description": "True when served from our cache rather than a live fetch.",
+     "title": "Cached",
+     "type": "boolean"
+    },
+    "charges": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "Registered charges for one entity — an `include=[\"charges\"]` attachment\n(D-042(g), D-045(a)), never a plain field on `CompanyReport` (D-041(c)):\nit is a second round trip with its own moment, its own cache state and its\nown failure mode, so it carries its own `SourceRef` rather than reusing\nthe report's.\n\n**The count fields are ruled by D-045(a)**, not by D-042(h). It strikes\n`outstanding_count` — `total_count - satisfied_count` was our arithmetic\nwearing a register figure's name, and on a shared model it would have\nmeant \"outstanding\" for a register with no partially-satisfied state and\n\"not fully satisfied\" for one that has it (D-011) — and adds the\nregister's own `part_satisfied_count` in its place: a whole-company\nfigure Companies House publishes directly, `0` in every fixture observed\nso far, and not derived from anything else on this block.\n\nTwo-level nullability is the point of this shape (D-026(c), D-041(c),\nD-042(d)(3)): `CompanyReport.charges` is `None` when `charges` was not in\n`include`, or when the fetch failed (`Registry.lookup_with` appends a\n`notes` sentence on the report saying which). Once *present*, this block\ncarries `charges: []` for an entity the register confirms has none —\nthat case must never collapse into the absent case, and must never be\n`not_found` (D-011).",
+       "properties": {
+        "charges": {
+         "description": "Sorted newest first (a country module's own tie-break rule).",
+         "items": {
+          "additionalProperties": false,
+          "description": "One registered charge (a mortgage or other security interest) against\nan entity — one row of a `ChargeBlock`.\n\nField names are country-neutral (D-042(g)): GB is the first filler\n(Companies House `/company/{n}/charges`, `registries/gb/__init__.py`),\nand any future filler (e.g. Norway's Løsøreregisteret, once it opens a\npublic API) maps onto this same shape rather than getting one of its own.\n\n**The field list is ruled by D-045(a)**, not by D-042(h) — which rules\n`FiledDocument` and no charge shape at all. D-045(a) accepts the names\nthis class started with, corrects the `created_on` / `delivered_on` /\n`satisfied_on` descriptions, and adds `contains_fixed_charge` and\n`contains_negative_pledge` beside `contains_floating_charge`, all three of\nwhich Companies House emits **only when true** — so an absent flag means\nthe register did not mark this instrument, never that it lacks one, and\nnever `False` (D-011). It also adds `assets_charged_type` and\n`obligations_secured_type`, the register's own category token for each\nfree-text field (S-series finding 7, D-042(e)(3)'s `persons_entitled`\ntreatment reused twice over).",
+          "properties": {
+           "assets_charged": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own free-text description of what is charged, relayed verbatim and uncapped. It may contain particulars of property, account details or a natural person's name (e.g. a guarantor): never a lookup key, never indexed, never searchable and never reaches a log line (D-028(1), D-040) — the same binding `parties_entitled` carries. See `assets_charged_type` for the register's own category token this text is filed under.",
+            "title": "Assets Charged"
+           },
+           "assets_charged_type": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own category token for `assets_charged`, verbatim: `short-particulars` or `brief-description` are the two seen on Companies House's `particulars.type` — two different kinds of text under one field name, which this token disambiguates. National vocabulary lives here, in the value, never in the field name (D-042(g)).",
+            "title": "Assets Charged Type"
+           },
+           "charge_id": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own opaque handle for this charge; not fetchable through this API. `None` on an older filing that predates the register assigning one — 19 of 110 items observed, all pre-2013 — honestly absent, not guessed.",
+            "title": "Charge Id"
+           },
+           "charge_number": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own sequence number for this charge, scoped to this company only: not unique across companies, and not a lookup key.",
+            "title": "Charge Number"
+           },
+           "classification": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "What kind of instrument this is, in the register's own prose — not a code, and not the same field as `FiledDocument.type_code`.",
+            "title": "Classification"
+           },
+           "contains_fixed_charge": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether Companies House marks this instrument as including a fixed charge. The register emits this key **only when `True`**: absence means the register did not mark this instrument, never that it lacks one, and must never be read or stored as `False` (D-011). Norway's Løsøreregisteret and Sweden's företagsinteckningar use different taxonomies for security interests, so a future filler for either may leave this `None` on every item it fills, forever — the same shape as `FiledDocument.days_from_fee_point`.",
+            "title": "Contains Fixed Charge"
+           },
+           "contains_floating_charge": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether Companies House marks this instrument as including a floating charge. The register emits this key **only when `True`**: absence means the register did not mark this instrument, never that it lacks one, and must never be read or stored as `False` (D-011). Norway's Løsøreregisteret and Sweden's företagsinteckningar use different taxonomies for security interests, so a future filler for either may leave this `None` on every item it fills, forever — the same shape as `FiledDocument.days_from_fee_point`.",
+            "title": "Contains Floating Charge"
+           },
+           "contains_negative_pledge": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether Companies House marks this instrument as including a negative pledge — a covenant restricting further charges over the same assets, and, on its own, a fact a lender changes behaviour on. The register emits this key **only when `True`**: absence means the register did not mark this instrument, never that it lacks one, and must never be read or stored as `False` (D-011). Norway's Løsøreregisteret and Sweden's företagsinteckningar use different taxonomies for security interests, so a future filler for either may leave this `None` on every item it fills, forever — the same shape as `FiledDocument.days_from_fee_point`.",
+            "title": "Contains Negative Pledge"
+           },
+           "created_on": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The date the *charge instrument* was created — not a record timestamp. See `delivered_on` for the date it reached the register; the gap between the two is the Companies Act 2006 s.859A window a charge must be delivered within to be registered at all.",
+            "title": "Created On"
+           },
+           "delivered_on": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own receipt date: when the charge was delivered to the register for registration, which is not the same date as `created_on`. The interval between them is the Companies Act 2006 s.859A window a charge must be delivered within to be registered at all.",
+            "title": "Delivered On"
+           },
+           "is_outstanding": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Derived from `status` by membership of a country module's own committed table of status words it has actually observed on the wire. `None` when `status` is absent or is a word not yet in that table — never guessed, never `False` by default (D-025(d), D-011).",
+            "title": "Is Outstanding"
+           },
+           "obligations_secured": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own free-text description of what the charge secures, relayed verbatim and uncapped, under the same binding as `assets_charged` (D-028(1), D-040): never a lookup key, never indexed, never searchable, never reaches a log line. See `obligations_secured_type` for the register's own category token — on every observed item that carried one (19 of 19) it was `amount-secured`, never `obligations-secured`, so this field's name is a category the token disambiguates, not a description every value matches.",
+            "title": "Obligations Secured"
+           },
+           "obligations_secured_type": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own category token for `obligations_secured`, verbatim from Companies House's `secured_details.type`. Observed as `amount-secured` on 19 of 19 items that carried a token at all — `obligations_secured` itself has never once carried an `obligations-secured` value, which is exactly why this token, not the field's name, is the category. National vocabulary lives here, in the value, never in the field name (D-042(g)).",
+            "title": "Obligations Secured Type"
+           },
+           "parties_entitled": {
+            "description": "Names exactly as the register publishes them for the party or parties the charge is entitled to (typically a bank, an insurer or a trustee company; occasionally a natural person, e.g. a director lending to their own company). This is a term of the company's own instrument, not a person record: it is never a lookup key, never indexed, never searchable and never reaches a log line (D-028(1), D-040) — the same binding `assets_charged` and `obligations_secured` carry, because free prose describing charged property can also name a guarantor or a charged dwelling. It is deliberately not named the register's own `persons_entitled` — that name asserts a natural person; this one does not.",
+            "items": {
+             "type": "string"
+            },
+            "title": "Parties Entitled",
+            "type": "array"
+           },
+           "satisfied_on": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The date the register recorded this charge as satisfied, exactly as published. `None` while outstanding — see `status` for the register's own word and `is_outstanding` for the derived flag.",
+            "title": "Satisfied On"
+           },
+           "status": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own word, verbatim, e.g. \"outstanding\", \"fully-satisfied\" — national vocabulary lives here, in the value, never in a field name (D-042(g)). See `is_outstanding` for the country-neutral derived flag.",
+            "title": "Status"
+           }
+          },
+          "title": "Charge",
+          "type": "object"
+         },
+         "title": "Charges",
+         "type": "array"
+        },
+        "notes": {
+         "description": "Plain-English caveats about this block: truncation when `total_count` exceeds `len(charges)`, and — whenever any charge on this page carries free text in `assets_charged` or `obligations_secured` — a disclosure that the text is the register's own prose, relayed verbatim and not parsed, and may name a natural person or carry an account identifier.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "part_satisfied_count": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The register's own whole-company count of charges it marks partially satisfied, identical in kind to `total_count` and `satisfied_count`. `None` when the register does not publish it. Observed as `0` in every fixture this project has seen — this project has never observed a non-zero value — and the count is the register's own; it is not derived from anything else on this block.",
+         "title": "Part Satisfied Count"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "Where, when and under what licence this block was fetched.",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        },
+        "satisfied_count": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The register's own whole-company count of satisfied charges, verbatim.",
+         "title": "Satisfied Count"
+        },
+        "total_count": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The register's own count of charges for this company, which may exceed `len(charges)` — see `notes` for a truncation disclosure when it does.",
+         "title": "Total Count"
+        }
+       },
+       "required": [
+        "provenance"
+       ],
+       "title": "ChargeBlock",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Registered charges (mortgages / security interests) against this entity. `None` unless `charges` was passed in `include=[...]` — and, even then, `None` if that fetch failed (see `notes` for which attachment and why). A country that declares this attachment (`CountryInfo.supported_includes`) returns a *present* block with an empty `charges` list for an entity that genuinely has none — the two states never collapse into each other (D-011, D-042(d))."
+    },
+    "confidence": {
+     "default": 1.0,
+     "description": "How sure we are this record is the entity the caller meant (D-005).",
+     "maximum": 1.0,
+     "minimum": 0.0,
+     "title": "Confidence",
+     "type": "number"
+    },
+    "confidence_basis": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Why that confidence, e.g. 'exact identifier lookup'.",
+     "title": "Confidence Basis"
+    },
+    "country": {
+     "description": "ISO-3166-1 alpha-2, upper-case, e.g. 'NO'.",
+     "title": "Country",
+     "type": "string"
+    },
+    "deregistered_at": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Date the entity was deleted from the register.",
+     "title": "Deregistered At"
+    },
+    "email": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Contact email as registered.",
+     "title": "Email"
+    },
+    "employees": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Registered number of employees. None = not reported.",
+     "title": "Employees"
+    },
+    "employees_reported": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Whether the registry holds an employee figure at all (distinguishes 0 from unknown).",
+     "title": "Employees Reported"
+    },
+    "euid": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "European Unique Identifier (EUID, Commission Implementing Regulation (EU) 2021/1042 Article 9), where the register publishes one, e.g. Finland's 'FIFPRO.0112038-9'. None for a register that does not (today: all of ours). Three traps: (1) this is not the LEI — the EUID is register-issued, mandatory in the EU and free, the LEI is voluntary, global, LOU-issued and fee-bearing; an entity may carry both, one or neither. (2) 'EUid' also names the EU Digital Identity wallet, a personal credential unrelated to company registers. (3) it is not stable across a register reorganisation, since it encodes the register of origin (e.g. France's RNE replacing the RCS in 2023). Carried verbatim from the register; never constructed from parts.",
+     "title": "Euid"
+    },
+    "fetched_at": {
+     "anyOf": [
+      {
+       "format": "date-time",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "UTC timestamp of the live fetch this record came from.",
+     "title": "Fetched At"
+    },
+    "filings": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "What one entity has filed with its national register — an\n``include=[\"filings\"]`` attachment (D-041(d), D-042), never a plain field\non :class:`CompanyReport` (D-041(c)): it is a second round trip with its\nown moment, its own cache state and its own failure mode, so it carries its\nown :class:`SourceRef` rather than reusing the report's.\n\nAll three live countries declare it, and each answers a differently-scoped\nquestion its register actually supports — Companies House returns the whole\nfiling history, Bolagsverket the filed annual reports, Regnskapsregisteret\nthe filed annual accounts. `notes` says which, in words, on every block.\n\nTwo-level nullability is the contract (D-011, D-026(c), D-041(c)):\n**absent** means \"you did not ask, or the fetch failed\" — `lookup_with`\nappends one `notes` sentence to the report saying which — while **present\nwith `documents: []`** means \"the register lists no filings for this\nentity\", a real and useful answer about a counterparty that must never be\nrendered as an absence.",
+       "properties": {
+        "documents": {
+         "description": "One page of the register's own filing history, newest first by the register's own period or filing date: Britain sorts by `filed_at`; Sweden by `period_end` then `filed_at`; Norway by `period_end` then `period_start`. Never paginated further; when the register holds more, `total_count` says how many and `notes` says so in words. Empty means the register lists none — not that we could not look.",
+         "items": {
+          "additionalProperties": false,
+          "description": "One filing a national register publishes for one entity — one row of a\n:class:`FilingHistory`.\n\nThe shape ``DECISIONS.md`` D-041(d) ruled and D-042(h) widened, and it is\ncountry-neutral by construction rather than by intent: Britain, Sweden and\nNorway each built this model independently behind their own seam, and all\nthree arrived field-for-field at this one. National vocabulary lives in the\n*values* (`category`, `type_code`, `description_code`), never in a field\nname (D-042(g)).\n\nEvery field is nullable and every `None` means the same thing: **the\nregister does not publish it** (D-011). It never means zero, never means\n\"no\", and is never filled by derivation — a register that does not publish\na period start gets `None`, not a start inferred by subtracting twelve\nmonths from the end (D-009).",
+          "properties": {
+           "category": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own category for this filing, verbatim and never translated. It is the field `kind` is derived from. Twenty-two words observed live in Britain, and the list is not closed: \"accounts\", \"capital\", \"officers\", \"mortgage\", \"confirmation-statement\", \"annual-return\", \"resolution\", \"gazette\", \"incorporation\", \"address\", \"insolvency\", \"dissolution\", \"change-of-name\", \"persons-with-significant-control\", \"auditors\", \"miscellaneous\", \"historical\", \"restoration\", \"document-replacement\", \"change-of-constitution\", \"return\" and \"other\".",
+            "title": "Category"
+           },
+           "days_from_fee_point": {
+            "anyOf": [
+             {
+              "type": "integer"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Signed days from a named late-fee datum to `filed_at`, **only where the register itself publishes such a datum for that period**. Negative is early. `None` is the common answer and means the datum does not exist in the data, not that the arithmetic was skipped. Sweden's Bolagsverket fills it: årsredovisningslagen 8 kap. 6 § starts a förseningsavgift of 7 500 kr (15 000 kr for a public company) at that datum. It is **not** the company's own filing deadline — ÅRL 8 kap. 3 § instead requires filing within one month of the general meeting that adopts the accounts — and a nine-month variant of 8 kap. 6 § cannot be excluded, because the dataset does not identify which companies it applies to. Companies House publishes only the *next* period's due date — `accounts.next_accounts.due_on` and `confirmation_statement.next_due` on the company profile — and no per-period historical due date at all, so there is nothing to measure a past filing against without guessing a 9-month or 6-month period and presenting the guess as the register's own — the invented figure D-009 forbids.",
+            "title": "Days From Fee Point"
+           },
+           "description_code": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own description-template key, verbatim and **never resolved into prose**. This is the key and not the sentence on purpose, and the reason is the whole design of this block: Companies House resolves these templates from a `description_values` object, 97 templates interpolate an officer's name and 26 a person with significant control's, so the resolved sentence is personal data while the key is not. **The key says what happened; only the values say who** (D-042(e)(1), D-028).",
+            "title": "Description Code"
+           },
+           "document_id": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own opaque handle for this filing, relayed verbatim and never interpreted. **Not fetchable through this API**: the filed document itself lives behind a separate host, which is a second upstream with its own provenance and out of scope for this block (D-041(c)). It is the key a support case with the register can name. Norway's payload also carries an integer `id`, an internal row identifier, which is not relayed.",
+            "title": "Document Id"
+           },
+           "file_format": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "What the register holds the document as, where it says. `None` where the filing-history endpoint publishes no format: Companies House's filing-history endpoint publishes only a page count and a `paper_filed` marker, no media type — the media type itself lives on a separate document host, a second fetch this block does not make.",
+            "title": "File Format"
+           },
+           "filed_at": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "When the register recorded this filing, verbatim. This is the field that makes the block answer *does this company file on time*, and it is the sort key for `FilingHistory.documents`: newest first.",
+            "title": "Filed At"
+           },
+           "kind": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The `Deadline.kind` slug this filing discharges, or `None` when it discharges none. This is the one field that is *derived* rather than relayed, and it is derived only by a committed per-country table of category words actually observed on the wire. A filing whose category is outside that table gets `None` rather than an invented slug (D-009): a filing that discharges no deadline this product publishes says so honestly.",
+            "title": "Kind"
+           },
+           "period_end": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The reporting period's last day, exactly as the register published it. Beware what the period belongs to: on an annual-accounts filing it is the date the accounts were made up to, but a register may publish a made-up date on other filing kinds too — a British confirmation statement carries one, and it is not a financial year end. Read it together with `kind`. `None` on the great majority of filings, which have no reporting period at all.",
+            "title": "Period End"
+           },
+           "period_start": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The reporting period's first day, as published. `None` wherever the register publishes no counterpart to `period_end` — deriving one would assert a period length the register never stated, and a first, shortened or extended accounting period is lawful and common (D-009). Norway's Regnskapsregisteret publishes `regnskapsperiode: {fraDato, tilDato}` and fills both ends; Companies House publishes only the end; so does Sweden's Bolagsverket, whose bokföringslagen 3 kap. 3 § permits an 18-month first or final period — exactly the period length a subtracted twelve months would falsely assert.",
+            "title": "Period Start"
+           },
+           "type_code": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own form code for this filing, verbatim: \"AA\", \"CS01\", \"AP01\", \"MR01\" and older forms such as \"288a\" and \"363s\" in Britain — 100 distinct codes across 1876 items observed live.",
+            "title": "Type Code"
+           }
+          },
+          "title": "FiledDocument",
+          "type": "object"
+         },
+         "title": "Documents",
+         "type": "array"
+        },
+        "financial_year_end": {
+         "anyOf": [
+          {
+           "format": "date",
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The latest reporting period among this entity's filed **annual accounts** (`kind == \"annual_accounts\"`), carried verbatim — never a synthesised month-day, and never taken from a filing of another kind that happens to carry a made-up date of its own. It is the latest *period*, not the period of the latest *filing*, because a register may accept a later filing that amends an earlier year and that would otherwise roll this date backwards. It is **evidence of** the entity's accounting reference date, not a statement of it. `None` when this page holds no annual-accounts filing with a reporting period, including when older accounts exist further back than the page reaches.",
+         "title": "Financial Year End"
+        },
+        "notes": {
+         "description": "Plain-English caveats about this block: which subset of filings this register publishes, truncation when `total_count` exceeds `len(documents)`, and which empty state an empty `documents` is.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "Where, when and under what licence this block was fetched.",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        },
+        "total_count": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The register's own count of filings for this entity, which may greatly exceed `len(documents)` — 8371 against a 25-row page, for one company observed live. **`None` means the register published no count**, not zero, and for Companies House it additionally distinguishes a real zero from a number whose filing history the register cannot serve at all: that endpoint returns `0` for both, and relaying the second as a zero would assert something the register never said (D-011). `notes` names which case it was.",
+         "title": "Total Count"
+        }
+       },
+       "required": [
+        "provenance"
+       ],
+       "title": "FilingHistory",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "What this entity has filed with its register, and when. `None` unless `filings` was passed in `include=[...]` — and, even then, `None` if that fetch failed (see `notes` for which attachment and why). Scope differs by country because each register publishes a different subset, and the block's own `notes` says which: Companies House the whole filing history, Bolagsverket the filed annual reports, Regnskapsregisteret the filed annual accounts. A *present* block with `documents: []` means the register lists none — never the same as absent (D-011, D-042(d))."
+    },
+    "financials": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "Key figures from an entity's filed annual accounts — an\n``include=[\"financials\"]`` attachment (DECISIONS.md D-043), never a plain\nfield on :class:`CompanyReport` (D-041(c)): it is a second round trip with\nits own moment, its own cache state and its own failure mode, so it\ncarries its own :class:`SourceRef` rather than reusing the report's.\n\n**A second block, not a wider `FiledDocument`** (D-043(b)): \"did they file\non time\" and \"what do the numbers say\" are two different questions, and\nfolding nineteen numeric fields onto `FiledDocument` would collapse two\nmeanings into one `None` — \"Britain does not publish this\" and \"this\nNorwegian company did not report this line\" — which D-011 forbids.\n\nNorway and Sweden fill this block today, from two different sources:\nNorway's figures arrive in Regnskapsregisteret's own open key-figures\nfeed, the same fetch as `filings`; Sweden's are read out of the entity's\nown filed annual report (the K2 inline-XBRL document Bolagsverket's\ndocument API serves), a second request that shares its document-list\ndiscovery step with `filings` but is not the same fetch (DECISIONS.md\nD-047(f)). Britain does not fill this block, and that is the register's\nown population, not a scope decision this project made: the accounts of\nthe companies that matter are filed on paper or as PDF, the\nmachine-readable (iXBRL) mandate is 1 April 2028 with a\nprofit-and-loss publication opt-out for small and micro companies, and\nno British filing sampled carried the balance-sheet totals this block\nrelays (DECISIONS.md D-043(i), as amended by D-047(f)).\n`include=[\"financials\"]` on a country that does not declare it is\n`bad_request`, never a silently empty block.\n\nTwo-level nullability is the point of the shape (D-011, D-026(c),\nD-041(c), D-042(d)(3)): once *present*, this block carries `periods: []`\nfor an entity Regnskapsregisteret holds no filed accounts for — that\nstate must never collapse into the absent state and must never be\n``not_found``. **No field on this block or on `FinancialPeriod` is a\nderived ratio, indicator or verdict** — DECISIONS.md D-043(e) rules out an\nequity ratio, a current ratio, a net-debt figure, a working-capital\nfigure and every similar field on three independent grounds, the\nstrongest being that the register relays filings whose own totals do not\nreconcile on 27 of 358 observed filings. The one comparison this project\nmakes is a `notes` sentence, never a number: see `notes` below.",
+       "properties": {
+        "notes": {
+         "description": "Plain-English caveats about this block. Unconditional on any non-empty block: that figures are denominated in the stated currency and framework and are not comparable across companies or borders without regard to both, and that this is the latest filed period rather than a history. Conditional: a reconciliation note when `total_assets` and `total_equity_and_liabilities` disagree, a non-NOK currency note, and one note each for `small_entity`, `audit_exempt`, `liquidation_basis` and an observed `unaudited` (DECISIONS.md D-043(e),(g)).",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "periods": {
+         "description": "Filed accounting periods, sorted newest first by `period_end`. Both registers carry exactly one today, for different reasons: Regnskapsregisteret publishes only one — the endpoint takes no year argument and holds no history — while Bolagsverket lists every filed annual report but only the most recent is parsed into this block, a bounded-cost choice rather than a register limit (DECISIONS.md D-047(f)). Either way this is a latest-figures block, not a trend; `notes` says so on every non-empty block, and the rest of a Swedish entity's filed reports are in `include=[\"filings\"]`. The list exists for a register that publishes more than one.",
+         "items": {
+          "additionalProperties": false,
+          "description": "One filed accounting period's key figures, mapped a second time\nalongside :class:`~registry_mcp.core.models.FiledDocument` for the same\nfiling (D-043(h), D-047(f)). For Norway the two come from the same\nfetch; for Sweden `financials` shares `filings`' document-list discovery\nstep but then reads the filed document itself, a further fetch `filings`\nnever makes. Either way, `document_id` and `period_end` are the join\nkeys a caller uses to line this period up with its sibling\n`FiledDocument`.\n\n`currency` is the one field in this whole block with no default\n(DECISIONS.md D-043(d)): a figure separated from its currency is not\npartially wrong, it is meaningless, and this model makes constructing one\na `pydantic.ValidationError` rather than a silently-`None` currency. A\nperiod the register published with no `valuta` is not carried at all —\nthe mapper skips it and says why in `FinancialSummary.notes` — which is\nsafe because `valuta` was present on 573 of 573 payloads this project has\nread.",
+          "properties": {
+           "accounting_framework": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The accounting framework this period was prepared under, verbatim from `regnkapsprinsipper.regnskapsregler` — observed values include 'regnskapslovenAlminneligRegler', 'IFRS' and 'forenkletAnvendelseIFRS'. Two Norwegian companies' figures are not necessarily on the same basis; no field here converts between them (DECISIONS.md D-043(d)).",
+            "title": "Accounting Framework"
+           },
+           "audit_exempt": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether the company has resolved to opt out of audit under aksjeloven § 7-6, from `revisjon.fravalgRevisjon` — lawful below that section's thresholds and True on 65 of 358 observed filings (18%). The consequence a credit decision must weigh: no independent auditor checked these figures.",
+            "title": "Audit Exempt"
+           },
+           "balance_sheet": {
+            "anyOf": [
+             {
+              "additionalProperties": false,
+              "description": "Stocks at the period's last instant — Regnskapsregisteret's\n``eiendeler`` and ``egenkapitalGjeld``, the other of the two sub-objects on\na :class:`FinancialPeriod` (D-043(c)). See :class:`IncomeStatement` for why\nthe two are separate models rather than one flat one.\n\nEvery field is `None` or a whole-unit figure in :attr:`FinancialPeriod.currency`\n— never both `None` and zero at once, and never inferred from the other\n(D-043(f)). **No field here is a ratio or a verdict** — an equity ratio, a\ncurrent ratio and every similar derived figure are declined by D-043(e): the\nregister's own `total_assets` and `total_equity_and_liabilities` disagree\non 27 of 358 filings (7.5%), so a ratio built from this block would be a\nratio of two numbers the register itself does not vouch for jointly. The\none comparison this project makes is a `notes` sentence, never a number —\nsee :class:`FinancialSummary`.",
+              "properties": {
+               "current_assets": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Current assets at period end (`sumOmloepsmidler`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Current Assets"
+               },
+               "current_liabilities": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Current liabilities at period end (`sumKortsiktigGjeld`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Current Liabilities"
+               },
+               "equity": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Total equity at period end (`sumEgenkapital`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Equity"
+               },
+               "fixed_assets": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Fixed assets at period end (`sumAnleggsmidler`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Fixed Assets"
+               },
+               "liabilities": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Total liabilities at period end (`sumGjeld`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)). Carried exactly as the register states it, including negative: DECISIONS.md D-043(e) records real filings with a negative `sumGjeld` (e.g. -108,837), which is a filing the register relayed without validating, not a company fact this field corrects.",
+                "title": "Liabilities"
+               },
+               "non_current_liabilities": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Non-current liabilities at period end (`sumLangsiktigGjeld`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Non Current Liabilities"
+               },
+               "paid_in_equity": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Paid-in equity at period end (`sumInnskuttEgenkaptial` — the register's own spelling, not a typo in this field's description). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Paid In Equity"
+               },
+               "retained_equity": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Retained equity at period end (`sumOpptjentEgenkapital`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Retained Equity"
+               },
+               "total_assets": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Total assets at period end (`sumEiendeler`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)). One of only three fields present on every one of 573 observed filings. Compare with `total_equity_and_liabilities` (DECISIONS.md D-043(e)): the two disagree on 27 of 358 filings, and this block's own `notes` names the gap when they do; neither figure is edited, reconciled or dropped.",
+                "title": "Total Assets"
+               },
+               "total_equity_and_liabilities": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Total equity and liabilities at period end (`sumEgenkapitalGjeld`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)). One of only three fields present on every one of 573 observed filings. See `total_assets` for the reconciliation note the two together can trigger.",
+                "title": "Total Equity And Liabilities"
+               }
+              },
+              "title": "BalanceSheet",
+              "type": "object"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Stocks at this period's last instant. `None` when the register published no line in this statement at all for this filing; otherwise present with whichever lines it published, each individually nullable (DECISIONS.md D-043(f))."
+           },
+           "consolidated": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether this filing is a consolidated (group) statement, derived from `scope` by a committed table of words this module has actually observed on the wire — today only `{'SELSKAP': False}`. A word outside that table, including an implied-but-unobserved 'KONSERN', gets `None`, never `False` (DECISIONS.md D-011, D-025(d)): this field never guesses.",
+            "title": "Consolidated"
+           },
+           "currency": {
+            "description": "ISO-4217-shaped currency code, verbatim from `valuta`. **Required — this field has no default, and a period the register published with no currency is not constructed at all** (DECISIONS.md D-043(d)): a figure without its currency is not partially wrong, it is meaningless, and this model makes that state unrepresentable rather than merely discouraged. 12 of 358 observed Norwegian filings are not in kroner (USD, EUR, SEK, DKK), so two *Norwegian* companies can be incomparable without either crossing a border. Values are whole units of this currency; scale (thousands, millions) is not recorded because the register does not publish one, and the figures are exact integers that are not significant to that precision.",
+            "title": "Currency",
+            "type": "string"
+           },
+           "document_id": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own opaque handle for this filing, verbatim from `journalnr` — the same handle the sibling `FiledDocument.document_id` on `filings` carries for the same filing, and the join key between the two blocks (DECISIONS.md D-043(h)). Not fetchable through this API.",
+            "title": "Document Id"
+           },
+           "income_statement": {
+            "anyOf": [
+             {
+              "additionalProperties": false,
+              "description": "Flows over one reporting period — Regnskapsregisteret's\n``resultatregnskapResultat``, one of two sub-objects on a\n:class:`FinancialPeriod` (D-043(c)). Nested apart from :class:`BalanceSheet`\non purpose: revenue is a flow over a span, not a stock at an instant, and a\ncaller who mixes the two time semantics makes precisely the error this\nsplit exists to prevent.\n\nEvery field is `None` or a whole-unit figure in :attr:`FinancialPeriod.currency`\n— never both `None` and zero at once, and never inferred from the other\n(D-043(f)); see `FinancialPeriod.currency` for what the unit is and why it\nis required.",
+              "properties": {
+               "financial_costs": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Financial costs for the period (`sumFinanskostnad`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Financial Costs"
+               },
+               "financial_income": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Financial income for the period (`sumFinansinntekter`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Financial Income"
+               },
+               "net_financial_items": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Net financial items for the period (`nettoFinans`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Net Financial Items"
+               },
+               "operating_costs": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Total operating costs for the period (`sumDriftskostnad`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Operating Costs"
+               },
+               "operating_result": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Operating result for the period (`driftsresultat`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Operating Result"
+               },
+               "profit_before_tax": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Ordinary result before tax (`ordinaertResultatFoerSkattekostnad`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)).",
+                "title": "Profit Before Tax"
+               },
+               "profit_for_period": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Profit or loss for the period (`aarsresultat`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)). One of only three fields present on every one of 573 observed filings.",
+                "title": "Profit For Period"
+               },
+               "revenue": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Turnover for the period (`sumDriftsinntekter`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)). Absent on 51 of 358 observed filings (14%) — not rare.",
+                "title": "Revenue"
+               },
+               "total_comprehensive_income": {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "null"
+                 }
+                ],
+                "default": null,
+                "description": "Total comprehensive income for the period (`totalresultat`). `None` means the register did not publish this line for this filing — never zero. The register is inconsistent about when it states an explicit zero for an absent figure versus omitting the line entirely, so this field's absence is not evidence the true value is zero, and a stated zero is not evidence the register omits the line elsewhere (DECISIONS.md D-043(f)). Absent on 209 of 358 observed filings (58%) — the register's own line, not this project's omission.",
+                "title": "Total Comprehensive Income"
+               }
+              },
+              "title": "IncomeStatement",
+              "type": "object"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Flows for this period. `None` when the register published no line in this statement at all for this filing; otherwise present with whichever lines it published, each individually nullable (DECISIONS.md D-043(f))."
+           },
+           "liquidation_basis": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether this filing is an *avviklingsregnskap* under aksjeloven § 16-10 — a winding-up account prepared on a realisation rather than a going-concern basis, over a final stub period — from `avviklingsregnskap`. Rare (3 of 215 entities the register marks `underAvvikling`) and, when true, real: read `FinancialSummary.notes` for the caveat this triggers. It does not restate the winding-up itself, which `CompanyReport.status` already carries.",
+            "title": "Liquidation Basis"
+           },
+           "period_end": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The reporting period's last day, as published (`regnskapsperiode.tilDato`). Equal to the sibling `FiledDocument.period_end` for this filing on the same report (DECISIONS.md D-043(h)).",
+            "title": "Period End"
+           },
+           "period_start": {
+            "anyOf": [
+             {
+              "format": "date",
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The reporting period's first day, as published (`regnskapsperiode.fraDato`). Real, published data — never derived by subtracting twelve months from `period_end`, because a first or final period may be shorter or longer (DECISIONS.md D-009).",
+            "title": "Period Start"
+           },
+           "scope": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "What this filing covers, the register's own word, verbatim from `regnskapstype` — 'SELSKAP' (company accounts) is the only value observed in 573 payloads; 'KONSERN' (consolidated) is implied by the vocabulary but was never seen. See `consolidated` for the country-neutral derived flag.",
+            "title": "Scope"
+           },
+           "small_entity": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether this filing was prepared under the reduced-disclosure regime for a *lite foretak* (regnskapsloven § 1-6), from `regnkapsprinsipper.smaaForetak`. **Not a distress signal** — True on 315 of 358 observed filings, the majority case — it is a disclosure caveat: fewer figures exist, and those that do were prepared under rules that permit simplification.",
+            "title": "Small Entity"
+           },
+           "unaudited": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Relayed uninverted from `revisjon.ikkeRevidertAarsregnskap`, which its own name claims means these accounts were not audited. **`True` was never observed** in 573 sampled payloads, including every filing by a company that had opted out of audit under `audit_exempt` — so this flag's semantics are unverified: do not read a `False` here as an assertion that the accounts were audited, and do not read this field as more reliable than `audit_exempt` (DECISIONS.md D-043(g)).",
+            "title": "Unaudited"
+           }
+          },
+          "required": [
+           "currency"
+          ],
+          "title": "FinancialPeriod",
+          "type": "object"
+         },
+         "title": "Periods",
+         "type": "array"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "Where, when and under what licence this block was fetched. For Norway, **identical in all five fields to the sibling `filings` block's `provenance` when both are requested together**: they are the same upstream fetch, not two (DECISIONS.md D-043(h)). For Sweden the two blocks' `provenance` are **not** identical: `financials` shares `filings`' document-list discovery fetch to decide what to fetch, but then makes its own further request for the document itself, and this field describes that further request, not the shared list (DECISIONS.md D-047(f)).",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        }
+       },
+       "required": [
+        "provenance"
+       ],
+       "title": "FinancialSummary",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Key figures from this entity's filed annual accounts. `None` unless `financials` was passed in `include=[...]` — and, even then, `None` if that fetch failed (see `notes` for which attachment and why). Norway returns a *present* block with `periods: []` for an entity Regnskapsregisteret holds no filed accounts for. Sweden instead returns *no block at all*, plus a report-level `notes` sentence naming the reason, because Bolagsverket's digital annual-report channel holds nothing for that entity — a fact about the company, not about the country (D-042(d)(3), `tasks/T55.md`). Norway and Sweden today: Norway's arrive in the register's own open key-figures feed, Sweden's are read out of the entity's own filed annual report. Britain does not declare this attachment because the accounts of the companies that matter are filed on paper or as PDF ahead of the 1 April 2028 machine-readable mandate — a fact about the register's own population, not a parser this project has declined to write (D-043(i), D-047(f))."
+    },
+    "founded_at": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Incorporation / foundation date.",
+     "title": "Founded At"
+    },
+    "has_annual_accounts_duty": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "True when this legal form must file annual accounts with the state.",
+     "title": "Has Annual Accounts Duty"
+    },
+    "has_board_duty": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "True when this legal form must have a registered board.",
+     "title": "Has Board Duty"
+    },
+    "id": {
+     "description": "Canonical national identifier, digits/letters only, no spaces or dots.",
+     "title": "Id",
+     "type": "string"
+    },
+    "id_formatted": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The identifier as a local would write it, e.g. '923 609 016'.",
+     "title": "Id Formatted"
+    },
+    "id_scheme": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Name of the identifier scheme, e.g. 'organisasjonsnummer'.",
+     "title": "Id Scheme"
+    },
+    "in_business_register": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Listed in the commercial register (Norway: Foretaksregisteret).",
+     "title": "In Business Register"
+    },
+    "in_group": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Part of a corporate group.",
+     "title": "In Group"
+    },
+    "industry_codes": {
+     "description": "Industry classifications, primary first.",
+     "items": {
+      "additionalProperties": false,
+      "description": "An industry classification code (NACE / SIC / national equivalent).",
+      "properties": {
+       "code": {
+        "description": "The code as published, e.g. '06.100'.",
+        "title": "Code",
+        "type": "string"
+       },
+       "description": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Registry's own description.",
+        "title": "Description"
+       },
+       "rank": {
+        "default": 1,
+        "description": "1 = primary activity, 2 = second, and so on.",
+        "minimum": 1,
+        "title": "Rank",
+        "type": "integer"
+       },
+       "scheme": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Classification scheme, e.g. 'NACE' or the national variant name.",
+        "title": "Scheme"
+       }
+      },
+      "required": [
+       "code"
+      ],
+      "title": "IndustryCode",
+      "type": "object"
+     },
+     "title": "Industry Codes",
+     "type": "array"
+    },
+    "insolvency": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "Insolvency proceedings a register publishes against one entity — an\n``include=[\"insolvency\"]`` attachment (D-042), never a plain field on\n:class:`CompanyReport` (D-041(c)), and carrying its own :class:`SourceRef`.\n\nTwo-level nullability is the point of the shape (D-011, D-026(c),\nD-041(c), D-042(d)(3)): once *present*, this block carries ``cases: []``\nfor an entity the register publishes no insolvency case for — that state\nmust never collapse into the absent state and must never be ``not_found``.\nCompanies House's 404 here is the *normal* answer for a solvent company and\nis byte-identical to its answer for a number that was never issued, so it\nsays nothing about whether the entity exists; ``notes`` therefore\ndistinguishes \"the register holds no insolvency resource here\" from \"the\nresource exists and is empty\" instead of flattening both into silence.",
+       "properties": {
+        "cases": {
+         "description": "Every insolvency case the register publishes for this entity — the whole history, not a page, where the register's endpoint is unpaginated. Sorted newest first by the case's most recent event date, then by `case_number` descending; cases the register gives no date for sort last.",
+         "items": {
+          "additionalProperties": false,
+          "description": "One insolvency case a register publishes against one entity.\n\n**No practitioner particular can land here.** A register commonly publishes\neach appointed practitioner's name and postal address alongside the case;\nD-042(e)(2) bars relaying them in the first tranche, so this model has no\nfield for them and no country mapper reads the key. Adding them later is a\ndecision with its own entry in ``DECISIONS.md``, inheriting D-028's four\npreconditions in full.",
+          "properties": {
+           "case_number": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own identifier for this case, verbatim. For Companies House this is a per-company sequence number rendered as a string (\"1\", \"2\", … up to \"31\" in the live sample) and is **not** a court reference — it identifies the case only within this entity. Kept as a string because another register's case identifier need not be numeric.",
+            "title": "Case Number"
+           },
+           "case_type": {
+            "anyOf": [
+             {
+              "type": "string"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "The register's own word for the kind of procedure, verbatim — national vocabulary in the value (D-042(g)). Ten words observed live in Britain, among them \"compulsory-liquidation\", \"creditors-voluntary-liquidation\", \"members-voluntary-liquidation\" and \"in-administration\". See `is_liquidation` for the country-neutral derived flag.",
+            "title": "Case Type"
+           },
+           "events": {
+            "description": "The register's own dated steps in this case, newest first. Frequently empty — 172 of the 1,485 live British cases carried no date at all, most of them old receiverships — and an empty list means the register publishes no date for this case, never that nothing happened.",
+            "items": {
+             "additionalProperties": false,
+             "description": "One dated step in an insolvency case, as the register itself records it.\n\nThese are the register's own events, not this service's interpretation of\nthem: D-042(e)(2) rules that case type, case number and *these* dated\nevents carry the entire distress signal a pre-contract check needs.",
+             "properties": {
+              "event_type": {
+               "anyOf": [
+                {
+                 "type": "string"
+                },
+                {
+                 "type": "null"
+                }
+               ],
+               "default": null,
+               "description": "The register's own word for what happened, verbatim — national vocabulary lives here, in the value, never in a field name (D-042(g)). Thirteen words have been observed live in Britain: \"administration-started-on\", \"administration-ended-on\", \"administration-discharged-on\", \"instrumented-on\", \"petitioned-on\", \"wound-up-on\", \"concluded-winding-up-on\", \"voluntary-arrangement-started-on\", \"voluntary-arrangement-ended-on\", \"moratorium-started-on\", \"declaration-solvent-on\", \"due-to-be-dissolved-on\" and \"dissolved-on\" (the last of which Companies House's own published enumeration omits). A word outside the observed set is still relayed verbatim: this field is never filtered, only reported.",
+               "title": "Event Type"
+              },
+              "occurred_on": {
+               "anyOf": [
+                {
+                 "format": "date",
+                 "type": "string"
+                },
+                {
+                 "type": "null"
+                }
+               ],
+               "default": null,
+               "description": "The date the register gives for this event.",
+               "title": "Occurred On"
+              }
+             },
+             "title": "InsolvencyEvent",
+             "type": "object"
+            },
+            "title": "Events",
+            "type": "array"
+           },
+           "is_liquidation": {
+            "anyOf": [
+             {
+              "type": "boolean"
+             },
+             {
+              "type": "null"
+             }
+            ],
+            "default": null,
+            "description": "Whether this procedure is a winding-up — the country-neutral question behind the national word in `case_type`. Derived by membership of a committed table of words the country module has actually observed on the wire. `None` when `case_type` is absent or is a word not yet in that table — never guessed, never `False` by default (D-011, D-025(d)). **`True` does not mean insolvent**: a members' voluntary liquidation is a *solvent* winding-up, begun by a declaration of solvency, and 56 of the 1,485 live British cases behind this table were exactly that. Read it as 'the entity is being wound up', not as 'the entity cannot pay'.",
+            "title": "Is Liquidation"
+           },
+           "note_codes": {
+            "description": "The register's own note **codes** for this case, verbatim and never resolved into prose — the same treatment D-042(e)(1) gives a filing's `description_code`. Only one code has ever been observed live: \"scottish-insolvency-info\", which means the Accountant in Bankruptcy's Register of Insolvencies holds further detail this API does not. Companies House declares this field an unbounded `array[string]`, so it is the one place in that payload a name could hide; codes are therefore relayed through an allow-list of observed codes, and an unrecognised one is dropped and disclosed in the block's `notes` rather than passed through.",
+            "items": {
+             "type": "string"
+            },
+            "title": "Note Codes",
+            "type": "array"
+           }
+          },
+          "title": "InsolvencyCase",
+          "type": "object"
+         },
+         "title": "Cases",
+         "type": "array"
+        },
+        "notes": {
+         "description": "Plain-English caveats about this block: which of the register's two empty states this is, that practitioner particulars exist upstream and are deliberately not relayed, and any note code withheld by the allow-list.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "Where, when and under what licence this block was fetched.",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        },
+        "statuses": {
+         "description": "The register's own entity-level insolvency status words, verbatim — national vocabulary in values (D-042(g)). Eight observed live in Britain: \"in-administration\", \"liquidation\", \"receivership\", \"receiver-manager\", \"administrative-receiver\", \"administration-order\", \"voluntary-arrangement\" and \"live-receiver-manager-on-at-least-one-charge\". An **empty list means the register publishes no such word for this entity**, which is not the same as 'not currently insolvent': about one in ten companies whose Companies House status is itself an insolvency status still has no word here. No yes/no flag is derived from this field for exactly that reason (D-011).",
+         "items": {
+          "type": "string"
+         },
+         "title": "Statuses",
+         "type": "array"
+        }
+       },
+       "required": [
+        "provenance"
+       ],
+       "title": "InsolvencyBlock",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Insolvency proceedings the register publishes against this entity. `None` unless `insolvency` was passed in `include=[...]`, or that fetch failed. A *present* block with `cases: []` means the register publishes no case, which for Companies House is the normal answer for a solvent company — and is not evidence the entity exists, since that register answers the same way for a number never issued. Read `InsolvencyCase.is_liquidation` with its own caveat: a members' voluntary liquidation is a solvent wind-up."
+    },
+    "is_active": {
+     "default": false,
+     "description": "Convenience mirror of `status == active`, so agents need no enum table.",
+     "title": "Is Active",
+     "type": "boolean"
+    },
+    "is_subunit": {
+     "default": false,
+     "description": "True when this record is a branch/sub-unit, not a legal entity.",
+     "title": "Is Subunit",
+     "type": "boolean"
+    },
+    "last_annual_accounts_year": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Most recent financial year for which accounts were filed.",
+     "title": "Last Annual Accounts Year"
+    },
+    "legal_form": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "English label, e.g. 'Private limited company'.",
+     "title": "Legal Form"
+    },
+    "legal_form_code": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "National legal-form code, e.g. 'AS', 'ASA', 'ENK'.",
+     "title": "Legal Form Code"
+    },
+    "legal_form_local": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Local label, e.g. 'Aksjeselskap'.",
+     "title": "Legal Form Local"
+    },
+    "lei": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "The Legal Entity Identifier GLEIF (the Global LEI Foundation) publishes\nfor one entity — the ``include=[\"lei\"]`` attachment, D-026(c)'s shape,\nunamended by D-045(e). Unlike every other attachment, this upstream is\nnot any one country's own register: GLEIF publishes every jurisdiction\nfrom one endpoint, under one CC0 licence, with one TTL, so it is the\nfirst attachment every country declares by default\n(``Registry.universal_includes``, D-045(e)) rather than something a\ncountry module opts into.\n\nThe two-level nullability is D-026(c)'s and D-011's, restated here: an\n**absent** ``CompanyReport.lei`` means the attachment was not requested,\nor the fetch failed (a ``notes`` sentence on the report says which); a\n**present** block with ``lei=None`` means GLEIF holds no LEI for this\nentity, which is a real and useful answer about a counterparty and must\nnever be rendered as though nothing were known.",
+       "properties": {
+        "legal_name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The legal name as GLEIF publishes it, carried verbatim. May differ from `CompanyReport.name`, because the two are two registers' opinions recorded at two different moments — never reconciled against it and never used to correct the company record (D-018: say which source said what).",
+         "title": "Legal Name"
+        },
+        "lei": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The 20-character Legal Entity Identifier GLEIF publishes for this entity. `None` *inside a present block* means GLEIF holds no LEI for it — a real and useful answer about a counterparty, and not the same as this block being absent (D-026(c), D-011). The LEI is **not** the EUID — see `CompanyReport.euid`'s own description for that distinction rather than restating it here.",
+         "title": "Lei"
+        },
+        "notes": {
+         "description": "Plain-English caveats about this block. Always names the exact string sent as GLEIF's `entity.registeredAs` filter, so a `lei: null` answer is legible rather than silent, and the register-authority code GLEIF cites for this entity. If GLEIF returned more than one record for this registration number, a sentence discloses how many and each LEI, rather than silently picking one.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "Where, when and under what licence this block was fetched. `source` names GLEIF, `license` is 'CC0 1.0', and `source_url` is this record's own GLEIF URL. Never implies endorsement and never describes registry-mcp as a GLEIF service — GLEIF's anti-impersonation clause sits outside its data licence (D-026(c)).",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        },
+        "registration_status": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "GLEIF's own `registration.status` for this LEI record, verbatim: 'ISSUED', 'LAPSED', … (national-vocabulary-in-values, D-042(g)). A 'LAPSED' LEI means the entity stopped renewing its registration and is **not** evidence of insolvency or inactivity — Carillion plc ('03782379') and Lehman Brothers International (Europe) ('02538254') both read `entity.status: ACTIVE` beside `registration.status: LAPSED`. This field carries the *registration's* status; GLEIF's `entity.status` is not carried at all, because it is a claim about the company made by neither the company's own register nor us.",
+         "title": "Registration Status"
+        }
+       },
+       "required": [
+        "provenance"
+       ],
+       "title": "LeiRecord",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "This entity's Legal Entity Identifier record, from GLEIF — not a national register (D-026(c), D-045(e)). `None` unless `lei` was passed in `include=[...]` — and, even then, `None` if that fetch failed (see `notes` for why). A country that declares this attachment (`CountryInfo.supported_includes`) returns a *present* block even for an entity GLEIF holds no LEI for: `LeiRecord.lei` is `None` inside it, which is a real answer, never the same as this field being absent (D-011). Declared by default by every country whose identifiers cannot be a natural person's (`Registry.universal_includes`) — Sweden does not declare it, because GLEIF is a third-party host queried by identifier in a URL query string."
+    },
+    "license": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Licence of the upstream data, e.g. 'NLOD 2.0'.",
+     "title": "License"
+    },
+    "limited_liability": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "True when owners are not personally liable for debts.",
+     "title": "Limited Liability"
+    },
+    "name": {
+     "description": "Current registered name.",
+     "title": "Name",
+     "type": "string"
+    },
+    "notes": {
+     "description": "Caveats an agent should surface to the user, plain English, one per item.",
+     "items": {
+      "type": "string"
+     },
+     "title": "Notes",
+     "type": "array"
+    },
+    "parent_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Identifier of the parent/owning entity, if any.",
+     "title": "Parent Id"
+    },
+    "parents": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "Corporate parents from GLEIF Level 2 — the `include=[\"parents\"]`\nattachment (D-047(a)).\n\n**Three-level nullability**, restated for this block: an **absent**\n`CompanyReport.parents` means `parents` was not requested, or the fetch\nfailed (`notes` on the report says which). A **present** block whose\n`direct` and `ultimate` are both `None` means GLEIF holds **no LEI at\nall** for this entity — there is no Level 2 to hold either, and that is\nitself the answer, not an absence. A **present** block with `direct`\nand/or `ultimate` populated is the ordinary case, whether populated side\ndiscloses a parent or records why it did not.\n\n`direct` and `ultimate` are two independent sides that can disagree in\nkind — one disclosed, the other excepted, or two different parents.\n**Never collapse them and never derive one from the other**: in a\n600-record Swedish sample, 9 records disclosed a direct parent and 10\ndisclosed an ultimate one, so at least one record took different paths\non its two sides.\n\nThe sentence the whole block hangs on: **GLEIF Level 2 reports the\n*accounting consolidating* parent — the entity that consolidates this\nentity's accounts (wire word `IS_DIRECTLY_CONSOLIDATED_BY` /\n`IS_ULTIMATELY_CONSOLIDATED_BY`) — which is not the same as the majority\nshareholder, and neither implies the other.**",
+       "properties": {
+        "direct": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "description": "One side (`direct` or `ultimate`) of a `ParentBlock` — either GLEIF\ndiscloses a corporate parent for this side, or the entity's own filer\nexplained why it did not (``include=[\"parents\"]``, D-047(a)).\n\n**Exactly one of `lei` and `reporting_exception` is populated — never\nboth, never neither** (enforced below, D-011: a link that discloses a\nparent's LEI and a link that records why no parent was disclosed are two\ndifferent facts and must not collapse into one).\n\nGLEIF Level 2 reports the *accounting consolidating* parent — the wire\nword is `IS_DIRECTLY_CONSOLIDATED_BY` / `IS_ULTIMATELY_CONSOLIDATED_BY` —\nwhich is **not** the same as the majority shareholder, and neither\nimplies the other.",
+           "properties": {
+            "corroboration_level": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "GLEIF's own corroboration level for the *relationship* record, verbatim: `FULLY_CORROBORATED`, `PARTIALLY_CORROBORATED`, `ENTITY_SUPPLIED_ONLY`. Measured over 31 disclosed relationships: 10 / 11 / 10 — roughly a third of all disclosed parent links are the filer's own assertion that nobody has checked, which is the reason this field costs a second request. `None` on the exception side, where there is no relationship record.",
+             "title": "Corroboration Level"
+            },
+            "jurisdiction": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The parent's own registered jurisdiction, ISO-3166-1 alpha-2, as GLEIF publishes it. May differ from this entity's own `CompanyReport.country`.",
+             "title": "Jurisdiction"
+            },
+            "legal_name": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The parent's legal name exactly as GLEIF publishes it, verbatim and never reconciled against `CompanyReport.name` or anything else. **Bound by D-028(1)**: never a lookup key, never an index, never searchable, never written to a log (D-040). The binding exists because GLEIF issues LEIs to sole proprietors too — 126,936 records carry an entity-level classification of `SOLE_PROPRIETOR`, whose legal name is routinely a natural person's name — and although no sole-proprietor *parent* was observed in a 30-record sample, nothing in GLEIF's Level 2 format forbids one.",
+             "title": "Legal Name"
+            },
+            "lei": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The parent's own 20-character LEI, when GLEIF discloses a parent for this side. This is a lookup key **for GLEIF**, not for `lookup_company` — the caller cannot feed it a national identifier this project does not carry. To walk up a group from here, call `lookup_company` on the parent's own national identifier where the caller already has it. Norway additionally publishes `CompanyReport.parent_id` on the *first* round trip from Enhetsregisteret — a different register's answer to a neighbouring question, and it is not reconciled against this one (D-018).",
+             "title": "Lei"
+            },
+            "registration_status": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The *parent's* own LEI registration status (`ISSUED`, `LAPSED`, …), carrying the same warning as `LeiRecord.registration_status`: a `LAPSED` LEI means the parent stopped renewing its own registration and is **not** evidence of insolvency — see that field's own description rather than restating it here.",
+             "title": "Registration Status"
+            },
+            "reporting_exception": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "Why the entity did not report a parent on this side, from GLEIF's closed exception-reason vocabulary, relayed verbatim: `NO_LEI`, `NATURAL_PERSONS` ('the entity is controlled by a natural person(s) without any intermediate legal entity'), `NON_CONSOLIDATING` ('controlled by legal entities not subject to consolidation'), `NO_KNOWN_PERSON` ('no known person(s) controlling the entity, e.g. the entity is controlled by diverse shareholders'), `NON_PUBLIC`, and five values deprecated since 2022-03-01 and retained only for compatibility (`BINDING_LEGAL_COMMITMENTS`, `LEGAL_OBSTACLES`, `DISCLOSURE_DETRIMENTAL`, `DETRIMENT_NOT_EXCLUDED`, `CONSENT_NOT_OBTAINED`). Three things to hold onto reading it, all load-bearing: it is a **category word and never a name** — nothing beyond the word is available and nothing beyond it would be relayed if it were (D-028); it is the entity's **own stated reason**, verified by neither GLEIF nor us; and it is **not applied consistently between filers** — of 117 ultimate-parent exceptions sampled, `NATURAL_PERSONS` is 49 of 57 (86%) of Norwegian ones and 28 of 60 (47%) of British ones, and EQUINOR ASA (`OW6OFBNCKXC4US5C7523`), 67% owned by the Norwegian State, reads `NATURAL_PERSONS` while DNB, Telenor and Tesco — in the same position at the top of their own groups — read `NON_CONSOLIDATING`, and BP, Ericsson and Carillion read `NO_KNOWN_PERSON`. Treat `NATURAL_PERSONS` on a company with a known institutional owner as a filing artefact, not a fact about its owners.",
+             "title": "Reporting Exception"
+            },
+            "source_url": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The exact GLEIF URL that returned this side's own record — the parent's Level 1 record when disclosed, or the reporting-exception record when excepted. `ParentBlock.provenance` describes the fetch as a whole; this names the one leg that filled this side (D-046(d)).",
+             "title": "Source Url"
+            }
+           },
+           "title": "ParentLink",
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The entity that directly consolidates this entity's accounts, or the reporting exception recorded for this side. `None` when GLEIF's relationships name neither a disclosed parent nor a reporting exception for this side (0 of 1,800 records sampled) or when a failed fetch degraded just this side (`notes` names the leg); see `ParentBlock`'s own docstring for the two other reasons this can be `None`."
+        },
+        "notes": {
+         "description": "Plain-English caveats, always naming the URL(s) actually fetched — including, when GLEIF holds no LEI at all, a sentence saying so. Whenever either side carries a `reporting_exception`, also carries the 'this word is the filer's own, unverified and inconsistently applied' sentence, because a caveat that lives only in a schema description does not travel into a rendered answer. Also names the one thing lost by not modelling the disclosed relationship's own period history: its start date.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "One `SourceRef` for the whole fan-out (D-046(d)), not one per side: `source` names GLEIF, `license` is 'CC0 1.0', `source_url` is 'https://api.gleif.org/api/v1/lei-records/{lei}' — the record every leg hangs off — and `fetched_at` is the moment the fan-out completed. The discovery search that finds this entity's LEI fills no field on this block; it is shared with `include=[\"lei\"]` and never repeated for a lookup that asks for both. Each side's own `source_url` names the exact leg that filled it. Never implies endorsement and never describes registry-mcp as a GLEIF service (D-026(c)).",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        },
+        "ultimate": {
+         "anyOf": [
+          {
+           "additionalProperties": false,
+           "description": "One side (`direct` or `ultimate`) of a `ParentBlock` — either GLEIF\ndiscloses a corporate parent for this side, or the entity's own filer\nexplained why it did not (``include=[\"parents\"]``, D-047(a)).\n\n**Exactly one of `lei` and `reporting_exception` is populated — never\nboth, never neither** (enforced below, D-011: a link that discloses a\nparent's LEI and a link that records why no parent was disclosed are two\ndifferent facts and must not collapse into one).\n\nGLEIF Level 2 reports the *accounting consolidating* parent — the wire\nword is `IS_DIRECTLY_CONSOLIDATED_BY` / `IS_ULTIMATELY_CONSOLIDATED_BY` —\nwhich is **not** the same as the majority shareholder, and neither\nimplies the other.",
+           "properties": {
+            "corroboration_level": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "GLEIF's own corroboration level for the *relationship* record, verbatim: `FULLY_CORROBORATED`, `PARTIALLY_CORROBORATED`, `ENTITY_SUPPLIED_ONLY`. Measured over 31 disclosed relationships: 10 / 11 / 10 — roughly a third of all disclosed parent links are the filer's own assertion that nobody has checked, which is the reason this field costs a second request. `None` on the exception side, where there is no relationship record.",
+             "title": "Corroboration Level"
+            },
+            "jurisdiction": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The parent's own registered jurisdiction, ISO-3166-1 alpha-2, as GLEIF publishes it. May differ from this entity's own `CompanyReport.country`.",
+             "title": "Jurisdiction"
+            },
+            "legal_name": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The parent's legal name exactly as GLEIF publishes it, verbatim and never reconciled against `CompanyReport.name` or anything else. **Bound by D-028(1)**: never a lookup key, never an index, never searchable, never written to a log (D-040). The binding exists because GLEIF issues LEIs to sole proprietors too — 126,936 records carry an entity-level classification of `SOLE_PROPRIETOR`, whose legal name is routinely a natural person's name — and although no sole-proprietor *parent* was observed in a 30-record sample, nothing in GLEIF's Level 2 format forbids one.",
+             "title": "Legal Name"
+            },
+            "lei": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The parent's own 20-character LEI, when GLEIF discloses a parent for this side. This is a lookup key **for GLEIF**, not for `lookup_company` — the caller cannot feed it a national identifier this project does not carry. To walk up a group from here, call `lookup_company` on the parent's own national identifier where the caller already has it. Norway additionally publishes `CompanyReport.parent_id` on the *first* round trip from Enhetsregisteret — a different register's answer to a neighbouring question, and it is not reconciled against this one (D-018).",
+             "title": "Lei"
+            },
+            "registration_status": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The *parent's* own LEI registration status (`ISSUED`, `LAPSED`, …), carrying the same warning as `LeiRecord.registration_status`: a `LAPSED` LEI means the parent stopped renewing its own registration and is **not** evidence of insolvency — see that field's own description rather than restating it here.",
+             "title": "Registration Status"
+            },
+            "reporting_exception": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "Why the entity did not report a parent on this side, from GLEIF's closed exception-reason vocabulary, relayed verbatim: `NO_LEI`, `NATURAL_PERSONS` ('the entity is controlled by a natural person(s) without any intermediate legal entity'), `NON_CONSOLIDATING` ('controlled by legal entities not subject to consolidation'), `NO_KNOWN_PERSON` ('no known person(s) controlling the entity, e.g. the entity is controlled by diverse shareholders'), `NON_PUBLIC`, and five values deprecated since 2022-03-01 and retained only for compatibility (`BINDING_LEGAL_COMMITMENTS`, `LEGAL_OBSTACLES`, `DISCLOSURE_DETRIMENTAL`, `DETRIMENT_NOT_EXCLUDED`, `CONSENT_NOT_OBTAINED`). Three things to hold onto reading it, all load-bearing: it is a **category word and never a name** — nothing beyond the word is available and nothing beyond it would be relayed if it were (D-028); it is the entity's **own stated reason**, verified by neither GLEIF nor us; and it is **not applied consistently between filers** — of 117 ultimate-parent exceptions sampled, `NATURAL_PERSONS` is 49 of 57 (86%) of Norwegian ones and 28 of 60 (47%) of British ones, and EQUINOR ASA (`OW6OFBNCKXC4US5C7523`), 67% owned by the Norwegian State, reads `NATURAL_PERSONS` while DNB, Telenor and Tesco — in the same position at the top of their own groups — read `NON_CONSOLIDATING`, and BP, Ericsson and Carillion read `NO_KNOWN_PERSON`. Treat `NATURAL_PERSONS` on a company with a known institutional owner as a filing artefact, not a fact about its owners.",
+             "title": "Reporting Exception"
+            },
+            "source_url": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ],
+             "default": null,
+             "description": "The exact GLEIF URL that returned this side's own record — the parent's Level 1 record when disclosed, or the reporting-exception record when excepted. `ParentBlock.provenance` describes the fetch as a whole; this names the one leg that filled this side (D-046(d)).",
+             "title": "Source Url"
+            }
+           },
+           "title": "ParentLink",
+           "type": "object"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The entity at the top of the chain that ultimately consolidates this entity's accounts, or the reporting exception recorded for this side. Independent of `direct` — never derived from it, never reconciled against it."
+        }
+       },
+       "required": [
+        "provenance"
+       ],
+       "title": "ParentBlock",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Corporate parents from GLEIF Level 2 — accounting consolidation, not shareholding (see `ParentBlock`'s own docstring). `None` unless `parents` was passed in `include=[...]` — and, even then, `None` if that fetch failed (see `notes` for why). A country that declares this attachment returns a *present* block even for an entity GLEIF holds no LEI for at all, with `direct` and `ultimate` both `None`: GLEIF cannot hold Level 2 for an entity it has no Level 1 for, and that is the answer, not an absence (D-011). Declared by default by every country whose identifiers cannot be a natural person's (`Registry.universal_includes`, alongside `lei`) — Sweden does not declare it, for the same reason it does not declare `lei`."
+    },
+    "peppol": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "Whether one entity can be reached over the Peppol network — the\n``include=[\"peppol\"]`` attachment (DECISIONS.md D-029(b), amended in full\nby D-046 after ``tasks/T48-recon.md`` read the wire). Norway-only today:\ndeclared by ``BrregRegistry.supported_includes``, not by\n:attr:`Registry.universal_includes` (D-046(h)) — the participant\nidentifier needs a country's own ISO 6523 ICD, the answer's provenance is\na *different SMP per participant* rather than one endpoint, and the\nlicence sentence below was earned by reading a Norwegian catalogue page.\n\nThe Peppol network is not Enhetsregisteret: the answering SMP is operated\nby a second organisation entirely (for Norway, Digitaliseringsdirektoratet\n— named in ``registries/no/peppol.py``, where national vocabulary belongs\nper D-004, never here), so this is a second round trip with its own\n:class:`SourceRef` rather than a field on :class:`CompanyReport` itself\n(D-026(c)).",
+       "properties": {
+        "can_receive_invoice": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Whether this participant advertises the Peppol BIS Billing 3.0 Invoice document type or its PINT successor — DFØ's own equation: 'Peppol BIS billing v3.0 er det samme som EHF-faktura', which is exactly the 1 January 2027 question. Derived by **exact membership of a committed table of document type identifiers**, never by matching text, a substring or a version range. `true` when a table id is in `document_types` via the authoritative SMP route; also `true` via the Peppol Directory fallback, but a Directory list is a subset of the SMP's, so a Directory miss here is `null`, never `false` — see `document_types`. `false` only when `registered` itself is `false`. `null` when `registered` is `null`. **The SMP publishes a per-document-type ServiceActivationDate/ServiceExpirationDate that this block does not read** (one extra HTTP call per document type), so an advertised document type may be future-dated or already expired — `notes` says so whenever this is `true`.",
+         "title": "Can Receive Invoice"
+        },
+        "document_types": {
+         "description": "The **document type** identifiers the answering SMP (or, on the Directory fallback, the Peppol Directory) advertises for this participant, full qualified `'<scheme>::<value>'` strings, e.g. `'busdox-docid-qns::urn:oasis:...:billing:3.0::2.1'`. **Not process identifiers** — those live one HTTP call deeper, per document type, and are not carried (D-046(e)). No cap and no truncation: the modal Norwegian participant lists two, some list many more. Only *receiving* capabilities are registered anywhere in the Peppol network, which is the right semantics for 'can this counterparty receive an e-invoice'.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Document Types",
+         "type": "array"
+        },
+        "notes": {
+         "description": "Plain-English caveats about this block. Always names which route answered (the SMP, or the Peppol Directory) or which step failed when `registered` is `null`; that only *receiving* capabilities are registered in the Peppol network; on the Directory route, that it is a voluntary, lagging index of the SMP; and, on a Directory miss, the operators' own statement that this does not mean the entity is not in the Peppol Network.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Notes",
+         "type": "array"
+        },
+        "participant_id": {
+         "description": "The ISO 6523 participant identifier, `'0192:' + normalised orgnr` — `0192` is Norway's ICD (International Code Designator) inside the Peppol network. Derived offline from the identifier alone and **always populated, even when every lookup failed** (D-029(c)): it is the key a caller needs to ask elsewhere, regardless of what this block's own `registered` field says.",
+         "title": "Participant Id",
+         "type": "string"
+        },
+        "provenance": {
+         "additionalProperties": false,
+         "description": "Where, when and under what licence this block's answer was produced. `source` names the SMP host and route that answered (e.g. '<host> (Peppol SMP, via the Peppol SML)'), or the Peppol Directory named as an index that may lag — **derived at request time from what actually answered, never a constant** (D-046(b)). `license` carries D-046(g)'s stated absence: nobody publishes a licence for the Peppol SML, for any SMP or for the Peppol Directory. One `SourceRef` for the whole block even though up to two round trips were made (a DNS read and an HTTPS read): the DNS step only located the host and fills no field of this block except `smp_url`, so it is disclosed as that field rather than as a second provenance (D-046(d)).",
+         "properties": {
+          "cached": {
+           "default": false,
+           "description": "True when this attachment was served from cache rather than a live fetch.",
+           "title": "Cached",
+           "type": "boolean"
+          },
+          "fetched_at": {
+           "anyOf": [
+            {
+             "format": "date-time",
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "UTC timestamp of the live fetch this attachment came from.",
+           "title": "Fetched At"
+          },
+          "license": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Licence of the upstream data for this attachment's own fetch, e.g. 'CC0 1.0'. A block's licence is the register's own for that endpoint and may equal the base report's without being derived from it: Norway's Regnskapsregisteret accounts endpoint states no licence of its own, so the blocks it serves carry NLOD 2.0 — the same value the company record on the same host already carries.",
+           "title": "License"
+          },
+          "source": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Human-readable source name, e.g. 'GLEIF Level 1 (gleif.org)'.",
+           "title": "Source"
+          },
+          "source_url": {
+           "anyOf": [
+            {
+             "type": "string"
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "default": null,
+           "description": "Direct URL of the upstream record, for citation.",
+           "title": "Source Url"
+          }
+         },
+         "title": "SourceRef",
+         "type": "object"
+        },
+        "registered": {
+         "anyOf": [
+          {
+           "type": "boolean"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Three states, and an agent branches on this field under a statute, so all three matter. `true`: the Peppol network answered for this participant — either the SMP the Peppol SML named for it served a ServiceGroup, or the Peppol Directory listed a match. `false`: **the authoritative SML/SMP route answered that it is not registered** — an NXDOMAIN resolving the Peppol SML, or a 404 from the SMP the SML named. Nothing else ever earns `false` (D-046(a)). `null`: we could not get an authoritative answer — a DNS resolver exception, a timeout, a NOERROR answer with no `Meta:SMP` record, an SMP error, **or the Peppol Directory simply not listing this participant**, which both Peppol operators state in writing means nothing: publication to the Directory is voluntary, and its own introduction page says a miss there 'doesn't mean the entity is not in the Peppol Network' (D-046(a)).",
+         "title": "Registered"
+        },
+        "smp_url": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "The SMP base URL the Peppol SML named for **this participant**, verbatim. This varies per participant and is **never assumed**: the default national SMP a country's participants mostly resolve to is not the only one — a measured 1-in-43 Norwegian participants resolve to a different one entirely (D-046(b)). `null` when the SML never named a host for this participant (NXDOMAIN, or no usable `Meta:SMP` record).",
+         "title": "Smp Url"
+        }
+       },
+       "required": [
+        "participant_id",
+        "provenance"
+       ],
+       "title": "PeppolParticipant",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Whether this entity can be reached over the Peppol e-invoicing network. `None` unless `peppol` was passed in `include=[...]` — and, even then, `None` only if the attachment could not be built at all (see `notes` for why). A country that declares this attachment returns a **present** block even when the network could not be reached: `PeppolParticipant.registered` carries the three-state answer (`true`/`false`/`null`) and `PeppolParticipant.participant_id` is always populated, because that is the key a caller needs to ask elsewhere regardless (D-011, D-029(c)). Norway only, today (D-046(h)): the participant identifier needs a country's own ISO 6523 ICD and the answer's provenance is a different SMP per participant, neither of which generalises to `Registry.universal_includes` yet."
+    },
+    "phone": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Contact phone as registered.",
+     "title": "Phone"
+    },
+    "postal_address": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "description": "A postal or visiting address, flattened to something an LLM can read.\n\n``lines`` keeps the registry's own street/box lines in order; the rest are\nparsed components where the registry provides them.",
+       "properties": {
+        "city": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Post town.",
+         "title": "City"
+        },
+        "country_code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "ISO-3166-1 alpha-2 country code of the address itself.",
+         "title": "Country Code"
+        },
+        "country_name": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Country name as registered.",
+         "title": "Country Name"
+        },
+        "lines": {
+         "description": "Street or PO-box lines exactly as the registry supplies them.",
+         "items": {
+          "type": "string"
+         },
+         "title": "Lines",
+         "type": "array"
+        },
+        "municipality": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Municipality name.",
+         "title": "Municipality"
+        },
+        "municipality_code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "National municipality code, if the registry has one.",
+         "title": "Municipality Code"
+        },
+        "postal_code": {
+         "anyOf": [
+          {
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ],
+         "default": null,
+         "description": "Postal / ZIP code.",
+         "title": "Postal Code"
+        }
+       },
+       "title": "Address",
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Postal address."
+    },
+    "previous_names": {
+     "description": "Former registered names, newest first.",
+     "items": {
+      "type": "string"
+     },
+     "title": "Previous Names",
+     "type": "array"
+    },
+    "published_deadlines": {
+     "description": "Filing dates the upstream register publishes for this entity itself, carried verbatim. Empty for a register that publishes none — most of them. This is the input `Registry.deadlines(report, today)` needs to prefer the register's own figure over any calculation (DECISIONS.md D-018), and it is what keeps that method the pure function of (report, today) its contract promises.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A filing obligation exactly as the *register itself* publishes it.\n\nThe counterpart to :class:`Deadline`, and deliberately much smaller.\n:class:`Deadline` is *ours*: computed, English-labelled, dated against a\ncaller-supplied ``today``. This is *theirs*: whatever the upstream register\nstates about the obligation, carried verbatim, with no interpretation and\nno arithmetic.\n\nIt exists because some registers do the filing arithmetic themselves and\npublish the answer — Companies House publishes\n``accounts.next_accounts.due_on`` and ``confirmation_statement.next_due``,\nwhich already account for accounting-reference-date changes, shortened and\nextended periods, and administrative extensions that no outside calculation\ncan see (``DECISIONS.md`` D-016(a), D-018). A registry whose upstream\npublishes such a date fills this list at lookup time, and its\n:meth:`Registry.deadlines` then merges: the published date wins, a\ncomputation fills the gaps. A registry whose upstream publishes nothing —\nBrønnøysundregistrene, and every register that only states the statute —\nleaves the list empty and loses nothing.\n\nNothing in ``core/`` interprets any field here. ``kind`` and ``source``\nare opaque strings owned by the country module; ``core`` only carries them\nacross the lookup → deadlines boundary so that\n``Registry.deadlines(report, today)`` can stay the pure function of\n``(report, today)`` that its contract promises.",
+      "properties": {
+       "due_date": {
+        "anyOf": [
+         {
+          "format": "date",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "The date the register itself publishes for this filing. `None` when the register names a period but no date — the country module may still be able to compute one from `period_end`.",
+        "title": "Due Date"
+       },
+       "kind": {
+        "description": "The same machine slug the country module uses for the matching `Deadline.kind`, e.g. 'annual_accounts'. Unique within a report.",
+        "title": "Kind",
+        "type": "string"
+       },
+       "overdue": {
+        "anyOf": [
+         {
+          "type": "boolean"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "The register's own overdue flag, if it publishes one. Corroboration only: it is computed against the register's today, not the caller's, so `Deadline.days_until < 0` is the authoritative answer.",
+        "title": "Overdue"
+       },
+       "period_end": {
+        "anyOf": [
+         {
+          "format": "date",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Last day of the period this filing covers, if published. This, not an accounting reference date, is what a statutory period runs from.",
+        "title": "Period End"
+       },
+       "period_start": {
+        "anyOf": [
+         {
+          "format": "date",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "First day of the period this filing covers, if published.",
+        "title": "Period Start"
+       },
+       "source": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Where the date came from upstream, e.g. 'accounts.next_accounts.due_on'. Opaque to core; the country module turns it into `applies_because` prose.",
+        "title": "Source"
+       }
+      },
+      "required": [
+       "kind"
+      ],
+      "title": "PublishedDeadline",
+      "type": "object"
+     },
+     "title": "Published Deadlines",
+     "type": "array"
+    },
+    "purpose": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Statutory purpose / objects clause, joined into one string.",
+     "title": "Purpose"
+    },
+    "registered_at": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Date first entered in the central register.",
+     "title": "Registered At"
+    },
+    "registers": {
+     "additionalProperties": {
+      "type": "boolean"
+     },
+     "description": "Other national sub-registers this entity is or is not in, keyed by a lower-case slug, e.g. {'stiftelsesregisteret': false}.",
+     "title": "Registers",
+     "type": "object"
+    },
+    "registry": {
+     "description": "Registry slug, e.g. 'brreg'.",
+     "title": "Registry",
+     "type": "string"
+    },
+    "sector": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Institutional sector description.",
+     "title": "Sector"
+    },
+    "sector_code": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Institutional sector code.",
+     "title": "Sector Code"
+    },
+    "share_capital": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Registered share capital.",
+     "title": "Share Capital"
+    },
+    "share_capital_currency": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "ISO-4217 code for `share_capital`.",
+     "title": "Share Capital Currency"
+    },
+    "source": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Human-readable source name, e.g. 'Enhetsregisteret (brreg.no)'.",
+     "title": "Source"
+    },
+    "source_url": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Direct URL of the upstream record, for citation.",
+     "title": "Source Url"
+    },
+    "status": {
+     "default": "unknown",
+     "description": "Normalised lifecycle status.",
+     "enum": [
+      "active",
+      "under_liquidation",
+      "under_compulsory_liquidation",
+      "bankrupt",
+      "dissolved",
+      "deleted",
+      "unknown"
+     ],
+     "title": "CompanyStatus",
+     "type": "string"
+    },
+    "status_detail": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "One sentence in English explaining the status and the flag it came from.",
+     "title": "Status Detail"
+    },
+    "vat_number": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "VAT identifier if it differs from `id` (Norway: id + 'MVA').",
+     "title": "Vat Number"
+    },
+    "vat_registered": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Registered for VAT (Norway: Merverdiavgiftsregisteret).",
+     "title": "Vat Registered"
+    },
+    "vat_registered_at": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Date of VAT registration.",
+     "title": "Vat Registered At"
+    },
+    "website": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Website as registered.",
+     "title": "Website"
+    }
+   },
+   "required": [
+    "country",
+    "registry",
+    "id",
+    "name"
+   ],
+   "title": "CompanyReport",
+   "type": "object"
+  },
+  "title": "Look up a company in a national business register"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Find a company (ChatGPT connector alias for search_company)"
+  },
+  "description": "ChatGPT connector alias; other clients should prefer `search_company`, which takes an\nexplicit `country` and returns the full SearchResult. One free-text query — a name, an\nidentifier, or either plus a country — across Norway, the United Kingdom and Sweden.\nReturns {\"results\": [{\"id\", \"title\", \"url\"}]}; pass a result's `id` to `fetch`.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "A company name, a national identifier, or either plus a country.",
+     "examples": [
+      "Equinor",
+      "923609016",
+      "Tesco GB"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "The whole `search` response: `{\"results\": [...]}`.",
+   "properties": {
+    "results": {
+     "items": {
+      "additionalProperties": false,
+      "description": "One `search` result row. OpenAI reads exactly `id`, `title` and `url`.",
+      "properties": {
+       "id": {
+        "title": "Id",
+        "type": "string"
+       },
+       "title": {
+        "title": "Title",
+        "type": "string"
+       },
+       "url": {
+        "title": "Url",
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "title",
+       "url"
+      ],
+      "title": "ConnectorSearchHit",
+      "type": "object"
+     },
+     "title": "Results",
+     "type": "array"
+    }
+   },
+   "title": "ConnectorSearchResponse",
+   "type": "object"
+  },
+  "title": "Find a company (ChatGPT connector alias for search_company)"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search a national company register by name"
+  },
+  "description": "Search a national company register by name, when you have a name rather than an\nidentifier.\n\n`country=\"NO\"` searches Brønnøysundregistrene / Enhetsregisteret (brreg) — the norway\ncompany lookup for the norwegian business registry when the organisasjonsnummer (orgnr,\norg.nr) is not yet known; `country=\"GB\"` is the uk company search at Companies House,\nreturning each hit's company number (company registration number, CRN).\n\n**Sweden cannot be searched by name.** Bolagsverket's free API has four operations and\nnone takes a company name, so `country=\"SE\"` raises `not_implemented` — a fact about\nthe register, not a temporary gap, and it will not start working. Sweden supports\nlookup by identifier only: call `lookup_company` with the ten-digit\norganisationsnummer (or a sole trader's twelve-digit personnummer), or\n`validate_company_id` first to check the shape for free. Bolagsverket publishes the\nwhole register as bulk downloadable files for callers who must search by name.\n\nThen call `lookup_company` with the `id` of the right hit for the full report — a\nsearch hit is deliberately thin (name, legal form, status, city) and must not be acted\non directly. Hits arrive in the register's own relevance order, so read each hit's\n`confidence` rather than assuming the first row is best. Zero hits is not an error, and\n`hint` says what to try next — Norwegian names are registered upper-case and often carry\nan 'AS', 'ASA' or 'NUF' suffix, UK names a 'LIMITED', 'LTD', 'PLC' or 'LLP' one, worth\ndropping before concluding a company does not exist.\n\nErrors are the `{\"error\": {\"code\", \"message\", \"hint\"}}` envelope this server's\ninstructions set out code by code; `hint` names the next call. Call `list_countries`\nif you are unsure a country is supported.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "default": "NO",
+     "description": "ISO-3166-1 alpha-2 — NO Norway, GB United Kingdom, SE Sweden. UK is not a country code here and is rejected. Call list_countries for the live set.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum hits to return, 1-100; default 10. Outside that range is a bad_request, not a silent clamp.",
+     "examples": [
+      10,
+      50
+     ],
+     "type": "integer"
+    },
+    "name": {
+     "description": "Company name to search for, free text — not an identifier. Use lookup_company once you have the id of the right hit.",
+     "examples": [
+      "Equinor",
+      "Tesco"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "search_company",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "Envelope returned by ``search`` — hits plus what the agent needs next.",
+   "properties": {
+    "cached": {
+     "default": false,
+     "description": "Served from cache.",
+     "title": "Cached",
+     "type": "boolean"
+    },
+    "country": {
+     "description": "ISO-3166-1 alpha-2, upper-case.",
+     "title": "Country",
+     "type": "string"
+    },
+    "fetched_at": {
+     "anyOf": [
+      {
+       "format": "date-time",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "UTC timestamp of the fetch.",
+     "title": "Fetched At"
+    },
+    "hint": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "What to do next, e.g. 'call lookup_company with the id of the right hit'.",
+     "title": "Hint"
+    },
+    "hits": {
+     "description": "Best matches, best first: always sorted by `confidence` descending. Hits that score equally keep the order the upstream register returned them in.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One candidate from a name search.\n\nDeliberately thin: enough for an agent to pick the right entity and then\ncall ``lookup_company`` with ``id`` for the full report.",
+      "properties": {
+       "city": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Post town of the business address.",
+        "title": "City"
+       },
+       "confidence": {
+        "default": 0.5,
+        "description": "Match confidence for this hit (D-005).",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "title": "Confidence",
+        "type": "number"
+       },
+       "confidence_basis": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Why that confidence.",
+        "title": "Confidence Basis"
+       },
+       "country": {
+        "description": "ISO-3166-1 alpha-2, upper-case.",
+        "title": "Country",
+        "type": "string"
+       },
+       "id": {
+        "description": "Canonical national identifier — feed this to lookup.",
+        "title": "Id",
+        "type": "string"
+       },
+       "is_subunit": {
+        "default": false,
+        "description": "True for branches / sub-units.",
+        "title": "Is Subunit",
+        "type": "boolean"
+       },
+       "legal_form": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "English legal-form label.",
+        "title": "Legal Form"
+       },
+       "legal_form_code": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "National legal-form code.",
+        "title": "Legal Form Code"
+       },
+       "municipality": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Municipality of the business address.",
+        "title": "Municipality"
+       },
+       "name": {
+        "description": "Registered name.",
+        "title": "Name",
+        "type": "string"
+       },
+       "registered_at": {
+        "anyOf": [
+         {
+          "format": "date",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Date entered in the register.",
+        "title": "Registered At"
+       },
+       "registry": {
+        "description": "Registry slug.",
+        "title": "Registry",
+        "type": "string"
+       },
+       "source_url": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Upstream record URL.",
+        "title": "Source Url"
+       },
+       "status": {
+        "default": "unknown",
+        "description": "Normalised lifecycle status.",
+        "enum": [
+         "active",
+         "under_liquidation",
+         "under_compulsory_liquidation",
+         "bankrupt",
+         "dissolved",
+         "deleted",
+         "unknown"
+        ],
+        "title": "CompanyStatus",
+        "type": "string"
+       }
+      },
+      "required": [
+       "country",
+       "registry",
+       "id",
+       "name"
+      ],
+      "title": "SearchHit",
+      "type": "object"
+     },
+     "title": "Hits",
+     "type": "array"
+    },
+    "query": {
+     "description": "The name that was searched for.",
+     "title": "Query",
+     "type": "string"
+    },
+    "registry": {
+     "description": "Registry slug.",
+     "title": "Registry",
+     "type": "string"
+    },
+    "total": {
+     "default": 0,
+     "description": "Total matches upstream, which may exceed len(hits).",
+     "minimum": 0,
+     "title": "Total",
+     "type": "integer"
+    },
+    "truncated": {
+     "default": false,
+     "description": "True when `total` exceeds the returned hits.",
+     "title": "Truncated",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "country",
+    "registry",
+    "query"
+   ],
+   "title": "SearchResult",
+   "type": "object"
+  },
+  "title": "Search a national company register by name"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Validate a company identifier (no network call)"
+  },
+  "description": "Check whether a national company identifier is well-formed — no network call.\n\n`country=\"NO\"` checksum-checks a Norwegian organisasjonsnummer (orgnr, org.nr) for\nBrønnøysundregistrene / Enhetsregisteret (brreg) — the cheap norway company lookup\npre-check for the norwegian business registry. `country=\"GB\"` shape-checks and\nnormalises a UK company number (company registration number, CRN) for Companies House\n('445790' → '00445790', 'oc303675' → 'OC303675'); a CRN has no check digit, so a GB\n`valid: true` means the shape is right and nothing more. `country=\"SE\"` shape-checks and\nnormalises a Swedish organisationsnummer for Bolagsverket ('556016-0680' and\n'SE556016068001' both become '5560160680') and accepts a sole trader's twelve-digit\npersonnummer; Sweden's check digit is **not** enforced here (`registry://rules/SE` says\nwhy), so an `SE` `valid: true` means the shape is right, `reason` may carry a caveat,\nand the register's own verdict arrives on the lookup. It is the cheapest way to tell a\nten-digit Swedish organisationsnummer from a nine-digit Norwegian organisasjonsnummer.\n\nUse it on user input or a spreadsheet column before spending a real `lookup_company`\ncall, since it is instant and free.\n\nReturns a ValidationResult and never raises for a malformed identifier: `valid: false`\ncomes with `reason` and `hint` rather than a tool error — this tool answers a question,\nit does not fail on bad input (D-010). A valid identifier does not mean the entity\nexists; follow it with `lookup_company` if you need facts. The only error it raises is\n`unsupported_country`, in the usual `{\"error\": {\"code\", \"message\", \"hint\"}}` envelope —\ncall `list_countries`.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "default": "NO",
+     "description": "ISO-3166-1 alpha-2 — NO Norway, GB United Kingdom, SE Sweden. UK is not a country code here and is rejected. Call list_countries for the live set.",
+     "type": "string"
+    },
+    "id": {
+     "description": "The company's national identifier, normalised for you — a Norwegian organisasjonsnummer (orgnr), a Companies House company number (CRN), or a Swedish organisationsnummer or personnummer. Spaces, dots, hyphens, a NO...MVA suffix and a short CRN are accepted; list_countries gives each country's exact shape.",
+     "examples": [
+      "923609016",
+      "00445790"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "validate_company_id",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "The answer to \"is this identifier well-formed?\" — no network call.\n\nThe only shape the validation operation returns, on both surfaces\n(``DECISIONS.md`` D-010): REST ``GET /v1/{country}/validate/{id}`` and the\nMCP tool ``validate_company_id``.\n\nNote that an invalid identifier is **not** an error here: this operation\nanswers a question, so it returns ``valid=False`` with a ``reason`` and a\n``hint`` rather than raising. That is the one deliberate exception to\n``DECISIONS.md`` D-007's \"every expected failure is a raised\n``RegistryError``\" — and the reason ``hint`` is carried on this model.\n\nBuild it with ``Registry.validate(id)``; do not construct it in a surface.",
+   "properties": {
+    "country": {
+     "description": "ISO-3166-1 alpha-2, upper-case.",
+     "title": "Country",
+     "type": "string"
+    },
+    "formatted": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The identifier as a local would write it, e.g. '923 609 016'. None when invalid.",
+     "title": "Formatted"
+    },
+    "hint": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "What to do next when `valid` is false — the same hint the invalid_id error carries. None when valid: the next call is simply lookup.",
+     "title": "Hint"
+    },
+    "id_scheme": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Name of the identifier scheme, e.g. 'organisasjonsnummer'.",
+     "title": "Id Scheme"
+    },
+    "input": {
+     "description": "The identifier exactly as the caller supplied it.",
+     "title": "Input",
+     "type": "string"
+    },
+    "normalized": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Canonical form to pass to lookup, e.g. '923609016'. None when invalid.",
+     "title": "Normalized"
+    },
+    "reason": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "One English sentence saying why it is valid, or what failed.",
+     "title": "Reason"
+    },
+    "registry": {
+     "description": "Registry slug, e.g. 'brreg'.",
+     "title": "Registry",
+     "type": "string"
+    },
+    "valid": {
+     "description": "True when the identifier passes this country's format and checksum.",
+     "title": "Valid",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "country",
+    "registry",
+    "input",
+    "valid"
+   ],
+   "title": "ValidationResult",
+   "type": "object"
+  },
+  "title": "Validate a company identifier (no network call)"
+ }
+]

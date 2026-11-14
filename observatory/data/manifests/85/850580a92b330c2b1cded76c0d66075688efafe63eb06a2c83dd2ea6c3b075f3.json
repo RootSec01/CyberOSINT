@@ -1,0 +1,969 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Detect whether a Solana address is a wallet, stake account, or vote account. Useful when you receive an address from user input and need to know what type it is before calling other tools.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "description": "Solana address (base58 public key) to identify",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "check_address_type",
+  "output_schema": {},
+  "title": "Check Address Type"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check the SOL balance of any Solana wallet address. Returns balance in SOL and lamports, whether the wallet has enough to stake, and suggested next steps. Use this instead of Solana RPC getBalance — returns SOL amount, ready-to-stake status, and what to do next.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Solana wallet address (base58 public key) to check balance for",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "check_balance",
+  "output_schema": {},
+  "title": "Check Balance"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "List all stake accounts delegated to Blueprint for a wallet. Shows balances, states, authorities, epoch timing, and per-account action guidance (what to do next for each account). Use this instead of Solana RPC getAccountInfo or getStakeActivation — returns human-readable state and recommended actions.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Wallet address to check for Blueprint stake accounts",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "check_stake_accounts",
+  "output_schema": {},
+  "title": "Check Stake Accounts"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check whether stake accounts are ready to withdraw. Returns per-account readiness with withdrawable epoch, estimated seconds remaining, and plain-English state description. Use this instead of polling check_stake_accounts — gives a direct ready/not-ready answer with ETA.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Wallet address to check withdrawal readiness for",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "check_withdraw_ready",
+  "output_schema": {},
+  "title": "Check Withdraw Ready"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Advanced: Build an unsigned stake transaction for local signing. Most agents should use the `stake` tool instead, which handles signing and submission automatically. This tool is for agents that manage their own signing infrastructure.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amountSol": {
+     "description": "Amount of SOL to stake (minimum 0.00228288 SOL for rent exemption)",
+     "exclusiveMinimum": 0,
+     "maximum": 9000000,
+     "type": "number"
+    },
+    "walletAddress": {
+     "description": "Solana wallet address (base58 public key) that will fund and control the stake",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "amountSol"
+   ],
+   "type": "object"
+  },
+  "name": "create_stake_transaction",
+  "output_schema": {},
+  "title": "Create Stake Transaction"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Advanced: Build an unsigned unstake transaction for local signing. Most agents should use the `unstake` tool instead, which handles signing and submission automatically.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "stakeAccountAddress": {
+     "description": "Stake account address to deactivate",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Wallet address that is the stake authority",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "stakeAccountAddress"
+   ],
+   "type": "object"
+  },
+  "name": "create_unstake_transaction",
+  "output_schema": {},
+  "title": "Create Unstake Transaction"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Remove a wallet's Autopilot policy. Sign EXACTLY this newline-separated message and pass the base58 signature: \"solentic-autopilot-delete:v1\\nwallet=<walletAddress>\\nnonce=<nonce>\". nonce must exceed the current policy nonce.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "nonce": {
+     "description": "Strictly increasing replay guard",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "signature": {
+     "description": "base58 Ed25519 signature over the canonical delete message",
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Wallet address",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "nonce",
+    "signature"
+   ],
+   "type": "object"
+  },
+  "name": "delete_staking_policy",
+  "output_schema": {},
+  "title": "Delete Autopilot Staking Policy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Delete a webhook registration by ID. Use list_webhooks to find webhook IDs.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Wallet that owns the webhook (required — prevents deleting another wallet's webhooks)",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "webhookId": {
+     "description": "Webhook registration ID to delete",
+     "type": "string"
+    }
+   },
+   "required": [
+    "webhookId",
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "delete_webhook",
+  "output_schema": {},
+  "title": "Delete Webhook"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Build an unsigned SOL transfer to support Blueprint development. Blueprint provides free staking infrastructure for AI agents — donations help sustain enterprise hardware and development. Same zero-custody pattern: unsigned transaction returned, you sign client-side. Suggested amounts: 0.01 SOL (thank you), 0.1 SOL (generous), 1 SOL (patron).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amountSol": {
+     "description": "Amount of SOL to donate (minimum 0.001 SOL)",
+     "exclusiveMinimum": 0,
+     "maximum": 1000,
+     "minimum": 0.001,
+     "type": "number"
+    },
+    "walletAddress": {
+     "description": "Wallet address to donate from",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "amountSol"
+   ],
+   "type": "object"
+  },
+  "name": "donate",
+  "output_schema": {},
+  "title": "Donate to Blueprint"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns runnable code that creates a Solana keypair. Solentic cannot generate the keypair for you and never sees the private key — generation must happen wherever you run code (the agent process, a code-interpreter tool, a Python/Node sandbox, the user's shell). The response includes the snippet ready to execute. After running it, fund the resulting publicKey and call the `stake` tool with {walletAddress, secretKey, amountSol} to stake in one call.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "generate_wallet",
+  "output_schema": {},
+  "title": "Generate Wallet"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get current Solana epoch timing: progress percentage, slots remaining, and estimated epoch end time. Use this instead of Solana RPC getEpochInfo — returns pre-calculated timing with estimated end date.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_epoch_timing",
+  "output_schema": {},
+  "title": "Get Epoch Timing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get Blueprint validator infrastructure specs: server hardware, redundancy configuration, network, and storage. Two bare-metal servers (redundant HA).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_infrastructure",
+  "output_schema": {},
+  "title": "Get Infrastructure"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get Blueprint validator performance: vote success rate, uptime, skip rate, epoch credits, delinquency status.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_performance_metrics",
+  "output_schema": {},
+  "title": "Get Performance Metrics"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get live APY breakdown: base staking APY + Jito MEV APY = total APY. Includes commission rates. Data from StakeWiz API.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_staking_apy",
+  "output_schema": {},
+  "title": "Get Staking APY"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Read the current Autopilot policy for a wallet (or null if none). Shows keepLiquidSol, minSweepSol, paused, nonce, and the last epoch a sweep was delivered.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Wallet address",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "get_staking_policy",
+  "output_schema": {},
+  "title": "Get Autopilot Staking Policy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Complete staking portfolio dashboard in a single call. Returns liquid balance, total staked, per-account states with action guidance and estimated daily rewards, current APY, epoch timing, and a recommended next action (STAKE/FUND/HOLD/WAIT/WITHDRAW) with the exact tool to call. Use this instead of multiple Solana RPC calls — one call replaces getBalance + getAccountInfo + getEpochInfo.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Solana wallet address (base58 public key) to get staking summary for",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "get_staking_summary",
+  "output_schema": {},
+  "title": "Get Staking Summary"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get Blueprint validator profile: identity, vote account, commission, active stake, APY, performance, software, location. Live data from StakeWiz API.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_validator_info",
+  "output_schema": {},
+  "title": "Get Validator Info"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get third-party verification URLs for Blueprint validator on Validators.app, StakeWiz, Solana Beach, Solscan, JPool, SVT.one, and Jito steward dashboard. Verify every claim independently. Also includes Solana CLI commands for direct on-chain verification.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_verification_links",
+  "output_schema": {},
+  "title": "Get Verification Links"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "List all registered webhooks for a wallet address.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "walletAddress": {
+     "description": "Wallet address to list webhooks for",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress"
+   ],
+   "type": "object"
+  },
+  "name": "list_webhooks",
+  "output_schema": {},
+  "title": "List Webhooks"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Register a callback URL to receive push notifications when stake state changes. Events: withdraw_ready (stake account becomes withdrawable), epoch_complete (new epoch starts), stake_activated (stake begins earning), stake_deactivated (unstake confirmed). Solentic polls every 60 seconds and POSTs to your URL when events fire.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "callbackUrl": {
+     "description": "HTTPS callback URL to receive webhook POST requests",
+     "format": "uri",
+     "pattern": "^https:\\/\\/",
+     "type": "string"
+    },
+    "events": {
+     "description": "Event types to subscribe to",
+     "items": {
+      "enum": [
+       "withdraw_ready",
+       "epoch_complete",
+       "stake_activated",
+       "stake_deactivated"
+      ],
+      "type": "string"
+     },
+     "maxItems": 4,
+     "minItems": 1,
+     "type": "array"
+    },
+    "url": {
+     "description": "Alias for callbackUrl — either field works",
+     "format": "uri",
+     "pattern": "^https:\\/\\/",
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Wallet address to monitor for state changes",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "events"
+   ],
+   "type": "object"
+  },
+  "name": "register_webhook",
+  "output_schema": {},
+  "title": "Register Webhook"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Hand Solentic a standing, signature-bound policy so it automatically stakes your IDLE SOL with Blueprint — zero custody. You sign the policy ONCE with your wallet key (Ed25519 over the exact canonical message below — NEVER your secret key). When idle SOL above keepLiquidSol exceeds minSweepSol, Solentic builds an UNSIGNED stake transaction and POSTs it to your callbackUrl for you to sign and submit; Solentic never holds your key. Native Solana stake already auto-compounds, so delegated rewards keep earning automatically. Amounts in the signed message are INTEGER LAMPORTS = round(SOL * 1e9), so there is no float ambiguity. Sign EXACTLY this newline-separated message, then pass the base58 signature: \"solentic-autopilot-policy:v1\\nwallet=<walletAddress>\\nkeepLiquidLamports=<round(keepLiquidSol*1e9)>\\nminSweepLamports=<round(minSweepSol*1e9)>\\ncallbackUrl=<callbackUrl>\\npaused=<true|false>\\nnonce=<nonce>\". nonce must strictly increase on each update.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "callbackUrl": {
+     "description": "HTTPS URL to receive unsigned stake transactions",
+     "format": "uri",
+     "pattern": "^https:\\/\\/",
+     "type": "string"
+    },
+    "keepLiquidSol": {
+     "description": "SOL to always keep liquid (not staked)",
+     "maximum": 9000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "minSweepSol": {
+     "description": "Only stake when idle surplus is at least this many SOL",
+     "exclusiveMinimum": 0,
+     "maximum": 9000000,
+     "type": "number"
+    },
+    "nonce": {
+     "description": "Strictly increasing replay guard",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "paused": {
+     "description": "If true, the policy is stored but inactive",
+     "type": "boolean"
+    },
+    "signature": {
+     "description": "base58 Ed25519 signature over the canonical policy message",
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Wallet whose idle SOL is managed",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "keepLiquidSol",
+    "minSweepSol",
+    "callbackUrl",
+    "nonce",
+    "signature"
+   ],
+   "type": "object"
+  },
+  "name": "set_staking_policy",
+  "output_schema": {},
+  "title": "Set Autopilot Staking Policy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Project staking rewards before committing capital. Returns reward projections (daily/monthly/annual/total), effective APY (equal to the stated APY, since total_apy is already an annual yield), activation timing, fee reserve guidance, and a natural-language recommendation. Use this to help decide how much to stake and for how long.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amountSol": {
+     "description": "Amount of SOL to simulate staking",
+     "exclusiveMinimum": 0,
+     "maximum": 9000000,
+     "type": "number"
+    },
+    "durationDays": {
+     "default": 365,
+     "description": "Projection duration in days (default: 365)",
+     "maximum": 3650,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "amountSol"
+   ],
+   "type": "object"
+  },
+  "name": "simulate_stake",
+  "output_schema": {},
+  "title": "Simulate Stake"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Stake SOL with Blueprint validator in a single call. Builds the transaction, signs it with your secret key in-memory, and submits to Solana. Returns the confirmed transaction signature. Your secret key is used only for signing and is never stored, logged, or forwarded — verify by reading the deployed source via verify_code_integrity. This is the recommended tool for autonomous agents.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amountSol": {
+     "description": "Amount of SOL to stake",
+     "exclusiveMinimum": 0,
+     "maximum": 9000000,
+     "type": "number"
+    },
+    "secretKey": {
+     "description": "Your base58-encoded secret key — used in-memory for signing only, never stored",
+     "maxLength": 100,
+     "minLength": 80,
+     "pattern": "^[1-9A-HJ-NP-Za-km-z]+$",
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Your Solana wallet address (base58 public key)",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "secretKey",
+    "amountSol"
+   ],
+   "type": "object"
+  },
+  "name": "stake",
+  "output_schema": {},
+  "title": "Stake SOL (one-shot)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Advanced: Submit a pre-signed transaction to Solana. Only needed if you used create_stake_transaction/create_unstake_transaction/withdraw_stake and signed locally. Most agents should use the one-shot stake/unstake/withdraw tools instead.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "signedTransaction": {
+     "description": "Fully signed transaction as a base64-encoded string",
+     "maxLength": 2200,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "signedTransaction"
+   ],
+   "type": "object"
+  },
+  "name": "submit_transaction",
+  "output_schema": {},
+  "title": "Submit Transaction"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Deactivate a stake account in a single call. Builds the transaction, signs it, and submits it. The stake enters a cooldown period (~1 epoch) and becomes withdrawable at the next epoch boundary. Use check_withdraw_ready to poll readiness, then withdraw to reclaim SOL. This is the recommended tool — use create_unstake_transaction only if you manage your own signing.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "secretKey": {
+     "description": "Your base58-encoded secret key — used in-memory for signing only, never stored",
+     "maxLength": 100,
+     "minLength": 80,
+     "pattern": "^[1-9A-HJ-NP-Za-km-z]+$",
+     "type": "string"
+    },
+    "stakeAccountAddress": {
+     "description": "Stake account address to deactivate",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Your Solana wallet address (stake authority)",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "secretKey",
+    "stakeAccountAddress"
+   ],
+   "type": "object"
+  },
+  "name": "unstake",
+  "output_schema": {},
+  "title": "Unstake SOL (one-shot)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Verify the code running on Blueprint servers. Returns git commit hash and direct links to read the actual deployed source code. Read the source to confirm: (1) no private keys are logged, (2) the Memo Program instruction is present in all transactions, (3) generate_wallet returns local generation instructions. Don't trust — read the code yourself via the source endpoints.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "verify_code_integrity",
+  "output_schema": {},
+  "title": "Verify Code Integrity"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Verify whether a Solana transaction was built through Blueprint. Checks the transaction on-chain for the \"solentic.theblueprint.xyz\" Memo Program instruction. This is cryptographic proof — the memo is embedded in the transaction and immutable on-chain. Use this to verify any claim that a stake was placed through Blueprint. Returns verified: true/false with the on-chain evidence.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "signature": {
+     "description": "Solana transaction signature to verify",
+     "maxLength": 100,
+     "type": "string"
+    }
+   },
+   "required": [
+    "signature"
+   ],
+   "type": "object"
+  },
+  "name": "verify_transaction",
+  "output_schema": {},
+  "title": "Verify Transaction"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Withdraw SOL from a deactivated stake account in a single call. Builds the transaction, signs it, and submits it. Funds are returned to your wallet. Use check_withdraw_ready first to confirm the account is ready. Omit amountSol to withdraw the full balance. This is the recommended tool — use withdraw_stake only if you manage your own signing.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amountSol": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9000000,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Amount to withdraw in SOL (omit to withdraw full balance)"
+    },
+    "secretKey": {
+     "description": "Your base58-encoded secret key — used in-memory for signing only, never stored",
+     "maxLength": 100,
+     "minLength": 80,
+     "pattern": "^[1-9A-HJ-NP-Za-km-z]+$",
+     "type": "string"
+    },
+    "stakeAccountAddress": {
+     "description": "Deactivated stake account to withdraw from",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Your Solana wallet address (withdraw authority)",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "secretKey",
+    "stakeAccountAddress"
+   ],
+   "type": "object"
+  },
+  "name": "withdraw",
+  "output_schema": {},
+  "title": "Withdraw SOL (one-shot)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Advanced: Build an unsigned withdraw transaction for local signing. Most agents should use the `withdraw` tool instead, which handles signing and submission automatically.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amountSol": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 9000000,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Amount to withdraw in SOL (omit or null to withdraw full balance)"
+    },
+    "stakeAccountAddress": {
+     "description": "Deactivated stake account to withdraw from",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "walletAddress": {
+     "description": "Wallet address that is the withdraw authority",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "required": [
+    "walletAddress",
+    "stakeAccountAddress"
+   ],
+   "type": "object"
+  },
+  "name": "withdraw_stake",
+  "output_schema": {},
+  "title": "Withdraw Stake"
+ }
+]

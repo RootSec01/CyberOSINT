@@ -1,0 +1,642 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Add catalog icons to an existing Icon Collection as plain entries (idempotent). Requires a Pro API token with collections:write and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "collectionId": {
+     "description": "Numeric ID of the collection (integer or numeric string).",
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "iconIds": {
+     "description": "Catalog icon IDs to add as plain entries; up to 200 per call, existing entries skipped.",
+     "items": {
+      "description": "A catalog icon ID.",
+      "type": "integer"
+     },
+     "maxItems": 200,
+     "type": "array"
+    }
+   },
+   "required": [
+    "collectionId",
+    "iconIds"
+   ],
+   "type": "object"
+  },
+  "name": "add_icons_to_collection",
+  "output_schema": {},
+  "title": "Add icons to Icon Collection"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Create a persistent Pro Icon Collection and optionally add icon IDs. Requires Pro API token with collections:write and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "colorPolicy": {
+     "description": "Stored color policy: currentColor rewrites fills, preserve keeps them, strip removes them. Default currentColor.",
+     "enum": [
+      "currentColor",
+      "preserve",
+      "strip"
+     ],
+     "type": "string"
+    },
+    "description": {
+     "description": "Optional collection description, up to 600 characters.",
+     "type": "string"
+    },
+    "framework": {
+     "description": "Default export framework stored on the collection. Default svg.",
+     "enum": [
+      "svg",
+      "react-ts",
+      "vue",
+      "sprite"
+     ],
+     "type": "string"
+    },
+    "iconIds": {
+     "description": "Catalog icon IDs to add at creation; up to 200, duplicates ignored.",
+     "items": {
+      "description": "A catalog icon ID.",
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "name": {
+     "description": "Collection name, up to 120 characters.",
+     "type": "string"
+    },
+    "namingPolicy": {
+     "description": "File and component naming: kebab (default), pascal, or camel.",
+     "enum": [
+      "kebab",
+      "pascal",
+      "camel"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "create_icon_kit",
+  "output_schema": {},
+  "title": "Create Icon Collection"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Queue a Pro Icon Collection export, including optional PNG packs. Requires an MCP token with exports:create.",
+  "input_schema": {
+   "properties": {
+    "collectionId": {
+     "description": "Numeric ID of the collection (integer or numeric string).",
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "colorPolicy": {
+     "description": "currentColor rewrites fills, preserve keeps them, strip removes them. When omitted, collections carrying styling (applied style or custom icons) default to preserve; plain collections use the collection's stored policy (currentColor unless changed).",
+     "enum": [
+      "currentColor",
+      "preserve",
+      "strip"
+     ],
+     "type": "string"
+    },
+    "componentSuffix": {
+     "description": "Component name suffix, 1-32 letters or digits starting with a letter. Default Icon.",
+     "pattern": "^[A-Za-z][A-Za-z0-9]{0,31}$",
+     "type": "string"
+    },
+    "decorative": {
+     "description": "Mark components decorative (aria-hidden) by default. Default true.",
+     "type": "boolean"
+    },
+    "defaultSize": {
+     "description": "Default component render size in pixels, 1-1024. Default 24.",
+     "maximum": 1024,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "formats": {
+     "description": "Formats to build. Defaults to the basic set: SVG folder, SVG sprite, JSON manifest, license manifest.",
+     "items": {
+      "description": "An export format identifier; png is shorthand for png-pack.",
+      "enum": [
+       "svg-folder",
+       "svg-sprite",
+       "json-manifest",
+       "license-manifest",
+       "react-ts",
+       "vue",
+       "svelte",
+       "solid",
+       "blade",
+       "storybook",
+       "npm-package",
+       "png-pack",
+       "iconify-json",
+       "png"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "namingPolicy": {
+     "description": "File and component naming: kebab, pascal, or camel. When omitted, uses the collection's stored policy (kebab unless changed).",
+     "enum": [
+      "kebab",
+      "pascal",
+      "camel"
+     ],
+     "type": "string"
+    },
+    "packageName": {
+     "description": "npm package name for npm-package exports, lowercase, optionally scoped.",
+     "maxLength": 214,
+     "pattern": "^(?:@[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*|[a-z0-9][a-z0-9._-]*)$",
+     "type": "string"
+    },
+    "packageVersion": {
+     "description": "Semver version for npm-package exports, such as 1.0.0. Default 0.1.0.",
+     "maxLength": 64,
+     "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$",
+     "type": "string"
+    },
+    "png": {
+     "description": "PNG pack options: sizes (up to 6 allowed pixel values, default [512]), densities (1-3, default [1]), backgroundType and backgroundColor, iconColorMode and iconColor, padding 0-256 pixels (default 48).",
+     "type": "object"
+    },
+    "sizeProps": {
+     "description": "Emit size props on framework components. Default true.",
+     "type": "boolean"
+    },
+    "titleProp": {
+     "description": "Include an accessible title prop on components. Default true.",
+     "type": "boolean"
+    },
+    "typescript": {
+     "description": "Emit TypeScript where the format supports it. Default true.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "collectionId"
+   ],
+   "type": "object"
+  },
+  "name": "export_icon_collection",
+  "output_schema": {},
+  "title": "Export Icon Collection"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Render one icon as PNG or a ZIP of PNG variants. Requires the Pro Plan and an MCP token with icons:read and exports:create scopes.",
+  "input_schema": {
+   "properties": {
+    "backgroundColor": {
+     "description": "Hex background color used when backgroundType is solid. Default #ffffff.",
+     "type": "string"
+    },
+    "backgroundType": {
+     "description": "Background fill. Default transparent.",
+     "enum": [
+      "transparent",
+      "solid"
+     ],
+     "type": "string"
+    },
+    "densities": {
+     "description": "Density multipliers to render, up to 2. Default [1].",
+     "items": {
+      "description": "Device-pixel-ratio multiplier.",
+      "enum": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "type": "integer"
+     },
+     "maxItems": 2,
+     "type": "array"
+    },
+    "filename": {
+     "description": "Base filename for the generated file. Defaults to the icon name.",
+     "type": "string"
+    },
+    "iconColor": {
+     "description": "Hex icon color used when iconColorMode is custom. Default #000000.",
+     "type": "string"
+    },
+    "iconColorMode": {
+     "description": "preserve (default) keeps source colors; black, white, or custom recolor the icon.",
+     "enum": [
+      "preserve",
+      "black",
+      "white",
+      "custom"
+     ],
+     "type": "string"
+    },
+    "iconName": {
+     "description": "The icon slug/name from the URL. Required to prevent ID-only bulk export.",
+     "type": "string"
+    },
+    "id": {
+     "description": "The catalog icon ID.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "padding": {
+     "description": "Padding around the icon in pixels, 0-256. Default 48.",
+     "maximum": 256,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "sizes": {
+     "description": "Canvas sizes to render, up to 4 of the allowed pixel values. Default [512].",
+     "items": {
+      "description": "Square canvas size in pixels.",
+      "enum": [
+       16,
+       24,
+       32,
+       48,
+       96,
+       128,
+       256,
+       512,
+       1024
+      ],
+      "type": "integer"
+     },
+     "maxItems": 4,
+     "type": "array"
+    },
+    "zip": {
+     "description": "Return a ZIP of all size and density variants instead of a single PNG. Default false.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id",
+    "iconName"
+   ],
+   "type": "object"
+  },
+  "name": "export_icon_png",
+  "output_schema": {},
+  "title": "Export icon as PNG"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Recommend and persist an Icon Collection for a project brief. Requires Pro API token with collections:write and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Optional icon set category filter, including New.",
+     "type": "string"
+    },
+    "colorPolicy": {
+     "description": "Stored color policy: currentColor rewrites fills, preserve keeps them, strip removes them. Default currentColor.",
+     "enum": [
+      "currentColor",
+      "preserve",
+      "strip"
+     ],
+     "type": "string"
+    },
+    "framework": {
+     "description": "Default export framework stored on the collection. Default svg.",
+     "enum": [
+      "svg",
+      "react-ts",
+      "vue",
+      "sprite"
+     ],
+     "type": "string"
+    },
+    "maxIcons": {
+     "description": "Maximum icons in the generated collection, 1-64. Default 16.",
+     "maximum": 64,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "namingPolicy": {
+     "description": "File and component naming: kebab (default), pascal, or camel.",
+     "enum": [
+      "kebab",
+      "pascal",
+      "camel"
+     ],
+     "type": "string"
+    },
+    "projectDescription": {
+     "description": "Project brief used to extract icon concepts, up to 1500 characters.",
+     "type": "string"
+    },
+    "projectName": {
+     "description": "Optional collection name; derived from the description when omitted.",
+     "type": "string"
+    },
+    "requiredConcepts": {
+     "description": "Concepts that must be searched, merged with concepts extracted from the brief.",
+     "items": {
+      "description": "One concept keyword.",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "screens": {
+     "description": "Optional screen or page names that contribute extra concepts.",
+     "items": {
+      "description": "A screen or page name, such as Billing settings.",
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "projectDescription"
+   ],
+   "type": "object"
+  },
+  "name": "generate_icon_kit_for_project",
+  "output_schema": {},
+  "title": "Generate Icon Collection for project"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Return one icon by ID. Metadata is public; raw SVG requires a Pro API token with icons:read and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "format": {
+     "description": "svg is an alias for includeSvg=true; metadata (default) returns metadata only.",
+     "enum": [
+      "metadata",
+      "svg"
+     ],
+     "type": "string"
+    },
+    "id": {
+     "description": "The catalog icon ID, as shown in search results and icon page URLs.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "includeSvg": {
+     "description": "Include the raw body and wrapped SVG markup. Requires a Pro token with icons:read. Default false.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_icon",
+  "output_schema": {},
+  "title": "Get icon metadata or SVG"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Read one Icon Collection with its paginated entries. Custom-icon entries include entryId, customEditId, customName, and their customized SVG snapshot as the body. Requires a Pro API token with collections:read and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "collectionId": {
+     "description": "Numeric ID of the collection (integer or numeric string).",
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "page": {
+     "description": "One-based page number. Default 1.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "perPage": {
+     "description": "Entries per page, 1-100. Default 50.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "collectionId"
+   ],
+   "type": "object"
+  },
+  "name": "get_icon_collection",
+  "output_schema": {},
+  "title": "Get Icon Collection"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "List your persistent Icon Collections with icon counts. Requires a Pro API token with collections:read and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Collections per page, 1-50. Default 20.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "One-based page number. Default 1.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Optional name or slug filter.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_icon_collections",
+  "output_schema": {},
+  "title": "List Icon Collections"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Recommend icon candidates for a UI description using svgicons.com search metadata.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Optional icon set category filter, including New.",
+     "type": "string"
+    },
+    "concepts": {
+     "description": "Optional explicit concept keywords, merged with concepts extracted from the description.",
+     "items": {
+      "description": "One concept keyword, such as settings or invoice.",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Max recommendations, 1-30 with a Pro token (1-10 otherwise). Default 8.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "uiDescription": {
+     "description": "Product UI, screen, or feature description.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uiDescription"
+   ],
+   "type": "object"
+  },
+  "name": "recommend_icons_for_ui",
+  "output_schema": {},
+  "title": "Recommend icons for UI"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Remove an icon from an Icon Collection. Entry-precise by default: only the plain entry is removed and custom variants survive; set allVariants true to remove every entry of the icon. Requires a Pro API token with collections:write and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "allVariants": {
+     "default": false,
+     "description": "true removes every entry of the icon, including custom variants. Default false: entry-precise, only the plain entry is removed and custom variants survive.",
+     "type": "boolean"
+    },
+    "collectionId": {
+     "description": "Numeric ID of the collection (integer or numeric string).",
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "iconId": {
+     "description": "Numeric ID of the catalog icon whose entry should be removed.",
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "collectionId",
+    "iconId"
+   ],
+   "type": "object"
+  },
+  "name": "remove_icon_from_collection",
+  "output_schema": {},
+  "title": "Remove icon from Icon Collection"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Search icon sets by name, prefix, author, category, or description.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Optional category, including New.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Icon sets per page, 1-50. Default 20.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "One-based page number. Default 1.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Search text matched against icon set name, prefix, author, category, and description.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_icon_sets",
+  "output_schema": {},
+  "title": "Search SVG icon sets"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Search svgicons.com icons and return icon metadata. Raw SVG requires a Pro API token with icons:read and mcp:use scopes.",
+  "input_schema": {
+   "properties": {
+    "category": {
+     "description": "Optional icon set category, including New.",
+     "type": "string"
+    },
+    "iconSetPrefix": {
+     "description": "Optional icon set prefix to limit the search.",
+     "type": "string"
+    },
+    "includeSvg": {
+     "description": "Include wrapped SVG markup. Requires Pro token icons:read.",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Max results, 1-50. Default 10 (20 with a Pro token); capped at 10 anonymous, 20 member, 50 Pro.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Zero-based result offset for pagination. Default 0.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Icon search query, such as \"arrow left\", \"settings\", or \"github\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_icons",
+  "output_schema": {},
+  "title": "Search SVG icons"
+ }
+]

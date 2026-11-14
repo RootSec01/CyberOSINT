@@ -1,0 +1,377 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Analyze an image into a case"
+  },
+  "description": "Analyze one image and attach the result to an existing case. Spends credits at the usual rates (D1 1, D2 2, D3 10). Capped at 20 analyses an hour per account, and a connected app is limited to depth 2. Returns the analysis and the case id. Reads the scene only (architecture, signage, terrain, vegetation), never the people in it. No face recognition, no biometric identification, no person matching. It answers where an image was taken, never who is in it, and must not be used to locate or track a person.",
+  "input_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "image_url"
+     ]
+    },
+    {
+     "required": [
+      "image_b64"
+     ]
+    }
+   ],
+   "properties": {
+    "case_id": {
+     "description": "The id of the case.",
+     "type": "string"
+    },
+    "depth": {
+     "default": 2,
+     "description": "Analysis depth. 1 = Surface (1 credit). 2 = Standard (2 credits). 3 = Forensic (10 credits; agent tokens with maximum depth 3 only).",
+     "enum": [
+      1,
+      2,
+      3
+     ],
+     "type": "integer"
+    },
+    "image_b64": {
+     "description": "Base64-encoded image bytes (no data: prefix).",
+     "type": "string"
+    },
+    "image_url": {
+     "description": "Public HTTPS URL to the image to analyze.",
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "case_id"
+   ],
+   "type": "object"
+  },
+  "name": "add_scene_to_case",
+  "output_schema": {},
+  "title": "Analyze an image into a case"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check Oceanir credits"
+  },
+  "description": "Check the authenticated Oceanir account's current credit balance and remaining monthly allowance.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "check_credits",
+  "output_schema": {},
+  "title": "Check Oceanir credits"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Check a location claim"
+  },
+  "description": "Test whether an image is consistent with a location someone has already claimed: a listing's stated city, an address on a case file or claim form, a caption. Oceanir locates the image from visual evidence alone FIRST, then compares. Returns a verdict of `agrees`, `contradicts`, or `unverifiable`, with the distance between the claim and the evidence. `unverifiable` means the image does not settle it and the item needs a human. It is a real answer, not a failure. A verdict of `agrees` means the image is consistent with the claim, not that the claim is true. Capped at 20 analyses an hour per account, and a connected app is limited to depth 2 (an agent token with maximum depth 3 can use depth 3). Reads the scene only (architecture, signage, terrain, vegetation), never the people in it. No face recognition, no biometric identification, no person matching. It answers where an image was taken, never who is in it, and must not be used to locate or track a person.",
+  "input_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "image_url"
+     ]
+    },
+    {
+     "required": [
+      "image_b64"
+     ]
+    }
+   ],
+   "properties": {
+    "depth": {
+     "default": 2,
+     "description": "Analysis depth. 2 = Standard is the right default for verification; 1 = Surface is city-level only and will rarely contradict anything; 3 = Forensic adds contradiction checks (10 credits).",
+     "enum": [
+      1,
+      2,
+      3
+     ],
+     "type": "integer"
+    },
+    "image_b64": {
+     "description": "Base64-encoded image bytes (no data: prefix).",
+     "type": "string"
+    },
+    "image_url": {
+     "description": "Public HTTPS URL to the image to test.",
+     "format": "uri",
+     "type": "string"
+    },
+    "scope": {
+     "description": "The location being claimed. Oceanir treats this as a search boundary and never as evidence: it can only narrow the search, never raise confidence, and Oceanir rejects it outright on hard image-legible contradiction (signage in an impossible script, the wrong driving side, a landmark that is elsewhere).",
+     "properties": {
+      "captured_at": {
+       "description": "When the image is CLAIMED to have been taken. Optional, and worth sending whenever the claim carries a date, because it is the only check here that does not depend on Oceanir's own confidence. A bare date (2026-09-12) returns whether the sun rose at that place at all that day and for how long; at high latitudes that alone can contradict a daylit image outright. A time WITH a UTC offset (2026-09-12T14:30:00-04:00) additionally returns the sun's altitude and compass direction at that moment. A time WITHOUT an offset has its clock time ignored and only its date used: an assumed timezone can turn noon into midnight, so it is never guessed.",
+       "type": "string"
+      },
+      "lat": {
+       "maximum": 90,
+       "minimum": -90,
+       "type": "number"
+      },
+      "lng": {
+       "maximum": 180,
+       "minimum": -180,
+       "type": "number"
+      },
+      "name": {
+       "description": "Place name, e.g. \"Doral, Florida\".",
+       "type": "string"
+      },
+      "radius_km": {
+       "default": 60,
+       "description": "How far from the centre still counts as the claimed place. Defaults to 60km, which covers a metro area.",
+       "type": "number"
+      }
+     },
+     "required": [
+      "name",
+      "lat",
+      "lng"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "scope"
+   ],
+   "type": "object"
+  },
+  "name": "check_location_claim",
+  "output_schema": {},
+  "title": "Check a location claim"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Create an Oceanir case"
+  },
+  "description": "Create an empty case to group related results. Free: it spends no credits. Returns the new case's id.",
+  "input_schema": {
+   "properties": {
+    "description": {
+     "description": "Optional context, such as the location the source claims.",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "name": {
+     "description": "A label you will recognise, for example the listing or claim it is about.",
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "create_case",
+  "output_schema": {},
+  "title": "Create an Oceanir case"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Locate a scene"
+  },
+  "description": "Analyze an image and return its probable real-world location. Returns ranked coordinates with a confidence score and the visual evidence chain the analysis used (architecture, signage, vegetation, terrain, lighting). No EXIF or GPS required. Capped at 20 analyses an hour per account, and a connected app is limited to depth 2 (an agent token with maximum depth 3 can use depth 3). Reads the scene only (architecture, signage, terrain, vegetation), never the people in it. No face recognition, no biometric identification, no person matching. It answers where an image was taken, never who is in it, and must not be used to locate or track a person.",
+  "input_schema": {
+   "anyOf": [
+    {
+     "required": [
+      "image_url"
+     ]
+    },
+    {
+     "required": [
+      "image_b64"
+     ]
+    }
+   ],
+   "properties": {
+    "depth": {
+     "default": 1,
+     "description": "Analysis depth. 1 = Surface (region scan, 1 credit). 2 = Standard (ranked candidates with evidence, 2 credits). 3 = Forensic (deeper reasoning and contradiction checks, 10 credits).",
+     "enum": [
+      1,
+      2,
+      3
+     ],
+     "type": "integer"
+    },
+    "image_b64": {
+     "description": "Base64-encoded image bytes (no data: prefix).",
+     "type": "string"
+    },
+    "image_url": {
+     "description": "Public HTTPS URL to the image to analyze.",
+     "format": "uri",
+     "type": "string"
+    },
+    "scope": {
+     "description": "The location being claimed. Oceanir treats this as a search boundary and never as evidence: it can only narrow the search, never raise confidence, and Oceanir rejects it outright on hard image-legible contradiction (signage in an impossible script, the wrong driving side, a landmark that is elsewhere).",
+     "properties": {
+      "captured_at": {
+       "description": "When the image is CLAIMED to have been taken. Optional, and worth sending whenever the claim carries a date, because it is the only check here that does not depend on Oceanir's own confidence. A bare date (2026-09-12) returns whether the sun rose at that place at all that day and for how long; at high latitudes that alone can contradict a daylit image outright. A time WITH a UTC offset (2026-09-12T14:30:00-04:00) additionally returns the sun's altitude and compass direction at that moment. A time WITHOUT an offset has its clock time ignored and only its date used: an assumed timezone can turn noon into midnight, so it is never guessed.",
+       "type": "string"
+      },
+      "lat": {
+       "maximum": 90,
+       "minimum": -90,
+       "type": "number"
+      },
+      "lng": {
+       "maximum": 180,
+       "minimum": -180,
+       "type": "number"
+      },
+      "name": {
+       "description": "Place name, e.g. \"Doral, Florida\".",
+       "type": "string"
+      },
+      "radius_km": {
+       "default": 60,
+       "description": "How far from the centre still counts as the claimed place. Defaults to 60km, which covers a metro area.",
+       "type": "number"
+      }
+     },
+     "required": [
+      "name",
+      "lat",
+      "lng"
+     ],
+     "type": "object"
+    }
+   },
+   "type": "object"
+  },
+  "name": "find_scene",
+  "output_schema": {},
+  "title": "Locate a scene"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Summarize an Oceanir case"
+  },
+  "description": "Read a case's summary: what it holds, the results attached to it and where they point. Read-only: it never runs an analysis and never spends credits. Reads the scene only (architecture, signage, terrain, vegetation), never the people in it. No face recognition, no biometric identification, no person matching. It answers where an image was taken, never who is in it, and must not be used to locate or track a person.",
+  "input_schema": {
+   "properties": {
+    "case_id": {
+     "description": "The id of the case.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "case_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_case",
+  "output_schema": {},
+  "title": "Summarize an Oceanir case"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check Oceanir usage"
+  },
+  "description": "Read the last 30 days of Oceanir usage for the authenticated account: calls, credits used, a breakdown by depth, and what remains. Read-only; it never spends credits.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_usage",
+  "output_schema": {},
+  "title": "Check Oceanir usage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List Oceanir cases"
+  },
+  "description": "List this account's cases (named groups of results), newest first, with their ids. Read-only: it never runs an analysis and never spends credits.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 20,
+     "description": "How many cases to return.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_cases",
+  "output_schema": {},
+  "title": "List Oceanir cases"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List past Oceanir results"
+  },
+  "description": "List this account's past Oceanir results, newest first: place, coordinates, confidence, depth and date. Read-only: it never runs a new analysis and never spends credits. Accounts with analysis history switched off return nothing. Reads the scene only (architecture, signage, terrain, vegetation), never the people in it. No face recognition, no biometric identification, no person matching. It answers where an image was taken, never who is in it, and must not be used to locate or track a person.",
+  "input_schema": {
+   "properties": {
+    "city": {
+     "description": "Optional exact city name to filter by.",
+     "maxLength": 120,
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "description": "How many results to return, newest first.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Optional text to match against the neighborhood, city or file name.",
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_past_scenes",
+  "output_schema": {},
+  "title": "List past Oceanir results"
+ }
+]

@@ -1,0 +1,1006 @@
+[
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Agent Attestations"
+  },
+  "description": "[FREE] Read the onchain attestations naming an AI agent's wallet on Base, and what they\nare worth in SolvScore's underwriting. Accepts a Base wallet address, an agent name, or\na SolvScore credit file id.\n\nReturns points_awarded, whether the wallet carries an unrevoked KYC-backed Coinbase\nVerified Account, how many attestations were ignored because their attester is not\nallowlisted, and the schema uids a company can attest into to report work an agent\nactually delivered.\n\nCheck this before extending credit, prepaying, or delegating paid work to an unknown\ncounterparty: an attestation from an allowlisted attester is third-party evidence, and\nan attestation from an unknown attester is deliberately worth zero, because otherwise\nagents vouch for each other in a circle. Identity opens a door; delivered work still\nearns the limit.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent_or_wallet": "rex-voss"
+    }
+   ],
+   "properties": {
+    "agent_or_wallet": {
+     "description": "Agent name, slug, or 0x-prefixed Base wallet address.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_or_wallet"
+   ],
+   "type": "object"
+  },
+  "name": "get_agent_attestations",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Agent Attestations"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Agent Credit Score"
+  },
+  "description": "[FREE] Look up an AI agent's SolvScore credit file before you transact with it.\nAccepts an agent name, id, or Base L2 wallet address.\nReturns trust_score (0-100), badges (reputation bonds held), a nested credit object\ncarrying credit_limit and apr_bps, plus two counterparty red flags worth checking\nbefore you extend anything: sybil_flagged and cooling.\nFree and unauthenticated - no API key, no payment header.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent": "rex-voss"
+    }
+   ],
+   "properties": {
+    "agent": {
+     "description": "Agent name, slug or id, e.g. rex-voss.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent"
+   ],
+   "type": "object"
+  },
+  "name": "get_agent_credit_score",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Agent Credit Score"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Credit Improvement Path"
+  },
+  "description": "Counterfactual credit explanation: the minimal quantified actions an agent\ncan take to improve its SolvScore status. Free. For each target (next badge,\nthe 85-point underwriting floor, or an explicit trust-score target) returns\nper-action unit counts, points per unit, headroom to each scoring cap, and\nwhether that single path reaches the target. Also explains the hard-collateral\npath (which lifts the limit and cuts the APR without moving the score).",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent": "rex-voss",
+     "target": 85
+    }
+   ],
+   "properties": {
+    "agent": {
+     "description": "Agent name, slug or id, e.g. rex-voss.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    },
+    "target": {
+     "default": 0,
+     "description": "Target trust score the agent is working toward, 0-100, e.g. 85.",
+     "examples": [
+      85
+     ],
+     "type": "number"
+    }
+   },
+   "required": [
+    "agent"
+   ],
+   "type": "object"
+  },
+  "name": "get_credit_improvement_path",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Credit Improvement Path"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Credit Ladder"
+  },
+  "description": "[FREE] Read the SolvScore micro-limit ladder for one wallet.\n\nReturns the published rungs ($10 starter, then $25 / $50 / $100 / $250 as\nrepayments are recorded), this wallet's current rung and limit, its recent\nladder events, and any standard-underwriting decision once it graduates.\nA starter limit needs an allowlisted attestation, so a wallet with no attested\nwork reads as no ladder at all — that is the honest answer, not an error.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "wallet": "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+    }
+   ],
+   "properties": {
+    "wallet": {
+     "description": "Base L2 wallet address, 0x-prefixed, e.g. 0xBd16B985685A09b11C7cCC0d2d2E820A0F774286.",
+     "examples": [
+      "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "wallet"
+   ],
+   "type": "object"
+  },
+  "name": "get_credit_ladder",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Credit Ladder"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Credit Leaderboard"
+  },
+  "description": "[FREE] List the most creditworthy agents by SolvScore, with bond counts and slash\nhistory. Useful for finding trustworthy counterparties rather than vetting one.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "limit": 10
+    }
+   ],
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "Maximum number of rows or entries to return, e.g. 10.",
+     "examples": [
+      10
+     ],
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_credit_leaderboard",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Credit Leaderboard"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Credit Market Stats"
+  },
+  "description": "[FREE] Protocol-wide SolvScore stats: agents scored, total credit capacity in USDC,\nreputation bonds outstanding and slashed, quotes issued versus approved (the decline\nrate), plus average and top trust score. Useful for sizing the agent credit market.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_credit_market_stats",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Credit Market Stats"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Kya Credential"
+  },
+  "description": "[FREE] Read a Know-Your-Agent credential for an AI agent or wallet: pass a\n0x Base address, a Solana base58 address, or a known AgentWorld agent name.\nReturns the live credential - verification level (refused/thin/scored),\ntrust_score, spend-authority enrollment, settled-payment history, and the\nsignals we cannot read scored as zero. The EIP-191-signed version is\nPOST /api/agentworld/kya/signed at $0.02 USDC on Base via x402; verify any\nsigned credential free at POST /api/agentworld/kya/verify against the\npublished issuer address. Docs: https://solvscore.com/kya/",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "subject": "rex-voss"
+    }
+   ],
+   "properties": {
+    "subject": {
+     "description": "Agent name, slug or wallet address to run the check against.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "subject"
+   ],
+   "type": "object"
+  },
+  "name": "get_kya_credential",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Kya Credential"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Liquidity Stress Test"
+  },
+  "description": "[FREE] Stress-test an agent treasury's real USDC liquidity on Base L2.\nAccepts a 0x Base address or an AgentWorld agent name.\nReads on-chain USDC transfers over the last 90 days and returns\nusdc_balance, inflow/outflow totals and daily rates, median inflow\ncadence, net_daily_flow_usd, days_to_dry_up (None when accruing),\nflow_state (draining/accruing), a solvency_risk_flag for dry-up inside\na 30-day credit term, and scan_coverage_pct (block-range fraction\nactually scanned; the tool refuses below 90% rather than under-report).\nFirst call on an uncached subject can take up to ~60s; results are\ncached for one hour. Free and unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "subject": "rex-voss"
+    }
+   ],
+   "properties": {
+    "subject": {
+     "description": "Agent name, slug or wallet address to run the check against.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "subject"
+   ],
+   "type": "object"
+  },
+  "name": "get_liquidity_stress_test",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Liquidity Stress Test"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Scoring Weights"
+  },
+  "description": "[FREE] Read the governance-parameterized weights behind every SolvScore, so you can\naudit exactly how a score was produced and what behaviour raises or lowers it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_scoring_weights",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Scoring Weights"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Solv Quote"
+  },
+  "description": "[FREE] Live $SOLV buy quote on Base: pass an ETH amount in wei and get\nthe expected SOLV out, a 5%-slippage minimum, and READY-TO-SIGN Universal\nRouter calldata. Execute with one eth_sendTransaction\n{to: universal_router, data: calldata, value: eth_wei} from any funded\nBase wallet - no approvals, no custody. $SOLV launches 2026-09-11 19:00\nUTC on openlaunch.lol; returns 409 before launch.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "eth_wei": 1000000000000000000
+    }
+   ],
+   "properties": {
+    "eth_wei": {
+     "description": "Quote size in wei, e.g. 1000000000000000000 for 1 ETH.",
+     "examples": [
+      1000000000000000000
+     ],
+     "type": "integer"
+    }
+   },
+   "required": [
+    "eth_wei"
+   ],
+   "type": "object"
+  },
+  "name": "get_solv_quote",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Solv Quote"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Solvscore Agent Dashboard"
+  },
+  "description": "[FREE] SolvScore Agent Credit Dashboard (inv #4345): browse scored AI agents with\nfilters — trust score range (0-100), reputation bond status (active|slashed), job,\nand sort (trust_score|credit|apr|name). Returns trust score, credit limit, APR,\nbadges, bond status and profile links per agent. Snapshot re-scored every 6h.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "bond": "",
+     "job": "trader",
+     "limit": 10,
+     "max_score": 100,
+     "min_score": 0,
+     "sort": "trust_score"
+    }
+   ],
+   "properties": {
+    "bond": {
+     "default": "",
+     "description": "Reputation bond status filter: active or slashed. Empty string returns both.",
+     "examples": [
+      ""
+     ],
+     "type": "string"
+    },
+    "job": {
+     "default": "",
+     "description": "Agent job role filter, e.g. trader, banker, artist. Empty string returns all roles.",
+     "examples": [
+      "trader"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 50,
+     "description": "Maximum number of rows or entries to return, e.g. 10.",
+     "examples": [
+      10
+     ],
+     "type": "integer"
+    },
+    "max_score": {
+     "default": 100,
+     "description": "Highest trust score to include, 0-100. 100 means no ceiling.",
+     "examples": [
+      100
+     ],
+     "type": "number"
+    },
+    "min_score": {
+     "default": 0,
+     "description": "Lowest trust score to include, 0-100. 0 means no floor.",
+     "examples": [
+      0
+     ],
+     "type": "number"
+    },
+    "sort": {
+     "default": "trust_score",
+     "description": "Sort order: trust_score, credit, apr or name.",
+     "examples": [
+      "trust_score"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_solvscore_agent_dashboard",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Solvscore Agent Dashboard"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get Solvscore Receipts"
+  },
+  "description": "[FREE] Read the settlement-receipt ledger: every paid SolvScore underwrite\n(batch credit lookup, collateral assessment) with the request behind it, the\nresponse returned, the paying wallet and the Base settlement tx - in a\nSHA-256 hash chain recomputed over every row, so a single edited receipt\nanywhere is visible as chain_ok=false.\nPass payer (0x...) to filter to one wallet's receipts.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "limit": 10,
+     "payer": "0x367F1b3D8Ca90D1e087481a9A40d585Bf3451a03"
+    }
+   ],
+   "properties": {
+    "limit": {
+     "default": 25,
+     "description": "Maximum number of rows or entries to return, e.g. 10.",
+     "examples": [
+      10
+     ],
+     "type": "integer"
+    },
+    "payer": {
+     "default": "",
+     "description": "Optional payer wallet address to filter receipts, 0x-prefixed.",
+     "examples": [
+      "0x367F1b3D8Ca90D1e087481a9A40d585Bf3451a03"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_solvscore_receipts",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get Solvscore Receipts"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Record Credit Ladder Repayment"
+  },
+  "description": "[WRITE] Record one successful repayment against a wallet's ladder.\n\nAdvances the limit deterministically: 1 repayment -> $25, 3 -> $50, 6 -> $100,\n10 -> $250 and status graduated, at which point the bureau's standard\nunderwriting decides the real limit and APR. Refuses after a default.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "wallet": "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+    }
+   ],
+   "properties": {
+    "wallet": {
+     "description": "Base L2 wallet address, 0x-prefixed, e.g. 0xBd16B985685A09b11C7cCC0d2d2E820A0F774286.",
+     "examples": [
+      "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "wallet"
+   ],
+   "type": "object"
+  },
+  "name": "record_credit_ladder_repayment",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Record Credit Ladder Repayment"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Register Agent"
+  },
+  "description": "[FREE] Open a SolvScore credit file for your own agent so it can be underwritten.\nCall this once before requesting credit, or whenever a score lookup returns\nno_such_agent: an agent must hold a credit file before the bureau will rate it.\nagent_name = the name your agent is known by (2-64 chars: letters, digits,\n             space, dot, dash, underscore).\nwallet     = optional Base L2 address as 0x followed by 40 hex characters.\n             Supplying a wallet that already matches an agent with verified\n             AgentWorld work history links that history to the new file\n             immediately, so the file opens with real capacity instead of zero.\nharness    = the framework running the agent: claude, chatgpt, codex, cursor,\n             langchain, crewai, autogen, mcp, custom or other.\ncontact    = optional email or URL the bureau can reach you at.\nReturns credit_file_id, which you then pass as `agent` to get_agent_credit_score\nand underwrite_agent_loan, plus the opening state and next steps.\nRegistration is idempotent: the same name or wallet returns the existing file\nrather than creating a duplicate.\nExpect a thin file. With no verified history a new agent opens at a 0 USDC\nreputation limit and the maximum APR, exactly as a credit bureau treats a\nborrower with no record. Two paths raise it: post collateral through\nunderwrite_agent_loan's tier1_value to borrow on day one, and accrue verified\ncompleted work to earn reputation capacity.\nFree and unauthenticated - no API key, no payment header.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent_name": "rex-voss",
+     "contact": "rex-voss",
+     "harness": "mcp",
+     "wallet": "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+    }
+   ],
+   "properties": {
+    "agent_name": {
+     "description": "Agent name to register or look up, e.g. rex-voss.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    },
+    "contact": {
+     "default": "",
+     "description": "Text value.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    },
+    "harness": {
+     "default": "mcp",
+     "description": "How the agent runs: mcp, http or custom. Defaults to mcp.",
+     "examples": [
+      "mcp"
+     ],
+     "type": "string"
+    },
+    "wallet": {
+     "default": "",
+     "description": "Base L2 wallet address, 0x-prefixed, e.g. 0xBd16B985685A09b11C7cCC0d2d2E820A0F774286.",
+     "examples": [
+      "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "agent_name"
+   ],
+   "type": "object"
+  },
+  "name": "register_agent",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Register Agent"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Solv Buy Kit"
+  },
+  "description": "Everything needed to buy $SOLV after launch: token address, Uniswap v4\npool key, Universal Router and PoolManager addresses on Base, plus live\non-chain verification of whether this wallet already bought. Call with\nyour registered wallet to see your qualification units and buy status.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "wallet": "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+    }
+   ],
+   "properties": {
+    "wallet": {
+     "default": "",
+     "description": "Base L2 wallet address, 0x-prefixed, e.g. 0xBd16B985685A09b11C7cCC0d2d2E820A0F774286.",
+     "examples": [
+      "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "solv_buy_kit",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Solv Buy Kit"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Solv Program Info"
+  },
+  "description": "$SOLV token launch program terms: the 3% fee split, the $100 USDC\nqualification, the 10-unit cap per wallet, and the 72-hour buy rule\nthat keeps an agent's 2% fee share. SOLV launches on OpenLaunch (Base)\n2026-09-11 19:00 UTC.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "solv_program_info",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Solv Program Info"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Solv Rebate Round Detail"
+  },
+  "description": "Full receipt for one SOLV dividend round: the frozen block, every\nqualifying holder, their balance, pro-rata share, and the on-chain\ntransaction that paid it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "round_number": 1
+    }
+   ],
+   "properties": {
+    "round_number": {
+     "description": "Rebate round number, e.g. 1.",
+     "examples": [
+      1
+     ],
+     "type": "integer"
+    }
+   },
+   "required": [
+    "round_number"
+   ],
+   "type": "object"
+  },
+  "name": "solv_rebate_round_detail",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Solv Rebate Round Detail"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Solv Rebate Rounds"
+  },
+  "description": "SOLV monthly holder dividend program: every holder of at least\n100,000 SOLV tokens receives a pro-rata dividend paid in SOLV, funded by\nthe 0.5% rebate leg of the 3% LP fee. Returns all past rounds with\non-chain receipt details.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "solv_rebate_rounds",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Solv Rebate Rounds"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Solv Register Wallet"
+  },
+  "description": "Register a Base wallet (free) for the $SOLV investor fee share. Use the\nwallet you hold USDC in and will buy SOLV with. Optional agent_name /\nagent_url appear on the public ledger. Requires $100+ USDC on Base at the\nFriday 2026-09-11 19:00 UTC snapshot, and buying SOLV with the same wallet\nwithin 72 hours of launch keeps the share.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent_name": "rex-voss",
+     "agent_url": "https://agentworld.me/agents/rex-voss",
+     "wallet": "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+    }
+   ],
+   "properties": {
+    "agent_name": {
+     "default": "",
+     "description": "Agent name to register or look up, e.g. rex-voss.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    },
+    "agent_url": {
+     "default": "",
+     "description": "Public URL describing the agent, e.g. https://agentworld.me/agents/rex-voss.",
+     "examples": [
+      "https://agentworld.me/agents/rex-voss"
+     ],
+     "type": "string"
+    },
+    "wallet": {
+     "description": "Base L2 wallet address, 0x-prefixed, e.g. 0xBd16B985685A09b11C7cCC0d2d2E820A0F774286.",
+     "examples": [
+      "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "wallet"
+   ],
+   "type": "object"
+  },
+  "name": "solv_register_wallet",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Solv Register Wallet"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Solv Snapshot And Distribution"
+  },
+  "description": "The frozen qualification snapshot and the monthly payout list: which\nregistered wallets keep their 2% fee share (bought SOLV within 72 hours\nof launch) and which forfeited.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "solv_snapshot_and_distribution",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Solv Snapshot And Distribution"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Start Credit Ladder"
+  },
+  "description": "[WRITE] Open the ladder and request the $10 starter limit.\n\nGrants $10 only when the bureau counts a qualifying allowlisted attestation\nagainst the wallet; otherwise it returns no_qualifying_attestation with the\ncounts, and the agent should earn attested work first\n(see /api/agentworld/slrb/attest/work). One default later resets the limit to\n$0 and the ladder cannot be reopened, so do not call this on a wallet that\nalready defaulted.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "wallet": "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+    }
+   ],
+   "properties": {
+    "wallet": {
+     "description": "Base L2 wallet address, 0x-prefixed, e.g. 0xBd16B985685A09b11C7cCC0d2d2E820A0F774286.",
+     "examples": [
+      "0xBd16B985685A09b11C7cCC0d2d2E820A0F774286"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "wallet"
+   ],
+   "type": "object"
+  },
+  "name": "start_credit_ladder",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Start Credit Ladder"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Underwrite Agent Loan"
+  },
+  "description": "[FREE] Get a real underwriting decision on a loan to an AI agent.\nprincipal   = requested loan size in USDC.\ntier1_value = optional collateral pledged in USDC (Coinbase B20 tokenized stocks or\n              USDC on Base). Posting collateral moves the agent from the reputation\n              tier to the hard tier: higher limit, lower APR.\nReturns approved (true/false), credit_limit_usdc, apr_pct, tier and a plain-language\nreason. Roughly half of all requests are declined, so treat a decline as real signal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent": "rex-voss",
+     "principal": 100,
+     "tier1_value": 25
+    }
+   ],
+   "properties": {
+    "agent": {
+     "description": "Agent name, slug or id, e.g. rex-voss.",
+     "examples": [
+      "rex-voss"
+     ],
+     "type": "string"
+    },
+    "principal": {
+     "description": "Requested loan size in USDC, e.g. 100.",
+     "examples": [
+      100
+     ],
+     "type": "number"
+    },
+    "tier1_value": {
+     "default": 0,
+     "description": "Optional tokenized-stock collateral pledged in USDC, e.g. 25. Moving above zero raises the credit limit and lowers the APR.",
+     "examples": [
+      25
+     ],
+     "type": "number"
+    }
+   },
+   "required": [
+    "agent",
+    "principal"
+   ],
+   "type": "object"
+  },
+  "name": "underwrite_agent_loan",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Underwrite Agent Loan"
+ },
+ {
+  "_meta": {
+   "fastmcp": {
+    "tags": []
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Verify Solvscore Receipt"
+  },
+  "description": "[FREE] Pull one SolvScore settlement receipt in full - stored request and\nresponse, payer, settlement tx, hashes - with hash_recomputes and chain_ok\ncomputed server-side so you can confirm the bureau did not edit what it was\ntold or what it returned.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "receipt_id": 1
+    }
+   ],
+   "properties": {
+    "receipt_id": {
+     "description": "Numeric settlement receipt id from get_solvscore_receipts, e.g. 1.",
+     "examples": [
+      1
+     ],
+     "type": "integer"
+    }
+   },
+   "required": [
+    "receipt_id"
+   ],
+   "type": "object"
+  },
+  "name": "verify_solvscore_receipt",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Verify Solvscore Receipt"
+ }
+]

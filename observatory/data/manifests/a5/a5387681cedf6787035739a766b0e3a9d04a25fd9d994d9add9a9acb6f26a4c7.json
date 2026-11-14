@@ -1,0 +1,1269 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Cancel appointment"
+  },
+  "description": "CANCEL an appointment. With notify=true Aryeo sends a cancellation notice to the order's customer (an email/message to a third party); with notify=false nobody is told. Cancelling can trigger fees or free the slot for other bookings. PUT /appointments/{id}/cancel.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appointment_id": {
+     "description": "Aryeo appointment id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "notify": {
+     "description": "true = notify the order's customer of the cancellation; false = cancel silently. Required: decide explicitly.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "appointment_id",
+    "notify"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_cancel_appointment",
+  "output_schema": {},
+  "title": "Cancel appointment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Complete task"
+  },
+  "description": "Mark a task completed (now, or at the given time). PUT /tasks/{id}/complete.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "completed_at": {
+     "description": "Completion time (default: now). ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "task_id": {
+     "description": "Aryeo task id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "task_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_complete_task",
+  "output_schema": {},
+  "title": "Complete task"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create customer"
+  },
+  "description": "Create a customer (an agent or brokerage that can place orders) in your Aryeo company from an owner name and email. Look the email up with aryeo_list_customers first to avoid duplicates. Aryeo may email the new customer an invitation. POST /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "description": {
+     "description": "Description of the customer.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "email": {
+     "description": "Email address of the customer owner.",
+     "format": "email",
+     "maxLength": 255,
+     "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+     "type": "string"
+    },
+    "license_number": {
+     "description": "Real estate license number.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "office_name": {
+     "description": "Name of the office or brokerage.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "owner_first_name": {
+     "description": "First name of the customer owner.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "owner_last_name": {
+     "description": "Last name of the customer owner.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "phone": {
+     "description": "Phone number, e.g. 555-123-4567.",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "team_name": {
+     "description": "Name of the customer's team.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "timezone": {
+     "description": "Default timezone, e.g. America/Chicago.",
+     "maxLength": 50,
+     "type": "string"
+    },
+    "website_url": {
+     "description": "Website URL.",
+     "format": "uri",
+     "maxLength": 255,
+     "type": "string"
+    }
+   },
+   "required": [
+    "owner_first_name",
+    "owner_last_name",
+    "email"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_create_customer",
+  "output_schema": {},
+  "title": "Create customer"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create task"
+  },
+  "description": "Create a task, optionally with a description, due date and an assignee (a company team member id). POST /tasks.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "company_team_member_id": {
+     "description": "Company team member to assign the task to (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "description": {
+     "description": "Task description.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "due_at": {
+     "description": "Due date. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "name": {
+     "description": "Task name.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_create_task",
+  "output_schema": {},
+  "title": "Create task"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get appointment"
+  },
+  "description": "One appointment by id: status, start/end, duration, assigned users and items. GET /appointments/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appointment_id": {
+     "description": "Aryeo appointment id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: owner, items, users, order, order.address, order.customer, order.listing, order.items, items.product_variant. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "appointment_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_get_appointment",
+  "output_schema": {},
+  "title": "Get appointment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get listing"
+  },
+  "description": "One listing by id: address, status, price, lot/building details, agents. Add include=images,videos,orders.appointments for media and visits. GET /listings/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: list_agent, co_list_agent, images, files, videos, floor_plans, interactive_content, property_website, orders.appointments. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "listing_id": {
+     "description": "Aryeo listing id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_get_listing",
+  "output_schema": {},
+  "title": "Get listing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get listing statistics"
+  },
+  "description": "Viewing statistics of a listing's property website (visits, views). GET /listings/{id}/stats.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "listing_id": {
+     "description": "Aryeo listing id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "listing_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_get_listing_stats",
+  "output_schema": {},
+  "title": "Get listing statistics"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get order"
+  },
+  "description": "One order by id: customer, address, status, totals, payment and invoice links. Add include=items,appointments,listing,customer for the line items and visits. GET /orders/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: items, listing, customer, appointments, appointments.users, unconfirmed_appointments, order_form, discounts, discounts.coupon. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "order_id": {
+     "description": "Aryeo order id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_get_order",
+  "output_schema": {},
+  "title": "Get order"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get task"
+  },
+  "description": "One task by id. GET /tasks/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "task_id": {
+     "description": "Aryeo task id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "task_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_get_task",
+  "output_schema": {},
+  "title": "Get task"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List appointments"
+  },
+  "description": "List appointments (shoots/visits), by default the SCHEDULED ones, newest start first. Filter by upcoming/past, status, a start-time window or the assigned users. Use include=order,order.address,users to see where and who. GET /appointments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: owner, items, users, order, order.address, order.customer, order.customerGroup, order.listing, order.items, items.product_variant. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default -start_at.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    },
+    "start_after": {
+     "description": "Only appointments starting at or after this moment. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "start_before": {
+     "description": "Only appointments starting at or before this moment. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "statuses": {
+     "description": "Appointment statuses to return (Aryeo default: SCHEDULED).",
+     "items": {
+      "enum": [
+       "SCHEDULED",
+       "UNSCHEDULED",
+       "CANCELED"
+      ],
+      "type": "string"
+     },
+     "maxItems": 3,
+     "type": "array"
+    },
+    "tense": {
+     "description": "Only upcoming or only past appointments.",
+     "enum": [
+      "UPCOMING",
+      "PAST"
+     ],
+     "type": "string"
+    },
+    "user_ids": {
+     "description": "Only appointments of these user ids (user ids = company_user.id from aryeo_list_team_members, not the team member id).",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_appointments",
+  "output_schema": {},
+  "title": "List appointments"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List available dates"
+  },
+  "description": "Days that still have availability for a proposed or existing appointment: give a start/end range or a timeframe, plus either appointment_id or duration + interval (minutes). GET /scheduling/available-dates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appointment_id": {
+     "description": "Existing appointment to find a new date for (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "duration": {
+     "description": "Appointment length in minutes (required without appointment_id).",
+     "maximum": 360,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "end_at": {
+     "description": "Availability before this moment. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "interval": {
+     "description": "Slot start interval in minutes (required without appointment_id).",
+     "maximum": 360,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "order_id": {
+     "description": "Order to calculate availability for (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "order_item_ids": {
+     "description": "Order item ids of the proposed appointment.",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "start_at": {
+     "description": "Availability after this moment. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "timeframe": {
+     "description": "A named timeframe instead of start_at/end_at (see Aryeo docs: use page to move through weeks/months).",
+     "enum": [
+      "DAY",
+      "WEEK",
+      "MONTH",
+      "YEAR"
+     ],
+     "type": "string"
+    },
+    "timezone": {
+     "description": "Client timezone (required by Aryeo); results are localized to it, e.g. America/Chicago.",
+     "maxLength": 50,
+     "minLength": 1,
+     "type": "string"
+    },
+    "user_ids": {
+     "description": "Only dates where all of these users are free (user ids = company_user.id from aryeo_list_team_members, not the team member id).",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    }
+   },
+   "required": [
+    "timezone"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_list_available_dates",
+  "output_schema": {},
+  "title": "List available dates"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List available timeslots"
+  },
+  "description": "Bookable timeslots for ONE day (in the given timezone) for a proposed or existing appointment. Give either appointment_id, or duration + interval (minutes). Optionally restrict to users and tie it to an order. GET /scheduling/available-timeslots.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appointment_id": {
+     "description": "Existing appointment to find a new time for (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "date": {
+     "description": "The day to list, yyyy-mm-dd.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "duration": {
+     "description": "Appointment length in minutes (required without appointment_id).",
+     "maximum": 360,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "interval": {
+     "description": "Slot start interval in minutes (required without appointment_id).",
+     "maximum": 360,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "order_id": {
+     "description": "Order to calculate availability for (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "order_item_ids": {
+     "description": "Order item ids of the proposed appointment.",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "timezone": {
+     "description": "Timezone that defines the day (required by Aryeo), e.g. America/Chicago.",
+     "maxLength": 50,
+     "minLength": 1,
+     "type": "string"
+    },
+    "user_ids": {
+     "description": "Only slots where all of these users are free (user ids = company_user.id from aryeo_list_team_members, not the team member id).",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    }
+   },
+   "required": [
+    "date",
+    "timezone"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_list_available_timeslots",
+  "output_schema": {},
+  "title": "List available timeslots"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List coupons"
+  },
+  "description": "List discount coupons (name, percent or amount off, active state, times redeemed). GET /coupons.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: promotion_codes, discountables. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "search": {
+     "description": "Coupons whose name matches.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default -created_at.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_coupons",
+  "output_schema": {},
+  "title": "List coupons"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List customers"
+  },
+  "description": "List your customers (the agents, brokerages and teams who order from you) with contact details and balances. Filter by name, email, email domain, phone or search text. GET /customers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "customer_team_ids": {
+     "description": "Comma-separated customer team ids.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "email": {
+     "description": "Customers with this exact email address.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "email_domain": {
+     "description": "Customers whose email is on this domain, e.g. gmail.com.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "include": {
+     "description": "Comma-separated relations to expand. Example: users. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "name": {
+     "description": "Customers with this name.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "phone": {
+     "description": "Customers with this phone number.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "search": {
+     "description": "Customers matching this text.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default -created_at.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_customers",
+  "output_schema": {},
+  "title": "List customers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List listings"
+  },
+  "description": "List the property listings of your Aryeo company (address, status, price, bedrooms, delivery status, thumbnails). Filter by search text, address, listing agent, status, price/size ranges or delivery status. GET /listings.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "active": {
+     "description": "true = only listings with an active status (coming soon, for sale/lease, pending, sold, leased).",
+     "type": "boolean"
+    },
+    "address": {
+     "description": "Listings whose address matches, e.g. 123 Main St.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "bathrooms_max": {
+     "description": "Maximum bathrooms.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "bathrooms_min": {
+     "description": "Minimum bathrooms.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "bedrooms_max": {
+     "description": "Maximum bedrooms.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "bedrooms_min": {
+     "description": "Minimum bedrooms.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "delivery_status": {
+     "description": "Only listings with this media delivery status.",
+     "enum": [
+      "DELIVERED",
+      "UNDELIVERED",
+      "SCHEDULED"
+     ],
+     "type": "string"
+    },
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: list_agent, co_list_agent, images, files, videos, floor_plans, interactive_content, property_website, orders.appointments. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "list_agent": {
+     "description": "Listings whose listing or co-listing agent matches, e.g. John Doe.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "price_max": {
+     "description": "Maximum price.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "price_min": {
+     "description": "Minimum price.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "search": {
+     "description": "Listings with a field matching this text.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default -created_at.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    },
+    "square_feet_max": {
+     "description": "Maximum square feet.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "square_feet_min": {
+     "description": "Minimum square feet.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "status": {
+     "description": "Only listings with this status.",
+     "enum": [
+      "DRAFT",
+      "COMING_SOON",
+      "FOR_LEASE",
+      "FOR_SALE",
+      "PENDING_SALE",
+      "PENDING_LEASE",
+      "FOR_RENT",
+      "SOLD",
+      "LEASED",
+      "OFF_MARKET"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_listings",
+  "output_schema": {},
+  "title": "List listings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List order forms"
+  },
+  "description": "List your order forms (the public booking forms customers use), with title, URL and scheduling settings. GET /order-forms.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_order_forms",
+  "output_schema": {},
+  "title": "List order forms"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List orders"
+  },
+  "description": "List the orders of your Aryeo company (newest first by default), with payment status, fulfillment status, totals and links. Filter by search text (address or customer), payment/fulfillment status, appointment date range, tags or assigned users. GET /orders.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appointment_start_after": {
+     "description": "Only orders with an appointment starting after this moment. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "appointment_start_before": {
+     "description": "Only orders with an appointment starting before this moment. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "creator_group_id": {
+     "description": "Only orders owned by this creator group (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "fulfillment_status": {
+     "description": "Only orders with this fulfillment status.",
+     "enum": [
+      "FULFILLED",
+      "PARTIALLY_FULFILLED",
+      "UNFULFILLED"
+     ],
+     "type": "string"
+    },
+    "include": {
+     "description": "Comma-separated relations to expand. Examples: items, listing, customer, appointments, appointments.users, unconfirmed_appointments, order_form, discounts, discounts.coupon. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "payment_status": {
+     "description": "Only orders with this payment status.",
+     "enum": [
+      "PAID",
+      "PARTIALLY_PAID",
+      "UNPAID"
+     ],
+     "type": "string"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "search": {
+     "description": "Orders whose address or customer matches this text, e.g. a street name.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default -created_at.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    },
+    "tag_ids": {
+     "description": "Orders carrying any of these tag ids.",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "user_ids": {
+     "description": "Orders that have appointments with any of these user ids (user ids = company_user.id from aryeo_list_team_members, not the team member id).",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_orders",
+  "output_schema": {},
+  "title": "List orders"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List product categories"
+  },
+  "description": "List the product categories (use the ids to filter aryeo_list_products). GET /product-categories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "search": {
+     "description": "Categories with a field matching this text.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default title.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_product_categories",
+  "output_schema": {},
+  "title": "List product categories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List products"
+  },
+  "description": "List your services/products (main products and add-ons) with type, active state and variants. Inactive products are hidden unless include_inactive is true. GET /products.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category_ids": {
+     "description": "Only products in these category ids.",
+     "items": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "include_inactive": {
+     "description": "true = also return inactive products.",
+     "type": "boolean"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "search": {
+     "description": "Products with a field matching this text.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "description": "Comma-separated sort fields; a leading - sorts descending. Default title.",
+     "maxLength": 100,
+     "pattern": "^[A-Za-z0-9_.,-]+$",
+     "type": "string"
+    },
+    "type": {
+     "description": "Only main products or only add-ons.",
+     "enum": [
+      "MAIN",
+      "ADDON"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_products",
+  "output_schema": {},
+  "title": "List products"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List tasks"
+  },
+  "description": "List tasks (to-dos such as editing or delivery steps) with assignee, due date and completion state. GET /tasks.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "aryeo_list_tasks",
+  "output_schema": {},
+  "title": "List tasks"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List team member calendar"
+  },
+  "description": "A team member's calendar between two moments: appointments, blocks, external events and buffers. Use aryeo_list_team_members for the id. GET /company-team-members/{id}/events.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "end": {
+     "description": "End of the window. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "include_unscheduled": {
+     "description": "true = include unscheduled appointments.",
+     "type": "boolean"
+    },
+    "start": {
+     "description": "Start of the window. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "team_member_id": {
+     "description": "Company team member id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "type": {
+     "description": "Only events of this type.",
+     "enum": [
+      "APPOINTMENT",
+      "CALENDAR_BLOCK",
+      "EXTERNAL",
+      "BUFFER",
+      "DECLINED_APPOINTMENT",
+      "UNSCHEDULED_APPOINTMENT"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "team_member_id"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_list_team_member_events",
+  "output_schema": {},
+  "title": "List team member calendar"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List team members"
+  },
+  "description": "List your company's team members (photographers and staff) with role, status, service-provider flag and permissions. Each member has two ids: the member `id` (for aryeo_list_team_member_events and as the task assignee company_team_member_id) and `company_user.id` (the USER id, for the user_ids filters of orders, appointments, timeslots and dates). company_user is included by default. GET /company-team-members.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include": {
+     "description": "Comma-separated relations to expand. Default: company_user. Example: company_user. An unknown value makes Aryeo reply with the allowed list.",
+     "maxLength": 255,
+     "pattern": "^[A-Za-z0-9_.,]+$",
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-100 (Aryeo default 25).",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "search": {
+     "description": "Team members matching this text.",
+     "maxLength": 255,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "aryeo_list_team_members",
+  "output_schema": {},
+  "title": "List team members"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Reschedule appointment"
+  },
+  "description": "MOVE an appointment to a new start and end time. With notify=true Aryeo sends a reschedule notice to the order's customer (a message to a third party). Check availability first (aryeo_list_available_timeslots). PUT /appointments/{id}/reschedule.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "appointment_id": {
+     "description": "Aryeo appointment id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    },
+    "end_at": {
+     "description": "New end. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    },
+    "notify": {
+     "description": "true = notify the order's customer of the new time; false = move silently. Required: decide explicitly.",
+     "type": "boolean"
+    },
+    "start_at": {
+     "description": "New start. ISO 8601 date-time with a timezone, e.g. 2026-10-01T13:00:00Z.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "appointment_id",
+    "start_at",
+    "end_at",
+    "notify"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_reschedule_appointment",
+  "output_schema": {},
+  "title": "Reschedule appointment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update order notes"
+  },
+  "description": "REPLACE the internal notes of an order (visible to your team only, not to the customer). The whole note is overwritten: read the order first and send the full new text. An empty string clears the notes. PUT /orders/{id}/notes.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "internal_notes": {
+     "description": "The complete new internal notes (max 2550 characters) (replaces the old text).",
+     "maxLength": 2550,
+     "type": "string"
+    },
+    "order_id": {
+     "description": "Aryeo order id (UUID).",
+     "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_id",
+    "internal_notes"
+   ],
+   "type": "object"
+  },
+  "name": "aryeo_update_order_notes",
+  "output_schema": {},
+  "title": "Update order notes"
+ }
+]

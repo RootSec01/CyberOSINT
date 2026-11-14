@@ -1,0 +1,1205 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Add an element to the current project"
+  },
+  "description": "Append a single element to an existing project — a TWEAK, e.g. dropping in one more caption or shape. By default it is added at the top level; pass parent_id to add it INTO a group (nested). The element is any valid schema element: video, image, text, shape, audio, group, caption, or particles. To create a composition or add several elements at once, build the JSON and use set_project instead. The new element is validated as part of the project as a whole before being added. Call get_schema(element_type) for the exact per-type fields; unrecognized keys are flagged.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "element": {
+     "additionalProperties": {},
+     "description": "A Clipkit element object. Must include `type`.",
+     "type": "object"
+    },
+    "parent_id": {
+     "description": "Optional id of a group to add this element INTO (nested). Omit to add at the top level.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "element"
+   ],
+   "type": "object"
+  },
+  "name": "add_element",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "added_element_id": {
+     "type": "string"
+    },
+    "element_type": {
+     "type": "string"
+    },
+    "parent_id": {
+     "type": "string"
+    },
+    "top_level_element_count": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "top_level_element_count"
+   ],
+   "type": "object"
+  },
+  "title": "Add an element to the current project"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Create a new Clipkit project"
+  },
+  "description": "Create a new, blank Clipkit project with the given dimensions and duration, and return its project_id. Defaults: 1920×1080, 10 seconds, 30 fps, output_format \"mp4\". Call this first when starting a new video. Pass an existing project_id to reset that project to blank; omit it to start a fresh project (note the returned id for subsequent tools).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "background_color": {
+     "description": "Hex color, e.g. \"#000000\".",
+     "type": "string"
+    },
+    "duration": {
+     "description": "Composition duration in seconds. Default 10.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "frame_rate": {
+     "description": "Frame rate. Default 30.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "height": {
+     "description": "Composition height in pixels. Default 1080.",
+     "exclusiveMinimum": 0,
+     "type": "integer"
+    },
+    "output_dither": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "additionalProperties": true,
+       "properties": {
+        "amplitude": {
+         "maximum": 8,
+         "minimum": 0,
+         "type": "number"
+        },
+        "enabled": {
+         "type": "boolean"
+        },
+        "pattern": {
+         "enum": [
+          "bayer",
+          "noise"
+         ],
+         "type": "string"
+        }
+       },
+       "type": "object"
+      }
+     ],
+     "description": "Anti-banding output dither — DEFAULT ON, leave unset. Pass false for byte-exact undithered output, or { amplitude, pattern } to tune. Stops gradients / soft shadows / blur from showing 8-bit banding; deterministic."
+    },
+    "output_format": {
+     "description": "Output container/codec. Default \"mp4\".",
+     "enum": [
+      "mp4",
+      "gif"
+     ],
+     "type": "string"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    },
+    "width": {
+     "description": "Composition width in pixels. Default 1920.",
+     "exclusiveMinimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "create_project",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "type": "number"
+    },
+    "frame_rate": {
+     "type": "number"
+    },
+    "height": {
+     "type": "number"
+    },
+    "output_format": {
+     "type": "string"
+    },
+    "project_id": {
+     "description": "Id of the created project — pass to subsequent tools.",
+     "type": "string"
+    },
+    "width": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "project_id"
+   ],
+   "type": "object"
+  },
+  "title": "Create a new Clipkit project"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Compose a designed promo from prebuilt scenes (one fast option)"
+  },
+  "description": "Assemble a designed-looking promo/intro/product/data video from the Clipkit pattern library: give an ordered list of SCENES and the words, and it bakes in the camera, glass, lighting, motion blur, timing, and layout, then returns an editor link. This is a FAST option when a conventional promo structure fits — it is NOT the only way to make a video and NOT a default; for anything specific or original, author the JSON yourself and call set_project (the full creative range). When you do use this, MIX scene types to fit the brief and vary the structure — a video can be a single kinetic headline, three title cards, a showcase montage, or a data explainer; you do NOT need a hero or a cta. Scene types: hero (glass-orb logo reveal: wordmark, tagline?), kinetic (letter-fly headline: text, subtitle?), showcase (a screenshot tilted in 3D: screenshot URL), title (full-frame title card: headline, kicker?, subtitle?), cta (closing card with a glass button: wordmark, tagline?, cta), stats (hero numbers: stats[{label,current,previous?}], title?), bars (bar chart: bars[{label,value,previous?}], title?), ranking (top-N list: items[{label,value}], title?), pie (pie cards: cards[{label,value,total,previous?}], title?). The data scenes (stats/bars/ranking/pie) look best with theme \"mux\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "height": {
+     "description": "Default 1080.",
+     "exclusiveMinimum": 0,
+     "type": "integer"
+    },
+    "motion_blur": {
+     "description": "Supersampled motion-blur samples (≥2 enables it — nicer but slower to render). Default off.",
+     "maximum": 32,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    },
+    "scenes": {
+     "description": "Ordered scenes; mix types to fit the brief — you do NOT need hero/cta. e.g. a single [{type:\"kinetic\",text:\"…\"}], a sequence [{type:\"title\",headline:\"…\"},{type:\"showcase\",screenshot:\"…\"},{type:\"title\",headline:\"…\"}], or a data piece [{type:\"ranking\",title:\"…\",items:[…]}]",
+     "items": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "description": "Accent color slot. Default \"green\".",
+          "enum": [
+           "pink",
+           "green",
+           "blue",
+           "lavender",
+           "purple",
+           "yellow",
+           "gray"
+          ],
+          "type": "string"
+         },
+         "duration": {
+          "description": "Scene length in seconds. Sensible default per scene type.",
+          "exclusiveMinimum": 0,
+          "type": "number"
+         },
+         "tagline": {
+          "type": "string"
+         },
+         "type": {
+          "const": "hero",
+          "type": "string"
+         },
+         "wordmark": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "wordmark"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "subtitle": {
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         },
+         "type": {
+          "const": "kinetic",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "text"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "screenshot": {
+          "format": "uri",
+          "type": "string"
+         },
+         "type": {
+          "const": "showcase",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "screenshot"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "headline": {
+          "type": "string"
+         },
+         "kicker": {
+          "type": "string"
+         },
+         "subtitle": {
+          "type": "string"
+         },
+         "type": {
+          "const": "title",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "headline"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "cta": {
+          "type": "string"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "tagline": {
+          "type": "string"
+         },
+         "type": {
+          "const": "cta",
+          "type": "string"
+         },
+         "wordmark": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "wordmark",
+         "cta"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "dateRange": {
+          "type": "string"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "stats": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "current": {
+             "type": "number"
+            },
+            "label": {
+             "type": "string"
+            },
+            "previous": {
+             "type": "number"
+            }
+           },
+           "required": [
+            "label",
+            "current"
+           ],
+           "type": "object"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array"
+         },
+         "title": {
+          "type": "string"
+         },
+         "type": {
+          "const": "stats",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "stats"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "bars": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "label": {
+             "type": "string"
+            },
+            "previous": {
+             "type": "number"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "required": [
+            "label",
+            "value"
+           ],
+           "type": "object"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "type": "array"
+         },
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "dateRange": {
+          "type": "string"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "title": {
+          "type": "string"
+         },
+         "type": {
+          "const": "bars",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "bars"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "dateRange": {
+          "type": "string"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "items": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "label": {
+             "type": "string"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "required": [
+            "label",
+            "value"
+           ],
+           "type": "object"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "type": "array"
+         },
+         "title": {
+          "type": "string"
+         },
+         "type": {
+          "const": "ranking",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "items"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "cards": {
+          "items": {
+           "additionalProperties": false,
+           "properties": {
+            "label": {
+             "type": "string"
+            },
+            "previous": {
+             "type": "number"
+            },
+            "total": {
+             "type": "number"
+            },
+            "value": {
+             "type": "number"
+            }
+           },
+           "required": [
+            "label",
+            "value",
+            "total"
+           ],
+           "type": "object"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array"
+         },
+         "color": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/color"
+         },
+         "dateRange": {
+          "type": "string"
+         },
+         "duration": {
+          "$ref": "#/properties/scenes/items/anyOf/0/properties/duration"
+         },
+         "title": {
+          "type": "string"
+         },
+         "type": {
+          "const": "pie",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "cards"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "minItems": 1,
+     "type": "array"
+    },
+    "theme": {
+     "description": "Visual theme. Default \"cinematic\" (dark, serif, premium).",
+     "enum": [
+      "cinematic",
+      "mux",
+      "minimal"
+     ],
+     "type": "string"
+    },
+    "width": {
+     "description": "Default 1920.",
+     "exclusiveMinimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "scenes"
+   ],
+   "type": "object"
+  },
+  "name": "create_promo",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "type": "number"
+    },
+    "editor_url": {
+     "type": "string"
+    },
+    "height": {
+     "type": "number"
+    },
+    "project_id": {
+     "type": "string"
+    },
+    "scene_count": {
+     "type": "number"
+    },
+    "width": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "project_id",
+    "scene_count"
+   ],
+   "type": "object"
+  },
+  "title": "Compose a designed promo from prebuilt scenes (one fast option)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Delete one element by id"
+  },
+  "description": "Delete the element with the given id, anywhere in the tree (including one nested inside a group or its mask) — a tweak to an existing composition. (The project must keep at least one top-level element.)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "The id of the element to delete.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "delete_element",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "deleted_element_id": {
+     "type": "string"
+    },
+    "top_level_element_count": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "deleted_element_id",
+    "top_level_element_count"
+   ],
+   "type": "object"
+  },
+  "title": "Delete one element by id"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Describe the current project in plain language"
+  },
+  "description": "Return a compact, human-readable summary of the current project — dimensions, fps, duration, an element breakdown by type, a per-track timeline (paint order low→high), and render-time warnings. Much cheaper to read than get_project's full JSON; use it to orient yourself or sanity-check structure without dumping the whole source.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "describe_project",
+  "output_schema": {},
+  "title": "Describe the current project in plain language"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Tweak one existing element (merge changed fields)"
+  },
+  "description": "Change fields on the element with the given id by merging in a partial element — only the keys you include change. The id may be any element ANYWHERE in the tree, including one nested inside a group (or its mask). Pass a whole nested value (e.g. a new `keyframe_animations` array) to replace that key; set a key to null to remove it. This is for TWEAKING an existing composition. To create a composition or change many elements at once, edit the JSON and call set_project instead. The result is re-validated before being accepted.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "The id of the element to edit.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "patch": {
+     "additionalProperties": {},
+     "description": "Partial element: the fields to change. Omitted keys are left as-is; a key set to null is removed.",
+     "type": "object"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "patch"
+   ],
+   "type": "object"
+  },
+  "name": "edit_element",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "changed_keys": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "element_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "element_id",
+    "changed_keys"
+   ],
+   "type": "object"
+  },
+  "title": "Tweak one existing element (merge changed fields)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get the current Clipkit project JSON"
+  },
+  "description": "Return the full current Clipkit source as JSON. Use this to inspect the project, pass it to a render pipeline, or compose follow-up edits.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_project",
+  "output_schema": {},
+  "title": "Get the current Clipkit project JSON"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get the Clipkit JSON Schema (exact fields)"
+  },
+  "description": "Return the authoritative JSON Schema for a Clipkit Source — exact field names, types, and enums, generated from the protocol. Call with no argument for the full Source schema, or with element_type (e.g. \"text\", \"shape\", \"particles\") for just that element's fields (much smaller). Use this when authoring with set_project / add_element so you never guess a field.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "element_type": {
+     "description": "Limit to one element type's fields (e.g. \"text\"). Omit for the full Source schema (large).",
+     "enum": [
+      "video",
+      "image",
+      "text",
+      "shape",
+      "audio",
+      "group",
+      "caption",
+      "particles"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_schema",
+  "output_schema": {},
+  "title": "Get the Clipkit JSON Schema (exact fields)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Host a remote image/video/audio so a project can use it"
+  },
+  "description": "Fetch a remote media URL (image/video/audio) and HOST it on Clipkit, returning a stable asset_url to put in an element's `url`. Use this so the project's media survives — the original link may rot, be private, or block hotlinking. Anonymous projects allow up to 5 hosted assets / 100 MB total / 50 MB per file; when the limit is hit, tell the user to open the project (open_in_editor) and sign in to add more. Requires project_id.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "filename": {
+     "description": "Optional display name for the asset.",
+     "type": "string"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    },
+    "url": {
+     "description": "A public http(s) URL to an image, video, or audio file.",
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "ingest_asset",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "asset_id": {
+     "type": "string"
+    },
+    "asset_url": {
+     "type": "string"
+    },
+    "filename": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "asset_url",
+    "asset_id",
+    "filename"
+   ],
+   "type": "object"
+  },
+  "title": "Host a remote image/video/audio so a project can use it"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Load a shared project back into the session"
+  },
+  "description": "Import a previously shared project as the current project, by its share id or its editor URL (e.g. https://clipkit.dev/editor?id=…), returning its project_id. Use this to continue working on a project the user opened in the editor or shared earlier — the round-trip for open_in_editor. Pass an existing project_id to load into that project; omit it to load into a new one.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id_or_url": {
+     "description": "A share id, or a clipkit.dev/editor?id=… URL.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id_or_url"
+   ],
+   "type": "object"
+  },
+  "name": "load_project",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "type": "number"
+    },
+    "element_count": {
+     "type": "number"
+    },
+    "height": {
+     "type": "number"
+    },
+    "project_id": {
+     "type": "string"
+    },
+    "width": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "project_id",
+    "element_count"
+   ],
+   "type": "object"
+  },
+  "title": "Load a shared project back into the session"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create a shareable link that opens the current project in the editor"
+  },
+  "description": "Validate the current project and create a link that opens it in the Clipkit web editor, where the user can preview and refine it. This shares the PROJECT (nothing is rendered — that's render_video). Use after composing or editing. Returns a URL.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "open_in_editor",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "editor_url": {
+     "type": "string"
+    },
+    "project_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "editor_url",
+    "project_id"
+   ],
+   "type": "object"
+  },
+  "title": "Create a shareable link that opens the current project in the editor"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Render one frame of the current project so you can SEE it"
+  },
+  "description": "Render a single frame of the current project to a PNG and return it as an image you can look at. This is how you check your work — in chat there is no other way to see what a composition actually looks like. Use it liberally: after composing, after edits, and at different times to inspect motion. Stills are FREE (credits are only spent by render_video). Pass `time` (seconds) to choose the frame; defaults to 0.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    },
+    "time": {
+     "description": "Composition time in seconds to capture. Default 0 (first frame).",
+     "minimum": 0,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "preview_still",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "height": {
+     "type": "number"
+    },
+    "mime_type": {
+     "type": "string"
+    },
+    "time": {
+     "type": "number"
+    },
+    "width": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "time"
+   ],
+   "type": "object"
+  },
+  "title": "Render one frame of the current project so you can SEE it"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Read the Clipkit authoring docs"
+  },
+  "description": "Return a canonical Clipkit doc as text. topic \"card\" = the ~8KB compact authoring card — the recommended context for authoring; \"pattern-lighting\" = the shine/neon/glow technique rigs; \"pattern-data-viz\" / \"pattern-cinematic-ui\" / \"pattern-ui-screencast\" / \"pattern-promo-teaser\" = ~4-5KB pattern cards (proven idioms: count-ups and bar rows; product hero shots with camera rigs; faked app UI with typing/cursor/clicks) — load ONE alongside the card when the brief matches its archetype; \"agents\" = the full authoring guide (fetch only when the card doesn't cover a need); \"protocol\" = the formal field spec; \"brand\" = brand reference. (Same docs offered as MCP resources, exposed as a tool so you can read them directly — resources are not always model-readable.)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "topic": {
+     "description": "Which doc. Default \"agents\".",
+     "enum": [
+      "agents",
+      "protocol",
+      "brand",
+      "card",
+      "pattern-data-viz",
+      "pattern-cinematic-ui",
+      "pattern-ui-screencast",
+      "pattern-lighting",
+      "pattern-promo-teaser"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "read_docs",
+  "output_schema": {},
+  "title": "Read the Clipkit authoring docs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Replace the entire Clipkit project"
+  },
+  "description": "Replace the entire project with the given source JSON, returning its project_id. This is the PRIMARY way to build: use it to create a composition or to add/change many elements at once. (To tweak a single element in an existing project, use edit_element / add_element / delete_element instead.) REVISION RULE: if you are iterating on a video that already exists in this conversation — the user asked for changes, you are fixing your own work — you MUST pass its project_id so the project is updated in place and keeps one editor link and its version history. Omitting project_id creates a NEW, unrelated project and strands the old one; only omit for a genuinely different video. The input is validated against the @clipkit/protocol before being accepted; invalid inputs return an error. Shape: { width, height, duration, frame_rate, output_format, background_color?, defaults? (house easing, e.g. a spring), fonts?, camera?, lights?, elements:[…] }; every element has a `type` plus base fields (id, layer, x, y, width, height, time, duration, opacity, rotation, animations, keyframe_animations) and type-specific fields. CKP/1.1: keyframe easings accept a spring object {type:\"spring\", duration?, bounce?}; channels take stagger {each, from, ease, split, seed} to spread across text units / set copies / group children; groups take layout {direction, gap, align} (stack — no hand-computed positions); text takes a count-up {expr, format}. For exact field names + types call get_schema (optionally with an element_type) — the runtime ignores unrecognized keys, and this tool flags any it does not recognize.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    },
+    "source": {
+     "additionalProperties": {},
+     "description": "A full Clipkit source object.",
+     "type": "object"
+    }
+   },
+   "required": [
+    "source"
+   ],
+   "type": "object"
+  },
+  "name": "set_project",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "type": "number"
+    },
+    "element_count": {
+     "type": "number"
+    },
+    "height": {
+     "type": "number"
+    },
+    "project_id": {
+     "type": "string"
+    },
+    "width": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "project_id",
+    "element_count"
+   ],
+   "type": "object"
+  },
+  "title": "Replace the entire Clipkit project"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Validate the current project (schema + render-time warnings)"
+  },
+  "description": "Run the @clipkit/protocol validator against the current project AND surface render-time warnings even when the JSON is valid — things that pass the schema but the runtime will silently drop or clip: emoji / non-ASCII text (the runtime font atlas is ASCII-only), elements that run past the composition end, a missing top-level duration. Run it before you share or render the project. For a fuller timeline read-back, use describe_project.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "project_id": {
+     "description": "Which project to act on — the id returned by create_project / set_project / create_promo / load_project. ALWAYS pass it once a project exists in this conversation; omitting it on a build tool creates a brand-new project. (Omit only on the local stdio server working a single project.)",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "validate_project",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "type": "number"
+    },
+    "element_count": {
+     "type": "number"
+    },
+    "error_count": {
+     "type": "number"
+    },
+    "errors": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "height": {
+     "type": "number"
+    },
+    "unknown_keys": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "valid": {
+     "type": "boolean"
+    },
+    "warnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "width": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "valid",
+    "error_count"
+   ],
+   "type": "object"
+  },
+  "title": "Validate the current project (schema + render-time warnings)"
+ }
+]

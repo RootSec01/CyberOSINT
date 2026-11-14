@@ -1,0 +1,20 @@
+[
+ {
+  "description": "Check whether an IP address (IPv4 or IPv6) is a genuine Bingbot IP address, verified against Bingbot's published IP data on seoapi.com.",
+  "input_schema": {
+   "properties": {
+    "ip": {
+     "description": "The IPv4 or IPv6 address to validate",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ip"
+   ],
+   "type": "object"
+  },
+  "name": "validate_ip",
+  "output_schema": {},
+  "title": "Validate Bingbot IP"
+ }
+]

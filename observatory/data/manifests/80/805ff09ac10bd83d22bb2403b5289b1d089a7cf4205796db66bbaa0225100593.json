@@ -1,0 +1,166 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://widget/critical-path-v1-1.0.0-897397a4735528362298ae944b8a8f837b6291af397b7b8eb760f2f5e7c8b4ae.html",
+   "openai/toolInvocation/invoked": "Critical path calculated",
+   "openai/toolInvocation/invoking": "Calculating critical tasks",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://widget/critical-path-v1-1.0.0-897397a4735528362298ae944b8a8f837b6291af397b7b8eb760f2f5e7c8b4ae.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Calculate critical path"
+  },
+  "description": "Use this when the user wants a critical path calculation, project duration, earliest/latest task starts and finishes, or task slack from explicit durations and dependencies. Accepts one to forty tasks, at most 160 finish-to-start dependencies, and durations with at most three decimal places. Includes parallel critical tasks and a CSV schedule. Does not schedule calendar dates, generate Gantt charts, account for resources or holidays, or infer missing task durations.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "project": {
+     "description": "Project label, e.g. Website launch.",
+     "maxLength": 80,
+     "type": "string"
+    },
+    "tasks": {
+     "description": "Tasks in any order, e.g. [{\"id\":\"A\",\"duration\":3},{\"id\":\"B\",\"duration\":5,\"depends_on\":[\"A\"]}].",
+     "items": {
+      "properties": {
+       "depends_on": {
+        "description": "Finish-to-start predecessor IDs, e.g. [\"design\"]. Omit for a starting task.",
+        "items": {
+         "description": "Predecessor task ID, e.g. design.",
+         "maxLength": 20,
+         "minLength": 1,
+         "type": "string"
+        },
+        "maxItems": 39,
+        "type": "array"
+       },
+       "duration": {
+        "description": "Elapsed duration in the chosen unit, with at most three decimal places, e.g. 2.5. Zero denotes a milestone.",
+        "maximum": 1000000,
+        "minimum": 0,
+        "type": "number"
+       },
+       "id": {
+        "description": "Unique dependency ID, e.g. design.",
+        "maxLength": 20,
+        "minLength": 1,
+        "type": "string"
+       },
+       "name": {
+        "description": "Task label, e.g. Design mockups. Defaults to its ID.",
+        "maxLength": 50,
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "duration"
+      ],
+      "type": "object"
+     },
+     "maxItems": 40,
+     "minItems": 1,
+     "type": "array"
+    },
+    "unit": {
+     "description": "A single elapsed-time unit for all task durations, e.g. days. Defaults to days; no business calendar is applied.",
+     "enum": [
+      "days",
+      "hours",
+      "weeks"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "tasks"
+   ],
+   "type": "object"
+  },
+  "name": "calculate_critical_path",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "critical_tasks": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "downloads": {
+     "additionalProperties": false,
+     "properties": {
+      "csv": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "csv"
+     ],
+     "type": "object"
+    },
+    "notes": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "one_critical_path": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "project": {
+     "type": "string"
+    },
+    "project_duration": {
+     "type": "number"
+    },
+    "schedule_preview_only": {
+     "type": "boolean"
+    },
+    "task_count": {
+     "type": "number"
+    },
+    "tasks": {
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "unit": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "unit",
+    "project_duration",
+    "task_count",
+    "critical_tasks",
+    "one_critical_path",
+    "notes",
+    "tasks",
+    "schedule_preview_only",
+    "downloads"
+   ],
+   "type": "object"
+  },
+  "title": "Calculate critical path"
+ }
+]

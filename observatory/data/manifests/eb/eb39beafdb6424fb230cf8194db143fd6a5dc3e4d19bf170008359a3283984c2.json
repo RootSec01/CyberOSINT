@@ -1,0 +1,211 @@
+[
+ {
+  "description": "Reserve one Location floor for the authenticated owner and create a fixed 55 USDC native-USDC x402 exact Payment Intent.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "accountOwnerAuthorityConfirmed": {
+     "const": true,
+     "type": "boolean"
+    },
+    "applicantKind": {
+     "const": "individual",
+     "type": "string"
+    },
+    "floor": {
+     "maximum": 65535,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "locationId": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+     "type": "string"
+    },
+    "termsAccepted": {
+     "const": true,
+     "type": "boolean"
+    },
+    "termsVersion": {
+     "const": "individual-v1",
+     "type": "string"
+    }
+   },
+   "required": [
+    "locationId",
+    "floor",
+    "applicantKind",
+    "termsVersion",
+    "termsAccepted",
+    "accountOwnerAuthorityConfirmed"
+   ],
+   "type": "object"
+  },
+  "name": "create_payment_intent",
+  "output_schema": {},
+  "title": "Create a Mainnet Payment Intent"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Create a short-lived owner login link for an existing 55 USDC Intent. Show the URL to the owner; wait for their Phantom wallet connection before preparing. Never request a token or private key. Do not automatically retry.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "intentId": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "intentId"
+   ],
+   "type": "object"
+  },
+  "name": "create_wallet_handoff",
+  "output_schema": {}
+ },
+ {
+  "description": "Check a virtual floor for the authenticated owner without disclosing another owner's identity.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "floor": {
+     "maximum": 65535,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "locationId": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "locationId",
+    "floor"
+   ],
+   "type": "object"
+  },
+  "name": "get_floor_availability",
+  "output_schema": {},
+  "title": "Check virtual floor availability"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read server-recorded settlement evidence for this handoff without sending, observing the chain or repairing a payment. settlement_recorded is historical evidence, not proof of currently active service. Unknown/review results require operator review. Never resend automatically.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "handoffId": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handoffId"
+   ],
+   "type": "object"
+  },
+  "name": "get_wallet_payment_status",
+  "output_schema": {}
+ },
+ {
+  "description": "List the authenticated owner's contracts. Only current active paid contracts with valid assent include their snapshotted mailbox address. Private forwarding destinations are omitted.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_contracts",
+  "output_schema": {},
+  "title": "List authenticated owner contracts"
+ },
+ {
+  "description": "Read the authenticated owner's durable event Inbox after an optional cursor.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "after": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 50,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_events",
+  "output_schema": {},
+  "title": "Read durable Agent events"
+ },
+ {
+  "description": "List safe Location summaries and virtual floor ranges using the connected Google OAuth account. Exact addresses are never included in this catalog.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_locations",
+  "output_schema": {},
+  "title": "List Location summaries"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "After the owner connects Phantom, prepare the immutable transaction for this handoff. Then ask the owner to review and sign in the existing owner page. This does not sign or send. Do not automatically retry or request a replacement after expiry.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "handoffId": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handoffId"
+   ],
+   "type": "object"
+  },
+  "name": "prepare_wallet_signature",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Only after the owner explicitly signs the 55 USDC payment in Phantom, submit the server-saved proof once. Acknowledgement is not settlement. Always follow with get_wallet_payment_status; never automatically retry submission, including after a timeout.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "handoffId": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "handoffId"
+   ],
+   "type": "object"
+  },
+  "name": "submit_wallet_payment",
+  "output_schema": {}
+ }
+]

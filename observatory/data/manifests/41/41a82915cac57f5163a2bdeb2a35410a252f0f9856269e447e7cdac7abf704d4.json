@@ -1,0 +1,105 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a record"
+  },
+  "description": "Get one record by id, with all its fields as the KB user can see them. Use agiloft_list_tables to find the table and its fields. Agiloft REST: EWRead.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "id": {
+     "description": "Record id (from agiloft_search_records).",
+     "minLength": 1,
+     "type": "string"
+    },
+    "table": {
+     "description": "Table logical name, case sensitive (for example case or contacts.employees).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "table",
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "agiloft_get_record",
+  "output_schema": {},
+  "title": "Get a record"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List tables"
+  },
+  "description": "List the tables of the Agiloft knowledgebase (label and logical name). Pass table and include_fields=true to get that table's fields. Use the logical names in the other tools. Agiloft REST: EWTable.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include_fields": {
+     "description": "true = also return the fields of the table (needs table).",
+     "type": "boolean"
+    },
+    "table": {
+     "description": "Only this table (logical name).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "agiloft_list_tables",
+  "output_schema": {},
+  "title": "List tables"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search records"
+  },
+  "description": "Search a table with an ad hoc query (for example summary~='test'&&priority=3; ~= means contains) and return the number of matches and the requested fields. Pages with page and limit. Agiloft REST: EWSearch.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "fields": {
+     "description": "Logical field names to return with each record.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "limit": {
+     "description": "Records per page (1 to 100).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, from 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Ad hoc query in Agiloft syntax, for example status='Open'. Leave empty for all records.",
+     "type": "string"
+    },
+    "table": {
+     "description": "Table logical name, case sensitive (for example case or contacts.employees).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "table"
+   ],
+   "type": "object"
+  },
+  "name": "agiloft_search_records",
+  "output_schema": {},
+  "title": "Search records"
+ }
+]

@@ -1,0 +1,162 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Aggregate statistics on how the Danish sportsbook Oddset prices football and tennis vs the de-vigged Pinnacle closing price (CLV gap), bookmaker margins, and late-vs-early price drift, by sport, league, market and hours-before-kickoff bucket. Every row is a mean/median/95% CI over >= 20 events; no raw odds. Period 2026-10-12 to 2026-11-07. Headline: mean CLV -8.4%. CLV is not profit; no betting tips. Call with summary=true for the headline only.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "book": {
+     "enum": [
+      "oddset",
+      "pinnacle"
+     ],
+     "type": "string"
+    },
+    "bucket": {
+     "enum": [
+      "0–1 t",
+      "1–3 t",
+      "3–6 t",
+      "6–12 t",
+      "12–24 t"
+     ],
+     "type": "string"
+    },
+    "dimension": {
+     "description": "e.g. sport, sport+market, sport+league, sport+bucket",
+     "type": "string"
+    },
+    "league": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 200,
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "market": {
+     "description": "1X2, DC, DNB, OU2.5, ML, ...",
+     "type": "string"
+    },
+    "metric": {
+     "enum": [
+      "clv",
+      "margin",
+      "drift"
+     ],
+     "type": "string"
+    },
+    "sport": {
+     "description": "fodbold = football",
+     "enum": [
+      "fodbold",
+      "tennis"
+     ],
+     "type": "string"
+    },
+    "summary": {
+     "default": false,
+     "description": "Return the headline summary instead of rows.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "betting_market_efficiency",
+  "output_schema": {},
+  "title": "Betting market efficiency (Oddset vs sharp market, aggregates)"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Look up one company by its official identifier: FR SIREN (9 digits) or SIRET (14), NO organisasjonsnummer (9 digits), FI Y-tunnus (1234567-8), US CIK or stock ticker. The country can be given, or prefixed in the id (e.g. NO:923609016); otherwise the id is routed by check-digit validation. Includes officers and filings by default.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "description": "fr, no, fi or us (optional).",
+     "type": "string"
+    },
+    "filings": {
+     "default": true,
+     "type": "boolean"
+    },
+    "id": {
+     "description": "Registry identifier, ticker for US, or prefixed form like FR:552032534.",
+     "type": "string"
+    },
+    "max_filings": {
+     "default": 10,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "officers": {
+     "default": true,
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_company",
+  "output_schema": {},
+  "title": "Get one company by registry identifier"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search companies by name in official business registers: France (INSEE Sirene / RNE), Norway (Brønnøysund), Finland (PRH/YTJ) and US SEC EDGAR filers. Returns normalized records (registry id, legal name, legal form, status, incorporation date, address, industry code, website, VAT where published).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "default": "all",
+     "description": "fr, no, fi, us, a comma-separated list, or all (default all).",
+     "type": "string"
+    },
+    "filings": {
+     "default": false,
+     "description": "Include filings (NO annual accounts, US SEC filings).",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 5,
+     "description": "Max results per country.",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "officers": {
+     "default": false,
+     "description": "Include officers/roles where published (FR, NO).",
+     "type": "boolean"
+    },
+    "query": {
+     "description": "Company name (or part of it) to search for.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_companies",
+  "output_schema": {},
+  "title": "Search official company registers"
+ }
+]

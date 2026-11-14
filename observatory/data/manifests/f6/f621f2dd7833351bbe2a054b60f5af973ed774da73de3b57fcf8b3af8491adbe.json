@@ -1,0 +1,68 @@
+[
+ {
+  "description": "List public Terraphim marketplace catalogue metadata, optionally filtered by tier",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "tier": {
+     "enum": [
+      "core",
+      "premium",
+      "community"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_skills",
+  "output_schema": {}
+ },
+ {
+  "description": "Search public Terraphim marketplace catalogue metadata by keyword",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 250,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 256,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_skills",
+  "output_schema": {}
+ },
+ {
+  "description": "Show public metadata for a single skill; full content remains gated",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "pattern": "^[a-z0-9][a-z0-9-]*$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "show_skill",
+  "output_schema": {}
+ }
+]

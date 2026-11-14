@@ -1,0 +1,199 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://splusmoney/cis-refund-card-v1.html",
+   "openai/toolInvocation/invoked": "CIS refund estimated",
+   "openai/toolInvocation/invoking": "Working out your CIS refund…",
+   "openai/widgetAccessible": false,
+   "ui": {
+    "resourceUri": "ui://splusmoney/cis-refund-card-v1.html"
+   },
+   "ui/resourceUri": "ui://splusmoney/cis-refund-card-v1.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Estimate CIS tax refund"
+  },
+  "description": "Estimate a UK CIS subcontractor's tax refund (or amount to pay) for tax year 2025-26, 2026-27 or 2027-28 (Budget 2026 rules for 2027-28). Takes the year's gross CIS income, the CIS deducted (the statement total, or the 20%/30% rate), allowable expenses (materials, tools, van mileage at HMRC simplified rates, parking and travel, phone, protective clothing, training and site cards, insurance, accountant) and optional other PAYE/pension income. Calculates taxable profit (or the trading allowance if better: £1,000, or £3,000 from 2027-28), income tax (England/Wales/NI or Scottish bands, Personal Allowance taper), Class 4 NIC and the Class 2 position, then compares the bill with the CIS already deducted. Returns the working line by line, payments-on-account warning, commonly missed expenses, rates used with GOV.UK sources and a result card. For self-employed sole traders under CIS, not limited companies. Read-only: stores and sends nothing. An estimate, not tax advice.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "accountancy_other_gbp": {
+     "description": "Accountant fees, business bank charges, trade subscriptions, stationery. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "business_miles": {
+     "description": "Business miles driven in own van/car (between sites, to merchants). Claimed at HMRC flat rates: 45p (2025-26) or 55p (2026-27 on) for the first 10,000; 25p after (35p from 2027-28, Budget 2026); 24p motorcycles. Default 0.",
+     "maximum": 200000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "cis_deducted_gbp": {
+     "description": "Total CIS deducted in the year, from the monthly CIS payment and deduction statements, GBP. If omitted it is worked out from cis_rate on the labour part.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "cis_rate": {
+     "description": "Deduction rate used when cis_deducted_gbp is not given: '20' (registered for CIS) or '30' (not registered). Default '20'.",
+     "enum": [
+      "20",
+      "30"
+     ],
+     "type": "string"
+    },
+    "gross_cis_income_gbp": {
+     "description": "Total paid by contractors in the tax year BEFORE CIS deductions (labour plus any materials invoiced), GBP. Required.",
+     "exclusiveMinimum": 0,
+     "maximum": 5000000,
+     "type": "number"
+    },
+    "insurance_gbp": {
+     "description": "Public liability and tool insurance. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "materials_gbp": {
+     "description": "Cost of materials the subcontractor bought and invoiced to contractors (CIS is not deducted from these; they are an expense). Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "other_expenses_gbp": {
+     "description": "Any other allowable business expenses. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "other_income_gbp": {
+     "description": "Other taxable income in the same year from a PAYE job or pension (gross), GBP. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "parking_tolls_travel_gbp": {
+     "description": "Parking, tolls, congestion/ULEZ charges for work trips, public transport and work-away accommodation. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "phone_internet_gbp": {
+     "description": "Business share of phone and data. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "region": {
+     "description": "Where the person lives for income tax: 'england_wales_ni' or 'scotland' (Scottish bands). Default england_wales_ni.",
+     "enum": [
+      "england_wales_ni",
+      "scotland"
+     ],
+     "type": "string"
+    },
+    "tax_paid_on_other_income_gbp": {
+     "description": "Income tax already paid on that other income (from the P60/P45). Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "tax_year": {
+     "description": "UK tax year: '2025-26' (6 Apr 2025 to 5 Apr 2026, return due 31 Jan 2027), '2026-27' or '2027-28' (Budget 2026 rules; Scottish 2027-28 bands not yet set, 2026-27 ones used). Default '2025-26'.",
+     "enum": [
+      "2025-26",
+      "2026-27",
+      "2027-28"
+     ],
+     "type": "string"
+    },
+    "tools_equipment_gbp": {
+     "description": "Tools and equipment bought for work in the year. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "training_cards_gbp": {
+     "description": "CSCS/CPCS cards and training that updates existing trade skills. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "vehicle": {
+     "description": "Vehicle for business_miles. Default car_or_van.",
+     "enum": [
+      "car_or_van",
+      "motorcycle"
+     ],
+     "type": "string"
+    },
+    "vehicle_costs_gbp": {
+     "description": "Business share of actual van/car costs, ONLY if not using mileage for that vehicle. Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "workwear_ppe_gbp": {
+     "description": "Protective clothing, PPE and branded workwear (not everyday clothes). Default 0.",
+     "maximum": 5000000,
+     "minimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "gross_cis_income_gbp"
+   ],
+   "type": "object"
+  },
+  "name": "estimate_cis_refund",
+  "output_schema": {},
+  "title": "Estimate CIS tax refund"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "CIS subcontractor tax rates"
+  },
+  "description": "List the UK rates a self-employed CIS subcontractor's tax bill uses for 2025-26, 2026-27 or 2027-28, each with its GOV.UK source: Personal Allowance and taper, income tax bands (England/Wales/NI or Scotland), Class 4 NIC limits and rates, the Class 2 position (treated as paid above the Small Profits Threshold, voluntary below), HMRC simplified mileage rates, the trading allowance (£1,000; £3,000 from 2027-28), the Making Tax Digital start dates and the 20%/30% CIS deduction rates. Read-only. Not tax advice.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "region": {
+     "description": "Income tax bands to show. Default england_wales_ni.",
+     "enum": [
+      "england_wales_ni",
+      "scotland"
+     ],
+     "type": "string"
+    },
+    "tax_year": {
+     "description": "'2025-26', '2026-27' or '2027-28'. Default '2025-26'.",
+     "enum": [
+      "2025-26",
+      "2026-27",
+      "2027-28"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_cis_tax_rates",
+  "output_schema": {},
+  "title": "CIS subcontractor tax rates and thresholds"
+ }
+]

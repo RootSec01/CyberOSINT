@@ -1,0 +1,194 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Full profile of one convention by slug: dates, venue and address, website, artist-alley and vendor registration windows/costs/URLs, every published price tier (artist spaces, dealer booths, badges; this edition and past ones) with its source, portfolio and table-share policy, hotel block, transit access, organizer verification, and up to 6 years of attendance/pricing history. Get slugs from artistally_search_conventions or an ArtistAlly event URL.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "Convention slug, e.g. \"otafest\" — the last segment of an ArtistAlly /events/ URL.",
+     "maxLength": 120,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "artistally_get_convention",
+  "output_schema": {},
+  "title": "Get convention details"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The regions, states/provinces, and metro areas ArtistAlly tracks, with approved-convention counts. Use it to learn valid region/state/metro filter values for the other tools. Takes no arguments.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "artistally_get_coverage",
+  "output_schema": {},
+  "title": "Get coverage map"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Artist-alley and vendor/dealer registration windows that are open right now or opening soon, sorted by urgency (soonest close date first). The go-to tool for questions like \"which cons can I still apply to?\" or \"what artist alleys open this month?\".",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "community": {
+     "description": "Filter by community: furry, anime, gaming, or multi (multi-genre).",
+     "enum": [
+      "furry",
+      "anime",
+      "gaming",
+      "multi"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max entries per section, default 30.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "region": {
+     "description": "Coverage region, e.g. \"Southeast\", \"Midwest\", \"West Coast\", \"Canada\". Valid values come from artistally_get_coverage.",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "state": {
+     "description": "Two-letter US state or Canadian province code, e.g. \"GA\", \"TX\", \"ON\".",
+     "maxLength": 2,
+     "minLength": 2,
+     "type": "string"
+    },
+    "type": {
+     "description": "Which registration kind to include. Default: both.",
+     "enum": [
+      "artist",
+      "vendor",
+      "both"
+     ],
+     "type": "string"
+    },
+    "within_days": {
+     "description": "Look-ahead window in days for \"opening soon\". Default 30.",
+     "maximum": 120,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "artistally_list_open_registrations",
+  "output_schema": {},
+  "title": "List open registrations"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search fan conventions (furry, anime, gaming) across 51 US and Canadian metro areas. Returns upcoming conventions by default (soonest first); set include_past to search the archive too. Filter by text, community, region, state, metro, or date range. Returns dates, venue, location, registration windows and table costs, plus a canonical ArtistAlly URL per convention.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "community": {
+     "description": "Filter by community: furry, anime, gaming, or multi (multi-genre).",
+     "enum": [
+      "furry",
+      "anime",
+      "gaming",
+      "multi"
+     ],
+     "type": "string"
+    },
+    "include_past": {
+     "description": "Include conventions that have already finished (default false). Past results are still sorted soonest-first; use starts_after/starts_before to target a specific year.",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Max results, default 20.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "metro": {
+     "description": "Metro slug from artistally_get_coverage, e.g. \"atlanta\", \"toronto\".",
+     "maxLength": 60,
+     "type": "string"
+    },
+    "offset": {
+     "description": "Pagination offset, default 0.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Free-text match on convention name, venue, or city, e.g. \"Otafest\" or \"Atlanta\".",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "region": {
+     "description": "Coverage region, e.g. \"Southeast\", \"Midwest\", \"West Coast\", \"Canada\". Valid values come from artistally_get_coverage.",
+     "maxLength": 30,
+     "type": "string"
+    },
+    "starts_after": {
+     "description": "Only conventions starting on or after this date (YYYY-MM-DD).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "starts_before": {
+     "description": "Only conventions starting on or before this date (YYYY-MM-DD).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "state": {
+     "description": "Two-letter US state or Canadian province code, e.g. \"GA\", \"TX\", \"ON\".",
+     "maxLength": 2,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "artistally_search_conventions",
+  "output_schema": {},
+  "title": "Search conventions"
+ }
+]

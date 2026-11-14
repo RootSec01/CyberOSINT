@@ -1,0 +1,350 @@
+[
+ {
+  "description": "Solve for the input value required to make an output metric hit a target value (deterministic bisection root-finding). Provide 'template', 'solve_for' (the input to solve), 'target_metric' (defaults to the primary output), and 'target_value'. Optionally pass 'bounds' [low, high] to constrain the search. Returns the required input value, the change from baseline, the achieved metric, and the residual. Assumes the metric is monotonic in the solved input over the range.",
+  "input_schema": {
+   "properties": {
+    "bounds": {
+     "description": "Optional [low, high] search range for the solved input. Auto-derived + expanded if omitted.",
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "horizon": {
+     "default": 12,
+     "description": "Number of periods to project forward (1..1200). Default depends on template (usually 12).",
+     "type": "integer"
+    },
+    "inputs": {
+     "description": "Scenario assumptions as {name: value}. Which keys are valid depends on the template (call list_templates). Unlisted keys fall back to documented defaults; unknown keys are ignored and reported in notes. You may also pass assumptions at the top level.",
+     "type": "object"
+    },
+    "period_label": {
+     "default": "month",
+     "description": "Label for each period; also sets annualization (periods/year).",
+     "enum": [
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year"
+     ],
+     "type": "string"
+    },
+    "solve_for": {
+     "description": "Name of the input variable to solve for.",
+     "type": "string"
+    },
+    "target_metric": {
+     "description": "Output metric to hit (defaults to the template's primary output).",
+     "type": "string"
+    },
+    "target_value": {
+     "description": "The value the target_metric should reach.",
+     "type": "number"
+    },
+    "template": {
+     "description": "Pre-built scenario template id: saas_growth, pricing_change, churn_impact, cost_reduction, hiring_plan, cash_runway, unit_economics, marketing_funnel, compound_growth (aliases like 'saas','pricing','runway','ltv' also resolve). Omit (or use 'custom') to run a free-form 'metrics' projection.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "template",
+    "solve_for",
+    "target_value"
+   ],
+   "type": "object"
+  },
+  "name": "break_even",
+  "output_schema": {}
+ },
+ {
+  "description": "Run 2-3 scenarios and compare their key_results side by side, with deltas against the first (baseline) scenario. Provide a 'scenarios' array where each entry is {name?, template, inputs} (each may set its own horizon, or pass a shared top-level 'horizon'). Optionally rank on 'compare_metric' with 'goal' ('max' default | 'min') to pick a winner, and set include_projections:true to also return per-period series.",
+  "input_schema": {
+   "properties": {
+    "compare_metric": {
+     "description": "Metric to rank scenarios on (optional).",
+     "type": "string"
+    },
+    "goal": {
+     "default": "max",
+     "description": "Whether higher (max) or lower (min) is better for compare_metric.",
+     "enum": [
+      "max",
+      "min"
+     ],
+     "type": "string"
+    },
+    "horizon": {
+     "description": "Optional shared horizon applied to scenarios that don't set their own.",
+     "type": "integer"
+    },
+    "include_projections": {
+     "default": false,
+     "description": "Include each scenario's full per-period projections.",
+     "type": "boolean"
+    },
+    "scenarios": {
+     "description": "2-3 scenarios to compare. Each: {name?, template, inputs, horizon?, period_label?} or {name?, metrics:[...]} for a custom model.",
+     "items": {
+      "properties": {
+       "horizon": {
+        "default": 12,
+        "description": "Number of periods to project forward (1..1200). Default depends on template (usually 12).",
+        "type": "integer"
+       },
+       "inputs": {
+        "description": "Scenario assumptions as {name: value}. Which keys are valid depends on the template (call list_templates). Unlisted keys fall back to documented defaults; unknown keys are ignored and reported in notes. You may also pass assumptions at the top level.",
+        "type": "object"
+       },
+       "metrics": {
+        "description": "For a CUSTOM free-form scenario (template omitted or 'custom'): a list of independently-growing metrics. Each: {name, start, growth_rate (per period, default 0), mode: 'compound' (default) | 'linear'}.",
+        "items": {
+         "properties": {
+          "growth_rate": {
+           "type": "number"
+          },
+          "mode": {
+           "default": "compound",
+           "enum": [
+            "compound",
+            "linear"
+           ],
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "start": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "name",
+          "start"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "name": {
+        "type": "string"
+       },
+       "period_label": {
+        "default": "month",
+        "description": "Label for each period; also sets annualization (periods/year).",
+        "enum": [
+         "day",
+         "week",
+         "month",
+         "quarter",
+         "year"
+        ],
+        "type": "string"
+       },
+       "template": {
+        "description": "Pre-built scenario template id: saas_growth, pricing_change, churn_impact, cost_reduction, hiring_plan, cash_runway, unit_economics, marketing_funnel, compound_growth (aliases like 'saas','pricing','runway','ltv' also resolve). Omit (or use 'custom') to run a free-form 'metrics' projection.",
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "scenarios"
+   ],
+   "type": "object"
+  },
+  "name": "compare_scenarios",
+  "output_schema": {}
+ },
+ {
+  "description": "Server health, version, and capabilities (tools, templates, period labels, max horizon). No parameters.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "health_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Discovery tool: list every pre-built scenario template (id, label, category, description, primary output, documented inputs with defaults/units, and available output metrics), plus how to run a custom free-form scenario and the supported period labels. No required parameters.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_templates",
+  "output_schema": {}
+ },
+ {
+  "description": "Main simulation tool. Run a deterministic what-if projection from a pre-built template (saas_growth, pricing_change, churn_impact, cost_reduction, hiring_plan, cash_runway, unit_economics, marketing_funnel, compound_growth) OR a free-form 'metrics' model. Returns period-by-period projections, headline key_results, the exact assumptions used (with defaults filled in), the methodology, notes, and a plain-language explanation. Pass 'template' + 'inputs' (assumptions), plus optional 'horizon' and 'period_label'. 100% deterministic (40-digit decimal math).",
+  "input_schema": {
+   "properties": {
+    "horizon": {
+     "default": 12,
+     "description": "Number of periods to project forward (1..1200). Default depends on template (usually 12).",
+     "type": "integer"
+    },
+    "inputs": {
+     "description": "Scenario assumptions as {name: value}. Which keys are valid depends on the template (call list_templates). Unlisted keys fall back to documented defaults; unknown keys are ignored and reported in notes. You may also pass assumptions at the top level.",
+     "type": "object"
+    },
+    "metrics": {
+     "description": "For a CUSTOM free-form scenario (template omitted or 'custom'): a list of independently-growing metrics. Each: {name, start, growth_rate (per period, default 0), mode: 'compound' (default) | 'linear'}.",
+     "items": {
+      "properties": {
+       "growth_rate": {
+        "type": "number"
+       },
+       "mode": {
+        "default": "compound",
+        "enum": [
+         "compound",
+         "linear"
+        ],
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "start": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "name",
+       "start"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "period_label": {
+     "default": "month",
+     "description": "Label for each period; also sets annualization (periods/year).",
+     "enum": [
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year"
+     ],
+     "type": "string"
+    },
+    "template": {
+     "description": "Pre-built scenario template id: saas_growth, pricing_change, churn_impact, cost_reduction, hiring_plan, cash_runway, unit_economics, marketing_funnel, compound_growth (aliases like 'saas','pricing','runway','ltv' also resolve). Omit (or use 'custom') to run a free-form 'metrics' projection.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "run_scenario",
+  "output_schema": {}
+ },
+ {
+  "description": "Vary one or more input assumptions and show the impact on a target output metric (one-at-a-time sensitivity). Provide 'template', the input to sweep via 'variable' (or 'variables' array), and 'target_metric' (defaults to the template's primary output). Control the sweep with 'variation' (fractional +/- around the baseline, default 0.2), 'steps' (default 5), or explicit 'values' / 'min'+'max'. Returns per-variable sweeps, an elasticity estimate, the output range, and a ranking of the most influential inputs.",
+  "input_schema": {
+   "properties": {
+    "horizon": {
+     "default": 12,
+     "description": "Number of periods to project forward (1..1200). Default depends on template (usually 12).",
+     "type": "integer"
+    },
+    "inputs": {
+     "description": "Scenario assumptions as {name: value}. Which keys are valid depends on the template (call list_templates). Unlisted keys fall back to documented defaults; unknown keys are ignored and reported in notes. You may also pass assumptions at the top level.",
+     "type": "object"
+    },
+    "max": {
+     "description": "Sweep upper bound (with 'min').",
+     "type": "number"
+    },
+    "min": {
+     "description": "Sweep lower bound (with 'max').",
+     "type": "number"
+    },
+    "period_label": {
+     "default": "month",
+     "description": "Label for each period; also sets annualization (periods/year).",
+     "enum": [
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year"
+     ],
+     "type": "string"
+    },
+    "steps": {
+     "default": 5,
+     "description": "Number of sweep points per variable (2-200).",
+     "type": "integer"
+    },
+    "target_metric": {
+     "description": "Output metric to track (see a template's 'outputs' via list_templates). Defaults to the template's primary output.",
+     "type": "string"
+    },
+    "template": {
+     "description": "Pre-built scenario template id: saas_growth, pricing_change, churn_impact, cost_reduction, hiring_plan, cash_runway, unit_economics, marketing_funnel, compound_growth (aliases like 'saas','pricing','runway','ltv' also resolve). Omit (or use 'custom') to run a free-form 'metrics' projection.",
+     "type": "string"
+    },
+    "values": {
+     "description": "Explicit sweep values for a single 'variable'.",
+     "items": {
+      "type": "number"
+     },
+     "type": "array"
+    },
+    "variable": {
+     "description": "A single input name to sweep.",
+     "type": "string"
+    },
+    "variables": {
+     "description": "Multiple inputs to sweep (one at a time). Each: {name, variation?|values?|min?+max?, steps?}.",
+     "items": {
+      "properties": {
+       "max": {
+        "type": "number"
+       },
+       "min": {
+        "type": "number"
+       },
+       "name": {
+        "type": "string"
+       },
+       "steps": {
+        "type": "integer"
+       },
+       "values": {
+        "items": {
+         "type": "number"
+        },
+        "type": "array"
+       },
+       "variation": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "name"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "variation": {
+     "default": 0.2,
+     "description": "Fractional sweep around the baseline (0<v<=1). 0.2 = +/-20%.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "template"
+   ],
+   "type": "object"
+  },
+  "name": "sensitivity_analysis",
+  "output_schema": {}
+ }
+]

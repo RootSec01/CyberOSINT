@@ -1,0 +1,240 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return directory record/source counts, AI status counts and snapshot methodology. Metadata separates the full research archive from directory coverage. Directory counts include evidence-reviewed video personas and pending research candidates; illustrated channels are excluded. AI status counts do not establish reviewed video-avatar evidence.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "ai_monk_index_stats",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "propertyNames": {
+    "type": "string"
+   },
+   "type": "object"
+  },
+  "title": "AI Monk Index coverage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve one exact directory profile ID, its complete research record and referenced sources. Includes pending candidates with their directory_scope, identity conflicts and unknowns. Illustrated channels are excluded; candidate inclusion does not confirm AI production or video format.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_ai_monk",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "propertyNames": {
+    "type": "string"
+   },
+   "type": "object"
+  },
+  "title": "Get AI monk research profile"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Offers (type, name, listed or base price, currency, URL), separate localized presentment observations, seller counters, creator revenue claims and revenue observations for AI monk accounts, plus counts by offer type. Optional account_id. Prices are not orders; claims are unaudited.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "account_id": {
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "how_they_monetize",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "propertyNames": {
+    "type": "string"
+   },
+   "type": "object"
+  },
+  "title": "How AI monk accounts monetize"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search monk profiles and pending research candidates by name/handle, provenance, language, platform and region. Excludes illustrated/watercolor storytelling channels. Paginated; latest single-platform audience order by default; optional sampled-video views or reported three-month USD gross-revenue order. Missing metrics are not zero. Returns provenance, directory_scope and unknowns; candidate inclusion does not confirm AI production or video format.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "language": {
+     "default": "all",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "platform": {
+     "default": "all",
+     "enum": [
+      "all",
+      "Instagram",
+      "TikTok",
+      "YouTube",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "maxLength": 500,
+     "type": "string"
+    },
+    "region": {
+     "default": "all",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort": {
+     "default": "audience",
+     "enum": [
+      "audience",
+      "views",
+      "revenue",
+      "directory"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "default": "all",
+     "enum": [
+      "all",
+      "confirmed",
+      "reported",
+      "unverified",
+      "unknown"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_ai_monks",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "propertyNames": {
+    "type": "string"
+   },
+   "type": "object"
+  },
+  "title": "Search AI Monk Index"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Observed AI monk video samples ranked by latest dated public views, with title, duration, upload date and structure_summary (format, hook and script pattern). Optional account_id. Views are sampled-video observations, not channel totals.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "account_id": {
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "top_formats",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "propertyNames": {
+    "type": "string"
+   },
+   "type": "object"
+  },
+  "title": "Top AI monk video formats and hooks"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Source-linked playbooks published by successful AI monk creators (e.g. Yang Mun by Shalev): script formula, winning hooks with reported views, voice, posting cadence, funnel to product and monetization. Creator claims are unaudited.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "winning_playbooks",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": {},
+   "propertyNames": {
+    "type": "string"
+   },
+   "type": "object"
+  },
+  "title": "Winning AI monk playbooks"
+ }
+]

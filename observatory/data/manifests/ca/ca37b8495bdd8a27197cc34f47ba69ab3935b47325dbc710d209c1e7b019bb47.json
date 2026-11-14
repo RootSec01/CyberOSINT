@@ -1,0 +1,221 @@
+[
+ {
+  "description": "Live on-chain token & smart contract rug-pull / honeypot shield for Base, Ethereum, and Solana. Inspects live EVM bytecode (blacklist selectors, mutable tax fees, pause toggles, unverified proxies) and Solana SPL / Token-2022 mint accounts (active mint authority, freeze authority, Permanent Delegate wallet seizure, Transfer Hook honeypots) plus live DexScreener liquidity and 24h buy/sell ratios. Price: $0.05 Base USDC or 0.00035 SOL.",
+  "input_schema": {
+   "properties": {
+    "chain": {
+     "default": "base",
+     "description": "Blockchain network where the token is deployed",
+     "enum": [
+      "base",
+      "ethereum",
+      "solana"
+     ],
+     "type": "string"
+    },
+    "payment_tx": {
+     "description": "Optional x402 payment transaction proof: Base EVM tx hash (0x...) transferring USDC to 0xb295E606F38C363b476FC546c27226B5fBcAAEFA, or Solana tx signature transferring SOL/USDC.",
+     "type": "string"
+    },
+    "session_token": {
+     "description": "Optional prepaid session voucher token (scanpay_sess_...) for 0ms instant execution.",
+     "type": "string"
+    },
+    "token_address": {
+     "description": "Token contract address (0x... for Base/Ethereum or Base58 mint address for Solana)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "chain",
+    "token_address"
+   ],
+   "type": "object"
+  },
+  "name": "audit_token",
+  "output_schema": {}
+ },
+ {
+  "description": "Activate a prepaid session voucher (0.006 SOL or 0.85 Base USDC for 10 operations). Eliminates per-request payment prompts and RPC latency in autonomous agent loops.",
+  "input_schema": {
+   "properties": {
+    "deposit_tx": {
+     "description": "Transaction signature/hash transferring 0.006 SOL or 0.85 Base USDC to merchant wallet",
+     "type": "string"
+    },
+    "payer_wallet": {
+     "description": "Public key / address of the payer",
+     "type": "string"
+    }
+   },
+   "required": [
+    "deposit_tx"
+   ],
+   "type": "object"
+  },
+  "name": "create_session_deposit",
+  "output_schema": {}
+ },
+ {
+  "description": "Check ScanPay engine health, available AST rules, and x402 payment configurations.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "health_check",
+  "output_schema": {}
+ },
+ {
+  "description": "Use before shipping or executing agent-generated code. Deterministic AST scan for Python, JavaScript and TypeScript with 65 rules (36 Python, 29 JS/TS) covering injection, hardcoded secrets, wallet key exfiltration, SSRF, infinite x402 payment loops and unsimulated Solana transactions. Returns findings with severity, deterministic patches, unified diffs and an execution verdict (PASS, WARN, BLOCK). Pay per call: 0.10 Base USDC or 0.0007 SOL over x402, no signup or API key.",
+  "input_schema": {
+   "properties": {
+    "auto_remediate": {
+     "default": true,
+     "description": "Whether to generate deterministic patches and unified diffs",
+     "type": "boolean"
+    },
+    "language": {
+     "default": "python",
+     "description": "Source code programming language",
+     "enum": [
+      "python",
+      "javascript",
+      "typescript",
+      "tsx"
+     ],
+     "type": "string"
+    },
+    "payment_tx": {
+     "description": "Optional x402 payment transaction proof: Base EVM tx hash (0x...) transferring USDC to 0xb295E606F38C363b476FC546c27226B5fBcAAEFA, or Solana tx signature transferring SOL/USDC.",
+     "type": "string"
+    },
+    "session_token": {
+     "description": "Optional prepaid session voucher token (scanpay_sess_...) for 0ms instant execution.",
+     "type": "string"
+    },
+    "source_code": {
+     "description": "Source code to scan (Python or JS/TS)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source_code"
+   ],
+   "type": "object"
+  },
+  "name": "scan_code",
+  "output_schema": {}
+ },
+ {
+  "description": "Cheapest way to check a snippet before running it: one deterministic AST pass over Python, JavaScript or TypeScript, returning severity-ranked findings and a PASS/WARN/BLOCK verdict without patches or diffs. 65 rules, about 0.2 ms. Pay per call: 0.02 Base USDC or 0.00015 SOL over x402, no signup. Upgrade to scan_code for deterministic patches.",
+  "input_schema": {
+   "properties": {
+    "language": {
+     "default": "python",
+     "description": "Source code programming language",
+     "enum": [
+      "python",
+      "javascript",
+      "typescript",
+      "tsx"
+     ],
+     "type": "string"
+    },
+    "payment_tx": {
+     "description": "Optional x402 payment transaction proof: Base EVM tx hash (0x...) transferring USDC to 0xb295E606F38C363b476FC546c27226B5fBcAAEFA, or Solana tx signature transferring SOL/USDC.",
+     "type": "string"
+    },
+    "session_token": {
+     "description": "Optional prepaid session voucher token (scanpay_sess_...) for 0ms instant execution.",
+     "type": "string"
+    },
+    "source_code": {
+     "description": "Source code to screen (Python or JS/TS)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source_code"
+   ],
+   "type": "object"
+  },
+  "name": "scan_quick",
+  "output_schema": {}
+ },
+ {
+  "description": "Anti-bot web access & scraper oracle for AI agents. Fetches web pages with stealth headers to bypass Cloudflare Turnstile, WAFs, and anti-bot challenges. Purifies HTML by removing scripts, stylesheets, tracking pixels, ads, and navigation boilerplate, returning clean, token-efficient Markdown ready for LLM consumption with cryptographic oracle attestation. Price: $0.02 Base USDC or 0.00015 SOL.",
+  "input_schema": {
+   "properties": {
+    "extract_mode": {
+     "default": "markdown",
+     "description": "Extracted content format",
+     "enum": [
+      "markdown",
+      "text",
+      "raw_html"
+     ],
+     "type": "string"
+    },
+    "payment_tx": {
+     "description": "Optional x402 payment transaction proof: Base EVM tx hash (0x...) transferring USDC to 0xb295E606F38C363b476FC546c27226B5fBcAAEFA, or Solana tx signature transferring SOL/USDC.",
+     "type": "string"
+    },
+    "session_token": {
+     "description": "Optional prepaid session voucher token (scanpay_sess_...) for 0ms instant execution.",
+     "type": "string"
+    },
+    "strip_media": {
+     "default": true,
+     "description": "Strip image tags and heavy media to conserve LLM context tokens",
+     "type": "boolean"
+    },
+    "url": {
+     "description": "Target URL to scrape",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "scrape_url",
+  "output_schema": {}
+ },
+ {
+  "description": "Pre-flight transaction & drainer shield for AI agents. Simulates and inspects EVM (Base/Ethereum) and Solana transactions before signing or broadcasting. Detects unlimited approvals, known drainers, honeypots, MEV sandwich exposure (min_output=0), and unauthorized Solana authority takeovers. Returns execution verdict (ALLOW, WARN, BLOCK) and cryptographic oracle attestation. Price: $0.05 Base USDC or 0.00035 SOL.",
+  "input_schema": {
+   "properties": {
+    "chain": {
+     "default": "base",
+     "description": "Target blockchain network",
+     "enum": [
+      "base",
+      "ethereum",
+      "solana"
+     ],
+     "type": "string"
+    },
+    "payment_tx": {
+     "description": "Optional x402 payment transaction proof: Base EVM tx hash (0x...) transferring USDC to 0xb295E606F38C363b476FC546c27226B5fBcAAEFA, or Solana tx signature transferring SOL/USDC.",
+     "type": "string"
+    },
+    "session_token": {
+     "description": "Optional prepaid session voucher token (scanpay_sess_...) for 0ms instant execution.",
+     "type": "string"
+    },
+    "tx": {
+     "description": "Transaction payload (EVM: to, data, value; Solana: instructions)",
+     "type": "object"
+    }
+   },
+   "required": [
+    "chain",
+    "tx"
+   ],
+   "type": "object"
+  },
+  "name": "simulate_tx",
+  "output_schema": {}
+ }
+]

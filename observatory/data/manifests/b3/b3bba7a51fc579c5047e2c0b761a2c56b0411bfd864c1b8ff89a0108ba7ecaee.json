@@ -1,0 +1,383 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The before-you-send-it checklist for one agreement: every missing field is listed, and terms whose absence cuts one way are flagged neutrally -- as written, what the gap means for both parties -- such as no termination clause or an uncapped liability. Reads only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "agreement": {
+     "description": "The agreement id, e.g. SA-2026-0003, or the client name when only one agreement has it",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "required": [
+    "agreement"
+   ],
+   "type": "object"
+  },
+  "name": "agreement_checklist",
+  "output_schema": {},
+  "title": "Check an agreement before you send it"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Write a service agreement between a freelancer and a client before the work starts: the parties, the scope of services, the deliverables, the rate and payment terms, start and end dates, a termination notice period, a liability cap and the governing jurisdiction. Stores the agreement and returns it rendered as clean Markdown with a signature block. Free tier: 3 active agreements; expiring a finished one frees its slot.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "clauses": {
+     "description": "Ids of library clauses to include, from clause_library: ip_assignment, confidentiality, late_payment, kill_fee, revision_rounds. The clause library is a Pro feature",
+     "items": {
+      "maxLength": 40,
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "client": {
+     "description": "Who the work is for, e.g. Brightleaf Studio",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "client_address": {
+     "maxLength": 400,
+     "type": "string"
+    },
+    "currency": {
+     "description": "ISO code the rate and cap are in",
+     "pattern": "^[A-Za-z]{3}$",
+     "type": "string"
+    },
+    "deliverables": {
+     "description": "What the client receives at the end, e.g. [\"Five-page site deployed to the client's host\", \"Handover document\"]",
+     "items": {
+      "maxLength": 400,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "end_date": {
+     "description": "The date the engagement ends, YYYY-MM-DD. Leave unset for an open-ended engagement",
+     "maxLength": 10,
+     "type": "string"
+    },
+    "freelancer": {
+     "description": "Who does the work, e.g. Anna Nowak, or Nowak Design",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "freelancer_address": {
+     "maxLength": 400,
+     "type": "string"
+    },
+    "jurisdiction": {
+     "description": "The governing law and courts, e.g. England and Wales, or the State of New York",
+     "maxLength": 300,
+     "type": "string"
+    },
+    "liability_cap_cents": {
+     "description": "The most the freelancer can be liable for, in whole cents. Leave unset and liability is uncapped, which the checklist flags",
+     "maximum": 100000000000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "note": {
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "payment_terms": {
+     "description": "When and how it is paid, e.g. Net 14 from invoice date, or 50% on signing and 50% on delivery",
+     "maxLength": 500,
+     "type": "string"
+    },
+    "rate_cents": {
+     "description": "The rate in whole cents. 8500 is 85.00",
+     "maximum": 100000000000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "rate_unit": {
+     "description": "What the rate buys: an hour, a day, or the whole project",
+     "enum": [
+      "hour",
+      "day",
+      "project"
+     ],
+     "type": "string"
+    },
+    "scope": {
+     "description": "The services the freelancer provides, e.g. Design and build of a five-page marketing site, with two weeks of post-launch fixes",
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "start_date": {
+     "description": "The date work begins, YYYY-MM-DD. May be in the future; it is a plan, not a log",
+     "maxLength": 10,
+     "type": "string"
+    },
+    "termination_notice_days": {
+     "description": "Days of written notice either party must give to end the agreement, e.g. 14",
+     "maximum": 365,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "freelancer",
+    "client",
+    "scope",
+    "deliverables",
+    "rate_cents",
+    "rate_unit",
+    "currency",
+    "payment_terms"
+   ],
+   "type": "object"
+  },
+  "name": "agreement_create",
+  "output_schema": {},
+  "title": "Write a service agreement"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read one service agreement in full by SA number or client name: parties, scope, deliverables, rate and payment terms, dates, termination, liability cap, jurisdiction, the clauses it carries, its status and its status history. Reads only.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "agreement": {
+     "description": "The agreement id, e.g. SA-2026-0003, or the client name when only one agreement has it",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "required": [
+    "agreement"
+   ],
+   "type": "object"
+  },
+  "name": "agreement_get",
+  "output_schema": {},
+  "title": "Read one agreement"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List service agreements newest first: parties, status, rate, dates and the clauses each carries. Filter by status and by client. An agreement is active until it is expired; the free tier holds 3 active agreements.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "client": {
+     "description": "Only agreements whose client contains this text, case-insensitive",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "status": {
+     "description": "Only agreements at this status: draft, sent, signed, expired",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "agreement_list",
+  "output_schema": {},
+  "title": "List agreements"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Render a service agreement ready to send and sign: the parties, the services, the deliverables, the payment terms, the term, termination, liability, jurisdiction, any library clauses it carries, and a signature block for both parties. Markdown, or self-contained HTML with print CSS that needs nothing from the network. HTML is a Pro feature. Writes nothing.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "agreement": {
+     "description": "The agreement id, e.g. SA-2026-0003, or the client name when only one agreement has it",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "format": {
+     "description": "markdown (default) or html. The HTML carries its own styling and references nothing external. HTML is a Pro feature",
+     "enum": [
+      "markdown",
+      "html"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "agreement"
+   ],
+   "type": "object"
+  },
+  "name": "agreement_render",
+  "output_schema": {},
+  "title": "Render an agreement for signing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Move one agreement exactly one step: draft, sent, signed, expired, stamping the date and an optional note into its history. A skipped or backwards step is refused and nothing is written. Expiring a finished engagement frees a free-tier slot.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "agreement": {
+     "description": "The agreement id, e.g. SA-2026-0003, or the client name when only one agreement has it",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "date": {
+     "description": "The date to stamp the step with, YYYY-MM-DD. Default today",
+     "maxLength": 10,
+     "type": "string"
+    },
+    "note": {
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "status": {
+     "description": "The next step for this agreement: draft, sent, signed, expired",
+     "maxLength": 20,
+     "type": "string"
+    }
+   },
+   "required": [
+    "agreement",
+    "status"
+   ],
+   "type": "object"
+  },
+  "name": "agreement_update_status",
+  "output_schema": {},
+  "title": "Move an agreement one step"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "List the built-in clause library: intellectual property assignment, mutual confidentiality, late payment interest, kill fee and revision rounds. Each clause is a title plus a body text. Pass an agreement and, on Pro, every body comes back with that agreement's variables filled in. The free tier lists titles and summaries; the full texts are a Pro feature.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "agreement": {
+     "description": "Fill each clause body with this agreement's variables. Pro feature",
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "clause_library",
+  "output_schema": {},
+  "title": "List the built-in clause library"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Turn Pro on for this connection with key, an MCPL1.<payload>.<signature> issued at checkout for this server or the bundle. Data under your token stays; a wrong or expired key changes nothing. license_status confirms it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "key": {
+     "description": "License key from checkout, MCPL1.<payload>.<signature>",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key"
+   ],
+   "type": "object"
+  },
+  "name": "license_activate",
+  "output_schema": {},
+  "title": "Activate license"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Report this endpoint's licence state for your token as JSON: the product, the tier free or pro, why it is not Pro, and the checkout URL. Call it to explain a free-tier refusal. No arguments, nothing changes.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "license_status",
+  "output_schema": {},
+  "title": "License status"
+ }
+]

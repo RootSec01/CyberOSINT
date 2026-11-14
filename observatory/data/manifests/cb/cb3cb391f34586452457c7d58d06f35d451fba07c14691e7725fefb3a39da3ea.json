@@ -1,0 +1,804 @@
+[
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://widget/gst-invoice-v1-1.0.0-8679d06a5bb96ffeb68cca165542a7f501b93a5feca9fb266ef8cdf205198ac2.html",
+   "openai/toolInvocation/invoked": "GST invoice ready",
+   "openai/toolInvocation/invoking": "Making the GST invoice",
+   "openai/widgetAccessible": true,
+   "ui": {
+    "resourceUri": "ui://widget/gst-invoice-v1-1.0.0-8679d06a5bb96ffeb68cca165542a7f501b93a5feca9fb266ef8cdf205198ac2.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Generate GST invoice"
+  },
+  "description": "Use this when the user wants a GST invoice in the GST invoice format (a GST bill format or tax invoice for India) as a PDF and Excel file. Convert what the user pastes, or an uploaded photo or image of a bill or order, into the fields: seller {name, gstin, address, state}, buyer {name, gstin, address, state} and items [{description, hsn, qty, unit, rate, discount, gst_rate}]; details is only a fallback for text you cannot split. Decides CGST + SGST (or UTGST) or IGST from the place of supply, reads state codes from GSTINs, flags an invalid GSTIN without refusing, adds the HSN-wise summary, rounds the total to the nearest rupee and writes amounts in words (lakh, crore). Does not make an e-invoice (IRN, QR) or e-way bill, does not pick GST rates, and does not compute cess. Do not use for export invoices, invoices outside India or invoices without GST.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "bank": {
+     "anyOf": [
+      {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "additionalProperties": {},
+         "properties": {},
+         "type": "object"
+        }
+       ]
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Optional bank details to print: {account_name, bank_name, account_number, ifsc, branch, upi}."
+    },
+    "buyer": {
+     "anyOf": [
+      {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "additionalProperties": {},
+         "properties": {
+          "address": {
+           "anyOf": [
+            {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "items": {
+                "type": "string"
+               },
+               "type": "array"
+              }
+             ]
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "description": "Full address with city and PIN code, e.g. \"12 MG Road, Pune 411001\"."
+          },
+          "email": {
+           "description": "Optional email, e.g. \"accounts@example.in\".",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "gstin": {
+           "description": "15-character GSTIN, e.g. \"27AAPFU0939F1ZV\". Its first 2 digits are the state code. Leave empty for an unregistered buyer.",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "name": {
+           "description": "Buyer (recipient) legal or trade name, e.g. \"Mehta Stores\".",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "phone": {
+           "description": "Optional phone, e.g. \"+91 98200 12345\".",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "state": {
+           "description": "State or union territory name or 2-digit GST code, e.g. \"Maharashtra\" or \"27\". Read from the GSTIN when one is given.",
+           "type": [
+            "string",
+            "number",
+            "null"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       ]
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "The buyer: {name, gstin (if registered), address, state}. The buyer's state decides CGST + SGST or IGST unless place_of_supply is given."
+    },
+    "copies": {
+     "description": "1 (default, original), 2 (original + duplicate) or 3 (original, duplicate for transporter, triplicate for supplier).",
+     "type": [
+      "number",
+      "string",
+      "null"
+     ]
+    },
+    "details": {
+     "description": "Fallback only: the invoice details pasted as text when they cannot be split into the fields above.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "due_date": {
+     "description": "Optional due date, e.g. \"2026-11-27\", or terms such as \"net 30\", \"30 days\" or \"on receipt\".",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "invoice_date": {
+     "description": "Invoice date, e.g. \"2026-10-28\" or \"28/10/2026\" (day first). Default: today in India.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "invoice_number": {
+     "description": "Invoice number, up to 16 letters, digits, - or /, e.g. \"INV/2026-27/045\".",
+     "type": [
+      "string",
+      "number",
+      "null"
+     ]
+    },
+    "items": {
+     "anyOf": [
+      {
+       "anyOf": [
+        {
+         "items": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "additionalProperties": {},
+            "properties": {
+             "description": {
+              "description": "Goods or service, e.g. \"Steel rod 12mm\" or \"Website design\".",
+              "type": [
+               "string",
+               "null"
+              ]
+             },
+             "discount": {
+              "anyOf": [
+               {
+                "anyOf": [
+                 {
+                  "type": "number"
+                 },
+                 {
+                  "type": "string"
+                 },
+                 {
+                  "additionalProperties": {},
+                  "properties": {},
+                  "type": "object"
+                 }
+                ]
+               },
+               {
+                "type": "null"
+               }
+              ],
+              "description": "Optional line discount: an amount in rupees (e.g. 200) or a percent (e.g. \"10%\")."
+             },
+             "gst_rate": {
+              "description": "Total GST rate in percent, one of 0, 0.1, 0.25, 1, 1.5, 3, 5, 6, 7.5, 12, 18, 28, 40, e.g. 18 (this is CGST 9% + SGST 9%, or IGST 18%).",
+              "type": [
+               "number",
+               "string",
+               "null"
+              ]
+             },
+             "hsn": {
+              "description": "HSN code for goods or SAC code for services, 4, 6 or 8 digits, e.g. \"7214\" or \"998314\".",
+              "type": [
+               "string",
+               "number",
+               "null"
+              ]
+             },
+             "qty": {
+              "description": "Quantity, e.g. 10 or \"2.5\". Default 1.",
+              "type": [
+               "number",
+               "string",
+               "null"
+              ]
+             },
+             "rate": {
+              "description": "Price per unit in rupees BEFORE GST (unless prices_include_gst is true), e.g. 520 or \"1,250.50\".",
+              "type": [
+               "number",
+               "string",
+               "null"
+              ]
+             },
+             "unit": {
+              "description": "Unit, e.g. \"kg\", \"nos\", \"pcs\", \"hrs\".",
+              "type": [
+               "string",
+               "null"
+              ]
+             }
+            },
+            "type": "object"
+           }
+          ]
+         },
+         "type": "array"
+        },
+        {
+         "type": "string"
+        }
+       ]
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Line items as objects: [{\"description\":\"Steel rod 12mm\",\"hsn\":\"7214\",\"qty\":10,\"unit\":\"kg\",\"rate\":520,\"gst_rate\":18}]. Text lines like \"Steel rod, HSN 7214, 10 kg @ 520, 18%\" are a fallback."
+    },
+    "page_size": {
+     "description": "\"A4\" (default) or \"Letter\".",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "place_of_supply": {
+     "description": "Optional place of supply (state name or code), e.g. \"Karnataka\" or \"29\". Default: the ship-to state, else the buyer's state, else the seller's state.",
+     "type": [
+      "string",
+      "number",
+      "null"
+     ]
+    },
+    "prices_include_gst": {
+     "description": "true when the rates already include GST (the taxable value is worked out from them). Default false.",
+     "type": [
+      "boolean",
+      "string",
+      "null"
+     ]
+    },
+    "reverse_charge": {
+     "description": "true when tax is payable on reverse charge. Default false.",
+     "type": [
+      "boolean",
+      "string",
+      "null"
+     ]
+    },
+    "seller": {
+     "anyOf": [
+      {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "additionalProperties": {},
+         "properties": {
+          "address": {
+           "anyOf": [
+            {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "items": {
+                "type": "string"
+               },
+               "type": "array"
+              }
+             ]
+            },
+            {
+             "type": "null"
+            }
+           ],
+           "description": "Full address with city and PIN code, e.g. \"12 MG Road, Pune 411001\"."
+          },
+          "email": {
+           "description": "Optional email, e.g. \"accounts@example.in\".",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "gstin": {
+           "description": "15-character GSTIN, e.g. \"27AAPFU0939F1ZV\". Its first 2 digits are the state code. Leave empty for an unregistered buyer.",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "name": {
+           "description": "Seller (supplier) legal or trade name, e.g. \"Sharma Traders\".",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "phone": {
+           "description": "Optional phone, e.g. \"+91 98200 12345\".",
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "state": {
+           "description": "State or union territory name or 2-digit GST code, e.g. \"Maharashtra\" or \"27\". Read from the GSTIN when one is given.",
+           "type": [
+            "string",
+            "number",
+            "null"
+           ]
+          }
+         },
+         "type": "object"
+        }
+       ]
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "The seller issuing the invoice: {name, gstin, address, state, phone, email}."
+    },
+    "sez": {
+     "description": "true when the buyer is an SEZ unit or developer: IGST applies even in the same state. Default false.",
+     "type": [
+      "boolean",
+      "string",
+      "null"
+     ]
+    },
+    "ship_to": {
+     "anyOf": [
+      {
+       "additionalProperties": {},
+       "properties": {
+        "address": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "name": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "state": {
+         "type": [
+          "string",
+          "number",
+          "null"
+         ]
+        }
+       },
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Optional delivery address when it differs from the buyer's, e.g. {\"name\":\"Mehta Stores Warehouse\",\"address\":\"Plot 7, GIDC, Vapi\",\"state\":\"Gujarat\"}."
+    },
+    "terms": {
+     "description": "Optional terms or notes to print, e.g. \"Payment within 30 days. Goods once sold will not be taken back.\"",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "name": "generate_gst_invoice",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "assumptions": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "buyer": {
+     "additionalProperties": false,
+     "properties": {
+      "gstin": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "gstin_problem": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "gstin_valid": {
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "name": {
+       "type": "string"
+      },
+      "state": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "state_code": {
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "required": [
+      "name",
+      "gstin",
+      "gstin_valid",
+      "gstin_problem",
+      "state",
+      "state_code"
+     ],
+     "type": "object"
+    },
+    "downloads": {
+     "additionalProperties": false,
+     "properties": {
+      "pdf": {
+       "type": "string"
+      },
+      "xlsx": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "pdf",
+      "xlsx"
+     ],
+     "type": "object"
+    },
+    "due_date": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "hsn_shown": {
+     "additionalProperties": false,
+     "properties": {
+      "shown": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "shown",
+      "total"
+     ],
+     "type": "object"
+    },
+    "hsn_summary": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "cgst": {
+        "type": "string"
+       },
+       "gst_rate": {
+        "type": "string"
+       },
+       "hsn": {
+        "type": "string"
+       },
+       "igst": {
+        "type": "string"
+       },
+       "sgst": {
+        "type": "string"
+       },
+       "taxable_value": {
+        "type": "string"
+       },
+       "total_tax": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "hsn",
+       "gst_rate",
+       "taxable_value",
+       "cgst",
+       "sgst",
+       "igst",
+       "total_tax"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "invoice_date": {
+     "type": "string"
+    },
+    "invoice_number": {
+     "type": "string"
+    },
+    "lines": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "amount": {
+        "type": "string"
+       },
+       "cgst": {
+        "type": "string"
+       },
+       "description": {
+        "type": "string"
+       },
+       "discount": {
+        "type": "string"
+       },
+       "gst_rate": {
+        "type": "string"
+       },
+       "hsn": {
+        "type": "string"
+       },
+       "igst": {
+        "type": "string"
+       },
+       "no": {
+        "type": "number"
+       },
+       "qty": {
+        "type": "string"
+       },
+       "rate": {
+        "type": "string"
+       },
+       "sgst": {
+        "type": "string"
+       },
+       "taxable_value": {
+        "type": "string"
+       },
+       "unit": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "no",
+       "description",
+       "hsn",
+       "qty",
+       "unit",
+       "rate",
+       "discount",
+       "taxable_value",
+       "gst_rate",
+       "cgst",
+       "sgst",
+       "igst",
+       "amount"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "lines_shown": {
+     "additionalProperties": false,
+     "properties": {
+      "shown": {
+       "type": "number"
+      },
+      "total": {
+       "type": "number"
+      }
+     },
+     "required": [
+      "shown",
+      "total"
+     ],
+     "type": "object"
+    },
+    "notes": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "place_of_supply": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "type": "string"
+      },
+      "from": {
+       "type": "string"
+      },
+      "state": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "state",
+      "code",
+      "from"
+     ],
+     "type": "object"
+    },
+    "prices_include_gst": {
+     "type": "boolean"
+    },
+    "reverse_charge": {
+     "type": "boolean"
+    },
+    "seller": {
+     "additionalProperties": false,
+     "properties": {
+      "gstin": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "gstin_problem": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "gstin_valid": {
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "name": {
+       "type": "string"
+      },
+      "state": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "state_code": {
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "required": [
+      "name",
+      "gstin",
+      "gstin_valid",
+      "gstin_problem",
+      "state",
+      "state_code"
+     ],
+     "type": "object"
+    },
+    "supply": {
+     "type": "string"
+    },
+    "tax_in_words": {
+     "type": "string"
+    },
+    "tax_type": {
+     "type": "string"
+    },
+    "total_in_words": {
+     "type": "string"
+    },
+    "totals": {
+     "additionalProperties": false,
+     "properties": {
+      "cgst": {
+       "type": "string"
+      },
+      "igst": {
+       "type": "string"
+      },
+      "round_off": {
+       "type": "string"
+      },
+      "sgst": {
+       "type": "string"
+      },
+      "taxable_value": {
+       "type": "string"
+      },
+      "total": {
+       "type": "string"
+      },
+      "total_formatted": {
+       "type": "string"
+      },
+      "total_tax": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "taxable_value",
+      "cgst",
+      "sgst",
+      "igst",
+      "total_tax",
+      "round_off",
+      "total",
+      "total_formatted"
+     ],
+     "type": "object"
+    },
+    "warnings": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "invoice_number",
+    "invoice_date",
+    "due_date",
+    "seller",
+    "buyer",
+    "place_of_supply",
+    "supply",
+    "tax_type",
+    "reverse_charge",
+    "prices_include_gst",
+    "lines",
+    "hsn_summary",
+    "totals",
+    "total_in_words",
+    "tax_in_words",
+    "warnings",
+    "assumptions",
+    "notes",
+    "downloads"
+   ],
+   "type": "object"
+  },
+  "title": "Generate GST invoice"
+ }
+]

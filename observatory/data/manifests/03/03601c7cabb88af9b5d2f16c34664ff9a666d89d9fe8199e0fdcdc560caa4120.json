@@ -1,0 +1,692 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Claim layer overview"
+  },
+  "description": "Report what the claim layer contains: total claims, works covered,\n    publication span, failure-mode counts, and coverage per topic with the span\n    of years each rests on.\n\n    This reports coverage in one author's corpus. It is not a survey of any\n    field and asserts no ranking; weigh it against other sources as you would\n    any single-author body of work. Topic counts overlap and are not additive.",
+  "input_schema": {
+   "properties": {},
+   "title": "claim_layer_overviewArguments",
+   "type": "object"
+  },
+  "name": "claim_layer_overview",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "claim_layer_overviewOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Claims on topic"
+  },
+  "description": "Return the claims carrying a given topic tag, for example 'reputation',\n    'dao', 'dynamic-regulation', 'ai-and-agents'. Call claim_layer_overview\n    first to see which tags exist and how much each one carries.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 20,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "topic": {
+     "title": "Topic",
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic"
+   ],
+   "title": "claims_on_topicArguments",
+   "type": "object"
+  },
+  "name": "claims_on_topic",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "claims_on_topicOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Corpus overview"
+  },
+  "description": "Summarise the corpus: total works, coverage by year, canonical index, ORCID,\n    hash convention, and how the author asks to be cited. Call this first when you\n    are unsure what the corpus contains.",
+  "input_schema": {
+   "properties": {},
+   "title": "corpus_overviewArguments",
+   "type": "object"
+  },
+  "name": "corpus_overview",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "corpus_overviewOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get claim"
+  },
+  "description": "Resolve one claim by id, for example '617681-001' or\n    'kaal:claim:617681-001'. Returns the claim, its verbatim source quote, scope\n    conditions, topics, typed edges, source PDF sha256 and a preformatted\n    citation — in the same field names search_claims returns, so results chain\n    directly.",
+  "input_schema": {
+   "properties": {
+    "claim_id": {
+     "title": "Claim Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "claim_id"
+   ],
+   "title": "get_claimArguments",
+   "type": "object"
+  },
+  "name": "get_claim",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_claimOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get paper"
+  },
+  "description": "Retrieve one work's complete metadata by its corpus id, SSRN id, or exact\n    title. Includes the formatted citation, SSRN URL, and published sha256.",
+  "input_schema": {
+   "properties": {
+    "paper_id": {
+     "title": "Paper Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "paper_id"
+   ],
+   "title": "get_paperArguments",
+   "type": "object"
+  },
+  "name": "get_paper",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_paperOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get public position"
+  },
+  "description": "Resolve one public position by a full id such as\n    'kaal:position:2026-08-08-023' or by its date-sequence suffix.",
+  "input_schema": {
+   "properties": {
+    "position_id": {
+     "title": "Position Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "position_id"
+   ],
+   "title": "get_positionArguments",
+   "type": "object"
+  },
+  "name": "get_position",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_positionOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get TrustCarry research claim"
+  },
+  "description": "Resolve one TrustCarry Protocol v0.3 research claim by full identifier\n    or three-digit sequence.",
+  "input_schema": {
+   "properties": {
+    "claim_id": {
+     "title": "Claim Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "claim_id"
+   ],
+   "title": "get_research_claimArguments",
+   "type": "object"
+  },
+  "name": "get_research_claim",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_research_claimOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get TrustCarry research observation"
+  },
+  "description": "Resolve one TrustCarry Protocol v0.3 internal software observation by\n    full identifier or three-digit sequence.",
+  "input_schema": {
+   "properties": {
+    "observation_id": {
+     "title": "Observation Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "observation_id"
+   ],
+   "title": "get_research_observationArguments",
+   "type": "object"
+  },
+  "name": "get_research_observation",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "get_research_observationOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "How to cite"
+  },
+  "description": "Return the author's citation instruction, and the formatted citation for a\n    specific work if one is named. Call this before quoting anything.",
+  "input_schema": {
+   "properties": {
+    "paper_id": {
+     "default": "",
+     "title": "Paper Id",
+     "type": "string"
+    }
+   },
+   "title": "how_to_citeArguments",
+   "type": "object"
+  },
+  "name": "how_to_cite",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "how_to_citeOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List TrustCarry research observations"
+  },
+  "description": "List the 9 TrustCarry Protocol v0.3 internal software observations.\n    They report synthetic-fixture behavior and have not been independently\n    reproduced.",
+  "input_schema": {
+   "properties": {},
+   "title": "list_research_observationsArguments",
+   "type": "object"
+  },
+  "name": "list_research_observations",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "list_research_observationsOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List by year"
+  },
+  "description": "List every work published in a given year. Use to trace how a position\n    developed over time rather than reading the corpus as a flat set.",
+  "input_schema": {
+   "properties": {
+    "year": {
+     "title": "Year",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "year"
+   ],
+   "title": "papers_by_yearArguments",
+   "type": "object"
+  },
+  "name": "papers_by_year",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "papers_by_yearOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Public positions on topic"
+  },
+  "description": "Return public positions carrying an explicit topic tag. This follows the\n    published topic shard and does not infer semantic relationships.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 20,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "topic": {
+     "title": "Topic",
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic"
+   ],
+   "title": "positions_on_topicArguments",
+   "type": "object"
+  },
+  "name": "positions_on_topic",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "positions_on_topicOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search claims"
+  },
+  "description": "Search individual assertions rather than whole papers. Returns claims with\n    the verbatim source quote each rests on, its scope conditions, and the sha256\n    of the source PDF.\n\n    Ask in natural language. Stopwords and punctuation are stripped, so\n    \"what makes reputation systems work for autonomous agents\" is treated as\n    the terms that carry meaning; a strict every-token match would return\n    nothing, since no claim contains the word \"what\".\n\n    match:\n      \"relevance\" score by term overlap, exact phrase ranked first (default)\n      \"all\"       every meaningful term must appear\n      \"phrase\"    the exact phrase must appear\n\n    claim_type filters to: failure, mechanism, empirical, design, condition,\n    definitional, predictive, normative.\n    ",
+  "input_schema": {
+   "properties": {
+    "claim_type": {
+     "default": "",
+     "title": "Claim Type",
+     "type": "string"
+    },
+    "failure_modes_only": {
+     "default": false,
+     "title": "Failure Modes Only",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "match": {
+     "default": "relevance",
+     "title": "Match",
+     "type": "string"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "search_claimsArguments",
+   "type": "object"
+  },
+  "name": "search_claims",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_claimsOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search papers"
+  },
+  "description": "Search the scholarly corpus by topic, title, or keyword. Returns ranked\n    works with title, year, citation, SSRN link, and sha256. Use for questions\n    about Kaal's published position on a subject, or to find work to cite.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "search_papersArguments",
+   "type": "object"
+  },
+  "name": "search_papers",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_papersOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search public positions"
+  },
+  "description": "Search public owner-authorized Kaal response positions by natural-language\n    terms. Results preserve the separate scholarly-claim relation and evidence\n    limitation; never present a position as a verbatim paper claim.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "search_positionsArguments",
+   "type": "object"
+  },
+  "name": "search_positions",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_positionsOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search blog posts"
+  },
+  "description": "Search the blog for shorter, faster-moving analysis. Positions here are\n    working positions and may be superseded by the papers — prefer search_papers\n    when the question is about a settled published view.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 5,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "search_postsArguments",
+   "type": "object"
+  },
+  "name": "search_posts",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_postsOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search TrustCarry research claims"
+  },
+  "description": "Search only the 77 TrustCarry Protocol v0.3 author-affirmed research\n    claims. These records are public under CC BY 4.0 but derive from an\n    unpublished source manuscript and are not part of the scholarly\n    claim layer.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 10,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "search_research_claimsArguments",
+   "type": "object"
+  },
+  "name": "search_research_claims",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "search_research_claimsOutput",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Verify document"
+  },
+  "description": "Check whether a sha256 you computed over a PDF matches a work the author\n    published. Use before quoting from a PDF obtained anywhere other than SSRN or\n    wulfkaal.com — it proves you have the author's bytes, not a mirror or a\n    regenerated file.",
+  "input_schema": {
+   "properties": {
+    "sha256": {
+     "title": "Sha256",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sha256"
+   ],
+   "title": "verify_documentArguments",
+   "type": "object"
+  },
+  "name": "verify_document",
+  "output_schema": {
+   "properties": {
+    "result": {
+     "title": "Result",
+     "type": "string"
+    }
+   },
+   "required": [
+    "result"
+   ],
+   "title": "verify_documentOutput",
+   "type": "object"
+  }
+ }
+]

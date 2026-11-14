@@ -1,0 +1,311 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "The cost-of-intelligence index: for each GPQA Diamond threshold, the cheapest first-party API price (blended USD per million tokens) at which a model at or above it could be bought, how many times cheaper it has become, and how many months the price takes to halve.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "eacc_get_cost_of_intelligence",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get e/acc's edited daily overview, either the latest issue or a real YYYY-MM-DD date. Use this when the user asks for a daily report rather than a raw chronological list.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "date": {
+     "description": "Optional real calendar date in YYYY-MM-DD. Omit for the latest daily report.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "description": "Stored edition language. Defaults to English. Missing editions return edition_unavailable; no live model calls.",
+     "enum": [
+      "en",
+      "zh"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "eacc_get_daily",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get the current e/acc Top 10 with each event's one-based rank. Use this for 'what is hot now' and to discover valid story public IDs; use eacc_get_latest for a chronological news list. Internal heat scores are not returned.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lang": {
+     "default": "en",
+     "description": "Stored edition language. Defaults to English. Missing editions return edition_unavailable; no live model calls.",
+     "enum": [
+      "en",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum number of current topics, from 1 to 10.",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "eacc_get_hot_topics",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get the latest e/acc items for a 24-hour or 7-day briefing. Prefer selected mode unless the user explicitly asks for every public item. Do not use this for named-topic search or multi-source event context.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category": {
+     "description": "Optional category: ai-models, ai-products, industry, paper, tip, opinion.",
+     "enum": [
+      "ai-models",
+      "ai-products",
+      "industry",
+      "paper",
+      "tip",
+      "opinion"
+     ],
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "description": "Stored edition language. Defaults to English. Missing editions return edition_unavailable; no live model calls.",
+     "enum": [
+      "en",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum number of results, from 1 to 30.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "mode": {
+     "default": "selected",
+     "description": "selected returns editorial picks; all returns every public item.",
+     "enum": [
+      "selected",
+      "all"
+     ],
+     "type": "string"
+    },
+    "window": {
+     "default": "24h",
+     "description": "Time window. Use 24h for a current briefing and 7d for a weekly view.",
+     "enum": [
+      "24h",
+      "7d"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "eacc_get_latest",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get e/acc's edited monthly report: the month's most important events chosen from its dailies, grouped by section, with an overview. Use this for what happened this month or in a given month; omit month for the latest.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "month": {
+     "description": "Optional real month in YYYY-MM such as 2026-09. Omit for the latest monthly report.",
+     "pattern": "^\\d{4}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "eacc_get_monthly",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get the evolving timeline, latest development, AI digest, and related events for one public story. Pass the Story public_id or story link that eacc_get_hot_topics returned; never invent or infer IDs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "lang": {
+     "default": "en",
+     "description": "Stored edition language. Defaults to English. Missing editions return edition_unavailable; no live model calls.",
+     "enum": [
+      "en",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "public_id": {
+     "description": "Story public ID or story link, from eacc_get_hot_topics (Story public_id or links.story); never guess it.",
+     "maxLength": 128,
+     "minLength": 1,
+     "type": "string"
+    },
+    "report_limit": {
+     "default": 20,
+     "description": "Maximum number of timeline reports, from 1 to 50.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "public_id"
+   ],
+   "type": "object"
+  },
+  "name": "eacc_get_story",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get e/acc's edited weekly report: the week's most important events chosen from its dailies, grouped by section, with an overview. Use this for what happened this week or in a given ISO week; omit week for the latest.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "week": {
+     "description": "Optional real ISO week such as 2026-W39. Omit for the latest weekly report.",
+     "pattern": "^\\d{4}-W\\d{2}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "eacc_get_weekly",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search e/acc by a 2–200 character topic, company, model, product, or person, over the latest 7 days by default or 30 days with window=30d. It searches editorial picks first and automatically expands to all public items only when picks have no result.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "category": {
+     "description": "Optional category: ai-models, ai-products, industry, paper, tip, opinion.",
+     "enum": [
+      "ai-models",
+      "ai-products",
+      "industry",
+      "paper",
+      "tip",
+      "opinion"
+     ],
+     "type": "string"
+    },
+    "lang": {
+     "default": "en",
+     "description": "Stored edition language. Defaults to English. Missing editions return edition_unavailable; no live model calls.",
+     "enum": [
+      "en",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum number of results, from 1 to 30.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Search query, 2 to 200 characters.",
+     "maxLength": 200,
+     "minLength": 2,
+     "type": "string"
+    },
+    "window": {
+     "default": "7d",
+     "description": "Search window: the latest 24 hours, 7 days (default) or 30 days.",
+     "enum": [
+      "24h",
+      "7d",
+      "30d"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "eacc_search",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Today's public wallpaper preview and product page. No key or credit required.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "eacc_wallpaper_today",
+  "output_schema": {}
+ }
+]

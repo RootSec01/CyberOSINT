@@ -1,0 +1,140 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Which car is cheaper to own"
+  },
+  "description": "Compare two cars' true monthly cost of ownership: which is cheaper, by how much per month and per year, and which cost line accounts for most of the gap. Differences under $10 a month are reported as a tie.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "a": {
+     "description": "First car slug",
+     "maxLength": 120,
+     "pattern": "^[a-z0-9_-]+$",
+     "type": "string"
+    },
+    "b": {
+     "description": "Second car slug",
+     "maxLength": 120,
+     "pattern": "^[a-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "a",
+    "b"
+   ],
+   "type": "object"
+  },
+  "name": "compare_true_cost",
+  "output_schema": {},
+  "title": "Which car is cheaper to own"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Cheapest cars to own, by segment"
+  },
+  "description": "Rank a segment of the catalogue by true monthly cost of ownership, cheapest first, with the segment's cheapest, median and most expensive figures.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "How many of the cheapest cars to return",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "segment": {
+     "default": "all",
+     "description": "all, suv, sedan, electric, hybrid, truck, or under-700 (everything under $700 a month)",
+     "enum": [
+      "all",
+      "suv",
+      "sedan",
+      "electric",
+      "hybrid",
+      "truck",
+      "under-700"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "cost_index",
+  "output_schema": {},
+  "title": "Cheapest cars to own, by segment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find a car"
+  },
+  "description": "Search the priced catalogue by make, model, trim or year and return matching cars with their slug and true monthly cost. Every word must match. Newest model years first.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "Maximum results",
+     "maximum": 25,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Make, model, trim and/or year, e.g. \"toyota rav4\" or \"2025 f-150\"",
+     "maxLength": 60,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "find_car",
+  "output_schema": {},
+  "title": "Find a car"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "True monthly cost of a car"
+  },
+  "description": "One car's true monthly cost of ownership: loan, insurance, maintenance and fuel, the total per month and per year, whether each estimate is the car's own figure or a segment average, and its rank among comparable cars.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "slug": {
+     "description": "Car slug from find_car, e.g. 2025-toyota-rav4-le",
+     "maxLength": 120,
+     "pattern": "^[a-z0-9_-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_true_cost",
+  "output_schema": {},
+  "title": "True monthly cost of a car"
+ }
+]

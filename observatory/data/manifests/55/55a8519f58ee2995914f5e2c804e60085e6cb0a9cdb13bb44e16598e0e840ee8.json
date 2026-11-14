@@ -1,0 +1,129 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Compare two eSIM providers by slug. Returns esimkenya.com's curated head-to-head verdict when one exists for that pair, otherwise returns both providers' full details side by side so you can compare them yourself. Use list_esim_providers first to find provider slugs.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "provider_a_slug": {
+     "description": "First provider slug, e.g. \"airalo\".",
+     "type": "string"
+    },
+    "provider_b_slug": {
+     "description": "Second provider slug, e.g. \"holafly\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "provider_a_slug",
+    "provider_b_slug"
+   ],
+   "type": "object"
+  },
+  "name": "compare_esim_providers",
+  "output_schema": {},
+  "title": "Compare two eSIM providers for Kenya"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get full details for a single eSIM provider by slug, including its review summary/verdict, key facts, FAQs, and every available plan (data amount, duration, price in USD). Use list_esim_providers first to find a provider slug.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "description": "Provider slug, e.g. \"airalo\", \"holafly\", \"safari-esim\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_esim_provider",
+  "output_schema": {},
+  "title": "Get eSIM provider details and plans"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search and list eSIM providers available in Kenya, with pricing, ratings, coverage, and descriptive fields (best_for, ideal_for/not_ideal_for, pros/cons). Optionally filter by a Kenya destination slug (national park, city, airport, beach, or island) to see providers editorially recommended there, with park-level coverage notes when available. This is the primary lookup tool — reason over the returned structured fields yourself to answer \"best for X\" style questions rather than expecting a pre-computed ranking.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "badge": {
+     "enum": [
+      "top_pick",
+      "popular",
+      "budget",
+      "unlimited"
+     ],
+     "type": "string"
+    },
+    "destination_slug": {
+     "description": "Slug of a Kenya destination, e.g. \"maasai-mara\", \"nairobi\", \"diani-beach\". Filters to providers recommended for that location.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "exclusiveMinimum": 0,
+     "maximum": 50,
+     "type": "integer"
+    },
+    "max_price_usd": {
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "min_rating": {
+     "maximum": 5,
+     "minimum": 0,
+     "type": "number"
+    },
+    "safari_coverage": {
+     "enum": [
+      "yes",
+      "partial",
+      "no"
+     ],
+     "type": "string"
+    },
+    "sort_by": {
+     "default": "display_order",
+     "enum": [
+      "rating",
+      "price",
+      "display_order"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_esim_providers",
+  "output_schema": {},
+  "title": "List eSIM providers for Kenya"
+ }
+]

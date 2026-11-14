@@ -1,0 +1,426 @@
+[
+ {
+  "description": "Free. Show the remaining credit balance for the API key sent in this connection's Authorization header. Call this before a long run of paid requests.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "check_balance",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Hashtag handle — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_hashtag_handle",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Hashtag posts — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "region": {
+     "description": "Optional.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_hashtag_posts",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Location posts — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "locationId": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "region": {
+     "description": "Optional.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "locationId"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_location_posts",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Music posts — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "region": {
+     "description": "Optional.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_music_posts",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Post — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "Required.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_post",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Post comments — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_post_comments",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Post comments replies — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "commentId": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "commentId"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_post_comments_replies",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Post — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "region": {
+     "description": "Optional.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_post_id",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). Post search — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "dateRange": {
+     "description": "Optional. One of: ALL_TIME, YESTERDAY, THIS_WEEK, THIS_MONTH, LAST_THREE_MONTHS, LAST_SIX_MONTHS.",
+     "enum": [
+      "ALL_TIME",
+      "YESTERDAY",
+      "THIS_WEEK",
+      "THIS_MONTH",
+      "LAST_THREE_MONTHS",
+      "LAST_SIX_MONTHS"
+     ],
+     "type": "string"
+    },
+    "keyword": {
+     "description": "Required.",
+     "type": "string"
+    },
+    "region": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "sortType": {
+     "description": "Optional. One of: RELEVANCE, MOST_LIKED, DATE_POSTED.",
+     "enum": [
+      "RELEVANCE",
+      "MOST_LIKED",
+      "DATE_POSTED"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "keyword"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_post_search",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). User followers — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_user_followers",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). User followings — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_user_followings",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). User handle — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "username": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "username"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_user_handle",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid ($0.004). User posts — TikTok. Live data as JSON. Pay with x402 or an Authorization: Bearer bby_live_... credits key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Optional.",
+     "type": "string"
+    },
+    "id": {
+     "description": "Required. Path parameter.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "region": {
+     "description": "Optional.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "tiktok_user_posts",
+  "output_schema": {}
+ },
+ {
+  "description": "Paid (the amount you choose, minimum $1). Buy prepaid credits with x402 so later calls skip the per-call payment round trip. With an Authorization: Bearer bby_live_... header on this connection it recharges that key. Without one, the paying wallet becomes the account and a new API key is minted and returned once — store it as a secret, it cannot be recovered.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "amount": {
+     "description": "Amount to add, in USD. Minimum 1.",
+     "minimum": 1,
+     "type": "number"
+    },
+    "rotate": {
+     "description": "Mint a replacement key for the paying wallet, invalidating the old one immediately. Only valid when no Authorization header is sent.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "amount"
+   ],
+   "type": "object"
+  },
+  "name": "topup_credits",
+  "output_schema": {}
+ }
+]

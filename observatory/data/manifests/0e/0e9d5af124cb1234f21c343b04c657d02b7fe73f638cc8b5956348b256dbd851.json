@@ -1,0 +1,83 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Publish text as a note on sharenotes.dev and get back a short, human-readable link (like https://sharenotes.dev/blue-fox-42) to give to a person. Use it when the user wants to share text, code, logs or instructions with someone else, or move text to another device. Anyone with the link can read the note, and notes are stored on the server, not end-to-end encrypted — never use it for passwords, API keys or other secrets. The note expires after 7 days unless you set expiresIn. Set burnAfterRead for a note that is destroyed the first time a person opens it, or maxViews (2–100) for one destroyed after that many opens. Returns the link and the expiry time.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "burnAfterRead": {
+     "description": "If true, the note is deleted the first time someone opens the link. Link previews in chat apps do not count.",
+     "type": "boolean"
+    },
+    "content": {
+     "description": "The text to publish. Plain text or Markdown. Up to 10 MB.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "expiresIn": {
+     "description": "How long the note lives. Defaults to 7d.",
+     "enum": [
+      "1h",
+      "24h",
+      "7d",
+      "30d"
+     ],
+     "type": "string"
+    },
+    "maxViews": {
+     "description": "Delete the note after this many opens (implies burnAfterRead). Link previews and reloads by someone who already opened it do not count.",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "title": {
+     "description": "Optional short title shown above the note.",
+     "maxLength": 100,
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "create_note",
+  "output_schema": {},
+  "title": "Create a ShareNotes link"
+ },
+ {
+  "annotations": {
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Read the text of a note on sharenotes.dev, given its link (https://sharenotes.dev/blue-fox-42) or just its name (blue-fox-42). Use it when the user gives you a ShareNotes link and asks about its contents. Returns plain text: notes written in the ShareNotes web editor are converted from HTML. It does not open PIN-protected notes, and it does not open delete-after-reading notes, because opening one destroys it — for those, ask the user to open the link in a browser.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "note": {
+     "description": "The note link, e.g. https://sharenotes.dev/blue-fox-42, or just blue-fox-42.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "note"
+   ],
+   "type": "object"
+  },
+  "name": "read_note",
+  "output_schema": {},
+  "title": "Read a ShareNotes note"
+ }
+]

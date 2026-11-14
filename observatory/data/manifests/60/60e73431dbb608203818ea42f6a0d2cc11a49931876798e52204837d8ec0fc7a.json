@@ -1,0 +1,236 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get an MRI category"
+  },
+  "description": "Return one category's question shapes (best tools, how buyers choose, comparisons, top lists, problem-first research, is it worth it, news) and the evidence state of each: published with rates, collecting, or not collectable.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Category key from mri_list_categories, e.g. cybersecurity.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "category"
+   ],
+   "type": "object"
+  },
+  "name": "mri_get_category",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Get an MRI category"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Which sources AI engines cite"
+  },
+  "description": "Ranked source domains that AI answer engines cite, pooled across engines, for one category and question shape, with citation rate (share of monitored answer runs citing the domain), rank, percentile and source role (editorial publication, vendor-owned, analyst research, community, academic/government, market database, wire distribution). This rate is not split by engine. For one engine, use mri_get_engine.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Category key, e.g. cybersecurity.",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "Page token from the previous response's next.cursor. When set, offset is ignored.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 25,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "question_shape": {
+     "description": "Buyer question pattern: best_x (best X tools), how_choose (how to choose), is_x_worth (is it worth it), news_topic (recent news), problem_first (how to solve a problem), top_list (top platforms), x_vs_y (A vs B).",
+     "enum": [
+      "best_x",
+      "how_choose",
+      "is_x_worth",
+      "news_topic",
+      "problem_first",
+      "top_list",
+      "x_vs_y"
+     ],
+     "type": "string"
+    },
+    "source_role": {
+     "description": "Optional filter, e.g. editorial_media for publications only, vendor_owned, analyst_research, community_social.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "category",
+    "question_shape"
+   ],
+   "type": "object"
+  },
+  "name": "mri_get_cited_sources",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Which sources AI engines cite"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "How often AI engines cite a site"
+  },
+  "description": "For one domain or URL, return how often AI answer engines cite it: overall citation rate, the rate on each engine (overall.byEngine: cited runs, that engine's observed runs, and whether the engine's sample clears the evidence floor), confidence tier, rank among all cited domains and within its source role, and per-category segment rates. Use to answer 'does ChatGPT cite <site>' or 'what share of Perplexity runs cite <site>'. A published byEngine row with runsCited 0 means that engine did not cite the domain. byEngine is the whole window, not a rate inside one category.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "description": "A domain (techcrunch.com) or any URL on it.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "mri_get_domain",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "How often AI engines cite a site"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Sources one answer engine cites"
+  },
+  "description": "Ranked sources one answer engine cites, by that engine's citation rate across the whole window; an engine whose collection changed inside the window also returns collectionRegime, its sources since the change, which is what it cites now. Pass category to limit the list to sources with a published segment in that category; the rate stays the whole-window rate and is not a rate inside the category. Collecting categories and engines below the evidence floor withhold the ranking. Use to answer 'what sources does Perplexity cite most?' or 'which sources does Google AI Overviews cite among published <category> sources'.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "description": "Optional category key. Limits the ranking to sources with a published segment in that category.",
+     "type": "string"
+    },
+    "cursor": {
+     "description": "Page token from the previous response's next.cursor. When set, offset is ignored.",
+     "type": "string"
+    },
+    "engine": {
+     "description": "Engine key from mri_list_engines: chatgpt, claude, gemini, google_ai_mode, google_ai_overviews, perplexity.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 25,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "engine"
+   ],
+   "type": "object"
+  },
+  "name": "mri_get_engine",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "Sources one answer engine cites"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List MRI categories"
+  },
+  "description": "List every Machine Relations Index category (e.g. cybersecurity, fintech, enterprise-software, ai-visibility-geo) with the question shapes that have published citation rates, plus the source-role vocabulary. Call this first to get a valid category key.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "release": {
+     "description": "Optional release id. Any release other than the current one returns release_unavailable.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "mri_list_categories",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "List MRI categories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List MRI answer engines"
+  },
+  "description": "List each answer engine with its latest-successful model metadata and historical modelPeriods (null when unavailable), the engine's observed runs and days, whether that sample clears the evidence floor, and the most-cited source on that engine across the whole window.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "release": {
+     "description": "Optional release id. Any release other than the current one returns release_unavailable.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "mri_list_engines",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "type": "noauth"
+   }
+  ],
+  "title": "List MRI answer engines"
+ }
+]

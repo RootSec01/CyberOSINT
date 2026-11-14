@@ -1,0 +1,133 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Screen a medication list"
+  },
+  "description": "Given a list of generic drug names, say which ones have a curated drug–gene record, with which genes and what each record rests on (a CPIC or DPWG guideline, a drug label, or the primary literature), and which are not covered. Needs no genotype.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "medications": {
+     "description": "Generic names, e.g. [\"clopidogrel\", \"simvastatin\"].",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 30,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "medications"
+   ],
+   "type": "object"
+  },
+  "name": "check_medications",
+  "output_schema": {},
+  "title": "Screen a medication list"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List genes"
+  },
+  "description": "List the genes in the DeepDNA knowledge base, with a one-line summary and category for each.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_genes",
+  "output_schema": {},
+  "title": "List genes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Look up drug–gene guidance"
+  },
+  "description": "Pharmacogenomic guidance for a gene, optionally for one drug: guideline (CPIC or DPWG, \"drug label\", or null when the record rests on the primary literature), summary of the recommendation, phenotypes and sources. Omit drug to list every drug curated for that gene.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "drug": {
+     "description": "Generic drug name, e.g. clopidogrel. Optional.",
+     "type": "string"
+    },
+    "gene": {
+     "description": "Pharmacogene symbol, e.g. CYP2C19.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "gene"
+   ],
+   "type": "object"
+  },
+  "name": "lookup_drug_gene",
+  "output_schema": {},
+  "title": "Look up drug–gene guidance"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Look up a gene"
+  },
+  "description": "Everything curated about one gene: function, key variants with rsIDs, metabolizer or function phenotypes, drug interactions, what a consumer genotyping array can and cannot tell you, and sources.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "symbol": {
+     "description": "HGNC gene symbol, e.g. CYP2C19. Case-insensitive.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "lookup_gene",
+  "output_schema": {},
+  "title": "Look up a gene"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Look up a variant"
+  },
+  "description": "One variant by dbSNP rsID: gene, star-allele or common name, alleles, functional effect, population frequency and sources. Send the rsID only, never the user's genotype. A single variant is not a phenotype or metabolizer status.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "rsid": {
+     "description": "dbSNP identifier, e.g. rs4244285.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "rsid"
+   ],
+   "type": "object"
+  },
+  "name": "lookup_variant",
+  "output_schema": {},
+  "title": "Look up a variant"
+ }
+]

@@ -1,0 +1,190 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Total item count plus counts per vertical and per event_type. Use to discover valid filter values and where coverage is dense.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_feed_stats",
+  "output_schema": {},
+  "title": "Feed coverage stats"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Most recent AI news items, newest first, with optional filters. Pass the returned next_cursor back as `cursor` to fetch older items.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "next_cursor from a previous call.",
+     "maxLength": 100,
+     "type": "string"
+    },
+    "event_type": {
+     "description": "Restrict to one event type.",
+     "enum": [
+      "launch",
+      "funding",
+      "release",
+      "acquisition",
+      "paper",
+      "update",
+      "shutdown"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max items to return (default 20).",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since": {
+     "description": "ISO 8601 date or timestamp; only items published at or after it.",
+     "type": "string"
+    },
+    "source": {
+     "description": "Restrict to one source, e.g. 'arxiv', 'hackernews', 'github'.",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "vertical": {
+     "description": "Restrict to one AI vertical.",
+     "enum": [
+      "foundation_models",
+      "inference",
+      "training",
+      "agents",
+      "code_generation",
+      "multimodal",
+      "safety_alignment",
+      "evaluation",
+      "developer_tooling",
+      "enterprise_platforms",
+      "data_infrastructure",
+      "open_source",
+      "hardware",
+      "consumer_products",
+      "creative_tools",
+      "search_retrieval",
+      "robotics",
+      "healthcare",
+      "finance",
+      "research",
+      "governance_policy"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_latest_news",
+  "output_schema": {},
+  "title": "Latest AI news"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Full-text search over indexed AI news. Supports quoted phrases, OR, and -exclusion. Results are ranked by relevance blended with recency; not paginated.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "event_type": {
+     "description": "Restrict to one event type.",
+     "enum": [
+      "launch",
+      "funding",
+      "release",
+      "acquisition",
+      "paper",
+      "update",
+      "shutdown"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Max items to return (default 20).",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Search terms, e.g. 'open-weight reasoning model'.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "since": {
+     "description": "ISO 8601 date or timestamp; only items published at or after it.",
+     "type": "string"
+    },
+    "source": {
+     "description": "Restrict to one source, e.g. 'arxiv', 'hackernews', 'github'.",
+     "maxLength": 64,
+     "type": "string"
+    },
+    "vertical": {
+     "description": "Restrict to one AI vertical.",
+     "enum": [
+      "foundation_models",
+      "inference",
+      "training",
+      "agents",
+      "code_generation",
+      "multimodal",
+      "safety_alignment",
+      "evaluation",
+      "developer_tooling",
+      "enterprise_platforms",
+      "data_infrastructure",
+      "open_source",
+      "hardware",
+      "consumer_products",
+      "creative_tools",
+      "search_retrieval",
+      "robotics",
+      "healthcare",
+      "finance",
+      "research",
+      "governance_policy"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_news",
+  "output_schema": {},
+  "title": "Search AI news"
+ }
+]

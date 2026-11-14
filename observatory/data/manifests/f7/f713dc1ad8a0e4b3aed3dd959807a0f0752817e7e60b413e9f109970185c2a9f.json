@@ -1,0 +1,332 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get adventure"
+  },
+  "description": "Get full public details for one published adventure by slug, including requirements, review summary and the operator contact shown on the public page.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "pattern": "^[a-z0-9-]{1,200}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_adventure",
+  "output_schema": {},
+  "title": "Get adventure"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get my stats"
+  },
+  "description": "The signed-in member's Adrenaline List stats: adventures done, bucket list size and countries visited, plus their profile URL when they have a public profile with a username. Requires sign-in.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_my_stats",
+  "output_schema": {},
+  "title": "Get my stats"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List my adventures"
+  },
+  "description": "List the signed-in member's own adventures on Adrenaline List: their bucket list and the adventures they have done, with slug, title, status, visibility, notes and completion date. Filter by status (done or bucket_list); 50 per page. Requires sign-in.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "default": 1,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "enum": [
+      "done",
+      "bucket_list"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_my_adventures",
+  "output_schema": {},
+  "title": "List my adventures"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List rankings"
+  },
+  "description": "Adrenaline List's own ranking lists: most-adrenaline (Adrenaline Index 1-10, category estimate where unrated), best-value (USD per hour), top-rated (approved member reviews), most-visited (page views, last 30 days) and type-1-fun (fun in the moment). Returns ranked published adventures with their score.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "list": {
+     "enum": [
+      "most-adrenaline",
+      "best-value",
+      "top-rated",
+      "most-visited",
+      "type-1-fun"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "list"
+   ],
+   "type": "object"
+  },
+  "name": "list_rankings",
+  "output_schema": {},
+  "title": "List rankings"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List search options"
+  },
+  "description": "List destination (country) and category slugs with published activity counts, for use with search_adventures.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "categories_limit": {
+     "default": 50,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "destinations_limit": {
+     "default": 50,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_search_options",
+  "output_schema": {},
+  "title": "List search options"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Mark an adventure"
+  },
+  "description": "Add a published adventure to the signed-in member's bucket list or mark it as done, by slug (from search_adventures). Optional notes, completed_at (for done) and visibility (public, profile_only or private). Anything omitted keeps what is stored: visibility (public for a new entry), notes and the completion date. Repeating a call changes nothing. Requires sign-in.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "completed_at": {
+     "anyOf": [
+      {
+       "format": "date",
+       "type": "string"
+      },
+      {
+       "format": "date-time",
+       "type": "string"
+      }
+     ]
+    },
+    "notes": {
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "slug": {
+     "pattern": "^[a-z0-9-]{1,200}$",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "done",
+      "bucket_list"
+     ],
+     "type": "string"
+    },
+    "visibility": {
+     "enum": [
+      "public",
+      "profile_only",
+      "private"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug",
+    "status"
+   ],
+   "type": "object"
+  },
+  "name": "mark_adventure",
+  "output_schema": {},
+  "title": "Mark an adventure"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search adventures"
+  },
+  "description": "Search published adrenaline activities on Adrenaline List by text, destination slug, category slug, adrenaline rating (1-10), months and maximum duration. Use list_search_options for valid slugs. Prices are indicative.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "category": {
+     "pattern": "^[a-z0-9-]{1,80}$",
+     "type": "string"
+    },
+    "destination": {
+     "pattern": "^[a-z0-9-]{1,80}$",
+     "type": "string"
+    },
+    "max_adrenaline": {
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_duration_minutes": {
+     "maximum": 20160,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "min_adrenaline": {
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "months": {
+     "items": {
+      "maximum": 12,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "maxItems": 12,
+     "minItems": 1,
+     "type": "array"
+    },
+    "page": {
+     "default": 1,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "default": 10,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 100,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_adventures",
+  "output_schema": {},
+  "title": "Search adventures"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Unmark an adventure"
+  },
+  "description": "Remove an adventure from the signed-in member's bucket list or done list, by slug, including one that is no longer published. Removing one that is on neither list changes nothing. Requires sign-in.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "slug": {
+     "pattern": "^[a-z0-9-]{1,200}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "unmark_adventure",
+  "output_schema": {},
+  "title": "Unmark an adventure"
+ }
+]

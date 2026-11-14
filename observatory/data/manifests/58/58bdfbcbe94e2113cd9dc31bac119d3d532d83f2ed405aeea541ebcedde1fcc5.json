@@ -1,0 +1,308 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Add internal note to order"
+  },
+  "description": "WRITE: add an INTERNAL note (visible to staff, not sent to the customer) to an order, or to one line item with order_line_id. Each call adds a new note, so do not repeat it. POST /api/json/manage_orders/add_internal_note.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "content": {
+     "description": "The note text.",
+     "maxLength": 5000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "order_id": {
+     "description": "The order's invoice number, e.g. INV1234 (this is the order id).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "order_line_id": {
+     "description": "Attach the note to this line item instead of the order.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "order_id",
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "deconetwork_add_order_note",
+  "output_schema": {},
+  "title": "Add internal note to order"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get order"
+  },
+  "description": "One order by invoice number with everything the API holds: all line items with decoration views/areas/processes, fields and sizes, team names, payments, refunds, shipments with tracking and packages, notes, taxes, store, and (optional) workflow items and purchase-order data. Status codes are spelled out. Card numbers, coupons and credential-bearing document/media links are removed. Supplier catalog tools are unavailable. GET /api/json/manage_orders/find (invoice number condition).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include_po_data": {
+     "description": "Include purchase orders linked to the workflow items (implies workflow data).",
+     "type": "boolean"
+    },
+    "include_production_file_info": {
+     "description": "Include production file format, size and offsets per decoration.",
+     "type": "boolean"
+    },
+    "include_workflow_data": {
+     "description": "Include production workflow items (what is left to produce or ship).",
+     "type": "boolean"
+    },
+    "order_id": {
+     "description": "The order's invoice number, e.g. INV1234 (this is the order id).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "order_id"
+   ],
+   "type": "object"
+  },
+  "name": "deconetwork_get_order",
+  "output_schema": {},
+  "title": "Get order"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List orders due"
+  },
+  "description": "Orders due in a date window (default: the next 7 days from today, UTC), soonest first, as compact summaries. By default cancelled, deleted and already shipped orders are left out, so the list is the work still ahead; set include_closed to see them. Use to answer 'what has to ship this week?'. GET /api/json/manage_orders/find (date due condition).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "due_from": {
+     "description": "Window start (default: today).",
+     "type": "string"
+    },
+    "due_to": {
+     "description": "Window end (default: 7 days after today).",
+     "type": "string"
+    },
+    "include_closed": {
+     "description": "Also return shipped, cancelled and deleted orders.",
+     "type": "boolean"
+    },
+    "limit": {
+     "description": "Rows per call, 1-100 (default 25).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Rows to skip (default 0). Pass the previous reply's next_offset.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "deconetwork_list_orders_due",
+  "output_schema": {},
+  "title": "List orders due"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Search orders"
+  },
+  "description": "Search DecoNetwork orders by date ordered, date due, date shipped, date invoiced or date modified (each a from/to range) and/or invoice number. Conditions are ANDed; with no filter the last 30 days of orders (by date ordered) are returned. Returns a compact summary per order: invoice number (order_id), job name, order and payment status in words, dates, amounts, billing and ship-to contact, shipping method, tracking numbers and line items. Use deconetwork_get_order for everything on one order. order_status narrows the page after it is fetched (the vendor has no documented status filter), so it must be combined with a date range or invoice number; page with next_offset. Max 100 rows per call; total and next_offset page through the rest. GET /api/json/manage_orders/find.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "due_from": {
+     "description": "Orders due on or after this UTC date.",
+     "type": "string"
+    },
+    "due_to": {
+     "description": "Orders due on or before this UTC date.",
+     "type": "string"
+    },
+    "include_shipments": {
+     "description": "Also load shipments (tracking, packages). Tracking numbers are listed either way when loaded.",
+     "type": "boolean"
+    },
+    "invoice_number": {
+     "description": "Only the order with exactly this invoice number.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "invoiced_from": {
+     "description": "Orders invoiced on or after this UTC date.",
+     "type": "string"
+    },
+    "invoiced_to": {
+     "description": "Orders invoiced on or before this UTC date.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rows per call, 1-100 (default 25).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "modified_from": {
+     "description": "Orders changed on or after this UTC date.",
+     "type": "string"
+    },
+    "modified_to": {
+     "description": "Orders changed on or before this UTC date.",
+     "type": "string"
+    },
+    "offset": {
+     "description": "Rows to skip (default 0). Pass the previous reply's next_offset.",
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "order_status": {
+     "description": "Keep only orders in these statuses (applied to the fetched page): ready for production, ready for shipping, shipped, cancelled, deleted, on hold, awaiting purchase order, awaiting stock, awaiting artwork.",
+     "items": {
+      "enum": [
+       "ready for production",
+       "ready for shipping",
+       "shipped",
+       "cancelled",
+       "deleted",
+       "on hold",
+       "awaiting purchase order",
+       "awaiting stock",
+       "awaiting artwork"
+      ],
+      "type": "string"
+     },
+     "maxItems": 10,
+     "type": "array"
+    },
+    "ordered_from": {
+     "description": "Orders placed on or after this UTC date (date ordered).",
+     "type": "string"
+    },
+    "ordered_to": {
+     "description": "Orders placed on or before this UTC date (a bare date means end of that day).",
+     "type": "string"
+    },
+    "shipped_from": {
+     "description": "Orders shipped on or after this UTC date.",
+     "type": "string"
+    },
+    "shipped_to": {
+     "description": "Orders shipped on or before this UTC date.",
+     "type": "string"
+    },
+    "sort_by": {
+     "description": "Sort field (default: production files ready).",
+     "enum": [
+      "date_ordered",
+      "production_files_ready",
+      "invoice_number",
+      "order_status",
+      "date_due",
+      "date_shipped",
+      "date_invoiced",
+      "date_modified"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "deconetwork_search_orders",
+  "output_schema": {},
+  "title": "Search orders"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Mark order produced or shipped"
+  },
+  "description": "WRITE: move a whole order, one line item or part of a line item to 'produced' or 'shipped'. Cannot be undone through the API. With new_status shipped you can store a tracking number (shipping_code). contact_customer=true makes DecoNetwork EMAIL THE CUSTOMER about the change (only when the whole order changes status); it defaults to false, so set it only when the user asked to notify the customer. Give order_line_id to change one line, plus workflow_item_id (and optionally qty) to change part of it. POST /api/json/manage_orders/update_order_status.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "contact_customer": {
+     "description": "Email the customer about this change (default false). Whole-order changes only.",
+     "type": "boolean"
+    },
+    "new_status": {
+     "description": "produced (status 2) or shipped (status 3).",
+     "enum": [
+      "produced",
+      "shipped"
+     ],
+     "type": "string"
+    },
+    "operator_login": {
+     "description": "Login of the operator to credit (default: the connected staff account).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "order_id": {
+     "description": "The order's invoice number, e.g. INV1234 (this is the order id).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "order_line_id": {
+     "description": "Only this line item (omit for the whole order).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "qty": {
+     "description": "Quantity to move; needs workflow_item_id. Default: the outstanding quantity.",
+     "exclusiveMinimum": 0,
+     "maximum": 1000000,
+     "type": "integer"
+    },
+    "shipping_code": {
+     "description": "Tracking number to store when marking shipped.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "workflow_item_id": {
+     "description": "Only this workflow item of the line (see deconetwork_get_order with include_workflow_data).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "order_id",
+    "new_status"
+   ],
+   "type": "object"
+  },
+  "name": "deconetwork_update_order_status",
+  "output_schema": {},
+  "title": "Mark order produced or shipped"
+ }
+]

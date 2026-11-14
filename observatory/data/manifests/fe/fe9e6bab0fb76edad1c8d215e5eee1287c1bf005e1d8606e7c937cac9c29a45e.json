@@ -1,0 +1,63 @@
+[
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Finds game, game studio and collection pages by matching the given text against page names. Descriptions, topics and themes lie outside its scope. Review count: 22",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "s": {
+     "description": "Full or partial name of a game, game studio or collection, at least two characters long.",
+     "maxLength": 64,
+     "minLength": 2,
+     "type": "string"
+    }
+   },
+   "required": [
+    "s"
+   ],
+   "type": "object"
+  },
+  "name": "lookup_machines",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Fetches what one page of the website shows for a given address: the facts of a single game or the page's list of games.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "Page address of this website, either complete or beginning with a slash.",
+     "maxLength": 300,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "new_games",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "The themed collections of games published on this website and the page address of every collection. Game collections: 1",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "top_slots",
+  "output_schema": {}
+ }
+]

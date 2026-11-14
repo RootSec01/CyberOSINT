@@ -1,0 +1,54 @@
+[
+ {
+  "description": "Build an UNSIGNED BNB Chain transaction to mint FairAgent NFTs (bonding curve) or the free claim. Sign and send it with your own wallet.",
+  "input_schema": {
+   "properties": {
+    "kind": {
+     "enum": [
+      "mint",
+      "claim"
+     ],
+     "type": "string"
+    },
+    "qty": {
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "ref": {
+     "description": "optional referrer address",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "fairagent_build_mint_tx",
+  "output_schema": {}
+ },
+ {
+  "description": "Read one FairAgent NFT: owner, image, traits, ERC-8004 link.",
+  "input_schema": {
+   "properties": {
+    "tokenId": {
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "tokenId"
+   ],
+   "type": "object"
+  },
+  "name": "fairagent_get_agent",
+  "output_schema": {}
+ },
+ {
+  "description": "Live FairAgent state: supply, next mint price in BNB, whether mint/claim are open, contract address.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "fairagent_info",
+  "output_schema": {}
+ }
+]

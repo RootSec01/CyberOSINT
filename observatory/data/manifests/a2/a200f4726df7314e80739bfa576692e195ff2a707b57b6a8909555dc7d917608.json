@@ -1,0 +1,509 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Look up African banks and mobile-money institutions by country (NIBSS sort codes, SWIFT/BIC, USSD) or a single bank code (e.g. 058 = GTBank).",
+  "input_schema": {
+   "properties": {
+    "code": {
+     "description": "Optional single bank code, e.g. 058.",
+     "type": "string"
+    },
+    "country": {
+     "description": "Optional ISO-2 country filter.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_african_banks",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get detailed data for one specific African exchange by ID — index value, change, trading hours, currency, and status.",
+  "input_schema": {
+   "properties": {
+    "exchange": {
+     "description": "Exchange ID. Options: nigeria, ghana, kenya, south-africa, ivory-coast, tanzania, zambia, egypt, morocco, botswana, mauritius, zimbabwe, uganda",
+     "enum": [
+      "nigeria",
+      "ghana",
+      "kenya",
+      "south-africa",
+      "ivory-coast",
+      "tanzania",
+      "zambia",
+      "egypt",
+      "morocco",
+      "botswana",
+      "mauritius",
+      "zimbabwe",
+      "uganda"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "exchange"
+   ],
+   "type": "object"
+  },
+  "name": "get_african_exchange",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the top gainers and/or losers on a specific African exchange today.",
+  "input_schema": {
+   "properties": {
+    "exchange": {
+     "description": "Exchange ID. Options: nigeria, ghana, kenya, south-africa, ivory-coast, tanzania, zambia, egypt, morocco, botswana, mauritius, zimbabwe, uganda",
+     "enum": [
+      "nigeria",
+      "ghana",
+      "kenya",
+      "south-africa",
+      "ivory-coast",
+      "tanzania",
+      "zambia",
+      "egypt",
+      "morocco",
+      "botswana",
+      "mauritius",
+      "zimbabwe",
+      "uganda"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of movers per category. Defaults to 10.",
+     "type": "number"
+    },
+    "type": {
+     "description": "Which movers to return. Defaults to both.",
+     "enum": [
+      "gainers",
+      "losers",
+      "both"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "exchange"
+   ],
+   "type": "object"
+  },
+  "name": "get_african_exchange_movers",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get stocks on a specific African exchange with prices, change percent, volume, market cap, and sector. Supports filtering and sorting.",
+  "input_schema": {
+   "properties": {
+    "exchange": {
+     "description": "Exchange ID. Options: nigeria, ghana, kenya, south-africa, ivory-coast, tanzania, zambia, egypt, morocco, botswana, mauritius, zimbabwe, uganda",
+     "enum": [
+      "nigeria",
+      "ghana",
+      "kenya",
+      "south-africa",
+      "ivory-coast",
+      "tanzania",
+      "zambia",
+      "egypt",
+      "morocco",
+      "botswana",
+      "mauritius",
+      "zimbabwe",
+      "uganda"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Number of stocks to return. Defaults to 50.",
+     "type": "number"
+    },
+    "order": {
+     "description": "Sort order. Defaults to desc.",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "sector": {
+     "description": "Filter by sector (optional).",
+     "type": "string"
+    },
+    "sort_by": {
+     "description": "Sort by: price, change_pct, volume, market_cap (optional).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "exchange"
+   ],
+   "type": "object"
+  },
+  "name": "get_african_exchange_stocks",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get a list of all African stock exchanges — NGX, GSE, NSE, JSE, BRVM, DSE, LuSE, EGX, CSE, BSE, SEM, ZSE, USE — with index levels, daily change, stocks count, and status.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_african_exchanges",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Current USD rates for ~40 African currencies, each with as-of timestamp and source.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_african_fx_rates",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get all major African market indices in one call — NGX ASI, GSE-CI, NASI, J203, BRVM-CI, LASI and more. Includes index values, daily change, and YTD performance.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_african_indices",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get current central bank policy rates and latest inflation for 18 African economies — Nigeria live from CBN — with source institution and URL per value.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_african_policy_rates",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Current government yield curve for an African country — latest T-bill/bond auction per tenor with stop rates and yields. 13 countries covered.",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "ISO-2 country code, e.g. NG, KE, GH.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country"
+   ],
+   "type": "object"
+  },
+  "name": "get_african_yield_curve",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get all macro indicators for one African country (ISO-2 code). Nigeria returns the live CBN set: MPR, T-bill, interbank, lending rates, and headline/food/core inflation.",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "ISO-2 country code, e.g. NG, KE, ZA.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country"
+   ],
+   "type": "object"
+  },
+  "name": "get_country_macro_indicators",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Monthly history for an African macro indicator. Nigeria reaches back to January 2006 (policy_rate, inflation, inflation_food, inflation_core, treasury_bill_rate and more).",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "description": "ISO-2 country code, e.g. NG.",
+     "type": "string"
+    },
+    "from": {
+     "description": "Optional start period, YYYY-MM.",
+     "type": "string"
+    },
+    "indicator": {
+     "description": "e.g. policy_rate or inflation.",
+     "type": "string"
+    },
+    "to": {
+     "description": "Optional end period, YYYY-MM.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "country",
+    "indicator"
+   ],
+   "type": "object"
+  },
+  "name": "get_macro_history",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Is an African exchange open right now? Returns reason (hours/weekend/public holiday with name), local time, session, and next open/close. Handles Sun–Thu markets and holidays.",
+  "input_schema": {
+   "properties": {
+    "exchange": {
+     "description": "Exchange code, e.g. NGX, JSE, EGX.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "exchange"
+   ],
+   "type": "object"
+  },
+  "name": "get_market_open_status",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get all 45 equities on Nigeria's NASD OTC Securities Exchange — the over-the-counter market for unlisted and growth-stage companies.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_nasd_stocks",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the full list of all 148+ equities listed on the NGX with current prices, daily change percent, volume, market cap, and sector.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_ngx_all_stocks",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the latest 200 corporate disclosures and regulatory announcements from NGX-listed companies — earnings, dividends, board changes, and filings.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_ngx_disclosures",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get a real-time overview of the Nigerian Stock Exchange (NGX). Returns the All Share Index (ASI), market capitalisation, trading volume, deals, advancers, and decliners. Use this when the user asks about the Nigerian stock market at a high level.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_ngx_market_overview",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Check whether the Nigerian Stock Exchange (NGX) is currently open or closed. Returns OPEN, CLOSED, or ENDOFDAY.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_ngx_market_status",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the latest price and trading history for a specific NGX-listed stock by ticker symbol (e.g. DANGCEM, GTCO, MTNN, ZENITHBANK, ACCESSCORP). Use this when the user asks about the price of a particular Nigerian stock.",
+  "input_schema": {
+   "properties": {
+    "symbol": {
+     "description": "NGX ticker symbol (e.g. DANGCEM, GTCO, MTNN). Case-insensitive.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "symbol"
+   ],
+   "type": "object"
+  },
+  "name": "get_ngx_stock_price",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the top gaining stocks on the NGX today, ranked by percentage price increase. Use this when the user asks which Nigerian stocks are up the most today.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Number of top gainers to return. Defaults to 10.",
+     "type": "number"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_ngx_top_gainers",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the top losing stocks on the NGX today, ranked by percentage price decline. Use this when the user asks which Nigerian stocks are down the most today.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Number of top losers to return. Defaults to 10.",
+     "type": "number"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_ngx_top_losers",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the biggest stock movers across ALL African exchanges combined — top gainers and losers by % change from every covered market today.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "description": "Number of movers per category. Defaults to 10.",
+     "type": "number"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_pan_african_movers",
+  "output_schema": {}
+ }
+]

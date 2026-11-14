@@ -1,0 +1,2177 @@
+[
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get hotel details"
+  },
+  "description": "Use this when someone asks about one hotel's setup, such as its default check-in and check-out times, currency, country or timezone. Returns the hotel's name, currency, language, timezone, country code and default check-in and check-out times, or not-found. Not for room availability or prices.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotelId": {
+     "description": "Hotel id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "hotelId"
+   ],
+   "type": "object"
+  },
+  "name": "get_hotel",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotel": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "checkInDefaultTime": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        },
+        "checkOutDefaultTime": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        },
+        "countryCode": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        },
+        "currency": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        },
+        "id": {
+         "pattern": "^[0-9a-f]{24}$",
+         "type": "string"
+        },
+        "lastEditTime": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        },
+        "locale": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        },
+        "name": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "timezone": {
+         "$ref": "#/properties/hotel/anyOf/0/properties/name"
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "currency",
+        "locale",
+        "timezone",
+        "countryCode",
+        "checkInDefaultTime",
+        "checkOutDefaultTime",
+        "lastEditTime"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Operational hotel metadata; null when not found. Contact details, addresses, integrations, credentials, payment configuration, reminders and guest data are never returned."
+    },
+    "status": {
+     "enum": [
+      "found",
+      "not-found"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "hotel"
+   ],
+   "type": "object"
+  },
+  "title": "Get hotel details"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check room availability and prices"
+  },
+  "description": "Use this when someone asks if rooms are free for certain dates or what a stay would cost. Returns the room types and rate plans with a free room every night for the party, with rooms left and nightly and total prices in minor currency units. Stays of 1–30 nights, check-in within 365 days. Not for making a booking.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "adults": {
+     "description": "Adults staying, from 1 to 20; defaults to 2",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "checkInDate": {
+     "description": "Arrival date as YYYY-MM-DD, from today to 365 days ahead in the hotel's timezone",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "checkOutDate": {
+     "description": "Departure date as YYYY-MM-DD, 1 to 30 nights after checkInDate",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "children": {
+     "description": "Children staying, from 0 to 20; defaults to 0",
+     "maximum": 20,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "hotelId": {
+     "description": "Hotel id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "infants": {
+     "description": "Infants staying, from 0 to 20; defaults to 0",
+     "maximum": 20,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "hotelId",
+    "checkInDate",
+    "checkOutDate"
+   ],
+   "type": "object"
+  },
+  "name": "get_hotel_availability",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "offers": {
+     "description": "One row per bookable room type and rate plan with a free room every night. Amounts are integer minor currency units (12000 is 120.00 in a two-decimal currency). Guest records, reservations, room assignments, access data, notes, payments, channel references, photos, free-text descriptions and credentials are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "availableRooms": {
+        "anyOf": [
+         {
+          "maximum": 100000,
+          "minimum": 0,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "currency": {
+        "$ref": "#/properties/offers/items/properties/roomTypeName"
+       },
+       "mealPlan": {
+        "$ref": "#/properties/offers/items/properties/roomTypeName"
+       },
+       "nightlyRate": {
+        "anyOf": [
+         {
+          "maximum": 1000000000000,
+          "minimum": 0,
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "nightlyRates": {
+        "items": {
+         "additionalProperties": false,
+         "properties": {
+          "date": {
+           "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+           "type": "string"
+          },
+          "price": {
+           "$ref": "#/properties/offers/items/properties/nightlyRate"
+          }
+         },
+         "required": [
+          "date",
+          "price"
+         ],
+         "type": "object"
+        },
+        "maxItems": 30,
+        "type": "array"
+       },
+       "ratePlanId": {
+        "$ref": "#/properties/offers/items/properties/roomTypeId"
+       },
+       "ratePlanTitle": {
+        "$ref": "#/properties/offers/items/properties/roomTypeName"
+       },
+       "roomTypeId": {
+        "anyOf": [
+         {
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "roomTypeName": {
+        "anyOf": [
+         {
+          "maxLength": 200,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "sellMode": {
+        "$ref": "#/properties/offers/items/properties/roomTypeName"
+       },
+       "totalPrice": {
+        "$ref": "#/properties/offers/items/properties/nightlyRate"
+       }
+      },
+      "required": [
+       "roomTypeId",
+       "roomTypeName",
+       "ratePlanId",
+       "ratePlanTitle",
+       "mealPlan",
+       "sellMode",
+       "availableRooms",
+       "nightlyRate",
+       "totalPrice",
+       "currency",
+       "nightlyRates"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    },
+    "offersAreTruncated": {
+     "description": "True when more than 100 offers matched the search",
+     "type": "boolean"
+    },
+    "search": {
+     "additionalProperties": false,
+     "properties": {
+      "adults": {
+       "maximum": 20,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "checkInDate": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      },
+      "checkOutDate": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      },
+      "children": {
+       "maximum": 20,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "infants": {
+       "maximum": 20,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "nights": {
+       "maximum": 30,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "checkInDate",
+      "checkOutDate",
+      "nights",
+      "adults",
+      "children",
+      "infants"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "search",
+    "offers",
+    "offersAreTruncated"
+   ],
+   "type": "object"
+  },
+  "title": "Check room availability and prices"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://hotelumo/schedule-summary-v1.html",
+   "openai/toolInvocation/invoked": "Hotelumo schedule summary ready.",
+   "openai/toolInvocation/invoking": "Counting Hotelumo stays…",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ],
+   "ui": {
+    "resourceUri": "ui://hotelumo/schedule-summary-v1.html"
+   },
+   "ui/resourceUri": "ui://hotelumo/schedule-summary-v1.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Count arrivals, departures and stays"
+  },
+  "description": "Use this when someone asks how busy the hotel is, or how many arrivals, departures or in-house stays fall on each day. Returns daily counts of confirmed, checked-in and checked-out stays plus reservation totals by status, for 7 days from today by default and at most 31 days; counting stops at 500. Not for looking up a guest or reservation.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "dateFrom": {
+     "description": "First day as YYYY-MM-DD (inclusive); defaults to today in UTC",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "dateTo": {
+     "description": "Last day as YYYY-MM-DD (inclusive), at most 31 days in total; defaults to six days after dateFrom",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "hotelId": {
+     "description": "Hotel id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "hotelId"
+   ],
+   "type": "object"
+  },
+  "name": "get_hotel_schedule_summary",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "description": "One row per day. arrivals, departures and inHouseReservations count confirmed, checked-in and checked-out stays; a stay is not in-house on its checkout day. Reservation or allocation identifiers, individual stay records, guest data, room assignments, notes, documents, payments, access data, channel references and credentials are never returned.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "arrivals": {
+        "maximum": 500,
+        "minimum": 0,
+        "type": "integer"
+       },
+       "day": {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       "departures": {
+        "maximum": 500,
+        "minimum": 0,
+        "type": "integer"
+       },
+       "inHouseReservations": {
+        "maximum": 500,
+        "minimum": 0,
+        "type": "integer"
+       }
+      },
+      "required": [
+       "day",
+       "arrivals",
+       "departures",
+       "inHouseReservations"
+      ],
+      "type": "object"
+     },
+     "maxItems": 31,
+     "type": "array"
+    },
+    "hotel": {
+     "additionalProperties": false,
+     "properties": {
+      "id": {
+       "pattern": "^[0-9a-f]{24}$",
+       "type": "string"
+      },
+      "name": {
+       "anyOf": [
+        {
+         "maxLength": 200,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "timezone": {
+       "$ref": "#/properties/hotel/properties/name"
+      }
+     },
+     "required": [
+      "id",
+      "name",
+      "timezone"
+     ],
+     "type": "object"
+    },
+    "range": {
+     "additionalProperties": false,
+     "properties": {
+      "dateFrom": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      },
+      "dateTo": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      }
+     },
+     "required": [
+      "dateFrom",
+      "dateTo"
+     ],
+     "type": "object"
+    },
+    "reservationCount": {
+     "maximum": 500,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "reservationCountIsLowerBound": {
+     "description": "True when more than 500 reservations overlap the range",
+     "type": "boolean"
+    },
+    "statusCounts": {
+     "additionalProperties": {
+      "maximum": 500,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "description": "Reservations overlapping the range by status, inquiries, requests, no-shows and cancellations included",
+     "propertyNames": {
+      "enum": [
+       "INQUIRY",
+       "REQUESTED",
+       "CONFIRMED",
+       "CHECKED_IN",
+       "CHECKED_OUT",
+       "NO_SHOW",
+       "CANCELED",
+       "UNSPECIFIED"
+      ]
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "hotel",
+    "range",
+    "reservationCount",
+    "reservationCountIsLowerBound",
+    "statusCounts",
+    "days"
+   ],
+   "type": "object"
+  },
+  "title": "Count arrivals, departures and stays"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get room type details"
+  },
+  "description": "Use this when someone asks about one room type, such as its name or how many guests it sleeps. Returns the room type's name, hotel and maximum guests, or not-found. Not for its prices or free dates.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "roomTypeId": {
+     "description": "Room type id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "roomTypeId"
+   ],
+   "type": "object"
+  },
+  "name": "get_room_type",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "roomType": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "hotelId": {
+         "anyOf": [
+          {
+           "pattern": "^[0-9a-f]{24}$",
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "id": {
+         "pattern": "^[0-9a-f]{24}$",
+         "type": "string"
+        },
+        "lastEditTime": {
+         "$ref": "#/properties/roomType/anyOf/0/properties/name"
+        },
+        "maxGuests": {
+         "anyOf": [
+          {
+           "maximum": 100,
+           "minimum": 0,
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "name": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "id",
+        "hotelId",
+        "name",
+        "maxGuests",
+        "lastEditTime"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Null when not found. Free-text descriptions, facilities, photos, channel mappings, integrations, credentials and arbitrary metadata are never returned."
+    },
+    "status": {
+     "enum": [
+      "found",
+      "not-found"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "roomType"
+   ],
+   "type": "object"
+  },
+  "title": "Get room type details"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Show daily prices and restrictions"
+  },
+  "description": "Use this when someone asks what a rate costs on specific nights, or about minimum stays, stop-sell or closed-to-arrival dates. Returns the stored per-day price and restrictions of one rate plan over up to 90 days; days without a row use the plan's base price. Not for whether rooms are free.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "dateFrom": {
+     "description": "First night as YYYY-MM-DD (inclusive)",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "dateTo": {
+     "description": "Last night as YYYY-MM-DD (inclusive); the range covers at most 90 days",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "hotelId": {
+     "description": "Hotel id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "ratePlanId": {
+     "description": "Rate plan id, belonging to hotelId: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "hotelId",
+    "ratePlanId",
+    "dateFrom",
+    "dateTo"
+   ],
+   "type": "object"
+  },
+  "name": "list_daily_rates",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "dailyRates": {
+     "description": "Stored per-day rows sorted by date; a date without a row sells at the plan's base price. price is in integer minor currency units. Guest, payment, channel, credential and arbitrary metadata are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "closedToArrival": {
+        "type": "boolean"
+       },
+       "closedToDeparture": {
+        "type": "boolean"
+       },
+       "date": {
+        "anyOf": [
+         {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "minStay": {
+        "anyOf": [
+         {
+          "maximum": 365,
+          "minimum": 0,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "price": {
+        "anyOf": [
+         {
+          "maximum": 1000000000000,
+          "minimum": 0,
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "ratePlanId": {
+        "anyOf": [
+         {
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "stopSell": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "ratePlanId",
+       "date",
+       "price",
+       "minStay",
+       "closedToArrival",
+       "closedToDeparture",
+       "stopSell"
+      ],
+      "type": "object"
+     },
+     "maxItems": 90,
+     "type": "array"
+    },
+    "status": {
+     "enum": [
+      "found",
+      "not-found"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "dailyRates"
+   ],
+   "type": "object"
+  },
+  "title": "Show daily prices and restrictions"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List extras and add-ons"
+  },
+  "description": "Use this when someone asks what extras a hotel sells, such as breakfast, parking, spa, transfers or fees, and what they cost. Returns each active extra's name, price in minor currency units, currency, category and taxable flag, 20 per page by default. Not for what a guest bought or was charged.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotelId": {
+     "description": "Only this hotel (24 lowercase hexadecimal characters); every hotel when absent",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Extras per page, from 1 to 100; defaults to 20",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Extras to skip, from 0 to 10000; defaults to 0. For the next page pass offset + limit",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_extras",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "extras": {
+     "description": "Active extras; price is in integer minor currency units. Guest charges, folio data, display colors and credentials are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "category": {
+        "anyOf": [
+         {
+          "$ref": "#/properties/extras/items/properties/name/anyOf/0"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "BREAKFAST, PARKING, SPA, TRANSFER, FEE or OTHER"
+       },
+       "currency": {
+        "$ref": "#/properties/extras/items/properties/name"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "maxLength": 200,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "price": {
+        "anyOf": [
+         {
+          "maximum": 1000000000000,
+          "minimum": 0,
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "taxable": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "name",
+       "price",
+       "currency",
+       "taxable",
+       "category"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    },
+    "page": {
+     "additionalProperties": false,
+     "description": "hasMore is true when another page exists; request it with offset + limit",
+     "properties": {
+      "hasMore": {
+       "type": "boolean"
+      },
+      "limit": {
+       "exclusiveMinimum": 0,
+       "maximum": 100,
+       "type": "integer"
+      },
+      "offset": {
+       "maximum": 10000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "returned": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "limit",
+      "offset",
+      "returned",
+      "hasMore"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "extras",
+    "page"
+   ],
+   "type": "object"
+  },
+  "title": "List extras and add-ons"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List your hotels"
+  },
+  "description": "Use this when someone asks which hotels or properties they manage in Hotelumo, or a hotel's id is needed. Returns each hotel's id, name, currency, language and timezone, 20 per page by default (no addresses or guest data). Not for room availability.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "description": "Hotels per page, from 1 to 100; defaults to 20",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Hotels to skip, from 0 to 10000; defaults to 0. For the next page pass offset + limit",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_hotels",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotels": {
+     "description": "Hotels in the signed-in organization. Addresses, phone numbers, channel credentials, payment configuration, reminder configuration and guest data are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "currency": {
+        "$ref": "#/properties/hotels/items/properties/name"
+       },
+       "id": {
+        "pattern": "^[0-9a-f]{24}$",
+        "type": "string"
+       },
+       "lastEditTime": {
+        "$ref": "#/properties/hotels/items/properties/name"
+       },
+       "locale": {
+        "$ref": "#/properties/hotels/items/properties/name"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "maxLength": 200,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "timezone": {
+        "$ref": "#/properties/hotels/items/properties/name"
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "currency",
+       "locale",
+       "timezone",
+       "lastEditTime"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    },
+    "page": {
+     "additionalProperties": false,
+     "description": "hasMore is true when another page exists; request it with offset + limit",
+     "properties": {
+      "hasMore": {
+       "type": "boolean"
+      },
+      "limit": {
+       "exclusiveMinimum": 0,
+       "maximum": 100,
+       "type": "integer"
+      },
+      "offset": {
+       "maximum": 10000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "returned": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "limit",
+      "offset",
+      "returned",
+      "hasMore"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "hotels",
+    "page"
+   ],
+   "type": "object"
+  },
+  "title": "List your hotels"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check hotel stock"
+  },
+  "description": "Use this when someone asks how many towels, sheets, toiletries or other supplies the hotel has left in stock, or what is running low. Returns up to 100 stock items with unit, quantity, minimum and a low-stock flag. Not for rooms available to book.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotelId": {
+     "description": "Id of the hotel, from list_hotels. Leave it out when the account has one hotel.",
+     "maxLength": 24,
+     "minLength": 24,
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Maximum number of items (default 50, maximum 100).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "lowStockOnly": {
+     "description": "Only items at or below their minimum quantity.",
+     "type": "boolean"
+    },
+    "search": {
+     "description": "Only items whose name contains these words.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_inventory_items",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "maximum": 100000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "hasMore": {
+     "type": "boolean"
+    },
+    "hotelId": {
+     "maxLength": 24,
+     "minLength": 24,
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "items": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "hotelId": {
+        "anyOf": [
+         {
+          "maxLength": 24,
+          "minLength": 24,
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "id": {
+        "anyOf": [
+         {
+          "maxLength": 24,
+          "minLength": 24,
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "lastEditTime": {
+        "anyOf": [
+         {
+          "maxLength": 40,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "lowStock": {
+        "type": "boolean"
+       },
+       "minimumQuantity": {
+        "anyOf": [
+         {
+          "maximum": 1000000000,
+          "minimum": 0,
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "name": {
+        "maxLength": 200,
+        "type": "string"
+       },
+       "quantity": {
+        "anyOf": [
+         {
+          "maximum": 1000000000,
+          "minimum": 0,
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "unit": {
+        "anyOf": [
+         {
+          "maxLength": 40,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      },
+      "required": [
+       "id",
+       "name",
+       "unit",
+       "quantity",
+       "minimumQuantity",
+       "lowStock",
+       "hotelId",
+       "lastEditTime"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    }
+   },
+   "required": [
+    "hotelId",
+    "items",
+    "count",
+    "hasMore"
+   ],
+   "type": "object"
+  },
+  "title": "Check hotel stock"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List rate plans and base prices"
+  },
+  "description": "Use this when someone asks what rate plans a hotel sells, such as room-only or breakfast-included rates, and their base prices. Returns each plan's title, room type, base price in minor currency units, meal plan, per-room or per-person pricing and default flag, 20 per page by default. Not for prices on specific dates.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotelId": {
+     "description": "Hotel id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rate plans per page, from 1 to 100; defaults to 20",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Rate plans to skip, from 0 to 10000; defaults to 0. For the next page pass offset + limit",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "roomTypeId": {
+     "description": "Only this room type (24 lowercase hexadecimal characters)",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "hotelId"
+   ],
+   "type": "object"
+  },
+  "name": "list_rate_plans",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "additionalProperties": false,
+     "description": "hasMore is true when another page exists; request it with offset + limit",
+     "properties": {
+      "hasMore": {
+       "type": "boolean"
+      },
+      "limit": {
+       "exclusiveMinimum": 0,
+       "maximum": 100,
+       "type": "integer"
+      },
+      "offset": {
+       "maximum": 10000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "returned": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "limit",
+      "offset",
+      "returned",
+      "hasMore"
+     ],
+     "type": "object"
+    },
+    "ratePlans": {
+     "description": "basePrice is in integer minor currency units. Channel-manager mappings, integration metadata and credentials are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "basePrice": {
+        "anyOf": [
+         {
+          "maximum": 1000000000000,
+          "minimum": 0,
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "currency": {
+        "$ref": "#/properties/ratePlans/items/properties/title"
+       },
+       "id": {
+        "pattern": "^[0-9a-f]{24}$",
+        "type": "string"
+       },
+       "isDefault": {
+        "type": "boolean"
+       },
+       "mealPlan": {
+        "$ref": "#/properties/ratePlans/items/properties/title"
+       },
+       "rateMode": {
+        "anyOf": [
+         {
+          "$ref": "#/properties/ratePlans/items/properties/title/anyOf/0"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "manual or derived"
+       },
+       "roomTypeId": {
+        "anyOf": [
+         {
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "sellMode": {
+        "$ref": "#/properties/ratePlans/items/properties/title"
+       },
+       "title": {
+        "anyOf": [
+         {
+          "maxLength": 200,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      },
+      "required": [
+       "id",
+       "roomTypeId",
+       "title",
+       "basePrice",
+       "currency",
+       "mealPlan",
+       "sellMode",
+       "rateMode",
+       "isDefault"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    }
+   },
+   "required": [
+    "ratePlans",
+    "page"
+   ],
+   "type": "object"
+  },
+  "title": "List rate plans and base prices"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List room types"
+  },
+  "description": "Use this when someone asks what kinds of rooms a hotel offers or how many guests each room type sleeps. Returns each room type's id, hotel, name and maximum guests, sorted by name, 20 per page by default. Not for whether a room type is free on given dates.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotelId": {
+     "description": "Only this hotel (24 lowercase hexadecimal characters); every hotel when absent",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Room types per page, from 1 to 100; defaults to 20",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Room types to skip, from 0 to 10000; defaults to 0. For the next page pass offset + limit",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_room_types",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "additionalProperties": false,
+     "description": "hasMore is true when another page exists; request it with offset + limit",
+     "properties": {
+      "hasMore": {
+       "type": "boolean"
+      },
+      "limit": {
+       "exclusiveMinimum": 0,
+       "maximum": 100,
+       "type": "integer"
+      },
+      "offset": {
+       "maximum": 10000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "returned": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "limit",
+      "offset",
+      "returned",
+      "hasMore"
+     ],
+     "type": "object"
+    },
+    "roomTypes": {
+     "description": "Room types sorted by name. Photos, public descriptions, rate-plan internals, channel mappings and credentials are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "hotelId": {
+        "anyOf": [
+         {
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "id": {
+        "pattern": "^[0-9a-f]{24}$",
+        "type": "string"
+       },
+       "lastEditTime": {
+        "$ref": "#/properties/roomTypes/items/properties/name"
+       },
+       "maxGuests": {
+        "anyOf": [
+         {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "name": {
+        "anyOf": [
+         {
+          "maxLength": 200,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       }
+      },
+      "required": [
+       "id",
+       "hotelId",
+       "name",
+       "maxGuests",
+       "lastEditTime"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    }
+   },
+   "required": [
+    "roomTypes",
+    "page"
+   ],
+   "type": "object"
+  },
+  "title": "List room types"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check room and housekeeping status"
+  },
+  "description": "Use this when someone asks which rooms are clean, dirty or inspected, or which are out of order or out of service. Returns each physical room's name or number, room type and hotel with its room and housekeeping status, 20 per page by default (no guest or occupant data). Not for which rooms are free on given dates.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "hotelId": {
+     "description": "Only this hotel (24 lowercase hexadecimal characters); every hotel when absent",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rooms per page, from 1 to 100; defaults to 20",
+     "exclusiveMinimum": 0,
+     "maximum": 100,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Rooms to skip, from 0 to 10000; defaults to 0. For the next page pass offset + limit",
+     "maximum": 10000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "roomTypeId": {
+     "description": "Only this room type (24 lowercase hexadecimal characters)",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_rooms",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "additionalProperties": false,
+     "description": "hasMore is true when another page exists; request it with offset + limit",
+     "properties": {
+      "hasMore": {
+       "type": "boolean"
+      },
+      "limit": {
+       "exclusiveMinimum": 0,
+       "maximum": 100,
+       "type": "integer"
+      },
+      "offset": {
+       "maximum": 10000,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "returned": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "limit",
+      "offset",
+      "returned",
+      "hasMore"
+     ],
+     "type": "object"
+    },
+    "rooms": {
+     "description": "Physical rooms sorted by name. Internal room ids, reservation, occupant, guest, access-control and channel data are excluded.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "hotelId": {
+        "anyOf": [
+         {
+          "pattern": "^[0-9a-f]{24}$",
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "housekeepingStatus": {
+        "anyOf": [
+         {
+          "$ref": "#/properties/rooms/items/properties/name/anyOf/0"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "CLEAN, DIRTY or INSPECTED"
+       },
+       "lastEditTime": {
+        "$ref": "#/properties/rooms/items/properties/name"
+       },
+       "name": {
+        "anyOf": [
+         {
+          "maxLength": 200,
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "roomTypeId": {
+        "$ref": "#/properties/rooms/items/properties/hotelId"
+       },
+       "status": {
+        "anyOf": [
+         {
+          "$ref": "#/properties/rooms/items/properties/name/anyOf/0"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "AVAILABLE (in service, not a statement about occupancy), OUT_OF_ORDER or OUT_OF_SERVICE"
+       }
+      },
+      "required": [
+       "hotelId",
+       "roomTypeId",
+       "name",
+       "status",
+       "housekeepingStatus",
+       "lastEditTime"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "type": "array"
+    }
+   },
+   "required": [
+    "rooms",
+    "page"
+   ],
+   "type": "object"
+  },
+  "title": "Check room and housekeeping status"
+ },
+ {
+  "_meta": {
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:write"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Update a stock quantity"
+  },
+  "description": "Use this when someone asks to correct or update how much of a supply the hotel has in stock, such as after counting towels or receiving a delivery. Returns the item with its previous and new quantity; the number given replaces the stored one. Not for adding a new stock item.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "expectedLastEditTime": {
+     "description": "The lastEditTime from list_inventory_items. An item changed since then is refused.",
+     "format": "date-time",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "inventoryItemId": {
+     "description": "Id of the stock item, from list_inventory_items.",
+     "maxLength": 24,
+     "minLength": 24,
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "quantity": {
+     "description": "The quantity now in stock, in the item unit. It replaces the stored quantity; work out the total first when the user gives a change.",
+     "maximum": 1000000000,
+     "minimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "inventoryItemId",
+    "quantity",
+    "expectedLastEditTime"
+   ],
+   "type": "object"
+  },
+  "name": "set_inventory_quantity",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "item": {
+     "additionalProperties": false,
+     "properties": {
+      "hotelId": {
+       "anyOf": [
+        {
+         "maxLength": 24,
+         "minLength": 24,
+         "pattern": "^[0-9a-f]{24}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "id": {
+       "anyOf": [
+        {
+         "maxLength": 24,
+         "minLength": 24,
+         "pattern": "^[0-9a-f]{24}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "lastEditTime": {
+       "anyOf": [
+        {
+         "maxLength": 40,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "lowStock": {
+       "type": "boolean"
+      },
+      "minimumQuantity": {
+       "anyOf": [
+        {
+         "maximum": 1000000000,
+         "minimum": 0,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "name": {
+       "maxLength": 200,
+       "type": "string"
+      },
+      "quantity": {
+       "anyOf": [
+        {
+         "maximum": 1000000000,
+         "minimum": 0,
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      },
+      "unit": {
+       "anyOf": [
+        {
+         "maxLength": 40,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ]
+      }
+     },
+     "required": [
+      "id",
+      "name",
+      "unit",
+      "quantity",
+      "minimumQuantity",
+      "lowStock",
+      "hotelId",
+      "lastEditTime"
+     ],
+     "type": "object"
+    },
+    "previousQuantity": {
+     "anyOf": [
+      {
+       "maximum": 1000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "status": {
+     "enum": [
+      "updated"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "status",
+    "previousQuantity",
+    "item"
+   ],
+   "type": "object"
+  },
+  "title": "Update a stock quantity"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://hotelumo/hotel-overview-v1.html",
+   "openai/toolInvocation/invoked": "Hotelumo overview ready.",
+   "openai/toolInvocation/invoking": "Loading Hotelumo operations…",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hotelumo:read"
+     ],
+     "type": "oauth2"
+    }
+   ],
+   "ui": {
+    "resourceUri": "ui://hotelumo/hotel-overview-v1.html"
+   },
+   "ui/resourceUri": "ui://hotelumo/hotel-overview-v1.html"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Show hotel operations overview"
+  },
+  "description": "Use this when someone wants a quick overview or dashboard of one hotel's operations. Returns an overview card with the hotel's details, reservation status counts for the next 7 days, and room, room-type, room-status and housekeeping counts from bounded samples (no guest, stay or payment data). Not for a single reservation.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "hotelId": {
+     "description": "Hotel id: 24 lowercase hexadecimal characters",
+     "pattern": "^[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "hotelId"
+   ],
+   "type": "object"
+  },
+  "name": "show_hotel_overview",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "hotel": {
+     "anyOf": [
+      {
+       "additionalProperties": false,
+       "properties": {
+        "currency": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "id": {
+         "pattern": "^[0-9a-f]{24}$",
+         "type": "string"
+        },
+        "locale": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "name": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "timezone": {
+         "anyOf": [
+          {
+           "maxLength": 200,
+           "type": "string"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        }
+       },
+       "required": [
+        "id",
+        "name",
+        "currency",
+        "locale",
+        "timezone"
+       ],
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Null when not found. Guest identities, contact details, reservation or allocation identifiers, individual stay records, notes, documents, occupant ids, payments, access data, integration configuration, credentials and arbitrary metadata are excluded."
+    },
+    "housekeepingStatusCounts": {
+     "additionalProperties": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "propertyNames": {
+      "enum": [
+       "CLEAN",
+       "DIRTY",
+       "INSPECTED",
+       "UNSPECIFIED"
+      ],
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "reservationStatusCounts": {
+     "additionalProperties": {
+      "maximum": 50,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "propertyNames": {
+      "enum": [
+       "INQUIRY",
+       "REQUESTED",
+       "CONFIRMED",
+       "CHECKED_IN",
+       "CHECKED_OUT",
+       "NO_SHOW",
+       "CANCELED",
+       "UNSPECIFIED"
+      ],
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "reservations": {
+     "additionalProperties": false,
+     "description": "Reservations overlapping the next seven UTC days, any status, sampled up to 50; hasMore marks a lower bound",
+     "properties": {
+      "count": {
+       "maximum": 50,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "hasMore": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "count",
+      "hasMore"
+     ],
+     "type": "object"
+    },
+    "roomStatusCounts": {
+     "additionalProperties": {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer"
+     },
+     "propertyNames": {
+      "enum": [
+       "AVAILABLE",
+       "OUT_OF_ORDER",
+       "OUT_OF_SERVICE",
+       "UNSPECIFIED"
+      ],
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "roomTypes": {
+     "additionalProperties": false,
+     "description": "Room types, sampled up to 50; hasMore marks a lower bound",
+     "properties": {
+      "count": {
+       "maximum": 50,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "hasMore": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "count",
+      "hasMore"
+     ],
+     "type": "object"
+    },
+    "rooms": {
+     "additionalProperties": false,
+     "description": "Physical rooms, sampled up to 100; hasMore marks a lower bound",
+     "properties": {
+      "count": {
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "hasMore": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "count",
+      "hasMore"
+     ],
+     "type": "object"
+    },
+    "scheduleRange": {
+     "additionalProperties": false,
+     "properties": {
+      "dateFrom": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      },
+      "dateTo": {
+       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+       "type": "string"
+      }
+     },
+     "required": [
+      "dateFrom",
+      "dateTo"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "hotel",
+    "scheduleRange",
+    "reservations",
+    "rooms",
+    "roomTypes",
+    "reservationStatusCounts",
+    "roomStatusCounts",
+    "housekeepingStatusCounts"
+   ],
+   "type": "object"
+  },
+  "title": "Show hotel operations overview"
+ }
+]

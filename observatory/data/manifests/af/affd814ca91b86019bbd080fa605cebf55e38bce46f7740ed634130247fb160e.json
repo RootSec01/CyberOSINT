@@ -1,0 +1,148 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List calculators"
+  },
+  "description": "List every calculator with its id, modes and input fields. Pass calculator=<id> to also get field hints and an example input. Call this before run_calculator.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "calculator": {
+     "description": "Optional: only show this calculator id.",
+     "type": "string"
+    },
+    "language": {
+     "default": "nl",
+     "description": "Language of the steps: nl (Dutch, default) or en (English).",
+     "enum": [
+      "nl",
+      "en"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_calculators",
+  "output_schema": {},
+  "title": "List calculators"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Run a calculator"
+  },
+  "description": "Run one calculator (ids from list_calculators) with explicit inputs and return the answer with worked steps. Field types: number (JSON number, or a string such as '2,5' or '-3'), fraction ({\"n\":3,\"d\":4} or '3/4'), list (array of numbers or '4; 7; 9'), text (a formula string such as 'x^3 - 2x'). Calculators with units accept inputs.unit (e.g. 'cm').",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "calculator": {
+     "description": "Calculator id.",
+     "enum": [
+      "abc",
+      "linear",
+      "stelsel",
+      "ongelijkheid",
+      "haakjes",
+      "rc",
+      "formule",
+      "percentage",
+      "breuken",
+      "verhoudingen",
+      "schaal",
+      "ggd",
+      "rest",
+      "afronden",
+      "machten",
+      "wortel",
+      "logaritme",
+      "notatie",
+      "machtsfunctie",
+      "groei",
+      "afgeleide",
+      "pythagoras",
+      "goniometrie",
+      "driehoek",
+      "sinusformule",
+      "oppervlakte",
+      "volume",
+      "cilinder",
+      "gemiddelde",
+      "standaardafwijking",
+      "normaal"
+     ],
+     "type": "string"
+    },
+    "inputs": {
+     "additionalProperties": true,
+     "description": "Field id → value.",
+     "type": "object"
+    },
+    "language": {
+     "default": "nl",
+     "description": "Language of the steps: nl (Dutch, default) or en (English).",
+     "enum": [
+      "nl",
+      "en"
+     ],
+     "type": "string"
+    },
+    "mode": {
+     "description": "Mode id of that calculator (see list_calculators). Defaults to the first mode.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "calculator",
+    "inputs"
+   ],
+   "type": "object"
+  },
+  "name": "run_calculator",
+  "output_schema": {},
+  "title": "Run a calculator"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Solve a maths question"
+  },
+  "description": "Solve a short maths question written in Dutch or English and return the answer with worked steps. Understands quadratic and linear equations, percentages, fractions, Pythagoras, derivatives, exponential growth, normal distribution, GCD/LCM, division with remainder, scale and plain arithmetic (e.g. '2^10 + sqrt(16)'). If the question is not understood, it says so and suggests the closest topics; it never guesses.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "language": {
+     "default": "nl",
+     "description": "Language of the steps: nl (Dutch, default) or en (English).",
+     "enum": [
+      "nl",
+      "en"
+     ],
+     "type": "string"
+    },
+    "question": {
+     "description": "The question, e.g. 'los op 2x + 3 = 11' or 'what is 15% of 80'.",
+     "maxLength": 240,
+     "type": "string"
+    }
+   },
+   "required": [
+    "question"
+   ],
+   "type": "object"
+  },
+  "name": "solve_math_question",
+  "output_schema": {},
+  "title": "Solve a maths question"
+ }
+]

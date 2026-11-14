@@ -1,0 +1,2250 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Add ingredient to recipe"
+  },
+  "description": "WRITE: add an ingredient line to a recipe, by unit and quantity (the unit must be one the ingredient offers, e.g. \"1 cup\" or \"1 gram\"; see units_and_grams from recipal_get_recipe_ingredient or valid_units from recipal_get_ingredient) or directly by total_grams (overrides unit and quantity). Changes the recipe's nutrition, label and cost. POST /recipes/{id}/recipe_ingredients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ingredient_id": {
+     "description": "Ingredient to add.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "quantity": {
+     "description": "Amount of the unit (default 1).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "total_grams": {
+     "description": "Weight in grams; overrides unit and quantity.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "unit": {
+     "description": "Unit of the ingredient (default: its first unit).",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "waste": {
+     "description": "Percent of the ingredient that does not go into the product (0-100). Costed in full, excluded from nutrition.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "recipe_id",
+    "ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_add_recipe_ingredient",
+  "output_schema": {},
+  "title": "Add ingredient to recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create ingredient"
+  },
+  "description": "WRITE: create a custom ingredient (private to your account) with its nutrition facts. For a food ingredient give nutrition_unit and nutrition_quantity (the serving the nutrients are entered for, e.g. 1 cup; for units beyond gram/oz/lb/kg add them in measures first) and all required nutrients. food and non_food cannot be changed later. Non-food items: set food=false and non_food to labor, packaging, safety, other_hourly or other_fixed. POST /ingredients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "allergens": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+       }
+      ]
+     },
+     "description": "Allergens by name, e.g. {\"Milk\": true, \"Almond\": true, \"other-shellfish\": \"Oyster\"}. Standard names: Wheat, Peanuts, Soy, Sesame, Mustard, Sulfites, Milk (Goat milk, Sheep milk), Egg (Duck egg, Quail egg), Fish (Tuna, Cod, Salmon, Bass), Shellfish (Crab, Lobster, Shrimp), tree nuts (Almond, Cashew, Hazelnut, Macadamia nut, Pecan, Pine nut, Pistachio, Walnut ...), Gluten (Barley, Oats, Rye, Triticale). other-milk/-egg/-fish/-shellfish/-treenut take a free-text source. An empty object {} clears all allergens.",
+     "propertyNames": {
+      "maxLength": 60,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "brand": {
+     "description": "Brand name, mainly to verify data.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "food": {
+     "description": "true (default) for a food ingredient; false for a non-food item.",
+     "type": "boolean"
+    },
+    "ingredient_list": {
+     "description": "Ingredient list text as it appears on a label, e.g. \"Curlies (Milk, Sugar)\".",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "measures": {
+     "description": "Custom units, e.g. [{quantity:1, unit:'cup', equivalent_quantity:240, equivalent_unit:'gram'}].",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "equivalent_quantity": {
+        "description": "How much of equivalent_unit that many units equal (e.g. 20).",
+        "exclusiveMinimum": 0,
+        "maximum": 1000000000000,
+        "type": "number"
+       },
+       "equivalent_unit": {
+        "description": "gram, oz, lb, kg, or another measure's unit.",
+        "maxLength": 60,
+        "minLength": 1,
+        "type": "string"
+       },
+       "quantity": {
+        "description": "How many of `unit` the measure describes (e.g. 1).",
+        "exclusiveMinimum": 0,
+        "maximum": 1000000000000,
+        "type": "number"
+       },
+       "unit": {
+        "description": "Name of the unit, e.g. \"cookie\" or \"cup\". Not gram, oz, lb or kg (every ingredient has those).",
+        "maxLength": 60,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "quantity",
+       "unit",
+       "equivalent_quantity",
+       "equivalent_unit"
+      ],
+      "type": "object"
+     },
+     "maxItems": 15,
+     "type": "array"
+    },
+    "name": {
+     "description": "Ingredient name (unique unless private).",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "non_food": {
+     "description": "Required when food=false.",
+     "enum": [
+      "labor",
+      "packaging",
+      "safety",
+      "other_hourly",
+      "other_fixed"
+     ],
+     "type": "string"
+    },
+    "nutrients": {
+     "additionalProperties": false,
+     "description": "Nutrition facts (food ingredients only). Amounts per serving (nutrition_quantity x nutrition_unit): calories; grams for protein, fat, fat_saturated, fat_trans, carbohydrate, fiber, uncounted_fiber, sugar, added_sugar, sugar_alcohol, fat_monounsaturated, fat_polyunsaturated, omega_3, omega_6, water, ash; milligrams for cholesterol, sodium, calcium, iron, potassium, vitamin_c, vitamin_e, thiamin, riboflavin, niacin, vitamin_b6, pantothenic_acid, phosphorus, magnesium, zinc, copper, manganese, chloride, choline; micrograms for vitamin_k, folate, vitamin_b12, biotin, iodine, selenium, chromium, molybdenum; IU for vitamin_d_IU and vitamin_a_IU. Required for a food ingredient: calories, protein, fat, fat_saturated, fat_trans, cholesterol, carbohydrate, fiber, sugar, added_sugar, sodium, calcium, iron, vitamin_a_IU, vitamin_c.",
+     "properties": {
+      "added_sugar": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "ash": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "biotin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "calcium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "calories": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "carbohydrate": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "chloride": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "cholesterol": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "choline": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "chromium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "copper": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_monounsaturated": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_polyunsaturated": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_saturated": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_trans": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fiber": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "folate": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "folate_dietary_equivalent": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "folic_acid": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "food_folate": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "iodine": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "iron": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "magnesium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "manganese": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "molybdenum": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "niacin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "omega_3": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "omega_6": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "pantothenic_acid": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "phosphorus": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "potassium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "protein": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "riboflavin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "selenium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "sodium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "sugar": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "sugar_alcohol": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "thiamin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "uncounted_fiber": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_a_IU": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_b12": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_b6": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_c": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_d_IU": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_e": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_k": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "water": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "zinc": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "nutrition_quantity": {
+     "description": "Required for food ingredients: quantity of nutrition_unit the nutrients are for, e.g. 0.5 for 0.5 cup.",
+     "exclusiveMinimum": 0,
+     "maximum": 1000000000000,
+     "type": "number"
+    },
+    "nutrition_unit": {
+     "description": "Required for food and safety ingredients. Food: the unit the nutrients are entered in (gram, oz, lb, kg, \"100 grams\", a unit from measures, or a volume unit such as cup once measures includes a volume). Safety: deg_f, deg_c, ph, brix, aw, seconds, minutes, hours, psi, ppm, percent, pass_fail or each.",
+     "maxLength": 60,
+     "minLength": 1,
+     "type": "string"
+    },
+    "source": {
+     "description": "Data source: URL, supplier or recipe id.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_create_ingredient",
+  "output_schema": {},
+  "title": "Create ingredient"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Add ingredient cost"
+  },
+  "description": "WRITE: add a price for an ingredient that becomes active on effective_at (the active cost is the one with the latest effective_at not after the date; one cost per ingredient per date). price and shipping are per quantity x unit. Changes the cost of every recipe using the ingredient from that date. Not allowed for subrecipe ingredients. POST /ingredient_costs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "effective_at": {
+     "description": "Date the cost becomes active, yyyy-mm-dd.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "ingredient_id": {
+     "description": "Ingredient id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "price": {
+     "description": "Price for quantity x unit (default 0).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "quantity": {
+     "description": "How much of the unit the price covers (default 0).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "shipping": {
+     "description": "Shipping for quantity x unit (default 0).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "unit": {
+     "description": "A unit of the ingredient, e.g. \"1 cup\", \"1 lb\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "ingredient_id",
+    "effective_at",
+    "unit"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_create_ingredient_cost",
+  "output_schema": {},
+  "title": "Add ingredient cost"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create recipe"
+  },
+  "description": "WRITE: create a new, empty recipe (add ingredient lines with recipal_add_recipe_ingredient, or use recipal_create_recipe_from_ingredients to do both at once). All fields are optional. Creates a record in your ReciPal account; it counts against the plan's recipe allowance. POST /recipes.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "allergens": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+       }
+      ]
+     },
+     "description": "Allergens by name, e.g. {\"Milk\": true, \"Almond\": true, \"other-shellfish\": \"Oyster\"}. Standard names: Wheat, Peanuts, Soy, Sesame, Mustard, Sulfites, Milk (Goat milk, Sheep milk), Egg (Duck egg, Quail egg), Fish (Tuna, Cod, Salmon, Bass), Shellfish (Crab, Lobster, Shrimp), tree nuts (Almond, Cashew, Hazelnut, Macadamia nut, Pecan, Pine nut, Pistachio, Walnut ...), Gluten (Barley, Oats, Rye, Triticale). other-milk/-egg/-fish/-shellfish/-treenut take a free-text source. An empty object {} clears all allergens.",
+     "propertyNames": {
+      "maxLength": 60,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "ingredient_list": {
+     "description": "Ingredient list text for the label.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "labor_cost": {
+     "description": "Labor cost per batch.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "name": {
+     "description": "Recipe name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "overhead_cost": {
+     "description": "Overhead cost per batch (rent, electricity, equipment ...).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "package_yield_quantity": {
+     "description": "Net weight of each finished package, in package_yield_unit (default 0).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "package_yield_unit": {
+     "description": "Unit of the finished package weight: \"grams\" (default), \"ounces\", \"mL\" or \"fluid ounces\".",
+     "enum": [
+      "grams",
+      "ounces",
+      "mL",
+      "fluid ounces"
+     ],
+     "type": "string"
+    },
+    "packages": {
+     "description": "Number of packages the recipe yields per batch (0 or more).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "packaging_cost": {
+     "description": "Cost per package of direct and secondary packaging.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "preparation": {
+     "description": "Preparation instructions for staff.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "prepared_serving_note": {
+     "description": "Note after the serving size on FDA labels, e.g. \"makes 1 cup prepared\".",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "servings": {
+     "description": "Servings per package (at least 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "number"
+    },
+    "sku": {
+     "description": "Your SKU.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "subrecipe_name": {
+     "description": "Name shown when this recipe is used as a subrecipe in another recipe's ingredient list.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "subrecipe_name_french": {
+     "description": "French name shown when used as a subrecipe.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "suggested_serving": {
+     "description": "Suggested serving in common terms, e.g. \"1 piece or 1 cup\".",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "visual_unit_of_measure": {
+     "description": "Visual reference after the metric serving size on FDA labels, e.g. \"5 chips\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recipal_create_recipe",
+  "output_schema": {},
+  "title": "Create recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create recipe with ingredients"
+  },
+  "description": "WRITE: create a new recipe and its ingredient lines in one call. ingredients lists ingredient ids with the weight of each in grams. Optional yield, servings and packaging fields as in recipal_create_recipe. Creates a record in your ReciPal account. POST /recipes/shortcut.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "allergens": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+       }
+      ]
+     },
+     "description": "Allergens by name, e.g. {\"Milk\": true, \"Almond\": true, \"other-shellfish\": \"Oyster\"}. Standard names: Wheat, Peanuts, Soy, Sesame, Mustard, Sulfites, Milk (Goat milk, Sheep milk), Egg (Duck egg, Quail egg), Fish (Tuna, Cod, Salmon, Bass), Shellfish (Crab, Lobster, Shrimp), tree nuts (Almond, Cashew, Hazelnut, Macadamia nut, Pecan, Pine nut, Pistachio, Walnut ...), Gluten (Barley, Oats, Rye, Triticale). other-milk/-egg/-fish/-shellfish/-treenut take a free-text source. An empty object {} clears all allergens.",
+     "propertyNames": {
+      "maxLength": 60,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "ingredient_list": {
+     "description": "Ingredient list text for the label.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "ingredients": {
+     "description": "Ingredient ids with their weights in grams (1-100 lines).",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "grams": {
+        "description": "Weight in grams.",
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "number"
+       },
+       "ingredient_id": {
+        "description": "Ingredient id.",
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+       }
+      },
+      "required": [
+       "ingredient_id",
+       "grams"
+      ],
+      "type": "object"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    },
+    "labor_cost": {
+     "description": "Labor cost per batch.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "name": {
+     "description": "Recipe name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "overhead_cost": {
+     "description": "Overhead cost per batch (rent, electricity, equipment ...).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "package_yield_quantity": {
+     "description": "Net weight of each finished package, in package_yield_unit (default 0).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "package_yield_unit": {
+     "description": "Unit of the finished package weight: \"grams\" (default), \"ounces\", \"mL\" or \"fluid ounces\".",
+     "enum": [
+      "grams",
+      "ounces",
+      "mL",
+      "fluid ounces"
+     ],
+     "type": "string"
+    },
+    "packages": {
+     "description": "Number of packages the recipe yields per batch (0 or more).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "packaging_cost": {
+     "description": "Cost per package of direct and secondary packaging.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "preparation": {
+     "description": "Preparation instructions for staff.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "prepared_serving_note": {
+     "description": "Note after the serving size on FDA labels, e.g. \"makes 1 cup prepared\".",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "servings": {
+     "description": "Servings per package (at least 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "number"
+    },
+    "sku": {
+     "description": "Your SKU.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "subrecipe_name": {
+     "description": "Name shown when this recipe is used as a subrecipe in another recipe's ingredient list.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "subrecipe_name_french": {
+     "description": "French name shown when used as a subrecipe.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "suggested_serving": {
+     "description": "Suggested serving in common terms, e.g. \"1 piece or 1 cup\".",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "visual_unit_of_measure": {
+     "description": "Visual reference after the metric serving size on FDA labels, e.g. \"5 chips\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "ingredients"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_create_recipe_from_ingredients",
+  "output_schema": {},
+  "title": "Create recipe with ingredients"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Turn recipe into subrecipe"
+  },
+  "description": "WRITE: turn a recipe into an ingredient (a subrecipe) with its nutrition, costing and ingredient list, so it can be used inside other recipes. Later changes to the recipe flow through to the ingredient. Fails if the recipe is empty. Returns the new ingredient. POST /recipes/{id}/create_subrecipe.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "recipe_id": {
+     "description": "Recipe to turn into a subrecipe.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "recipe_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_create_subrecipe",
+  "output_schema": {},
+  "title": "Turn recipe into subrecipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get finished goods row"
+  },
+  "description": "One finished-goods stock row by id. Needs an inventory plan. GET /finished_goods/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "finished_good_id": {
+     "description": "Finished good row id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "finished_good_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_finished_good",
+  "output_schema": {},
+  "title": "Get finished goods row"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get ingredient"
+  },
+  "description": "One ingredient in full (yours or a public one): allergens, ingredient-list text, custom units, and every nutrient per 100 grams. GET /ingredients/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ingredient_id": {
+     "description": "ReciPal ingredient id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_ingredient",
+  "output_schema": {},
+  "title": "Get ingredient"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get ingredient cost"
+  },
+  "description": "One ingredient cost entry by id. GET /ingredient_costs/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ingredient_cost_id": {
+     "description": "Ingredient cost id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "ingredient_cost_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_ingredient_cost",
+  "output_schema": {},
+  "title": "Get ingredient cost"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get raw-material inventory row"
+  },
+  "description": "One raw-material stock row by id (quantity, unit, weeks remaining, reorder guideline, on-hand value). Needs an inventory plan. GET /inventories/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "inventory_id": {
+     "description": "Inventory row id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "inventory_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_inventory",
+  "output_schema": {},
+  "title": "Get raw-material inventory row"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get label"
+  },
+  "description": "A recipe's saved nutrition-facts label settings (format, which rows show, styling) plus the computed nutrition claims (e.g. Fat Free) and ingredient list per language. The token is the last part of the recipe's primary_label path (/api/v1/labels/{token}). Optionally compute claims and ingredient list for another format. GET /labels/{token}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "label_token": {
+     "description": "Label token from the recipe's primary_label path.",
+     "pattern": "^[A-Za-z0-9_-]{8,64}$",
+     "type": "string"
+    },
+    "result_format": {
+     "description": "Compute claims and ingredient list for this format instead of the saved one, e.g. legacy_fda/adult/vertical.",
+     "maxLength": 100,
+     "minLength": 1,
+     "pattern": "^[A-Za-z0-9_/.-]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "label_token"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_label",
+  "output_schema": {},
+  "title": "Get label"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get label render status"
+  },
+  "description": "Status of a label render started with recipal_start_label_render: waiting, processing, ready or error. When ready, url is a temporary presigned download link. Poll about once a second; each poll counts toward the weekly request limit. GET /recipes/label_renders/{token}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "token": {
+     "description": "Render token returned by recipal_start_label_render.",
+     "pattern": "^[A-Za-z0-9_-]{8,64}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "token"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_label_render_status",
+  "output_schema": {},
+  "title": "Get label render status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get recipe"
+  },
+  "description": "One recipe in full: yield, servings, packages, allergens, costs (ingredient + packaging/labor/overhead), ingredient list, tags, primary label path and the complete per-serving nutrition. GET /recipes/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "recipe_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_recipe",
+  "output_schema": {},
+  "title": "Get recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get recipe ingredient"
+  },
+  "description": "One ingredient line of a recipe, including units_and_grams (the units you can use for it, each with its weight in grams). GET /recipes/{recipe_id}/recipe_ingredients/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "recipe_ingredient_id": {
+     "description": "Recipe ingredient (line) id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "recipe_id",
+    "recipe_ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_get_recipe_ingredient",
+  "output_schema": {},
+  "title": "Get recipe ingredient"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List current ingredient costs"
+  },
+  "description": "The currently active cost of every ingredient (one entry per ingredient): price, shipping, quantity and unit. GET /ingredient_costs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-20 (default 20).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recipal_list_current_ingredient_costs",
+  "output_schema": {},
+  "title": "List current ingredient costs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List recipe tags"
+  },
+  "description": "Recipe tags in use with the number of recipes carrying each, most used first. Use them to filter recipal_list_finished_goods. Needs an inventory plan. GET /finished_goods/tags.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "recipal_list_finished_good_tags",
+  "output_schema": {},
+  "title": "List recipe tags"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List finished goods inventory"
+  },
+  "description": "Finished-goods stock rows: recipe, quantity on hand, unit, total packages, lot-code settings, case/pallet sizes and the on-hand value. Needs an inventory plan. GET /finished_goods.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "archived": {
+     "description": "\"false\" = active only (default), \"true\" = archived only, \"all\" = both.",
+     "enum": [
+      "false",
+      "true",
+      "all"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-20 (default 20).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Case-insensitive search in the recipe name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort_direction": {
+     "description": "\"asc\" (default) or \"desc\".",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "sort_field": {
+     "description": "Default \"recipes.name\".",
+     "enum": [
+      "recipes.name",
+      "finished_goods.updated_at"
+     ],
+     "type": "string"
+    },
+    "tags": {
+     "description": "Only rows whose recipe has ALL these tags.",
+     "items": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recipal_list_finished_goods",
+  "output_schema": {},
+  "title": "List finished goods inventory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List costs of an ingredient"
+  },
+  "description": "The cost history of one ingredient: effective date, quantity, unit, price and shipping per entry (the entry with the latest effective_at not in the future is the active one). GET /ingredients/{id}/ingredient_costs.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "ingredient_id": {
+     "description": "ReciPal ingredient id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-20 (default 20).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_list_ingredient_costs",
+  "output_schema": {},
+  "title": "List costs of an ingredient"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List ingredients"
+  },
+  "description": "List your own ingredients (custom and subrecipe ingredients) with allergens, units and headline nutrition per 100 g. Set full=true for every nutrient. Archived ones are hidden unless asked for. GET /ingredients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "archived": {
+     "description": "\"false\" = active only (default), \"true\" = archived only, \"all\" = both.",
+     "enum": [
+      "false",
+      "true",
+      "all"
+     ],
+     "type": "string"
+    },
+    "full": {
+     "description": "Return every ingredient field including all nutrients (large). Default false.",
+     "type": "boolean"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-20 (default 20).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "sort_direction": {
+     "description": "\"desc\" (default) or \"asc\".",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "sort_field": {
+     "description": "Sort by \"updated_at\" (default), \"created_at\" or \"name\".",
+     "enum": [
+      "updated_at",
+      "created_at",
+      "name"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recipal_list_ingredients",
+  "output_schema": {},
+  "title": "List ingredients"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List raw-material inventory"
+  },
+  "description": "Raw-material (ingredient) stock rows: quantity on hand, weeks remaining, daily consumption, quantity on order, reorder risk (safe, warning, critical), reorder level and the on-hand value. Needs an inventory plan (otherwise 403 INVENTORY_PLAN_REQUIRED). By default sorted by weeks remaining, lowest first. GET /inventories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "archived": {
+     "description": "\"false\" = active only (default), \"true\" = archived only, \"all\" = both.",
+     "enum": [
+      "false",
+      "true",
+      "all"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-20 (default 20).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "q": {
+     "description": "Case-insensitive search in the ingredient name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "sort_direction": {
+     "description": "\"asc\" (default), \"desc\", or \"mid\" (warning band first, then critical, then safe; only for weeks_remaining and risk).",
+     "enum": [
+      "asc",
+      "desc",
+      "mid"
+     ],
+     "type": "string"
+    },
+    "sort_field": {
+     "description": "Default \"inventories.weeks_remaining\".",
+     "enum": [
+      "inventories.weeks_remaining",
+      "inventories.updated_at",
+      "ingredients.name",
+      "risk"
+     ],
+     "type": "string"
+    },
+    "supplier_id": {
+     "description": "Only rows linked to this supplier.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "tags": {
+     "description": "Only rows whose ingredient has ALL these tags.",
+     "items": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recipal_list_inventories",
+  "output_schema": {},
+  "title": "List raw-material inventory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List ingredient tags"
+  },
+  "description": "Ingredient tags in use with the number of ingredients carrying each, most used first. Use them to filter recipal_list_inventories. Needs an inventory plan. GET /inventories/tags.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "recipal_list_inventory_tags",
+  "output_schema": {},
+  "title": "List ingredient tags"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List recipe ingredients"
+  },
+  "description": "The formula of one recipe: every recipe ingredient line with ingredient id, name, quantity, unit, waste %, total grams and the display name per label language. Use the line ids with recipal_update_recipe_ingredient. GET /recipes/{id}/recipe_ingredients.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "recipe_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_list_recipe_ingredients",
+  "output_schema": {},
+  "title": "List recipe ingredients"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "List recipes"
+  },
+  "description": "List your recipes (products) with yield, servings, cost per batch/package and the headline per-serving nutrition (calories, fat, sodium, carbohydrate, protein). Sorted by last update by default. Set full=true for the complete object with every nutrient. Pages of up to 20; a page with fewer rows is the last. GET /recipes.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "archived": {
+     "description": "\"false\" = active only (default), \"true\" = archived only, \"all\" = both.",
+     "enum": [
+      "false",
+      "true",
+      "all"
+     ],
+     "type": "string"
+    },
+    "full": {
+     "description": "Return every recipe field including all ~80 nutrients (large). Default false.",
+     "type": "boolean"
+    },
+    "page": {
+     "description": "Page number, from 1 (default 1). Pass the previous reply's next_page.",
+     "exclusiveMinimum": 0,
+     "maximum": 100000,
+     "type": "integer"
+    },
+    "per_page": {
+     "description": "Results per page, 1-20 (default 20).",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "sort_direction": {
+     "description": "\"desc\" (default) or \"asc\".",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "sort_field": {
+     "description": "Sort by \"updated_at\" (default), \"created_at\" or \"name\".",
+     "enum": [
+      "updated_at",
+      "created_at",
+      "name"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recipal_list_recipes",
+  "output_schema": {},
+  "title": "List recipes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Remove ingredient from recipe"
+  },
+  "description": "WRITE (destructive): permanently remove one ingredient line from a recipe. It cannot be undone, but the same ingredient can be added back (with recipal_add_recipe_ingredient). Changes the recipe's nutrition, label and cost. The ingredient itself is not deleted. DELETE /recipes/{recipe_id}/recipe_ingredients/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "recipe_ingredient_id": {
+     "description": "Recipe ingredient (line) id from recipal_list_recipe_ingredients.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "recipe_id",
+    "recipe_ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_remove_recipe_ingredient",
+  "output_schema": {},
+  "title": "Remove ingredient from recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Copy or scale recipe"
+  },
+  "description": "WRITE: create a NEW recipe as a copy of an existing one, with every ingredient quantity and the yield multiplied by scale_amount (1 = plain copy; per-serving nutrition stays the same; scaling down cannot take packages below 1). Costs and tags carry over. The original is not changed. Without a name the copy is called \"<name> (copy)\" or \"<name> <n>x\". POST /recipes/{id}/scale.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "name": {
+     "description": "Name of the new recipe.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "recipe_id": {
+     "description": "Recipe to copy.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "scale_amount": {
+     "description": "Multiplier for quantities and yield (default 1).",
+     "exclusiveMinimum": 0,
+     "maximum": 1000000000000,
+     "type": "number"
+    }
+   },
+   "required": [
+    "recipe_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_scale_recipe",
+  "output_schema": {},
+  "title": "Copy or scale recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Start label render"
+  },
+  "description": "WRITE (render job): start rendering a recipe's nutrition label as a PDF or PNG and return the render status with a token. Always asynchronous: poll recipal_get_label_render_status with the token until status is ready, then give the user the temporary download url. Each account may run 5 renders in parallel. GET /recipes/{id}/label.pdf|label.png?async=true.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "format": {
+     "description": "\"pdf\" or \"png\".",
+     "enum": [
+      "pdf",
+      "png"
+     ],
+     "type": "string"
+    },
+    "page_size": {
+     "description": "PDF only: \"auto\" (default) crops to the label, or letter, legal, A4.",
+     "enum": [
+      "auto",
+      "letter",
+      "legal",
+      "A4"
+     ],
+     "type": "string"
+    },
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "zoom": {
+     "description": "PNG only: scale from 0.8 to 6 (default 3); larger = crisper, bigger image.",
+     "maximum": 6,
+     "minimum": 0.8,
+     "type": "number"
+    }
+   },
+   "required": [
+    "recipe_id",
+    "format"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_start_label_render",
+  "output_schema": {},
+  "title": "Start label render"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update ingredient"
+  },
+  "description": "WRITE: change fields of one of YOUR ingredients (public ingredients cannot be edited); fields you leave out stay unchanged. If nutrition_unit, nutrition_quantity or their measure change, nutrients you do not pass are rescaled to keep the same amount per serving. measures REPLACES the whole list of custom units, so send them all. Setting archived true hides the ingredient from lists; false restores it. The change flows into every recipe using the ingredient. PUT /ingredients/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "allergens": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+       }
+      ]
+     },
+     "description": "Allergens by name, e.g. {\"Milk\": true, \"Almond\": true, \"other-shellfish\": \"Oyster\"}. Standard names: Wheat, Peanuts, Soy, Sesame, Mustard, Sulfites, Milk (Goat milk, Sheep milk), Egg (Duck egg, Quail egg), Fish (Tuna, Cod, Salmon, Bass), Shellfish (Crab, Lobster, Shrimp), tree nuts (Almond, Cashew, Hazelnut, Macadamia nut, Pecan, Pine nut, Pistachio, Walnut ...), Gluten (Barley, Oats, Rye, Triticale). other-milk/-egg/-fish/-shellfish/-treenut take a free-text source. An empty object {} clears all allergens.",
+     "propertyNames": {
+      "maxLength": 60,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "archived": {
+     "description": "true to archive, false to restore.",
+     "type": "boolean"
+    },
+    "brand": {
+     "description": "Brand name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "ingredient_id": {
+     "description": "ReciPal ingredient id (one you created).",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "ingredient_list": {
+     "description": "Ingredient list text for labels.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "measures": {
+     "description": "The FULL list of custom units (replaces the existing list).",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "equivalent_quantity": {
+        "description": "How much of equivalent_unit that many units equal (e.g. 20).",
+        "exclusiveMinimum": 0,
+        "maximum": 1000000000000,
+        "type": "number"
+       },
+       "equivalent_unit": {
+        "description": "gram, oz, lb, kg, or another measure's unit.",
+        "maxLength": 60,
+        "minLength": 1,
+        "type": "string"
+       },
+       "quantity": {
+        "description": "How many of `unit` the measure describes (e.g. 1).",
+        "exclusiveMinimum": 0,
+        "maximum": 1000000000000,
+        "type": "number"
+       },
+       "unit": {
+        "description": "Name of the unit, e.g. \"cookie\" or \"cup\". Not gram, oz, lb or kg (every ingredient has those).",
+        "maxLength": 60,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "quantity",
+       "unit",
+       "equivalent_quantity",
+       "equivalent_unit"
+      ],
+      "type": "object"
+     },
+     "maxItems": 15,
+     "type": "array"
+    },
+    "name": {
+     "description": "Ingredient name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "nutrients": {
+     "additionalProperties": false,
+     "description": "Nutrition facts to change; others are kept. Amounts per serving (nutrition_quantity x nutrition_unit): calories; grams for protein, fat, fat_saturated, fat_trans, carbohydrate, fiber, uncounted_fiber, sugar, added_sugar, sugar_alcohol, fat_monounsaturated, fat_polyunsaturated, omega_3, omega_6, water, ash; milligrams for cholesterol, sodium, calcium, iron, potassium, vitamin_c, vitamin_e, thiamin, riboflavin, niacin, vitamin_b6, pantothenic_acid, phosphorus, magnesium, zinc, copper, manganese, chloride, choline; micrograms for vitamin_k, folate, vitamin_b12, biotin, iodine, selenium, chromium, molybdenum; IU for vitamin_d_IU and vitamin_a_IU.",
+     "properties": {
+      "added_sugar": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "ash": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "biotin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "calcium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "calories": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "carbohydrate": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "chloride": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "cholesterol": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "choline": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "chromium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "copper": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_monounsaturated": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_polyunsaturated": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_saturated": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fat_trans": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "fiber": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "folate": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "folate_dietary_equivalent": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "folic_acid": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "food_folate": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "iodine": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "iron": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "magnesium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "manganese": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "molybdenum": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "niacin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "omega_3": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "omega_6": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "pantothenic_acid": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "phosphorus": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "potassium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "protein": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "riboflavin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "selenium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "sodium": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "sugar": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "sugar_alcohol": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "thiamin": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "uncounted_fiber": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_a_IU": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_b12": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_b6": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_c": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_d_IU": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_e": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "vitamin_k": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "water": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      "zinc": {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "nutrition_quantity": {
+     "description": "Quantity of nutrition_unit the nutrients are for.",
+     "exclusiveMinimum": 0,
+     "maximum": 1000000000000,
+     "type": "number"
+    },
+    "nutrition_unit": {
+     "description": "Unit the nutrients are entered in.",
+     "maxLength": 60,
+     "minLength": 1,
+     "type": "string"
+    },
+    "source": {
+     "description": "Data source.",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_update_ingredient",
+  "output_schema": {},
+  "title": "Update ingredient"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update ingredient cost"
+  },
+  "description": "WRITE: change an existing ingredient cost entry (date, unit, quantity, price, shipping); fields you leave out stay unchanged. Changes recipe costs that depend on it. Not allowed for subrecipe ingredients. PUT /ingredient_costs/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "effective_at": {
+     "description": "New effective date, yyyy-mm-dd (unique per ingredient).",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "ingredient_cost_id": {
+     "description": "Ingredient cost id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "price": {
+     "description": "Price for quantity x unit.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "quantity": {
+     "description": "How much of the unit the price covers.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "shipping": {
+     "description": "Shipping for quantity x unit.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "unit": {
+     "description": "A unit of the ingredient.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "ingredient_cost_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_update_ingredient_cost",
+  "output_schema": {},
+  "title": "Update ingredient cost"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update recipe"
+  },
+  "description": "WRITE: change fields of one recipe; fields you leave out stay unchanged. package_yield_quantity \"default\" sets the package weight to the total weight of the current ingredients (no moisture loss accounted for); ingredient_list \"default\" rebuilds the label ingredient list in descending weight order. Changes labels and costs of this recipe. Tags cannot be set here. PUT /recipes/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "allergens": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+       }
+      ]
+     },
+     "description": "Allergens by name, e.g. {\"Milk\": true, \"Almond\": true, \"other-shellfish\": \"Oyster\"}. Standard names: Wheat, Peanuts, Soy, Sesame, Mustard, Sulfites, Milk (Goat milk, Sheep milk), Egg (Duck egg, Quail egg), Fish (Tuna, Cod, Salmon, Bass), Shellfish (Crab, Lobster, Shrimp), tree nuts (Almond, Cashew, Hazelnut, Macadamia nut, Pecan, Pine nut, Pistachio, Walnut ...), Gluten (Barley, Oats, Rye, Triticale). other-milk/-egg/-fish/-shellfish/-treenut take a free-text source. An empty object {} clears all allergens.",
+     "propertyNames": {
+      "maxLength": 60,
+      "minLength": 1,
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "ingredient_list": {
+     "description": "Ingredient list text for the label, or \"default\" to rebuild it from the ingredients.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "labor_cost": {
+     "description": "Labor cost per batch.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "name": {
+     "description": "Recipe name.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "overhead_cost": {
+     "description": "Overhead cost per batch (rent, electricity, equipment ...).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "package_yield_quantity": {
+     "anyOf": [
+      {
+       "maximum": 1000000000000,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "const": "default",
+       "type": "string"
+      }
+     ],
+     "description": "Net weight of each finished package in package_yield_unit, or \"default\" to total the ingredient weights."
+    },
+    "package_yield_unit": {
+     "description": "Unit of the finished package weight: \"grams\" (default), \"ounces\", \"mL\" or \"fluid ounces\".",
+     "enum": [
+      "grams",
+      "ounces",
+      "mL",
+      "fluid ounces"
+     ],
+     "type": "string"
+    },
+    "packages": {
+     "description": "Number of packages the recipe yields per batch (0 or more).",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "packaging_cost": {
+     "description": "Cost per package of direct and secondary packaging.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "preparation": {
+     "description": "Preparation instructions for staff.",
+     "maxLength": 5000,
+     "type": "string"
+    },
+    "prepared_serving_note": {
+     "description": "Note after the serving size on FDA labels, e.g. \"makes 1 cup prepared\".",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "servings": {
+     "description": "Servings per package (at least 1).",
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "number"
+    },
+    "sku": {
+     "description": "Your SKU.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "subrecipe_name": {
+     "description": "Name shown when this recipe is used as a subrecipe in another recipe's ingredient list.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "subrecipe_name_french": {
+     "description": "French name shown when used as a subrecipe.",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "suggested_serving": {
+     "description": "Suggested serving in common terms, e.g. \"1 piece or 1 cup\".",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "visual_unit_of_measure": {
+     "description": "Visual reference after the metric serving size on FDA labels, e.g. \"5 chips\".",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "recipe_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_update_recipe",
+  "output_schema": {},
+  "title": "Update recipe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update recipe ingredient amount"
+  },
+  "description": "WRITE: change the AMOUNT of one ingredient line in a recipe (unit, quantity, waste or total_grams; total_grams overrides unit and quantity). It cannot swap the ingredient: remove the line and add another instead. Changes the recipe's nutrition, label and cost. PUT /recipes/{recipe_id}/recipe_ingredients/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "quantity": {
+     "description": "Amount of the unit.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "recipe_id": {
+     "description": "ReciPal recipe id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "recipe_ingredient_id": {
+     "description": "Recipe ingredient (line) id from recipal_list_recipe_ingredients.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "total_grams": {
+     "description": "Weight in grams; overrides unit and quantity.",
+     "maximum": 1000000000000,
+     "minimum": 0,
+     "type": "number"
+    },
+    "unit": {
+     "description": "Unit, one of the ingredient's units.",
+     "maxLength": 100,
+     "minLength": 1,
+     "type": "string"
+    },
+    "waste": {
+     "description": "Waste percent (0-100).",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "number"
+    }
+   },
+   "required": [
+    "recipe_id",
+    "recipe_ingredient_id"
+   ],
+   "type": "object"
+  },
+  "name": "recipal_update_recipe_ingredient",
+  "output_schema": {},
+  "title": "Update recipe ingredient amount"
+ }
+]

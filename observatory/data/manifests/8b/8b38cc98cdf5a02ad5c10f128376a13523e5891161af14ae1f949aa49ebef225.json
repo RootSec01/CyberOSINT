@@ -1,0 +1,83 @@
+[
+ {
+  "description": "Zero-retention GDPR PII redaction gate (IBAN, Tax-ID, HRB, Names) with signed Ed25519 VC.",
+  "input_schema": {
+   "properties": {
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Maximum fee in EUR your agent is willing to pay per call (list price 0.008 EUR). Omit if not willing to pay.",
+     "type": "number"
+    },
+    "raw_text": {
+     "description": "Unstructured text containing potential DACH/EU PII.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "raw_text"
+   ],
+   "type": "object"
+  },
+  "name": "redact_gdpr_pii_text",
+  "output_schema": {}
+ },
+ {
+  "description": "Deterministic EU FSF, UN & OpenSanctions KYB screening issuing signed Ed25519 Non-Hit VCs.",
+  "input_schema": {
+   "properties": {
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "country_code": {
+     "default": "DE",
+     "description": "ISO-3166-1 alpha-2 country code.",
+     "type": "string"
+    },
+    "entity_name": {
+     "description": "Legal company or beneficiary name to screen.",
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Maximum fee in EUR your agent is willing to pay per call (list price 0.02 EUR). Omit if not willing to pay.",
+     "type": "number"
+    },
+    "vat_or_lei_id": {
+     "description": "Optional EU VAT ID or LEI identifier.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "entity_name"
+   ],
+   "type": "object"
+  },
+  "name": "screen_sanctions_and_kyb",
+  "output_schema": {}
+ },
+ {
+  "description": "Official KoSIT EN 16931 & XRechnung XML validator issuing signed Ed25519 VCs. Zero retention.",
+  "input_schema": {
+   "properties": {
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Maximum fee in EUR your agent is willing to pay per call (list price 0.03 EUR). Omit if not willing to pay.",
+     "type": "number"
+    },
+    "xml_content": {
+     "description": "Raw EN 16931 / XRechnung / UBL / CII XML string.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "xml_content"
+   ],
+   "type": "object"
+  },
+  "name": "validate_en16931_e_invoice",
+  "output_schema": {}
+ }
+]

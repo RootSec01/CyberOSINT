@@ -1,0 +1,844 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the default policy document. Save it as hotpath/policy.toml (or hotpath/<benchmark>-policy.toml), edit it, then check it with validate_policy.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_default_policy",
+  "output_schema": {},
+  "title": "Get Default Policy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Compare a report with its baseline, as the PR comment does: regressions, improvements and broken budgets. Read the top-level `verdict` first.",
+  "input_schema": {
+   "$defs": {
+    "Event": {
+     "enum": [
+      "push",
+      "pull_request"
+     ],
+     "type": "string"
+    },
+    "ResourceSelect": {
+     "additionalProperties": false,
+     "description": "One resource of a `Select`: the entities to read, each with every\nsection and value the report has of it.",
+     "properties": {
+      "keys": {
+       "description": "Exact, case-sensitive entity keys. Their format depends on the\nresource and is given by its field of `Select`; mostly a diff row's\n`key`, but io takes the value's label and keeps every operation of it.",
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "keys"
+     ],
+     "type": "object"
+    },
+    "Rows": {
+     "enum": [
+      "findings",
+      "advisory",
+      "all"
+     ],
+     "type": "string"
+    },
+    "Select": {
+     "additionalProperties": false,
+     "description": "`select=` as sent: per resource, exact entity keys.\nShared by the REST query and the MCP tools, whose schema it is.",
+     "properties": {
+      "channels": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Channel keys: the label."
+      },
+      "functions": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Function keys: the function name (`crate::module::fn`)."
+      },
+      "http": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "HTTP call keys: `name | route | source`, `-` for a part the entry lacks."
+      },
+      "io": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "I/O keys: the value's label (`sock`), never `label | operation | -`;\nit keeps the value's whole payload entry and every op row of it in a\ndiff."
+      },
+      "mutexes": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Mutex keys: the label."
+      },
+      "rw_locks": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "RwLock keys: the label."
+      },
+      "server": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Route keys: the route (`GET /users/{id}`)."
+      },
+      "sql": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "SQL keys: `query | route | source`, `-` for a part the entry lacks."
+      },
+      "threads": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Thread keys: the thread name; keeps every thread of that name in a\npayload and the diff's row summing them."
+      }
+     },
+     "type": "object"
+    }
+   },
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "benchmark": {
+     "description": "The benchmark name, as `list_benchmarks` prints it.",
+     "type": "string"
+    },
+    "commit": {
+     "description": "Full 40-character commit sha: the newest report measuring it or headed\nat it is the head.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "event": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Event"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Narrows `pr` / `commit` to one event; not with `id`."
+    },
+    "id": {
+     "description": "A report id as the head.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "pr": {
+     "description": "Pull request number: the PR's newest report is the head. One of `pr`,\n`commit`, `id`.",
+     "format": "uint32",
+     "minimum": 0,
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "precise": {
+     "description": "`true`: values, changes and budget figures unrounded, durations in\n`ns`, sizes in `B`. Default `false`: rounded for reading.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "repo": {
+     "description": "The repository as `owner/name`, as `list_repos` prints it.",
+     "type": "string"
+    },
+    "rows": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Rows"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "`findings` (default without `select`): the rows the PR comment lists.\n`advisory`: plus the findings of unjudged families. `all` (default\nwith `select`): every row, cell and total."
+    },
+    "select": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Select"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Keep only the rows and omissions of these entities, as in get_report:\nper resource exact `keys`; an io label keeps every op row of it. A\nsection left without any is dropped. Combines with `rows`."
+    }
+   },
+   "required": [
+    "repo",
+    "benchmark"
+   ],
+   "type": "object"
+  },
+  "name": "get_diff",
+  "output_schema": {},
+  "title": "Compare Report With Baseline"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Fetch one report: its summary, verdict and policy, optionally with its hotpath JSON payload. not_found means CI has not uploaded it yet. For what changed against the baseline, use get_diff.",
+  "input_schema": {
+   "$defs": {
+    "Event": {
+     "enum": [
+      "push",
+      "pull_request"
+     ],
+     "type": "string"
+    },
+    "ResourceSelect": {
+     "additionalProperties": false,
+     "description": "One resource of a `Select`: the entities to read, each with every\nsection and value the report has of it.",
+     "properties": {
+      "keys": {
+       "description": "Exact, case-sensitive entity keys. Their format depends on the\nresource and is given by its field of `Select`; mostly a diff row's\n`key`, but io takes the value's label and keeps every operation of it.",
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "keys"
+     ],
+     "type": "object"
+    },
+    "Select": {
+     "additionalProperties": false,
+     "description": "`select=` as sent: per resource, exact entity keys.\nShared by the REST query and the MCP tools, whose schema it is.",
+     "properties": {
+      "channels": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Channel keys: the label."
+      },
+      "functions": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Function keys: the function name (`crate::module::fn`)."
+      },
+      "http": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "HTTP call keys: `name | route | source`, `-` for a part the entry lacks."
+      },
+      "io": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "I/O keys: the value's label (`sock`), never `label | operation | -`;\nit keeps the value's whole payload entry and every op row of it in a\ndiff."
+      },
+      "mutexes": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Mutex keys: the label."
+      },
+      "rw_locks": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "RwLock keys: the label."
+      },
+      "server": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Route keys: the route (`GET /users/{id}`)."
+      },
+      "sql": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "SQL keys: `query | route | source`, `-` for a part the entry lacks."
+      },
+      "threads": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Thread keys: the thread name; keeps every thread of that name in a\npayload and the diff's row summing them."
+      }
+     },
+     "type": "object"
+    }
+   },
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "benchmark": {
+     "description": "The benchmark name, as `list_benchmarks` prints it.",
+     "type": "string"
+    },
+    "commit": {
+     "description": "Full 40-character commit sha: the newest report measuring it or headed\nat it (a PR branch's `git rev-parse HEAD` finds the PR's report).",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "event": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Event"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Narrows `pr` / `commit` to one event; not with `id`."
+    },
+    "id": {
+     "description": "A report id.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "include_payload": {
+     "description": "Include the uploaded hotpath JSON report. Default: false without\n`select`, true with it; `false` with `select` is refused.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "pr": {
+     "description": "Pull request number: the PR's newest report. One of `pr`, `commit`, `id`.",
+     "format": "uint32",
+     "minimum": 0,
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "precise": {
+     "description": "`true`: measurements unrounded, durations in `ns`, sizes in `B`\n(payload values as uploaded). Default `false`: rounded for reading.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "repo": {
+     "description": "The repository as `owner/name`, as `list_repos` prints it.",
+     "type": "string"
+    },
+    "select": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Select"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Keep only these entities in the payload, per resource\n(`functions`, `sql`, `http`, `server`, `mutexes`, `rw_locks`, `channels`,\n`io`, `threads`) exact, case-sensitive `keys` (function name; sql and\nhttp `name | route | source` with `-` for a missing part; io the\nvalue's label, every op of it; server the route; locks and channels\nthe label; threads the thread name, every thread of it). Up to 20 keys."
+    }
+   },
+   "required": [
+    "repo",
+    "benchmark"
+   ],
+   "type": "object"
+  },
+  "name": "get_report",
+  "output_schema": {},
+  "title": "Get Report"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List one repository's benchmarks.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "repo": {
+     "description": "The repository as `owner/name`, as `list_repos` prints it.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "repo"
+   ],
+   "type": "object"
+  },
+  "name": "list_benchmarks",
+  "output_schema": {},
+  "title": "List Benchmarks"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List a repository's reports, newest first, as summaries with their run totals. Use it to browse report history; with `select`, to follow given entities across runs.",
+  "input_schema": {
+   "$defs": {
+    "Event": {
+     "enum": [
+      "push",
+      "pull_request"
+     ],
+     "type": "string"
+    },
+    "ResourceSelect": {
+     "additionalProperties": false,
+     "description": "One resource of a `Select`: the entities to read, each with every\nsection and value the report has of it.",
+     "properties": {
+      "keys": {
+       "description": "Exact, case-sensitive entity keys. Their format depends on the\nresource and is given by its field of `Select`; mostly a diff row's\n`key`, but io takes the value's label and keeps every operation of it.",
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "required": [
+      "keys"
+     ],
+     "type": "object"
+    },
+    "Select": {
+     "additionalProperties": false,
+     "description": "`select=` as sent: per resource, exact entity keys.\nShared by the REST query and the MCP tools, whose schema it is.",
+     "properties": {
+      "channels": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Channel keys: the label."
+      },
+      "functions": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Function keys: the function name (`crate::module::fn`)."
+      },
+      "http": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "HTTP call keys: `name | route | source`, `-` for a part the entry lacks."
+      },
+      "io": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "I/O keys: the value's label (`sock`), never `label | operation | -`;\nit keeps the value's whole payload entry and every op row of it in a\ndiff."
+      },
+      "mutexes": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Mutex keys: the label."
+      },
+      "rw_locks": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "RwLock keys: the label."
+      },
+      "server": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Route keys: the route (`GET /users/{id}`)."
+      },
+      "sql": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "SQL keys: `query | route | source`, `-` for a part the entry lacks."
+      },
+      "threads": {
+       "anyOf": [
+        {
+         "$ref": "#/$defs/ResourceSelect"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Thread keys: the thread name; keeps every thread of that name in a\npayload and the diff's row summing them."
+      }
+     },
+     "type": "object"
+    },
+    "Verdict": {
+     "enum": [
+      "passed",
+      "regressed",
+      "failed",
+      "not_judged"
+     ],
+     "type": "string"
+    }
+   },
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "benchmark": {
+     "description": "Only this benchmark's reports, by name as `list_benchmarks` prints it.\nDefault: every benchmark of the repository.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "branch": {
+     "description": "Bare branch name (`main`): reports that measured that branch's ref,\nin practice its push reports; pair with `event: push` for the\nbaseline series. For a PR's own reports use `pr`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "commit": {
+     "description": "Full 40-character commit sha: reports measuring it or headed at it.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "cursor": {
+     "description": "`next_cursor` of the previous page, with the same filters.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "event": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Event"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Only reports of one event."
+    },
+    "limit": {
+     "description": "Reports per page, 1 to 50, default 20; with `select` 1 to 20,\ndefault 10.",
+     "format": "uint32",
+     "minimum": 0,
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "metadata": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Only reports whose user_metadata has all of these keys with exactly\nthese values (e.g. {\"runner\": \"Linux-ARM64\"}); up to 8 pairs. Reports\nwithout metadata never match.",
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "pr": {
+     "description": "Only this pull request's reports.",
+     "format": "uint32",
+     "minimum": 0,
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "precise": {
+     "description": "As get_report's `precise`.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "repo": {
+     "description": "The repository as `owner/name`, as `list_repos` prints it.",
+     "type": "string"
+    },
+    "select": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Select"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Return each report with its payload, filtered as get_report's `select`."
+    },
+    "since": {
+     "description": "Uploaded at or after this time: RFC 3339, or `YYYY-MM-DD` (UTC midnight).",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "until": {
+     "description": "Uploaded before this time, same format as `since`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "verdict": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Verdict"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "`passed`, `regressed` (failed reports included), `failed`, or\n`not_judged` (nothing was judged)."
+    }
+   },
+   "required": [
+    "repo"
+   ],
+   "type": "object"
+  },
+  "name": "list_reports",
+  "output_schema": {},
+  "title": "List Reports"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the repositories with the hotpath GitHub App installed, with their benchmarks. Start here: `full_name` is the `repo` argument of the other tools.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "query": {
+     "description": "Only repositories whose `owner/name` contains this text, ignoring case.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "with_benchmarks": {
+     "default": false,
+     "description": "Only repositories with at least one benchmark. Default false.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_repos",
+  "output_schema": {},
+  "title": "List Repositories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Check a policy TOML document. Use it after editing a policy file, before committing it.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "source": {
+     "description": "The whole policy TOML document, as written.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source"
+   ],
+   "type": "object"
+  },
+  "name": "validate_policy",
+  "output_schema": {},
+  "title": "Validate Policy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Show the GitHub user and API token this connection acts as. Use it to check the connection or after an invalid_token error.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "whoami",
+  "output_schema": {},
+  "title": "Show Current User"
+ }
+]

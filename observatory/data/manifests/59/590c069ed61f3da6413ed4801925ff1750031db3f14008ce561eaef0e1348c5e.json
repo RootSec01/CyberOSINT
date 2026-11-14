@@ -1,0 +1,1061 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Add a note to a candidate"
+  },
+  "description": "WRITE: add a note to a candidate's profile, visible to the team. Recruitee: POST /c/{company_id}/candidates/{candidate_id}/notes.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "body": {
+     "description": "The note text.",
+     "maxLength": 20000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "candidate_id": {
+     "description": "The candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "candidate_id",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_add_candidate_note",
+  "output_schema": {},
+  "title": "Add a note to a candidate"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Tag a candidate"
+  },
+  "description": "WRITE: add one or more tags to a candidate (existing tags are reused by name; new names create new tags). Recruitee: POST /c/{company_id}/candidates/{candidate_id}/tags.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidate_id": {
+     "description": "The candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "tags": {
+     "description": "Tag names to add, e.g. [\"Python developer\"].",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "candidate_id",
+    "tags"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_add_candidate_tags",
+  "output_schema": {},
+  "title": "Tag a candidate"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Add a candidate to a job"
+  },
+  "description": "WRITE: put an existing candidate on a job (or talent pool) — creates a placement in the pipeline's first stage. Pass exactly one of offer_id or talent_pool_id. Recruitee: POST /c/{company_id}/placements.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidate_id": {
+     "description": "The candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "offer_id": {
+     "description": "The job id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "talent_pool_id": {
+     "description": "The talent pool id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "candidate_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_assign_candidate_to_offer",
+  "output_schema": {},
+  "title": "Add a candidate to a job"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create a candidate"
+  },
+  "description": "WRITE: add a candidate manually (as if a recruiter added them in the app — no auto-confirmation email is sent), optionally assigning them straight to one or more jobs in the job's default stage. Recruitee: POST /c/{company_id}/candidates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "cover_letter": {
+     "description": "Cover letter text.",
+     "type": "string"
+    },
+    "emails": {
+     "description": "Email addresses.",
+     "items": {
+      "format": "email",
+      "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "links": {
+     "description": "Other links (portfolio, website).",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "name": {
+     "description": "Candidate's full name (required).",
+     "minLength": 1,
+     "type": "string"
+    },
+    "offer_ids": {
+     "description": "Jobs/talent pools to assign the candidate to (default stage).",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "phones": {
+     "description": "Phone numbers.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "remote_cv_url": {
+     "description": "Public URL of the CV file for Recruitee to fetch.",
+     "format": "uri",
+     "type": "string"
+    },
+    "social_links": {
+     "description": "Social profile URLs (e.g. LinkedIn).",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "sources": {
+     "description": "Source tags, e.g. [\"Referral\"].",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_create_candidate",
+  "output_schema": {},
+  "title": "Create a candidate"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Create a task"
+  },
+  "description": "WRITE: create a recruiting task, optionally about a candidate, assigned to team members (admin ids from recruitee_list_team_members), with an optional due date. Recruitee: POST /c/{company_id}/tasks.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "admin_ids": {
+     "description": "Assignees (admin ids).",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "candidate_id": {
+     "description": "Candidate the task is about.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "description": {
+     "description": "Task details.",
+     "type": "string"
+    },
+    "due_date": {
+     "description": "Due date/time (ISO 8601). Requires timezone.",
+     "type": "string"
+    },
+    "timezone": {
+     "description": "Timezone of the due date, e.g. Europe/Amsterdam.",
+     "type": "string"
+    },
+    "title": {
+     "description": "Task title (required).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "title"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_create_task",
+  "output_schema": {},
+  "title": "Create a task"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one candidate"
+  },
+  "description": "Fetch one candidate's full profile: contact details, sources, tags, cover letter, CV URL, custom fields, ratings, and `placements` — one per job they are on, each with its placement id and current stage. The placement id is what recruitee_move_candidate_stage needs. Recruitee: GET /c/{company_id}/candidates/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidate_id": {
+     "description": "The candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "candidate_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_get_candidate",
+  "output_schema": {},
+  "title": "Get one candidate"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get the current user"
+  },
+  "description": "Fetch the Recruitee user the API token belongs to — name, email, role, role abilities and company id. A cheap way to confirm the token and company id are right. Recruitee: GET /c/{company_id}/admin.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "recruitee_get_current_user",
+  "output_schema": {},
+  "title": "Get the current user"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get one job"
+  },
+  "description": "Fetch one job or talent pool by id with its full details: description, requirements, location, salary, employment type, candidate counters and pipeline_template_id. Recruitee: GET /c/{company_id}/offers/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "offer_id": {
+     "description": "The job (offer) id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "offer_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_get_offer",
+  "output_schema": {},
+  "title": "Get one job"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get a hiring pipeline"
+  },
+  "description": "Fetch a pipeline template with its ordered stages (id, name, group, category). A job's `pipeline_template_id` (from recruitee_list_offers / recruitee_get_offer) names its pipeline; the stage ids here are what recruitee_move_candidate_stage takes. Recruitee: GET /c/{company_id}/pipeline_templates/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "pipeline_template_id": {
+     "description": "The pipeline template id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "pipeline_template_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_get_pipeline_template",
+  "output_schema": {},
+  "title": "Get a hiring pipeline"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List a candidate's notes"
+  },
+  "description": "List the notes on a candidate's profile, with replies, author admin_id and visibility. Recruitee: GET /c/{company_id}/candidates/{candidate_id}/notes.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidate_id": {
+     "description": "The candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "candidate_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_list_candidate_notes",
+  "output_schema": {},
+  "title": "List a candidate's notes"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List candidates"
+  },
+  "description": "List candidates, newest first, optionally filtered by job, search, qualification, ids or creation date. Default 25 per page. detail auto returns whole records where they fit; if one record or page metadata is too large, explicitly marked summaries preserve candidate ids and omit other fields/references. detail full requires whole records; summary always returns summaries. Pages can be smaller than limit: continue with pagination.next_offset as offset and the same filters; null means finished. Do not advance by limit. Recruitee: GET /c/{company_id}/candidates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "created_after": {
+     "description": "Only candidates created after this date (ISO 8601).",
+     "type": "string"
+    },
+    "detail": {
+     "description": "Default auto: full records, with an explicitly marked summary fallback for oversized records/metadata. full refuses a page that cannot fit; summary returns only bounded identity fields.",
+     "enum": [
+      "auto",
+      "full",
+      "summary"
+     ],
+     "type": "string"
+    },
+    "disqualified": {
+     "description": "true = only disqualified candidates.",
+     "type": "boolean"
+    },
+    "ids": {
+     "description": "Only these candidate ids.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Candidates fetched per page (default 25, max 1000); the returned page can be smaller to fit the output budget.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offer_id": {
+     "description": "Only candidates on this job/talent pool.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "offset": {
+     "description": "Number of candidates to skip.",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "qualified": {
+     "description": "true = only qualified candidates.",
+     "type": "boolean"
+    },
+    "query": {
+     "description": "Search by candidate name or job.",
+     "type": "string"
+    },
+    "sort": {
+     "description": "Sort order (default by_date).",
+     "enum": [
+      "by_date",
+      "by_last_message"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_candidates",
+  "output_schema": {},
+  "title": "List candidates"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List departments"
+  },
+  "description": "List the company's departments with their ids and job counts. Recruitee: GET /c/{company_id}/departments.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "recruitee_list_departments",
+  "output_schema": {},
+  "title": "List departments"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List disqualify reasons"
+  },
+  "description": "List the company's configured disqualification reasons (id, name, position). Useful for reading why candidates were disqualified. Recruitee: GET /c/{company_id}/disqualify_reasons.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "recruitee_list_disqualify_reasons",
+  "output_schema": {},
+  "title": "List disqualify reasons"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List evaluations"
+  },
+  "description": "List interview results — evaluations (rating + note) and questionnaire scorecards — optionally for one candidate or by selected reviewers. Recruitee: GET /c/{company_id}/interview/results.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "admin_ids": {
+     "description": "Only results by these admin ids.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "candidate_id": {
+     "description": "Only this candidate's evaluations.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "kind": {
+     "description": "Result kind (default all).",
+     "enum": [
+      "evaluation",
+      "questionnaire",
+      "all"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "description": "Results per page (default unlimited).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number; only used together with limit.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "scope": {
+     "description": "Only mine, or all (default all).",
+     "enum": [
+      "my",
+      "all"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_evaluations",
+  "output_schema": {},
+  "title": "List evaluations"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List interviews"
+  },
+  "description": "List scheduled interview events (candidate_id, offer_id, stage_id, start time, duration, location, attendees). Defaults to upcoming events for the whole company; narrow by candidate, date range or interviewer. Recruitee: GET /c/{company_id}/interview/events.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "admin_ids": {
+     "description": "Only events assigned to these admin ids.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "candidate_id": {
+     "description": "Only this candidate's interviews.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "end_date": {
+     "description": "Range end, YYYY-MM-DD.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Events per page (default unlimited).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number; only used together with limit.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "scope": {
+     "description": "Only mine, or all (default all).",
+     "enum": [
+      "my",
+      "all"
+     ],
+     "type": "string"
+    },
+    "start_date": {
+     "description": "Range start, YYYY-MM-DD.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "status": {
+     "description": "Which events (default upcoming).",
+     "enum": [
+      "upcoming",
+      "past_due",
+      "all"
+     ],
+     "type": "string"
+    },
+    "timezone": {
+     "description": "Timezone for the date range, e.g. Europe/Amsterdam.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_interview_events",
+  "output_schema": {},
+  "title": "List interviews"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List jobs"
+  },
+  "description": "List the company's jobs (Recruitee calls them offers) with id, title, status, slug, department_id, recruiter_id, hiring_manager_id and pipeline_template_id. Filter by status, department, location, recruiter, hiring manager, tag and more; add heavy fields with `include` (e.g. counters for candidate counts, description, salary, location_ids). Paginated with limit + page (default 1000 per page); `meta.total_count` gives the total. Recruitee: GET /c/{company_id}/offers.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "categories": {
+     "description": "Only these job categories, e.g. information_technology.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "department_ids": {
+     "description": "Only jobs in these departments.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "employment_types": {
+     "description": "Only these employment types, e.g. fulltime.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "hiring_manager_ids": {
+     "description": "Only jobs with these hiring managers (admin ids).",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "include": {
+     "description": "Extra field groups to return.",
+     "items": {
+      "enum": [
+       "description",
+       "requirements",
+       "highlight",
+       "work_models",
+       "salary",
+       "dynamic_fields",
+       "follower_ids",
+       "location_ids",
+       "requisition_ids",
+       "tags",
+       "job_scheduler",
+       "issues",
+       "counters"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "lang_codes": {
+     "description": "Only jobs in these languages, e.g. en.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Jobs per page (default 1000).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "location_ids": {
+     "description": "Only jobs at these locations.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "offer_ids": {
+     "description": "Only these job ids.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "priorities": {
+     "description": "Only jobs with these priorities.",
+     "items": {
+      "enum": [
+       "urgent",
+       "high",
+       "normal",
+       "low"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "recruiter_ids": {
+     "description": "Only jobs with these recruiters (admin ids).",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "statuses": {
+     "description": "Only jobs in these statuses.",
+     "items": {
+      "enum": [
+       "draft",
+       "published",
+       "internal",
+       "closed",
+       "archived"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "tag_ids": {
+     "description": "Only jobs with these job tags.",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_offers",
+  "output_schema": {},
+  "title": "List jobs"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List candidate tags"
+  },
+  "description": "List the company's candidate tags with ids and usage counts. Tag ids are used in recruitee_search_candidates filters. Recruitee: GET /c/{company_id}/tags.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "query": {
+     "description": "Search tags by name.",
+     "type": "string"
+    },
+    "sort_by": {
+     "description": "Sort field.",
+     "enum": [
+      "name",
+      "taggings_count"
+     ],
+     "type": "string"
+    },
+    "sort_order": {
+     "description": "Sort direction (default asc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_tags",
+  "output_schema": {},
+  "title": "List candidate tags"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List tasks"
+  },
+  "description": "List recruiting tasks (title, description, due date, completed, candidate_id). With candidate_id, lists that candidate's tasks (Recruitee: GET /c/{company_id}/candidates/{candidate_id}/tasks — only `status` applies). Otherwise lists company tasks with scope, assignee, sorting and paging (Recruitee: GET /c/{company_id}/tasks).",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "admin_ids": {
+     "description": "Only tasks assigned to these admin ids (company list only).",
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "type": "array"
+    },
+    "candidate_id": {
+     "description": "Only this candidate's tasks.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "limit": {
+     "description": "Tasks per page (company list only).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "scope": {
+     "description": "Whose tasks (company list only).",
+     "enum": [
+      "my",
+      "unassigned",
+      "all"
+     ],
+     "type": "string"
+    },
+    "sort_by": {
+     "description": "Sort field (company list only).",
+     "enum": [
+      "due_date",
+      "created_at",
+      "completed_at"
+     ],
+     "type": "string"
+    },
+    "sort_order": {
+     "description": "Sort direction (company list only).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "description": "Completed or open tasks only.",
+     "enum": [
+      "completed",
+      "uncompleted"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_tasks",
+  "output_schema": {},
+  "title": "List tasks"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List team members"
+  },
+  "description": "List the company's team members (memberships): admin_id, role, whether they are a recruiter or hiring manager, and the jobs they can access. Use admin_id values for task assignees and filters. User names/emails are in the `references` array. Recruitee: GET /c/{company_id}/memberships.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "limit": {
+     "description": "Results per page.",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Search by name or email.",
+     "type": "string"
+    },
+    "role_id": {
+     "description": "Only members with this role id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "sort_by": {
+     "description": "Sort field (default name).",
+     "enum": [
+      "name",
+      "role",
+      "email"
+     ],
+     "type": "string"
+    },
+    "sort_order": {
+     "description": "Sort direction (default asc).",
+     "enum": [
+      "asc",
+      "desc"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_list_team_members",
+  "output_schema": {},
+  "title": "List team members"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Move a candidate to another stage"
+  },
+  "description": "WRITE: move a candidate to another stage of a job's pipeline. Takes the PLACEMENT id (from recruitee_get_candidate → placements[].id, one per job) and the destination stage id (from recruitee_get_pipeline_template). Moving to a 'hired' stage also requires work_location_id. Stage automations configured in Recruitee may run. Undo by moving back. Recruitee: PATCH /c/{company_id}/placements/{id}/change_stage.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "placement_id": {
+     "description": "The placement id (candidate-on-job), not the candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "stage_id": {
+     "description": "Destination stage id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "work_location_id": {
+     "description": "Location id — required by Recruitee when the destination is a hired stage.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "placement_id",
+    "stage_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_move_candidate_stage",
+  "output_schema": {},
+  "title": "Move a candidate to another stage"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Search candidates"
+  },
+  "description": "Search the company's candidates with Recruitee's candidate search (the same engine as the app's filters). `query` is a free-text search across name, emails, phones, tags, sources, job assignments, current stage, cover letter and CV content. `filters` accepts Recruitee filter objects verbatim, e.g. {\"field\":\"created_at\",\"gte\":1548975600} (Unix seconds), {\"field\":\"has_cv\",\"eq\":true}, {\"filter\":\"tags\",\"id\":{\"in\":[12]}}, {\"filter\":\"stages\",\"name\":{\"in\":[\"Phone interview\"]}}. Returns `hits` (with each candidate's placements: job + current stage) and `total`. Recruitee: GET /c/{company_id}/search/new/candidates.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "filters": {
+     "description": "Additional Recruitee search filter objects, sent as filters_json.",
+     "items": {
+      "additionalProperties": {},
+      "propertyNames": {
+       "type": "string"
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "description": "Candidates per page (default 60).",
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Page number, starting at 1.",
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Free-text search (adds a {\"field\":\"all\",\"query\":...} filter).",
+     "type": "string"
+    },
+    "sort_by": {
+     "description": "Sort key with _asc or _desc suffix, e.g. created_at_desc (default), relevance_desc, candidate_name_asc, candidate_rating_desc, candidate_stage_name_asc.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "recruitee_search_candidates",
+  "output_schema": {},
+  "title": "Search candidates"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Update a candidate"
+  },
+  "description": "WRITE: update a candidate's name or contact details. Only the fields you pass change; list fields (emails, phones, links) REPLACE the existing list, so pass the full list you want. Recruitee: PATCH /c/{company_id}/candidates/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "candidate_id": {
+     "description": "The candidate id.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "cover_letter": {
+     "description": "Cover letter text.",
+     "type": "string"
+    },
+    "emails": {
+     "description": "Full replacement list of email addresses.",
+     "items": {
+      "format": "email",
+      "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "links": {
+     "description": "Full replacement list of other links.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "name": {
+     "description": "New full name.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "phones": {
+     "description": "Full replacement list of phone numbers.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "social_links": {
+     "description": "Full replacement list of social profile URLs.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "candidate_id"
+   ],
+   "type": "object"
+  },
+  "name": "recruitee_update_candidate",
+  "output_schema": {},
+  "title": "Update a candidate"
+ }
+]

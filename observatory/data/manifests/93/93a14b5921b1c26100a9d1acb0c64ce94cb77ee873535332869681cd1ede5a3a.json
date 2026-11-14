@@ -1,0 +1,25 @@
+[
+ {
+  "description": "Check whether weather or US airport delays will affect a flight, pickup or shipment. By ICAO or IATA code: the latest decoded METAR (wind, visibility, ceiling, flight category) and current TAF from the NOAA Aviation Weather Center, FAA ground stops, delay programmes and closures for US airports, and airport details from OurAirports. Use when planning around a specific airport in the next hours. $0.003 per call, USDC on Base (x402).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "airport": {
+     "description": "ICAO (EKCH, KJFK) or IATA (CPH, JFK) airport code",
+     "type": "string"
+    },
+    "payment_signature": {
+     "description": "x402 v2 PAYMENT-SIGNATURE header value. Omit to receive payment requirements.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "airport_weather",
+  "output_schema": {}
+ }
+]

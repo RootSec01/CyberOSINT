@@ -1,0 +1,1835 @@
+[
+ {
+  "_meta": {
+   "openai/widgetAccessible": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check the booking"
+  },
+  "description": "Says where a quote stands: priced, waiting on the person (with minutes left on the hold), booked (when, and with which tech), they said it was not them, or the hold ran out. Once booked, it also says whether the tech is on the way (with the minutes left while their phone shares the drive), arrived (and whether inside the time promised), finished, or the visit was cancelled, and the tech's state license with the board that checked it, when it is checked and in force. Use it after hold_time, or later, to tell the person how it went. Sends nothing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "quote_id": {
+     "description": "The quote_id price gave.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "quote_id"
+   ],
+   "type": "object"
+  },
+  "name": "booking_status",
+  "output_schema": {
+   "properties": {
+    "change": {
+     "description": "A change the person's assistant asked for once booked: a cancel (done at once, free under the shop's terms), or a move (the shop texted the person a link, and done once they picked a new time).",
+     "properties": {
+      "asked": {
+       "enum": [
+        "cancel",
+        "move"
+       ],
+       "type": "string"
+      },
+      "asked_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "done": {
+       "type": "boolean"
+      },
+      "texted_at": {
+       "format": "date-time",
+       "type": "string"
+      }
+     },
+     "required": [
+      "asked",
+      "asked_at",
+      "done"
+     ],
+     "type": "object"
+    },
+    "held_until": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "minutes_left": {
+     "type": "integer"
+    },
+    "quote_id": {
+     "type": "string"
+    },
+    "said": {
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "priced",
+      "waits_for_owner",
+      "waiting",
+      "ran_out",
+      "declined",
+      "booked",
+      "canceled",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "visit": {
+     "description": "The booked visit as it stands now: its time, its tech, and what has happened since the yes.",
+     "properties": {
+      "arrived_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "canceled_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "drive": {
+       "description": "While the tech is on the way with their phone sharing: the minutes left on the drive, the same the person's own tracking page shows. estimated is true when the phone went quiet and the minutes follow the road's pace. Absent otherwise; arrival ends it.",
+       "properties": {
+        "arrives_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "estimated": {
+         "type": "boolean"
+        },
+        "minutes_left": {
+         "type": "integer"
+        }
+       },
+       "required": [
+        "minutes_left",
+        "arrives_at",
+        "estimated"
+       ],
+       "type": "object"
+      },
+      "ends_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "finished_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "now": {
+       "description": "Where the visit has got to, from the tech's own taps and the visit's close.",
+       "enum": [
+        "scheduled",
+        "on_the_way",
+        "arrived",
+        "finished",
+        "canceled"
+       ],
+       "type": "string"
+      },
+      "on_the_way_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "promise": {
+       "description": "The time promised now, and how the arrival measured against it: open (its time has not ended), kept (arrived inside it), early or late (by minutes), missed, canceled, or unrecorded.",
+       "properties": {
+        "minutes": {
+         "type": "integer"
+        },
+        "standing": {
+         "enum": [
+          "open",
+          "kept",
+          "early",
+          "late",
+          "missed",
+          "canceled",
+          "unrecorded"
+         ],
+         "type": "string"
+        },
+        "window_end": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "window_start": {
+         "format": "date-time",
+         "type": "string"
+        }
+       },
+       "required": [
+        "window_start",
+        "window_end",
+        "standing"
+       ],
+       "type": "object"
+      },
+      "starts_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "tech": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "tech_license": {
+       "description": "The tech's state license as the shop checked it with the state board that issues it: in force, under the tech's name, not lapsed. Absent when it is not checked, not found, lapsed, or the state has no board list to ask.",
+       "properties": {
+        "board": {
+         "type": "string"
+        },
+        "board_page": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "checked_on": {
+         "format": "date",
+         "type": "string"
+        },
+        "expires_on": {
+         "format": "date",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "number": {
+         "type": "string"
+        },
+        "state": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "board",
+        "state",
+        "number",
+        "checked_on"
+       ],
+       "type": "object"
+      },
+      "when": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "when",
+      "starts_at",
+      "ends_at"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "quote_id",
+    "state",
+    "said"
+   ],
+   "type": "object"
+  },
+  "title": "Check the booking"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Cancel the visit"
+  },
+  "description": "Cancels a booked visit when the person asks and confirms in this conversation, free under the shop's own terms: within 3 days of booking, and before the visit; nothing is owed. Side effects: the visit comes off the shop's schedule, and the shop texts the person that their assistant cancelled it. It cannot be undone here: to book again, get a new quote. Past those terms the person calls the shop. Calling again sends no second text.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "quote_id": {
+     "description": "The quote_id find_help or get_quote gave, for a booked visit.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "quote_id"
+   ],
+   "type": "object"
+  },
+  "name": "cancel_booking",
+  "output_schema": {
+   "properties": {
+    "change": {
+     "description": "A change the person's assistant asked for once booked: a cancel (done at once, free under the shop's terms), or a move (the shop texted the person a link, and done once they picked a new time).",
+     "properties": {
+      "asked": {
+       "enum": [
+        "cancel",
+        "move"
+       ],
+       "type": "string"
+      },
+      "asked_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "done": {
+       "type": "boolean"
+      },
+      "texted_at": {
+       "format": "date-time",
+       "type": "string"
+      }
+     },
+     "required": [
+      "asked",
+      "asked_at",
+      "done"
+     ],
+     "type": "object"
+    },
+    "held_until": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "minutes_left": {
+     "type": "integer"
+    },
+    "quote_id": {
+     "type": "string"
+    },
+    "said": {
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "priced",
+      "waits_for_owner",
+      "waiting",
+      "ran_out",
+      "declined",
+      "booked",
+      "canceled",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "visit": {
+     "description": "The booked visit as it stands now: its time, its tech, and what has happened since the yes.",
+     "properties": {
+      "arrived_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "canceled_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "drive": {
+       "description": "While the tech is on the way with their phone sharing: the minutes left on the drive, the same the person's own tracking page shows. estimated is true when the phone went quiet and the minutes follow the road's pace. Absent otherwise; arrival ends it.",
+       "properties": {
+        "arrives_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "estimated": {
+         "type": "boolean"
+        },
+        "minutes_left": {
+         "type": "integer"
+        }
+       },
+       "required": [
+        "minutes_left",
+        "arrives_at",
+        "estimated"
+       ],
+       "type": "object"
+      },
+      "ends_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "finished_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "now": {
+       "description": "Where the visit has got to, from the tech's own taps and the visit's close.",
+       "enum": [
+        "scheduled",
+        "on_the_way",
+        "arrived",
+        "finished",
+        "canceled"
+       ],
+       "type": "string"
+      },
+      "on_the_way_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "promise": {
+       "description": "The time promised now, and how the arrival measured against it: open (its time has not ended), kept (arrived inside it), early or late (by minutes), missed, canceled, or unrecorded.",
+       "properties": {
+        "minutes": {
+         "type": "integer"
+        },
+        "standing": {
+         "enum": [
+          "open",
+          "kept",
+          "early",
+          "late",
+          "missed",
+          "canceled",
+          "unrecorded"
+         ],
+         "type": "string"
+        },
+        "window_end": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "window_start": {
+         "format": "date-time",
+         "type": "string"
+        }
+       },
+       "required": [
+        "window_start",
+        "window_end",
+        "standing"
+       ],
+       "type": "object"
+      },
+      "starts_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "tech": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "tech_license": {
+       "description": "The tech's state license as the shop checked it with the state board that issues it: in force, under the tech's name, not lapsed. Absent when it is not checked, not found, lapsed, or the state has no board list to ask.",
+       "properties": {
+        "board": {
+         "type": "string"
+        },
+        "board_page": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "checked_on": {
+         "format": "date",
+         "type": "string"
+        },
+        "expires_on": {
+         "format": "date",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "number": {
+         "type": "string"
+        },
+        "state": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "board",
+        "state",
+        "number",
+        "checked_on"
+       ],
+       "type": "object"
+      },
+      "when": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "when",
+      "starts_at",
+      "ends_at"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "quote_id",
+    "state",
+    "said"
+   ],
+   "type": "object"
+  },
+  "title": "Cancel the visit"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Checked with the state",
+   "openai/toolInvocation/invoking": "Checking with the state"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Check a license with the state"
+  },
+  "description": "Asks whether a US contractor or trade license number is in force, with the state board that licenses that work: the board's status, the holder's name as the board lists it, the license kind, its end date, whether it covers the work asked about, and the day the board said so. Use it when the person wants to know whether a shop or a technician is licensed, given the number. Some states license the work only by city or county, or not at all; then it says so and gives the state's own page, or each city's and county's own page in local_lists. When a shop on HandledIQ holds the license, in force, its record and booking door come with the answer. It gives license status only, never a phone, an address or an email. Side effects: none.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "number": {
+     "description": "The license number as it is printed, like M-39874 or ROC 123456.",
+     "type": "string"
+    },
+    "signed": {
+     "description": "Optional. true adds the shop's signed record, when a shop on HandledIQ holds the license, to check with verify_record. Leave it out unless the person asks for proof.",
+     "type": "boolean"
+    },
+    "state": {
+     "description": "The state's two letters, like TX, AZ or DC.",
+     "type": "string"
+    },
+    "trade": {
+     "description": "The work the license is for: hvac (heating and cooling), plumbing, electrical, roofing, pest (pest control), contractor (general building) or demolition.",
+     "enum": [
+      "hvac",
+      "plumbing",
+      "electrical",
+      "roofing",
+      "pest",
+      "contractor",
+      "demolition"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "state",
+    "number",
+    "trade"
+   ],
+   "type": "object"
+  },
+  "name": "check_license",
+  "output_schema": {
+   "properties": {
+    "checkable": {
+     "description": "false when the state has no license to check for this work, or no list HandledIQ can read by number.",
+     "type": "boolean"
+    },
+    "checked_on": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "handlediq_shop": {
+     "properties": {
+      "business_id": {
+       "type": "string"
+      },
+      "door": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      },
+      "record": {
+       "type": "object"
+      },
+      "signed_record": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "licenses": {
+     "items": {
+      "properties": {
+       "board": {
+        "properties": {
+         "name": {
+          "type": [
+           "string",
+           "null"
+          ]
+         },
+         "url": {
+          "type": "string"
+         }
+        },
+        "type": "object"
+       },
+       "checked_on": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "covers_trade": {
+        "type": "boolean"
+       },
+       "expires_on": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "holder": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "in_force": {
+        "description": "null when the board's newest list is older than the day it ended.",
+        "type": [
+         "boolean",
+         "null"
+        ]
+       },
+       "kind": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "number": {
+        "type": "string"
+       },
+       "status": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "required": [
+       "board",
+       "number",
+       "in_force",
+       "covers_trade",
+       "checked_on"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "local_lists": {
+     "description": "Where the state leaves the license to cities or counties: each one's own license page HandledIQ has, named by its place.",
+     "items": {
+      "properties": {
+       "name": {
+        "type": "string"
+       },
+       "place": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "place",
+       "url"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "look_up": {
+     "properties": {
+      "name": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "url": {
+       "type": "string"
+      }
+     },
+     "type": [
+      "object",
+      "null"
+     ]
+    },
+    "note": {
+     "type": "string"
+    },
+    "number": {
+     "type": "string"
+    },
+    "says": {
+     "type": "string"
+    },
+    "state": {
+     "type": "string"
+    },
+    "trade": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "state",
+    "trade",
+    "number",
+    "checkable",
+    "licenses",
+    "says",
+    "checked_on"
+   ],
+   "type": "object"
+  },
+  "title": "Check a license with the state"
+ },
+ {
+  "_meta": {
+   "openai/toolInvocation/invoked": "Found shops near you",
+   "openai/toolInvocation/invoking": "Finding shops near you"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Find a shop near the person"
+  },
+  "description": "Finds up to 3 shops on HandledIQ near a US ZIP code that do what the person needs, soonest open time first: each with its own book prices (all in, US dollars), their terms, its soonest open times, its service record and a quote_id for hold_time. Use it when the person needs home service at a US house: heating and cooling, plumbing, electrical, roofing, pest control, junk removal, demolition and more. An empty list means no shop on HandledIQ takes that work near that ZIP yet. Sends nothing to anyone.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "assistant": {
+     "description": "Your own name, as the person you act for knows you, like ChatGPT, Claude or Muse. It goes in the text the shop sends them.",
+     "type": "string"
+    },
+    "budget_dollars": {
+     "description": "Optional. The most the person wants to pay, in dollars.",
+     "type": "number"
+    },
+    "day": {
+     "description": "Optional. The first day that works for the person, YYYY-MM-DD.",
+     "type": "string"
+    },
+    "include_signed_records": {
+     "description": "Optional. true adds each shop's signed record and the keys to check it with verify_record, a few thousand characters per shop. Leave it out unless the person asks for proof.",
+     "type": "boolean"
+    },
+    "need": {
+     "description": "What the person needs, in a line, like: AC not cooling, a roof leak, ants in the kitchen, or a couch to haul away.",
+     "type": "string"
+    },
+    "zip": {
+     "description": "The house's 5-digit US ZIP code.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "need",
+    "zip",
+    "assistant"
+   ],
+   "type": "object"
+  },
+  "name": "find_help",
+  "output_schema": {
+   "properties": {
+    "check_records": {
+     "description": "Only with include_signed_records: how to check each signed_record, every shop's key by its issuer's address.",
+     "type": "object"
+    },
+    "next": {
+     "type": "string"
+    },
+    "shops": {
+     "items": {
+      "properties": {
+       "business_id": {
+        "type": "string"
+       },
+       "currency": {
+        "description": "Every amount is US dollars.",
+        "enum": [
+         "USD"
+        ],
+        "type": "string"
+       },
+       "door": {
+        "type": "string"
+       },
+       "holds_times": {
+        "type": "boolean"
+       },
+       "prices": {
+        "items": {
+         "properties": {
+          "detail": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          },
+          "option_id": {
+           "type": "string"
+          },
+          "price": {
+           "type": "string"
+          },
+          "price_cents": {
+           "type": "integer"
+          },
+          "within_budget": {
+           "type": "boolean"
+          }
+         },
+         "required": [
+          "option_id",
+          "name",
+          "price_cents",
+          "price"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "quote_id": {
+        "type": "string"
+       },
+       "record": {
+        "description": "The shop's service record: counts from its own records (work finished, callbacks by cause, arrivals kept, houses served again, homeowner ratings, guarantee), each with how many records it rests on. Null until its owner shares it.",
+        "type": [
+         "object",
+         "null"
+        ]
+       },
+       "shop": {
+        "type": "string"
+       },
+       "signed_record": {
+        "description": "The record as a W3C Verifiable Credential in a compact JWS (typ vc+jwt, alg Ed25519) over its RFC 8785 form.",
+        "type": "string"
+       },
+       "soonest": {
+        "properties": {
+         "ends_at": {
+          "format": "date-time",
+          "type": "string"
+         },
+         "label": {
+          "description": "The time as a button says it, like: Wed 8 to 10 AM.",
+          "type": "string"
+         },
+         "starts_at": {
+          "format": "date-time",
+          "type": "string"
+         },
+         "tech": {
+          "type": [
+           "string",
+           "null"
+          ]
+         },
+         "time_id": {
+          "type": "string"
+         },
+         "time_zone": {
+          "description": "The shop's time zone, like: America/Chicago.",
+          "type": "string"
+         },
+         "when": {
+          "description": "The time in the shop's own time zone (time_zone), like: Today, 8 to 10 AM or Thu, Oct 22, 8 to 10 AM. Today is the shop's today.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "time_id",
+         "when",
+         "starts_at",
+         "ends_at"
+        ],
+        "type": "object"
+       },
+       "terms": {
+        "description": "The terms every price here comes with: all in with no fees, paid after the work, and free to cancel within cancel_free_days of booking, before the visit.",
+        "properties": {
+         "all_in": {
+          "type": "boolean"
+         },
+         "cancel_free_days": {
+          "type": "integer"
+         },
+         "fees_cents": {
+          "type": "integer"
+         },
+         "pay": {
+          "enum": [
+           "after_the_work"
+          ],
+          "type": "string"
+         },
+         "words": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "all_in",
+         "fees_cents",
+         "pay",
+         "cancel_free_days",
+         "words"
+        ],
+        "type": "object"
+       },
+       "times": {
+        "items": {
+         "properties": {
+          "ends_at": {
+           "format": "date-time",
+           "type": "string"
+          },
+          "label": {
+           "description": "The time as a button says it, like: Wed 8 to 10 AM.",
+           "type": "string"
+          },
+          "starts_at": {
+           "format": "date-time",
+           "type": "string"
+          },
+          "tech": {
+           "type": [
+            "string",
+            "null"
+           ]
+          },
+          "time_id": {
+           "type": "string"
+          },
+          "time_zone": {
+           "description": "The shop's time zone, like: America/Chicago.",
+           "type": "string"
+          },
+          "when": {
+           "description": "The time in the shop's own time zone (time_zone), like: Today, 8 to 10 AM or Thu, Oct 22, 8 to 10 AM. Today is the shop's today.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "time_id",
+          "when",
+          "starts_at",
+          "ends_at"
+         ],
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "visit": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "shop",
+       "business_id",
+       "quote_id",
+       "currency",
+       "prices",
+       "terms",
+       "soonest",
+       "door"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "zip": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "zip",
+    "shops",
+    "next"
+   ],
+   "type": "object"
+  },
+  "title": "Find a shop near the person"
+ },
+ {
+  "_meta": {
+   "openai/widgetAccessible": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Get one shop's price and open times"
+  },
+  "description": "Gets this shop's own book prices for what the person needs and its next real open times. Use it when the person wants a price or a time from this shop. Returns a quote_id for hold_time, the prices (all in, US dollars), their terms and up to 6 open times. visit true means no fixed price fits exactly, so the price is the shop's visit to find the problem. A price over the owner's limit waits for the owner; work outside the shop's trade gets no quote. Sends nothing to anyone. The shop is the one business_id names; kind is one of the kinds request_service gave, or leave it out and say the need in words.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "assistant": {
+     "description": "Your own name, as the person you act for knows you, like ChatGPT, Claude or Muse. It goes in the text the shop sends them.",
+     "type": "string"
+    },
+    "budget_dollars": {
+     "description": "Optional. The most the person wants to pay, in dollars.",
+     "type": "number"
+    },
+    "business_id": {
+     "description": "The shop's business_id: its provider_business_id in HandledIQ's business feed, or a find_help answer's.",
+     "type": "string"
+    },
+    "day": {
+     "description": "Optional. The first day that works for the person, YYYY-MM-DD; times start that day.",
+     "type": "string"
+    },
+    "kind": {
+     "description": "Optional. One of the shop's kinds of work, as request_service gave them (work[].kind).",
+     "type": "string"
+    },
+    "need": {
+     "description": "What the person needs, in a line, like: AC check, a roof leak, ants in the kitchen, or a couch to haul away.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "business_id",
+    "need",
+    "assistant"
+   ],
+   "type": "object"
+  },
+  "name": "get_quote",
+  "output_schema": {
+   "properties": {
+    "currency": {
+     "description": "Every amount is US dollars.",
+     "enum": [
+      "USD"
+     ],
+     "type": "string"
+    },
+    "holds_times": {
+     "type": "boolean"
+    },
+    "next": {
+     "type": "string"
+    },
+    "prices": {
+     "items": {
+      "properties": {
+       "detail": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "option_id": {
+        "type": "string"
+       },
+       "price": {
+        "type": "string"
+       },
+       "price_cents": {
+        "type": "integer"
+       },
+       "within_budget": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "option_id",
+       "name",
+       "price_cents",
+       "price"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "quote_id": {
+     "description": "Holds a time with hold_time. Null when the shop does not do that kind of work.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "shop": {
+     "type": "string"
+    },
+    "terms": {
+     "description": "The terms every price here comes with: all in with no fees, paid after the work, and free to cancel within cancel_free_days of booking, before the visit.",
+     "properties": {
+      "all_in": {
+       "type": "boolean"
+      },
+      "cancel_free_days": {
+       "type": "integer"
+      },
+      "fees_cents": {
+       "type": "integer"
+      },
+      "pay": {
+       "enum": [
+        "after_the_work"
+       ],
+       "type": "string"
+      },
+      "words": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "all_in",
+      "fees_cents",
+      "pay",
+      "cancel_free_days",
+      "words"
+     ],
+     "type": "object"
+    },
+    "times": {
+     "items": {
+      "properties": {
+       "ends_at": {
+        "format": "date-time",
+        "type": "string"
+       },
+       "label": {
+        "description": "The time as a button says it, like: Wed 8 to 10 AM.",
+        "type": "string"
+       },
+       "starts_at": {
+        "format": "date-time",
+        "type": "string"
+       },
+       "tech": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "time_id": {
+        "type": "string"
+       },
+       "time_zone": {
+        "description": "The shop's time zone, like: America/Chicago.",
+        "type": "string"
+       },
+       "when": {
+        "description": "The time in the shop's own time zone (time_zone), like: Today, 8 to 10 AM or Thu, Oct 22, 8 to 10 AM. Today is the shop's today.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "time_id",
+       "when",
+       "starts_at",
+       "ends_at"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "visit": {
+     "type": "boolean"
+    },
+    "waits_for_owner": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "quote_id",
+    "shop",
+    "currency",
+    "prices",
+    "terms",
+    "times",
+    "holds_times",
+    "next"
+   ],
+   "type": "object"
+  },
+  "title": "Get one shop's price and open times"
+ },
+ {
+  "_meta": {
+   "openai/widgetAccessible": true
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Hold a time and text the link"
+  },
+  "description": "Holds one open time from a quote for 10 minutes and has the shop text the person one link to book it. Use it only once the person has picked a price and a time, given their name and US mobile number, and said to go ahead. Side effect: the shop sends one text to that number. Nothing is booked until the person taps Book on the shop's page, where they also type their street address; you cannot book for them. Calling again with the same choice while the time is held sends no second text. The quote_id may come from any shop find_help or get_quote gave.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "mobile": {
+     "description": "The person's US mobile number, with its area code, as they gave it. The shop texts it once.",
+     "type": "string"
+    },
+    "name": {
+     "description": "The person's name, as they gave it.",
+     "type": "string"
+    },
+    "option_id": {
+     "description": "One of the quote's prices, by its option_id.",
+     "type": "string"
+    },
+    "quote_id": {
+     "description": "The quote_id price gave.",
+     "type": "string"
+    },
+    "time_id": {
+     "description": "One of the quote's times, by its time_id.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "quote_id",
+    "option_id",
+    "time_id",
+    "name",
+    "mobile"
+   ],
+   "type": "object"
+  },
+  "name": "hold_time",
+  "output_schema": {
+   "properties": {
+    "change": {
+     "description": "A change the person's assistant asked for once booked: a cancel (done at once, free under the shop's terms), or a move (the shop texted the person a link, and done once they picked a new time).",
+     "properties": {
+      "asked": {
+       "enum": [
+        "cancel",
+        "move"
+       ],
+       "type": "string"
+      },
+      "asked_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "done": {
+       "type": "boolean"
+      },
+      "texted_at": {
+       "format": "date-time",
+       "type": "string"
+      }
+     },
+     "required": [
+      "asked",
+      "asked_at",
+      "done"
+     ],
+     "type": "object"
+    },
+    "held_until": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "minutes_left": {
+     "type": "integer"
+    },
+    "quote_id": {
+     "type": "string"
+    },
+    "said": {
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "priced",
+      "waits_for_owner",
+      "waiting",
+      "ran_out",
+      "declined",
+      "booked",
+      "canceled",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "visit": {
+     "description": "The booked visit as it stands now: its time, its tech, and what has happened since the yes.",
+     "properties": {
+      "arrived_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "canceled_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "drive": {
+       "description": "While the tech is on the way with their phone sharing: the minutes left on the drive, the same the person's own tracking page shows. estimated is true when the phone went quiet and the minutes follow the road's pace. Absent otherwise; arrival ends it.",
+       "properties": {
+        "arrives_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "estimated": {
+         "type": "boolean"
+        },
+        "minutes_left": {
+         "type": "integer"
+        }
+       },
+       "required": [
+        "minutes_left",
+        "arrives_at",
+        "estimated"
+       ],
+       "type": "object"
+      },
+      "ends_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "finished_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "now": {
+       "description": "Where the visit has got to, from the tech's own taps and the visit's close.",
+       "enum": [
+        "scheduled",
+        "on_the_way",
+        "arrived",
+        "finished",
+        "canceled"
+       ],
+       "type": "string"
+      },
+      "on_the_way_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "promise": {
+       "description": "The time promised now, and how the arrival measured against it: open (its time has not ended), kept (arrived inside it), early or late (by minutes), missed, canceled, or unrecorded.",
+       "properties": {
+        "minutes": {
+         "type": "integer"
+        },
+        "standing": {
+         "enum": [
+          "open",
+          "kept",
+          "early",
+          "late",
+          "missed",
+          "canceled",
+          "unrecorded"
+         ],
+         "type": "string"
+        },
+        "window_end": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "window_start": {
+         "format": "date-time",
+         "type": "string"
+        }
+       },
+       "required": [
+        "window_start",
+        "window_end",
+        "standing"
+       ],
+       "type": "object"
+      },
+      "starts_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "tech": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "tech_license": {
+       "description": "The tech's state license as the shop checked it with the state board that issues it: in force, under the tech's name, not lapsed. Absent when it is not checked, not found, lapsed, or the state has no board list to ask.",
+       "properties": {
+        "board": {
+         "type": "string"
+        },
+        "board_page": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "checked_on": {
+         "format": "date",
+         "type": "string"
+        },
+        "expires_on": {
+         "format": "date",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "number": {
+         "type": "string"
+        },
+        "state": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "board",
+        "state",
+        "number",
+        "checked_on"
+       ],
+       "type": "object"
+      },
+      "when": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "when",
+      "starts_at",
+      "ends_at"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "quote_id",
+    "state",
+    "said"
+   ],
+   "type": "object"
+  },
+  "title": "Hold a time and text the link"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Ask to move the visit"
+  },
+  "description": "For a booked visit the person wants at another time: the shop texts the person one link to pick a new time when the same tech is free, and the visit moves only when they pick one. Side effect: one text to the person. Nothing changes on your word; booking_status shows the new time once they pick. Asked again within 10 minutes, it sends no second text.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "quote_id": {
+     "description": "The quote_id find_help or get_quote gave, for a booked visit.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "quote_id"
+   ],
+   "type": "object"
+  },
+  "name": "move_booking",
+  "output_schema": {
+   "properties": {
+    "change": {
+     "description": "A change the person's assistant asked for once booked: a cancel (done at once, free under the shop's terms), or a move (the shop texted the person a link, and done once they picked a new time).",
+     "properties": {
+      "asked": {
+       "enum": [
+        "cancel",
+        "move"
+       ],
+       "type": "string"
+      },
+      "asked_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "done": {
+       "type": "boolean"
+      },
+      "texted_at": {
+       "format": "date-time",
+       "type": "string"
+      }
+     },
+     "required": [
+      "asked",
+      "asked_at",
+      "done"
+     ],
+     "type": "object"
+    },
+    "held_until": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "minutes_left": {
+     "type": "integer"
+    },
+    "quote_id": {
+     "type": "string"
+    },
+    "said": {
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "priced",
+      "waits_for_owner",
+      "waiting",
+      "ran_out",
+      "declined",
+      "booked",
+      "canceled",
+      "closed"
+     ],
+     "type": "string"
+    },
+    "visit": {
+     "description": "The booked visit as it stands now: its time, its tech, and what has happened since the yes.",
+     "properties": {
+      "arrived_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "canceled_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "drive": {
+       "description": "While the tech is on the way with their phone sharing: the minutes left on the drive, the same the person's own tracking page shows. estimated is true when the phone went quiet and the minutes follow the road's pace. Absent otherwise; arrival ends it.",
+       "properties": {
+        "arrives_at": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "estimated": {
+         "type": "boolean"
+        },
+        "minutes_left": {
+         "type": "integer"
+        }
+       },
+       "required": [
+        "minutes_left",
+        "arrives_at",
+        "estimated"
+       ],
+       "type": "object"
+      },
+      "ends_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "finished_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "now": {
+       "description": "Where the visit has got to, from the tech's own taps and the visit's close.",
+       "enum": [
+        "scheduled",
+        "on_the_way",
+        "arrived",
+        "finished",
+        "canceled"
+       ],
+       "type": "string"
+      },
+      "on_the_way_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "promise": {
+       "description": "The time promised now, and how the arrival measured against it: open (its time has not ended), kept (arrived inside it), early or late (by minutes), missed, canceled, or unrecorded.",
+       "properties": {
+        "minutes": {
+         "type": "integer"
+        },
+        "standing": {
+         "enum": [
+          "open",
+          "kept",
+          "early",
+          "late",
+          "missed",
+          "canceled",
+          "unrecorded"
+         ],
+         "type": "string"
+        },
+        "window_end": {
+         "format": "date-time",
+         "type": "string"
+        },
+        "window_start": {
+         "format": "date-time",
+         "type": "string"
+        }
+       },
+       "required": [
+        "window_start",
+        "window_end",
+        "standing"
+       ],
+       "type": "object"
+      },
+      "starts_at": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "tech": {
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "tech_license": {
+       "description": "The tech's state license as the shop checked it with the state board that issues it: in force, under the tech's name, not lapsed. Absent when it is not checked, not found, lapsed, or the state has no board list to ask.",
+       "properties": {
+        "board": {
+         "type": "string"
+        },
+        "board_page": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "checked_on": {
+         "format": "date",
+         "type": "string"
+        },
+        "expires_on": {
+         "format": "date",
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "number": {
+         "type": "string"
+        },
+        "state": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "board",
+        "state",
+        "number",
+        "checked_on"
+       ],
+       "type": "object"
+      },
+      "when": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "when",
+      "starts_at",
+      "ends_at"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "quote_id",
+    "state",
+    "said"
+   ],
+   "type": "object"
+  },
+  "title": "Ask to move the visit"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://widget/request-service.html",
+   "openai/toolInvocation/invoked": "Ready for a quote",
+   "openai/toolInvocation/invoking": "Opening the shop",
+   "ui": {
+    "resourceUri": "ui://widget/request-service.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get a quote"
+  },
+  "description": "Opens HandledIQ's quote window on one shop for the person to use themselves: they pick what they need, see the shop's own book price and real open times, and hold a time. Use it when the person wants to see one shop's prices and pick a time on screen, given its business_id. Returns who the shop is and the work it prices. Sends nothing; a text goes only if the person holds a time in the window.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "business_id": {
+     "description": "The shop's business_id: its provider_business_id in HandledIQ's business feed, or a find_help answer's.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "business_id"
+   ],
+   "type": "object"
+  },
+  "name": "request_service",
+  "output_schema": {
+   "properties": {
+    "business_id": {
+     "type": "string"
+    },
+    "holds_times": {
+     "type": "boolean"
+    },
+    "next": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "price_page": {
+     "type": "string"
+    },
+    "prices_answer_now": {
+     "type": "boolean"
+    },
+    "rules": {
+     "type": "string"
+    },
+    "shop": {
+     "type": "string"
+    },
+    "trade": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "work": {
+     "description": "The shop's kinds of work, the three it prices most first, then Something else (visit).",
+     "items": {
+      "properties": {
+       "detail": {
+        "type": "string"
+       },
+       "icon": {
+        "type": "string"
+       },
+       "kind": {
+        "type": "string"
+       },
+       "label": {
+        "type": "string"
+       },
+       "title": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "kind",
+       "label"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "business_id",
+    "shop",
+    "holds_times",
+    "work",
+    "price_page"
+   ],
+   "type": "object"
+  },
+  "title": "Get a quote"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check a signed record"
+  },
+  "description": "Checks a signed record from any HandledIQ shop (a house's, a technician's or a shop's): valid, with who signed it and the record it holds, or not valid and why. Anyone can make the same check with the key at the issuer's id.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "signed": {
+     "description": "The signed form a record came with (signed, or signed_record): a compact JWS, up to a million characters.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "signed"
+   ],
+   "type": "object"
+  },
+  "name": "verify_record",
+  "output_schema": {
+   "properties": {
+    "issuer": {
+     "properties": {
+      "id": {
+       "type": "string"
+      },
+      "name": {
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "key_status": {
+     "type": "string"
+    },
+    "record": {
+     "type": "object"
+    },
+    "trusted": {
+     "type": "boolean"
+    },
+    "valid": {
+     "type": "boolean"
+    },
+    "why": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "valid"
+   ],
+   "type": "object"
+  },
+  "title": "Check a signed record"
+ }
+]

@@ -1,0 +1,760 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Add or update note"
+  },
+  "description": "ADL のノードに、規範的な注意点（humanNote）を保存する（ログインが必要・editor または admin 権限）。同じ ref_path への保存は上書き（UPSERT）で、1 ノードに有効なノートは最大 1 件。\ntext: 200 字以内。「〜のため〜にする」「〜なので〜禁止」の規範の形。固有名詞は書ける。1 ノードの複数の観点は 1 文にまとめて書く。\nref_path はサーバが ADL と照合する: 見つからないときは reason=\"ref_path_not_found\" と、当たった最長の前置（matched_prefix）、そこにあるキー（candidates）を返す。ADL が読めないときは reason=\"adl_unavailable\"。\"$ref\" の先はたどらない。ADL に \"contexts\" という欄は無い（実体は \"useCases\"）。\nノートの下書きをローカルにためてから保存する進め方は iceshore://guide/common に書いてある。\n入力: content_id, ref_path, text, lang（すべて必須）。\n出力: { ok, mode: \"inserted\"|\"updated\", defined_at, updated_at }。",
+  "input_schema": {
+   "properties": {
+    "content_id": {
+     "description": "IceShore プロジェクト ID（\"d\" で始まる内部ID。list_projects が返す id。\"I…\" 形式は使用不可）",
+     "type": "string"
+    },
+    "lang": {
+     "description": "ISO 639-1 言語コード（例: \"en\", \"ja\"）",
+     "type": "string"
+    },
+    "ref_path": {
+     "description": "対象ノードの ref_path（例: \"#/actors/customer\", \"#/useCases/uc1/traffics/t1\"）。ADL 内に実在するノードを指すこと（サーバが照合し、外れると reason=\"ref_path_not_found\" と candidates を返す）。`contexts` という欄は無い＝`useCases`",
+     "type": "string"
+    },
+    "text": {
+     "description": "規範形の注意点（200 文字以内）。\"〜のため〜にする\" / \"〜なので〜禁止\" の形式。事後報告や抽象表現は禁止",
+     "type": "string"
+    }
+   },
+   "required": [
+    "content_id",
+    "ref_path",
+    "text",
+    "lang"
+   ],
+   "type": "object"
+  },
+  "name": "add_note",
+  "output_schema": {},
+  "title": "Add or update note"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check connection"
+  },
+  "description": "IceShore への接続と認証の状態を返す。\n入力: なし。\n出力: 認証成功なら userId と所属組織一覧（organizations: workspace_id / name / role）、失敗（トークンの無効・失効など）なら error を含む文字列。\norganizations[].workspace_id は、create_content / commit_uploaded_codes の登録先（workspace_id）や list_projects の絞り込みに使える値。\n組織への登録ができるのは、role が admin または editor の組織。",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "auth_check",
+  "output_schema": {},
+  "title": "Check connection"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Request upload URLs"
+  },
+  "description": "複数のプロビジョニングファイルの presigned PUT URL を、1 回の呼び出しで N 件（最大 100）発行する（ログインが必要）。\n各 upload_url は HTTP PUT でファイル本体を受け付ける（有効期限 10 分・並列可）。シェルを実行できるクライアントでの例: curl --silent --show-error --fail -X PUT --upload-file <ローカルパス> '<upload_url>'。\nアップロードしたファイルは commit_uploaded_codes で構成図に取り込まれる。ADL 本体（adr）も 1 ファイル分足して送れ、commit_uploaded_codes の code_entries で is_root:true を付けると inline の adl_root が要らない。\nurls[] の順序は入力 files[] と同じ。同じバッチに同じ code_id が 2 件あるとエラー。staging はユーザ × project_id ごとに分かれる。\n入力: files（1〜100 件・必須）、project_id（追記時）。\n出力: project_id, urls: [{code_id, upload_url, content_key}, ...], expires_in（=600）。",
+  "input_schema": {
+   "properties": {
+    "files": {
+     "description": "アップロード対象のファイルメタ情報。同じ project_id に紐付く N 件をまとめて発行する。",
+     "items": {
+      "properties": {
+       "code_id": {
+        "description": "ファイル名 (例 \"main.tf\")。S3 のキーに直接使うので [A-Za-z0-9._-] のみ。",
+        "type": "string"
+       },
+       "fmt": {
+        "description": "ファイル形式 (json / yaml / hcl の 3 値のみ。.tf/.tfvars/.hcl→hcl、.yml→yaml)",
+        "enum": [
+         "json",
+         "yaml",
+         "hcl"
+        ],
+        "type": "string"
+       },
+       "lang": {
+        "description": "カテゴリ。acf=CFn / tfm=Terraform / slf=Serverless / arm=ARM / gdm=GDM / cim=CIM / aro=ROS / oth=その他",
+        "enum": [
+         "adl",
+         "acf",
+         "arm",
+         "gdm",
+         "cim",
+         "aro",
+         "tfm",
+         "slf",
+         "dkc",
+         "oth"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "code_id",
+       "lang",
+       "fmt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "project_id": {
+     "description": "既存プロジェクトに追記する場合のみ指定。新規作成では未指定で呼び出すと、サーバが project_id を採番して返す。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "files"
+   ],
+   "type": "object"
+  },
+  "name": "batch_request_upload_url",
+  "output_schema": {},
+  "title": "Request upload URLs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Add uploaded files to project"
+  },
+  "description": "request_upload_url / batch_request_upload_url の URL へ PUT したファイルを、IceShore プロジェクトの codes に取り込む（ログインが必要）。新規プロジェクトはこの呼び出しで作られ、既存プロジェクトにはマージ（MERGE）で追記・更新し、指定しなかった既存ファイルは温存する。\nマージのルール: code_id が一致すれば上書き、新しい code_id は末尾に追加、code_entries に無い既存ファイルはそのまま残る（save_content の全置換とは違う）。adl_root（または is_root:true のエントリ）を渡すと ADL 本体を置き換え、省くと既存のまま。\nADL 本体の渡し方は 2 通り: code_entries の 1 件に is_root:true（staged 経由・大きな ADL 向け）、または引数 adl_root に JSON 文字列（inline・小さな ADL 向け）。両方あれば inline を使う。旧称 cloud_design_root も受け付ける。\n品質評価（KGI）と構成図は保存時にサーバ側で作られるので、画面で保存し直す必要はない。info.version と info.status もサーバが決める（version は保存のたびに +1 される整数、status は品質評価から designed / prepared / draft を自動で決める）。応答には構成図の URL が含まれる。\ncode_entries の各 code_id は、PUT 済みでなければ 400。is_root:true は 1 件まで。ファイルの削除は扱わない（delete_code または save_content）。\nnotes（任意・配列）: 変更の 1 行要約。save_content と同じ形で、構成図の「履歴」タブに残る。応答の「記録した変更サマリー: N 件」が記録された件数。\n入力: project_id（必須）、code_entries（必須・空配列可）、adl_root（新規時に必要・staged の is_root があれば不要）、overview（新規時に必要）、workspace_id（新規時の登録先）、notes。\n出力: id と構成図の URL。",
+  "input_schema": {
+   "properties": {
+    "adl_root": {
+     "description": "ADL 構造を JSON.stringify した文字列。新規登録 (= request_upload_url で project_id を新規採番した最初の commit) では **必須**。既存プロジェクトの更新で構造を変えないなら省略可（既存値が保持される）。（旧称 cloud_design_root は後方互換のため引き続き受け付ける）",
+     "type": "string"
+    },
+    "cloud_design_root": {
+     "description": "非推奨。adl_root の旧称。後方互換のため受け付ける。新規コードでは adl_root を使うこと。",
+     "type": "string"
+    },
+    "code_entries": {
+     "description": "curl PUT で staging に置いた各ファイルのメタデータ。**ファイル中身 (data) は含めない**（サーバが S3 staging から読む）。差分アップロードでは「変更したファイルだけ」を列挙する。空配列は cloud_design_root / overview 単体の更新時に許容。",
+     "items": {
+      "properties": {
+       "code_id": {
+        "description": "request_upload_url / batch_request_upload_url で渡したのと同じ code_id",
+        "type": "string"
+       },
+       "fmt": {
+        "enum": [
+         "json",
+         "yaml",
+         "hcl"
+        ],
+        "type": "string"
+       },
+       "is_root": {
+        "description": "true を指定すると、この code_id の staged ファイル本体を adl_root (ADL 構造 JSON) として扱う。別途 adl_root 引数を渡す代わりに使えば 30KB+ の adr 文字列を inline で送る必要がなくなり大幅にトークン節約できる。1 回の commit で is_root=true は最大 1 件まで。inline adl_root と同時指定された場合は inline が優先。ADL 内部表記 (`isRoot` camelCase) で送っても自動的に `is_root` に正規化される。大きい ADL（30KB+）や通信タイムアウトを避けたい場合は staged is_root（本ファイルをルートとして指定）が有効。小さい ADL は inline adl_root でも可。どちらも正規サポート。",
+        "type": "boolean"
+       },
+       "lang": {
+        "enum": [
+         "adl",
+         "acf",
+         "arm",
+         "gdm",
+         "cim",
+         "aro",
+         "tfm",
+         "slf",
+         "dkc",
+         "oth"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "code_id",
+       "lang",
+       "fmt"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "notes": {
+     "description": "AIが生成した変更サマリー。**配列**であること（文字列を渡すと引数エラーで拒否される）。例: [{ at: 1717200000, content: \"S3バケット resource_storage を追加\" }]。ここに入れた内容だけが構成図の「履歴」タブに変更サマリーとして残る（他に書き込む経路は無い）。",
+     "items": {
+      "properties": {
+       "at": {
+        "description": "UNIX秒（整数）。例: 1717200000",
+        "type": "integer"
+       },
+       "content": {
+        "description": "変更内容のサマリー（日本語・100字以内の1行）",
+        "type": "string"
+       }
+      },
+      "required": [
+       "at",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "overview": {
+     "description": "プロジェクト概要メタ (titles / descriptions / version / security 等。titles/descriptions は複数形・locale-keyed map。security は取扱情報種別 \"publicHandling\"|\"confidentialHandling\"|\"privacyHandling\"。type（公開設定）は MCP 経由では常に private に固定されるため指定不要)。新規登録では **必須**。更新で overview を変えないなら省略可。",
+     "type": "string"
+    },
+    "project_id": {
+     "description": "request_upload_url で得た project_id を必ず渡す",
+     "type": "string"
+    },
+    "workspace_id": {
+     "description": "登録先ワークスペース（新規登録時のみ有効）。\"personal\"（個人）または組織UUID（auth_check の organizations[].workspace_id）。【必須運用】依頼文（プロンプト）に登録先ワークスペースの指定があればその値を使う。指定が無い場合は auth_check で組織一覧を取得し、**必ずユーザーに登録先（個人 or 組織名）を確認してから**呼ぶこと。無断で個人に作成しない。組織を指定するには、その組織の編集権限（admin / editor）が必要。省略時は個人ワークスペースに登録される（後方互換）。既存プロジェクトの更新時 workspace_id は無視される。登録済み構成図のワークスペース変更は MCP からは不可（IceShore の Web 画面から行う）。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project_id",
+    "code_entries"
+   ],
+   "type": "object"
+  },
+  "name": "commit_uploaded_codes",
+  "output_schema": {},
+  "title": "Add uploaded files to project"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Create project"
+  },
+  "description": "新しい IceShore プロジェクトを作る（ADL と添付ファイルを登録する。ログインが必要）。既存プロジェクトの更新は save_content が扱う。\ncodes の形: 配列のうち 1 件が ADL 本体（id=\"adlRoot\", isRoot=true, lang=\"adl\", fmt=\"json\", data=ADL を JSON.stringify した文字列）。残りはプロビジョニングファイルを 1 件 1 エントリ（isRoot=false）。ADL 本体が無いと画面では空になる。ADL の構造は iceshore://guide/adl に書いてある。\n例:\n{ \"codes\": [ { \"id\": \"adlRoot\", \"isRoot\": true, \"lang\": \"adl\", \"fmt\": \"json\", \"data\": \"{\"reindeer\":\"2.0.0\",\"self\":\"adl.json\",...}\" },\n             { \"id\": \"main.tf\", \"isRoot\": false, \"lang\": \"tfm\", \"fmt\": \"hcl\", \"data\": \"resource \"aws_lambda_function\" ...\" } ],\n  \"overview\": { \"titles\": {\"en\": \"...\", \"ja\": \"...\"}, \"descriptions\": {\"en\": \"...\", \"ja\": \"...\"}, \"version\": \"1.0.0\", \"type\": \"private\", \"security\": \"publicHandling\" } }\noverview は必須。IaC リポジトリからの新規インポートでは importSource（originUrl / webUrl / webKind / repoPath / lastImportedCommit / lastImportedAt / importMethod。手元のフォルダのパスは送らない）を、変更履歴として changeLog（at / by / source / summary / delta / securityNotices）を持てる（iceshore://guide/iac-import・iceshore://guide/changelog）。\nworkspace_id: \"personal\"（個人）または組織の ID（auth_check の organizations[].workspace_id）。省くと個人。組織への登録にはその組織の admin / editor 権限が要り、無ければ 403。登録先は作成時だけ指定でき、後から MCP では変えられない（画面から変える）。\n大きさ: 1 回あたり約 5 MB まで（同期リクエストの上限 6 MB）。合計が大きいとき・ファイルが多いときは batch_request_upload_url + commit_uploaded_codes の経路がある。\n保存前に、アクセスキー・パスワード・トークンなどに見える値は ***MASKED*** に置き換えて保存する。\n出力: 新しい id（\"d\" で始まる内部 ID）と構成図の URL。失敗時は ok:false と error。",
+  "input_schema": {
+   "properties": {
+    "codes": {
+     "description": "【必須形状】配列の中に必ず 1 件 id=\"adlRoot\" isRoot=true lang=\"adl\" fmt=\"json\" のエントリを含めること。adlRoot.data は ADL 構造（reindeer/self/info/actors/resources/useCases/components）を JSON.stringify した文字列。その他のエントリはプロビジョニングファイルを 1 件 1 エントリで isRoot=false として続ける。",
+     "items": {
+      "properties": {
+       "data": {
+        "description": "adlRoot は ADL 構造を JSON.stringify した**文字列**。他のエントリはファイル内容そのまま",
+        "type": "string"
+       },
+       "fmt": {
+        "description": "ファイル形式。\"json\" / \"yaml\" / \"hcl\" の 3 値のみ (FE master 準拠)。\n  - .tf / .tfvars / .hcl ファイル → fmt=\"hcl\"\n  - .yaml / .yml ファイル → fmt=\"yaml\" (.yml は yaml と同等扱い)\n  - .json ファイル → fmt=\"json\"\nadlRoot は必ず \"json\"。【最頻出ミス】カテゴリ（acf/slf/adl 等）と取り違えるな",
+        "enum": [
+         "json",
+         "yaml",
+         "hcl"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "ファイル名（例 \"main.tf\"）。ADL 本体は必ず id=\"adlRoot\"",
+        "type": "string"
+       },
+       "isRoot": {
+        "description": "ADL 本体の adlRoot エントリのみ true、その他は false",
+        "type": "boolean"
+       },
+       "isUsed": {
+        "description": "省略可。サーバ側で true に補完",
+        "type": "boolean"
+       },
+       "lang": {
+        "description": "カテゴリ（プロビジョニング種別）。adlRoot は \"adl\"。acf=AWS CloudFormation / tfm=Terraform / slf=Serverless Framework / arm=Azure Resource Manager / gdm=Google Cloud Deployment Manager / cim=Google Cloud Infrastructure Manager / aro=Alibaba Cloud ROS / dkc=Docker Compose / oth=その他。【最頻出ミス】拡張子（yaml/json/hcl）と取り違えるな。それらは fmt フィールドに入れる",
+        "enum": [
+         "adl",
+         "acf",
+         "arm",
+         "gdm",
+         "cim",
+         "aro",
+         "tfm",
+         "slf",
+         "dkc",
+         "oth"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "isRoot",
+       "lang",
+       "fmt",
+       "data"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "overview": {
+     "description": "プロジェクト概要メタ。titles/descriptions（複数形・locale-keyed map）、version、type（visibility: \"private\"|\"public\"）、security（取扱情報種別: \"publicHandling\"|\"confidentialHandling\"|\"privacyHandling\"）等を含む。type と security は別概念。例: { titles: { en: \"...\", ja: \"...\" }, descriptions: { en: \"...\", ja: \"...\" }, version: \"1.0.0\", type: \"private\", security: \"publicHandling\" }",
+     "type": "string"
+    },
+    "workspace_id": {
+     "description": "登録先ワークスペース。\"personal\"（個人）または組織UUID（auth_check の organizations[].workspace_id）。【必須運用】依頼文（プロンプト）に登録先ワークスペースの指定があればその値を使う。指定が無い場合は auth_check で組織一覧を取得し、**必ずユーザーに登録先（個人 or 組織名）を確認してから**呼ぶこと。無断で個人に作成しない。組織を指定するには、その組織の編集権限（admin または editor。auth_check の organizations[].role で確認可能）が必要。省略時は個人ワークスペースに登録される（後方互換）。ワークスペースを指定できるのは新規作成時のみ。登録済み構成図のワークスペース変更は MCP からは不可（IceShore の Web 画面から行う）。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "codes",
+    "overview"
+   ],
+   "type": "object"
+  },
+  "name": "create_content",
+  "output_schema": {},
+  "title": "Create project"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Delete project file"
+  },
+  "description": "プロジェクトの codes から 1 件のファイルを削除する（ログインが必要）。ADL 本体（adlRoot）は削除できない（必要なら save_content の全置換）。\n1 ファイル分の読み書きだけで済み、全 codes を送り直す save_content より速い。構成図は保存時にサーバ側で作り直される。\n入力: project_id, code_id（どちらも必須）。\n出力: { ok: true, id, removed: true|false }。removed:false は、その code_id が元から無かったことを示す。",
+  "input_schema": {
+   "properties": {
+    "code_id": {
+     "description": "削除するファイルの code_id (例 \"old.tf\")。adlRoot は不可。",
+     "type": "string"
+    },
+    "project_id": {
+     "description": "IceShore プロジェクト ID",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project_id",
+    "code_id"
+   ],
+   "type": "object"
+  },
+  "name": "delete_code",
+  "output_schema": {},
+  "title": "Delete project file"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Delete note"
+  },
+  "description": "ADL ノードの humanNote を論理削除する（is_deleted=1・ログインが必要・editor または admin 権限）。行は消さないので、同じ ref_path に add_note すると復活する。\n入力: content_id, ref_path（どちらも必須）。\n出力: { ok, mode: \"deleted\"|\"not_found\" }。",
+  "input_schema": {
+   "properties": {
+    "content_id": {
+     "description": "IceShore プロジェクト ID（\"d\" で始まる内部ID。list_projects が返す id。\"I…\" 形式は使用不可）",
+     "type": "string"
+    },
+    "ref_path": {
+     "description": "対象ノードの ref_path",
+     "type": "string"
+    }
+   },
+   "required": [
+    "content_id",
+    "ref_path"
+   ],
+   "type": "object"
+  },
+  "name": "delete_note",
+  "output_schema": {},
+  "title": "Delete note"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find project by source"
+  },
+  "description": "git の origin URL（またはローカルの絶対パス）から、IceShore のプロジェクト（ADL）を探す（ログインが必要）。\n用途: IaC のインポート前に、同じリポジトリがインポート済みかを調べる（済みなら更新 = save_content、未なら新規 = create_content の対象になる）。手順は iceshore://guide/iac-import に書いてある。\n入力: origin_url。\n出力: 見つかれば found=true と id・title・updatedAt、無ければ found=false。",
+  "input_schema": {
+   "properties": {
+    "origin_url": {
+     "description": "リポジトリのgit remote origin URL。例: \"git@github.com:org/repo.git\" または \"https://github.com/org/repo.git\"。git remoteがない場合はリポジトリの絶対パスを使用。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "origin_url"
+   ],
+   "type": "object"
+  },
+  "name": "find_content_by_source",
+  "output_schema": {},
+  "title": "Find project by source"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get project"
+  },
+  "description": "【認証不要（公式サンプルの公開コンテンツのみ）】匿名では公式サンプルだけを返し、それ以外はログインが必要（401）。IceShore プロジェクト 1 件の ADL と添付ファイルを返す。\n用途: 既存プロジェクトの参照、保存・更新の結果の確認（get_content(mode='detail') の戻りが保存後の実際の状態の正典）。\nid は list_projects または list_samples が返す、\"d\" で始まる内部 ID。\nmode の違い:\n  - \"meta\": メタ情報だけ。S3 を読まないので速い（10 秒以上短い）\n  - \"root\": ADL 本体（adlRoot）だけ\n  - \"detail\": 全ファイル。大きく、30 秒ほどかかる場合がある\n出力: { code, id, mode, data, type, role, ownerID, ... }。",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "IceShore プロジェクト ID（\"d\" で始まる内部ID。list_projects / create_content が返す id。例: d9289696c392a29e188.13397864。URL スラグの \"I…\" 形式は使用不可）",
+     "type": "string"
+    },
+    "locale": {
+     "description": "表示ロケール (en/ja 等)。省略時は en",
+     "type": "string"
+    },
+    "mode": {
+     "description": "取得モード。\n  - \"meta\" (速い・推奨デフォルト): 重い codes blob を S3 から読まない。overview/role 等のメタ情報のみ。10 秒以上短縮可。\n  - \"root\" (中): codes を adlRoot 1 件に絞る。ADL 構造だけ欲しい時。\n  - \"detail\" (既定値、重い): 全 codes を返す。プロビジョニングファイル全件を参照する時のみ。",
+     "enum": [
+      "detail",
+      "meta",
+      "root"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_content",
+  "output_schema": {},
+  "title": "Get project"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get guide"
+  },
+  "description": "【認証不要】匿名（未ログイン）でも使える。IceShore のガイド文書（ADL の書き方・登録手順・分析の進め方など）を名前で返す。\nMCP リソースに対応していないクライアント向けの取得手段で、対応クライアントは resources/read でも同じ内容を読める。\n主な名前: \"analysis\"（業務影響・依存・外部波及の分析）/ \"registration\"（システム登録）/ \"fix\"（ADL の修正）/ \"adl\"（ADL の作り方）/ \"saving-publishing\"（保存と公開）。\n入力: name（短縮名または URI パス）。知らない name のときは、使える名前の一覧を返す。\n出力: ガイド本文（markdown / JSON。本文は英語）。",
+  "input_schema": {
+   "properties": {
+    "name": {
+     "description": "ガイド名。短縮名（例 \"analysis\" / \"registration\" / \"fix\" / \"adl\" / \"saving-publishing\"）または URI パス（例 \"guide/analysis\" / \"skill/adl-validator\"）。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "get_guide",
+  "output_schema": {},
+  "title": "Get guide"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get notes"
+  },
+  "description": "プロジェクトの humanNote（人が ADL のノードに残した規範的な注意点）を返す（ログインが必要）。1 ノード（ref_path）につき有効なノートは最大 1 件。\n用途: 既存プロジェクトを編集するときの確認、人が編集した形跡（_meta.d が \"h:\" で始まる）のあるノードの参照、特定ノードについての質問への回答。\nrefs（任意・配列）: 取得するノードの ref_path。省くと全件（最大 500 件）。\nref_path が今の ADL に無いノートは、ノードの削除や改名で取り残されたもの。\n出力: { code, id, data: { notes: [{ note_id, ref_path, text, lang, defined_by, defined_at, updated_at }] } }。",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "IceShore プロジェクト ID（\"d\" で始まる内部ID。list_projects / create_content が返す id。例: d9289696c392a29e188.13397864。URL スラグの \"I…\" 形式は使用不可）",
+     "type": "string"
+    },
+    "refs": {
+     "description": "対象ノードの ref_path 配列（例: [\"#/actors/customer\", \"#/useCases/uc1/traffics/t1\"]）。省略時は全件（500 件まで）",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_notes",
+  "output_schema": {},
+  "title": "Get notes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List project files"
+  },
+  "description": "既存プロジェクトの codes 配列のメタデータ一覧を返す（ファイル中身 data は含まない）。差分アップロードの判定に使う。\n各エントリの sha256 は、data フィールド（文字列）を SHA-256 にかけた値。テキストファイルなら、ローカルの shasum -a 256 <file> の結果と一致する。\nsha256 が一致するファイルは変更なしで、不一致または一覧に無いファイルだけを request_upload_url / batch_request_upload_url → commit_uploaded_codes で送れば足りる。\n入力: project_id。\n出力: codes: [{code_id, isRoot, lang, fmt, size, sha256}]。",
+  "input_schema": {
+   "properties": {
+    "project_id": {
+     "description": "対象プロジェクトの id（\"d\" で始まる内部ID。list_projects が返す id）",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project_id"
+   ],
+   "type": "object"
+  },
+  "name": "list_codes_meta",
+  "output_schema": {},
+  "title": "List project files"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List projects"
+  },
+  "description": "ユーザが閲覧権限を持つプロジェクト（ADL 構成図）の一覧を返す（ログインが必要）。\n用途: 作業対象のプロジェクトの特定。業務影響・規模・依存関係を分析するときに、get_content で ADL を取る前の起点になる。\nページング: 既定は page=0 / itemperpage=24。続きは page=1, 2, …。itemperpage の最大は 100。\nサンプルとの関係: range を省くと range=\"related\" と同じで、公式サンプルは含まない（サンプルは list_samples が返す）。\nworkspace_id を渡すと、その 1 組織が所有する案件だけに絞り込む（値は auth_check の organizations[].workspace_id）。\n入力: range, page, itemperpage, workspace_id（すべて省略可）。\n出力: プロジェクトの id とタイトルの一覧（プレーンテキスト）。末尾に total / totalPages。",
+  "input_schema": {
+   "properties": {
+    "itemperpage": {
+     "description": "1 ページあたりの件数 (default 24、最大 100)。",
+     "type": "integer"
+    },
+    "page": {
+     "description": "0 起点のページ番号 (default 0)。default の itemperpage=24 件単位でページング。",
+     "type": "integer"
+    },
+    "range": {
+     "description": "取得スコープのフィルタ。\"related\" (省略時の既定) = 自分が role を持つ構成図 + 自分の組織の構成図。誰でも見える公開構成図（公式サンプル）は足さない。\"\" = related に加えて公開構成図も含める（サンプルは list_samples を使うこと）。\"bookmark\" = bookmark 済のみ。\"private\" = type=private のみ。\"privateBookmark\" = type=private かつ bookmark 済。",
+     "enum": [
+      "",
+      "related",
+      "bookmark",
+      "private",
+      "privateBookmark"
+     ],
+     "type": "string"
+    },
+    "workspace_id": {
+     "description": "特定の組織(ワークスペース)に絞り込む。auth_check が返す organizations[].workspace_id をそのまま渡す。複数組織に所属するユーザでも、指定した 1 組織が所有する案件のみが返るため、組織を跨いだ取りこぼし・混入を防げる。省略時は全所属組織の構成図が混在する。",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_projects",
+  "output_schema": {},
+  "title": "List projects"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List sample projects"
+  },
+  "description": "【認証不要】匿名（未ログイン）でも使える。サンプルのワークスペース（公式のサンプル・OSSのサンプルなど）の公開構成図の一覧を返す（ログイン時も同じ）。\n用途: 新しい設計の参考事例、サンプルを土台にした作成。\nlist_projects との違い: list_projects は自分が閲覧権限を持つプロジェクト（サンプルを含まない）、本ツールはサンプルだけ。\nワークスペース: 既定はすべてのサンプルのワークスペース。workspace で1つに絞れる（一覧の先頭にサンプルのワークスペースの名前と id を出す）。\nページング: 既定は page=0 / itemperpage=24。\n入力: page, itemperpage, workspace（すべて省略可）。\n出力: 公開プロジェクトの id とタイトルの一覧。末尾に total / totalPages。",
+  "input_schema": {
+   "properties": {
+    "itemperpage": {
+     "description": "1 ページあたりの件数 (default 24、最大 100)。",
+     "type": "integer"
+    },
+    "page": {
+     "description": "0 起点のページ番号 (default 0)。default の itemperpage=24 件単位でページング。",
+     "type": "integer"
+    },
+    "workspace": {
+     "description": "サンプルのワークスペースで絞る（workspace_id か名前）。省略時はすべてのサンプルのワークスペース。",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_samples",
+  "output_schema": {},
+  "title": "List sample projects"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Request upload URL"
+  },
+  "description": "プロビジョニングファイル 1 件分の、S3 への presigned PUT URL を発行する（ログインが必要）。ファイルが複数なら batch_request_upload_url が 1 回で N 件を発行する。\n返る upload_url は HTTP PUT でファイル本体を受け付ける（有効期限 10 分）。シェルを実行できるクライアントでの例: curl --silent --show-error --fail -X PUT --upload-file <ローカルパス> '<upload_url>'。ファイル中身はディスクから S3 へ直接送られ、会話の出力トークンにならない。シェルを使えないクライアントでは、create_content / save_content が中身を引数で受け取る。\nアップロードしたファイルは commit_uploaded_codes で構成図に取り込まれる。ADL 本体（adr）も同じ経路で送れ、commit_uploaded_codes の code_entries で is_root:true を付けると inline の adl_root が要らない。\nproject_id を省くと新しい project_id を採番する。同じ project_id で同じ code_id を発行し直すと、commit 時に後のものが使われる。staging はユーザ × project_id ごとに分かれ、他ユーザの project_id には発行できない（403）。\n入力: code_id, lang, fmt（必須）、project_id（追記・更新時）。\n出力: upload_url, content_key, project_id, expires_in。",
+  "input_schema": {
+   "properties": {
+    "code_id": {
+     "description": "プロビジョニングファイルのファイル名 (例 \"main.tf\" / \"serverless.yml\" / \"template.yaml\")。S3 のキーに直接使うので [A-Za-z0-9._-] のみ・最大 200 文字。",
+     "type": "string"
+    },
+    "fmt": {
+     "description": "ファイル形式 (json / yaml / hcl の 3 値のみ。.tf/.tfvars/.hcl→hcl、.yml→yaml)。",
+     "enum": [
+      "json",
+      "yaml",
+      "hcl"
+     ],
+     "type": "string"
+    },
+    "lang": {
+     "description": "カテゴリ。acf=CFn / tfm=Terraform / slf=Serverless / arm=ARM / gdm=GDM / cim=CIM / aro=ROS / oth=その他。【最頻出ミス】拡張子と取り違えるな。yaml/json は fmt フィールドに入れる",
+     "enum": [
+      "adl",
+      "acf",
+      "arm",
+      "gdm",
+      "cim",
+      "aro",
+      "tfm",
+      "slf",
+      "dkc",
+      "oth"
+     ],
+     "type": "string"
+    },
+    "project_id": {
+     "description": "既存プロジェクトに追記する場合のみ指定。新規作成では未指定で呼び出すと、サーバが project_id を採番して返す。同じセッションの 2 回目以降は返ってきた project_id を渡す。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code_id",
+    "lang",
+    "fmt"
+   ],
+   "type": "object"
+  },
+  "name": "request_upload_url",
+  "output_schema": {},
+  "title": "Request upload URL"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Update project"
+  },
+  "description": "既存の IceShore プロジェクトの ADL と添付ファイルを更新する（ログインが必要・所有者または admin / editor 権限）。新規作成は create_content が扱う。\n全置換（full-replace）: codes に渡したものがすべてになり、未指定の既存ファイルは削除される（allow_code_deletion を付けたときだけ削除を受け付ける）。既存ファイルを残すには、変更しないものも含めて全 codes を送る。現在の codes は get_content(mode='detail') で取れる。一部のファイルだけ足す・直すなら、マージする commit_uploaded_codes がある。\ncodes の形は create_content と同じ（1 件が ADL 本体 adlRoot）。overview は必須。\nnotes（任意・配列）: 変更の 1 行要約。[{ at: <UNIX 秒・整数>, content: \"<100 字以内>\" }] の形で、構成図の「履歴」タブに残る。応答の「記録した変更サマリー: N 件」が記録された件数。\ninfo.version と info.status はサーバが決める: version はサーバが採番し、保存のたびに +1 される整数（送った値は使われない）、status は品質評価から designed / prepared / draft を自動で決める（\"reviewed\" は自動では下げない）。応答の「改訂 N / status: X」が保存後の値。\n品質評価（KGI）と構成図は保存時にサーバ側で作られる。\nIaC から更新するときに人が足した内容（resources[*].lessons、useCases[*].notes、IaC に無い actors など）の扱いは iceshore://guide/iac-import に書いてある。\n保存前に、アクセスキー・JWT・秘密鍵・接続文字列などに見える値は ***MASKED*** に置き換えて保存し、置き換えた箇所を応答に一覧で返す。\n入力: id（必須）、codes（必須）、overview（必須）、notes、allow_code_deletion。",
+  "input_schema": {
+   "properties": {
+    "allow_code_deletion": {
+     "description": "full-replace で未指定の既存コードを削除することを明示的に許可する。通常は不要（既存プロビジョニングを保持するには全 codes を送る）。",
+     "type": "boolean"
+    },
+    "codes": {
+     "description": "【必須形状】配列の中に必ず 1 件 id=\"adlRoot\" isRoot=true lang=\"adl\" のエントリを含める。adlRoot.data は ADL 構造を JSON.stringify した文字列。",
+     "items": {
+      "properties": {
+       "data": {
+        "description": "adlRoot は ADL 構造を JSON.stringify した文字列。他はファイル内容",
+        "type": "string"
+       },
+       "fmt": {
+        "description": "ファイル形式。\"json\" / \"yaml\" / \"hcl\" の 3 値のみ (FE master 準拠)。.tf/.tfvars/.hcl→hcl、.yml→yaml。adlRoot は必ず \"json\"。【最頻出ミス】カテゴリ（acf/slf/adl 等）と取り違えるな",
+        "enum": [
+         "json",
+         "yaml",
+         "hcl"
+        ],
+        "type": "string"
+       },
+       "id": {
+        "description": "ファイル名。ADL 本体は必ず id=\"adlRoot\"",
+        "type": "string"
+       },
+       "isRoot": {
+        "description": "adlRoot のみ true、その他は false",
+        "type": "boolean"
+       },
+       "isUsed": {
+        "type": "boolean"
+       },
+       "lang": {
+        "description": "カテゴリ（プロビジョニング種別）。adlRoot は \"adl\"。他は acf=CFn / tfm=Terraform / slf=Serverless / arm=ARM / gdm=GDM / cim=CIM / aro=ROS / oth=その他。【最頻出ミス】拡張子（yaml/json）と取り違えるな。yaml/json は fmt フィールドに入れる",
+        "enum": [
+         "adl",
+         "acf",
+         "arm",
+         "gdm",
+         "cim",
+         "aro",
+         "tfm",
+         "slf",
+         "dkc",
+         "oth"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "isRoot",
+       "lang",
+       "fmt",
+       "data"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "id": {
+     "description": "既存プロジェクトの id（\"d\" で始まる内部ID。list_projects / create_content が返す id）",
+     "type": "string"
+    },
+    "notes": {
+     "description": "AIが生成した変更サマリー。**配列**であること（文字列を渡すと引数エラーで拒否される）。例: [{ at: 1717200000, content: \"S3バケット resource_storage を追加\" }]。ここに入れた内容だけが構成図の「履歴」タブに変更サマリーとして残る（他に書き込む経路は無い）。",
+     "items": {
+      "properties": {
+       "at": {
+        "description": "UNIX秒（整数）。例: 1717200000",
+        "type": "integer"
+       },
+       "content": {
+        "description": "変更内容のサマリー（日本語・100字以内の1行）",
+        "type": "string"
+       }
+      },
+      "required": [
+       "at",
+       "content"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "overview": {
+     "description": "更新後のメタ情報。titles/descriptions（複数形・locale-keyed map）、security（取扱情報種別: \"publicHandling\"|\"confidentialHandling\"|\"privacyHandling\"）等を含む。type（公開設定）は private 固定。version は送っても無視される（サーバが採番する）。",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "codes",
+    "overview"
+   ],
+   "type": "object"
+  },
+  "name": "save_content",
+  "output_schema": {},
+  "title": "Update project"
+ }
+]

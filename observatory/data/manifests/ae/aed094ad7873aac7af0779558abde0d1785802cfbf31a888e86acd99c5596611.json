@@ -1,0 +1,2903 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Compare deterministic object-category totals for two explicit official datasets.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "base_dataset_ref": {
+     "maxLength": 64,
+     "minLength": 10,
+     "pattern": "^official:[1-9][0-9]*$",
+     "title": "Base Dataset Ref",
+     "type": "string"
+    },
+    "base_district_identifier": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "Base District Identifier",
+     "type": "string"
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "compare_dataset_ref": {
+     "maxLength": 64,
+     "minLength": 10,
+     "pattern": "^official:[1-9][0-9]*$",
+     "title": "Compare Dataset Ref",
+     "type": "string"
+    },
+    "compare_district_identifier": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "Compare District Identifier",
+     "type": "string"
+    },
+    "fund_codes": {
+     "anyOf": [
+      {
+       "description": "Defaults to Fund 01 (General Fund); an explicit empty list selects all funds.",
+       "items": {
+        "description": "Two-digit SACS fund code; omitted financial scope defaults to Fund 01 (General Fund).",
+        "pattern": "^[0-9]{2}$",
+        "type": "string"
+       },
+       "maxItems": 20,
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Codes"
+    },
+    "resource_codes": {
+     "anyOf": [
+      {
+       "items": {
+        "pattern": "^[0-9]{4}$",
+        "type": "string"
+       },
+       "maxItems": 20,
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Codes"
+    }
+   },
+   "required": [
+    "base_district_identifier",
+    "base_dataset_ref",
+    "compare_district_identifier",
+    "compare_dataset_ref"
+   ],
+   "title": "sacs_compare_districtsArguments",
+   "type": "object"
+  },
+  "name": "sacs_compare_districts",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Build fiscal-distress rows with source filing details. Deficit spending is signed net operating result / expenditure; negative means deficit.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "basis": {
+     "default": "estimated_actuals",
+     "enum": [
+      "estimated_actuals",
+      "unaudited_actuals",
+      "adopted_budget",
+      "first_interim",
+      "second_interim"
+     ],
+     "title": "Basis",
+     "type": "string"
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "detail": {
+     "default": "full",
+     "enum": [
+      "summary",
+      "full"
+     ],
+     "title": "Detail",
+     "type": "string"
+    },
+    "district_identifier": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "District Identifier",
+     "type": "string"
+    },
+    "fiscal_year_max": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fiscal Year Max"
+    },
+    "fiscal_year_min": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fiscal Year Min"
+    },
+    "fund_codes": {
+     "anyOf": [
+      {
+       "description": "Exact list of funds to include; defaults to Fund 01. Intervening funds are excluded.",
+       "items": {
+        "description": "Two-digit SACS fund code to include",
+        "pattern": "^[0-9]{2}$",
+        "type": "string"
+       },
+       "maxItems": 20,
+       "minItems": 1,
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Codes"
+    },
+    "include_balance_sheet_from_actuals": {
+     "default": true,
+     "title": "Include Balance Sheet From Actuals",
+     "type": "boolean"
+    },
+    "one_time_resource_codes": {
+     "anyOf": [
+      {
+       "items": {
+        "pattern": "^[0-9]{4}$",
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "One Time Resource Codes"
+    }
+   },
+   "required": [
+    "district_identifier"
+   ],
+   "title": "sacs_district_context_packArguments",
+   "type": "object"
+  },
+  "name": "sacs_district_context_pack",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Build bounded district packs with source filing details. Deficit spending is signed net operating result / expenditure; negative means deficit.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "basis": {
+     "default": "estimated_actuals",
+     "enum": [
+      "estimated_actuals",
+      "unaudited_actuals",
+      "adopted_budget",
+      "first_interim",
+      "second_interim"
+     ],
+     "title": "Basis",
+     "type": "string"
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "detail": {
+     "default": "summary",
+     "enum": [
+      "summary",
+      "full"
+     ],
+     "title": "Detail",
+     "type": "string"
+    },
+    "district_identifiers": {
+     "items": {
+      "maxLength": 100,
+      "minLength": 2,
+      "type": "string"
+     },
+     "maxItems": 25,
+     "minItems": 1,
+     "title": "District Identifiers",
+     "type": "array"
+    },
+    "fiscal_year_max": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fiscal Year Max"
+    },
+    "fiscal_year_min": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}-[0-9]{2}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fiscal Year Min"
+    },
+    "fund_codes": {
+     "anyOf": [
+      {
+       "description": "Exact list of funds to include; defaults to Fund 01. Intervening funds are excluded.",
+       "items": {
+        "description": "Two-digit SACS fund code to include",
+        "pattern": "^[0-9]{2}$",
+        "type": "string"
+       },
+       "maxItems": 20,
+       "minItems": 1,
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Fund Codes"
+    },
+    "include_balance_sheet_from_actuals": {
+     "default": true,
+     "title": "Include Balance Sheet From Actuals",
+     "type": "boolean"
+    },
+    "one_time_resource_codes": {
+     "anyOf": [
+      {
+       "items": {
+        "pattern": "^[0-9]{4}$",
+        "type": "string"
+       },
+       "maxItems": 50,
+       "minItems": 1,
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "One Time Resource Codes"
+    }
+   },
+   "required": [
+    "district_identifiers"
+   ],
+   "title": "sacs_district_context_pack_batchArguments",
+   "type": "object"
+  },
+  "name": "sacs_district_context_pack_batch",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Explain current public fund, resource, goal, function, or object codes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "code_type": {
+     "enum": [
+      "fund",
+      "resource",
+      "goal",
+      "function",
+      "object"
+     ],
+     "title": "Code Type",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 500,
+     "minimum": 0,
+     "title": "Offset",
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 80,
+     "minLength": 1,
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "code_type",
+    "query"
+   ],
+   "title": "sacs_explain_codeArguments",
+   "type": "object"
+  },
+  "name": "sacs_explain_code",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve related CSAM 2024 sections/content using its source-evidenced knowledge graph. Start with a procedure number, a chunk_id from sacs_search_csam, a returned node_id, or short heading/code/glossary keywords (exactly one selector). Defaults to explicit references in both directions. Choose relations contains/in_procedure for hierarchy, defines/mentions for code or glossary connections, within_range for numeric code membership, or next for source adjacency; depth 1–2. Every result explains its evidence path and returns at most one cited text/Markdown chunk; representative content is partial. Query node_id=csam:2024:manual with relations=[contains] to browse structure. Use include_content=false for topology-only pages. No database/model calls or paid entitlement required.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "chunk_id": {
+     "anyOf": [
+      {
+       "pattern": "^csam:20\\d{2}:[a-f0-9]{24}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Chunk Id"
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "depth": {
+     "default": 1,
+     "maximum": 2,
+     "minimum": 1,
+     "title": "Depth",
+     "type": "integer"
+    },
+    "direction": {
+     "default": "both",
+     "enum": [
+      "both",
+      "outgoing",
+      "incoming"
+     ],
+     "title": "Direction",
+     "type": "string"
+    },
+    "include_content": {
+     "default": true,
+     "title": "Include Content",
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 5,
+     "maximum": 10,
+     "minimum": 1,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "node_id": {
+     "anyOf": [
+      {
+       "pattern": "^csam:20\\d{2}:(?:manual|(?:section|procedure):\\d{3}|appendix:[A-Z]|(?:topic|term):[a-f0-9]{16}|code:(?:fund|resource|goal|function|object|project_year|school):\\d{1,4}(?:-\\d{1,4})?|[a-f0-9]{24})$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Node Id"
+    },
+    "node_kinds": {
+     "default": [
+      "manual",
+      "section",
+      "procedure",
+      "appendix",
+      "topic",
+      "code",
+      "term"
+     ],
+     "items": {
+      "enum": [
+       "manual",
+       "section",
+       "procedure",
+       "appendix",
+       "topic",
+       "chunk",
+       "code",
+       "term"
+      ],
+      "type": "string"
+     },
+     "maxItems": 8,
+     "minItems": 1,
+     "title": "Node Kinds",
+     "type": "array"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 10000,
+     "minimum": 0,
+     "title": "Offset",
+     "type": "integer"
+    },
+    "procedure": {
+     "anyOf": [
+      {
+       "pattern": "^\\d{3}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Procedure"
+    },
+    "query": {
+     "default": "",
+     "maxLength": 160,
+     "title": "Query",
+     "type": "string"
+    },
+    "relations": {
+     "default": [
+      "references"
+     ],
+     "items": {
+      "enum": [
+       "references",
+       "contains",
+       "in_procedure",
+       "defines",
+       "mentions",
+       "within_range",
+       "next"
+      ],
+      "type": "string"
+     },
+     "maxItems": 7,
+     "minItems": 1,
+     "title": "Relations",
+     "type": "array"
+    }
+   },
+   "title": "sacs_get_csam_relatedArguments",
+   "type": "object"
+  },
+  "name": "sacs_get_csam_related",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List versioned official public SACS datasets for one district.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "district_identifier": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "District Identifier",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 500,
+     "minimum": 0,
+     "title": "Offset",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "district_identifier"
+   ],
+   "title": "sacs_list_public_datasetsArguments",
+   "type": "object"
+  },
+  "name": "sacs_list_public_datasets",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return recovered Form A ADA observations for one official district filing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "dataset_ref": {
+     "maxLength": 64,
+     "minLength": 10,
+     "pattern": "^official:[1-9][0-9]*$",
+     "title": "Dataset Ref",
+     "type": "string"
+    },
+    "district_identifier": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "District Identifier",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 500,
+     "minimum": 0,
+     "title": "Offset",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "district_identifier",
+    "dataset_ref"
+   ],
+   "title": "sacs_query_attendanceArguments",
+   "type": "object"
+  },
+  "name": "sacs_query_attendance",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return bounded aggregate financial summaries for one explicit official dataset.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "dataset_ref": {
+     "maxLength": 64,
+     "minLength": 10,
+     "pattern": "^official:[1-9][0-9]*$",
+     "title": "Dataset Ref",
+     "type": "string"
+    },
+    "district_identifier": {
+     "maxLength": 100,
+     "minLength": 2,
+     "title": "District Identifier",
+     "type": "string"
+    },
+    "function_code_max": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Function Code Max"
+    },
+    "function_code_min": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Function Code Min"
+    },
+    "fund_code_max": {
+     "anyOf": [
+      {
+       "description": "Two-digit SACS fund code; omitted financial scope defaults to Fund 01 (General Fund).",
+       "pattern": "^[0-9]{2}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": "01",
+     "title": "Fund Code Max"
+    },
+    "fund_code_min": {
+     "anyOf": [
+      {
+       "description": "Two-digit SACS fund code; omitted financial scope defaults to Fund 01 (General Fund).",
+       "pattern": "^[0-9]{2}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": "01",
+     "title": "Fund Code Min"
+    },
+    "goal_code_max": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Goal Code Max"
+    },
+    "goal_code_min": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Goal Code Min"
+    },
+    "group_limit": {
+     "default": 10,
+     "maximum": 25,
+     "minimum": 1,
+     "title": "Group Limit",
+     "type": "integer"
+    },
+    "include_zero_categories": {
+     "default": false,
+     "description": "Include zero-amount object category and group rows.",
+     "title": "Include Zero Categories",
+     "type": "boolean"
+    },
+    "object_code_max": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Object Code Max"
+    },
+    "object_code_min": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Object Code Min"
+    },
+    "resource_code_max": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Code Max"
+    },
+    "resource_code_min": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{4}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Resource Code Min"
+    }
+   },
+   "required": [
+    "district_identifier",
+    "dataset_ref"
+   ],
+   "title": "sacs_query_financial_summaryArguments",
+   "type": "object"
+  },
+  "name": "sacs_query_financial_summary",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Optionally register this MCP installation. Before calling, tell the operator registration is voluntary, data access works without it, list the fields to be stored, and obtain consent. Never infer or submit personal or confidential information.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_client": {
+     "anyOf": [
+      {
+       "maxLength": 100,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Agent Client"
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "consent_to_store": {
+     "const": true,
+     "description": "Must be true, and only after the operator accepts the disclosed storage.",
+     "title": "Consent To Store",
+     "type": "boolean"
+    },
+    "home_district_cds": {
+     "anyOf": [
+      {
+       "pattern": "^[0-9]{14}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Home District Cds"
+    },
+    "use_case": {
+     "anyOf": [
+      {
+       "maxLength": 500,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Use Case"
+    },
+    "user_type": {
+     "anyOf": [
+      {
+       "enum": [
+        "district_staff",
+        "county_office_staff",
+        "state_agency_staff",
+        "researcher",
+        "consultant",
+        "vendor",
+        "community_member",
+        "other",
+        "prefer_not_to_say"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "User Type"
+    }
+   },
+   "required": [
+    "consent_to_store"
+   ],
+   "title": "sacs_register_clientArguments",
+   "type": "object"
+  },
+  "name": "sacs_register_client",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search California School Accounting Manual (CSAM 2024) by keywords and topic, procedure number or a returned chunk_id. Use chunk_id with direction=previous or next and limit (1–10) to read adjacent source chunks within the same procedure; navigation.continuation supplies the next request. Results include extracted text plus Markdown with conservative code-definition/journal tables, topic path, procedure revision, printed/PDF page and a CDE PDF citation. All non-stopword keywords must match; topic filters heading words. Use short accounting terms rather than a long question. Read citations for surrounding tables/context; later correspondence is excluded. No login or model-provider key required.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "chunk_id": {
+     "anyOf": [
+      {
+       "pattern": "^csam:20\\d{2}:[a-f0-9]{24}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Chunk Id"
+    },
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "direction": {
+     "default": "current",
+     "enum": [
+      "current",
+      "previous",
+      "next"
+     ],
+     "title": "Direction",
+     "type": "string"
+    },
+    "limit": {
+     "default": 5,
+     "maximum": 10,
+     "minimum": 1,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 500,
+     "minimum": 0,
+     "title": "Offset",
+     "type": "integer"
+    },
+    "procedure": {
+     "anyOf": [
+      {
+       "pattern": "^\\d{3}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Procedure"
+    },
+    "query": {
+     "default": "",
+     "maxLength": 160,
+     "title": "Query",
+     "type": "string"
+    },
+    "topic": {
+     "anyOf": [
+      {
+       "maxLength": 100,
+       "minLength": 2,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Topic"
+    }
+   },
+   "title": "sacs_search_csamArguments",
+   "type": "object"
+  },
+  "name": "sacs_search_csam",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search current public California districts by name, 7-digit LEA, or 14-digit CDS.\n\n        Omit query or pass an empty string to browse all current districts.\n        Follow page.next_offset while page.has_more is true; pages contain at most 50 rows.\n        ",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "title": "Limit",
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "minimum": 0,
+     "title": "Offset",
+     "type": "integer"
+    },
+    "query": {
+     "default": "",
+     "maxLength": 100,
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "title": "sacs_search_districtsArguments",
+   "type": "object"
+  },
+  "name": "sacs_search_districts",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Report a wrong, stale, incomplete, or failed result, or send a feature request. Ask the operator to report issues here; explain the exact fields and submit only with consent. Include request ID and data version when available. Anonymous feedback is welcome. Never include personal, student, personnel, or confidential information.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "client_id": {
+     "anyOf": [
+      {
+       "pattern": "^sacs_client_[0-9a-f]{32}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Client Id"
+    },
+    "feedback_type": {
+     "default": "general",
+     "enum": [
+      "general",
+      "feature_request",
+      "incorrect",
+      "incomplete",
+      "stale",
+      "missing_context"
+     ],
+     "title": "Feedback Type",
+     "type": "string"
+    },
+    "message": {
+     "maxLength": 2000,
+     "minLength": 2,
+     "title": "Message",
+     "type": "string"
+    },
+    "related_data_version": {
+     "anyOf": [
+      {
+       "maxLength": 256,
+       "minLength": 1,
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Related Data Version"
+    },
+    "related_request_id": {
+     "anyOf": [
+      {
+       "pattern": "^[A-Za-z0-9._:-]{8,128}$",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Related Request Id"
+    },
+    "sentiment": {
+     "enum": [
+      "good",
+      "bad",
+      "mixed"
+     ],
+     "title": "Sentiment",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sentiment",
+    "message"
+   ],
+   "title": "sacs_submit_feedbackArguments",
+   "type": "object"
+  },
+  "name": "sacs_submit_feedback",
+  "output_schema": {
+   "$defs": {
+    "PublicError": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "enum": [
+        "invalid_request",
+        "not_found",
+        "private_scope_denied",
+        "dataset_mismatch",
+        "payload_rejected",
+        "backend_unavailable"
+       ],
+       "title": "Code",
+       "type": "string"
+      },
+      "message": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Message",
+       "type": "string"
+      },
+      "retryable": {
+       "default": false,
+       "title": "Retryable",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "title": "PublicError",
+     "type": "object"
+    },
+    "SourceProvenance": {
+     "additionalProperties": false,
+     "properties": {
+      "description": {
+       "maxLength": 500,
+       "minLength": 1,
+       "title": "Description",
+       "type": "string"
+      },
+      "record_ref": {
+       "maxLength": 160,
+       "minLength": 1,
+       "title": "Record Ref",
+       "type": "string"
+      },
+      "source": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Source",
+       "type": "string"
+      }
+     },
+     "required": [
+      "source",
+      "record_ref",
+      "description"
+     ],
+     "title": "SourceProvenance",
+     "type": "object"
+    }
+   },
+   "additionalProperties": false,
+   "properties": {
+    "contract_version": {
+     "const": "sacs.mcp.v1",
+     "default": "sacs.mcp.v1",
+     "title": "Contract Version",
+     "type": "string"
+    },
+    "data": {
+     "anyOf": [
+      {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Data"
+    },
+    "data_version": {
+     "maxLength": 256,
+     "minLength": 1,
+     "title": "Data Version",
+     "type": "string"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/PublicError"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "limitations": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 50,
+     "title": "Limitations",
+     "type": "array"
+    },
+    "ok": {
+     "title": "Ok",
+     "type": "boolean"
+    },
+    "request_id": {
+     "maxLength": 128,
+     "minLength": 8,
+     "title": "Request Id",
+     "type": "string"
+    },
+    "source_provenance": {
+     "items": {
+      "$ref": "#/$defs/SourceProvenance"
+     },
+     "title": "Source Provenance",
+     "type": "array"
+    }
+   },
+   "required": [
+    "data_version",
+    "request_id",
+    "ok"
+   ],
+   "title": "PublicToolResponse",
+   "type": "object"
+  }
+ }
+]

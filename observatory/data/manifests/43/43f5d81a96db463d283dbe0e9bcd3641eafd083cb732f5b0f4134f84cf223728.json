@@ -1,0 +1,442 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Cancel a workflow"
+  },
+  "description": "WRITE (cannot be undone): cancel a running workflow found by its external id. mode ALL (default) cancels every workflow with that external id. POST /restapi/v1/cancelwf.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "comments": {
+     "description": "Reason for the cancellation.",
+     "type": "string"
+    },
+    "external_id": {
+     "description": "External id of the workflow instance.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "mode": {
+     "description": "ALL (default) or SELECTED.",
+     "enum": [
+      "ALL",
+      "SELECTED"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "external_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_cancel_workflow",
+  "output_schema": {},
+  "title": "Cancel a workflow"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get form submissions"
+  },
+  "description": "Get form submissions with questions, answers and the workflow custom fields. 500 records per page; pass next_key for more. GET /reports/forms/{id}/data.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "form_id": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "next_key": {
+     "description": "nextKey from the previous response, to get the next page.",
+     "type": "string"
+    },
+    "select": {
+     "description": "Comma separated field names to return (default: all).",
+     "type": "string"
+    },
+    "submit_end_date": {
+     "description": "End of the submit date range, yyyy-mm-dd.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    },
+    "submit_start_date": {
+     "description": "Start of the submit date range, yyyy-mm-dd.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "form_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_get_form_data",
+  "output_schema": {},
+  "title": "Get form submissions"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get form properties"
+  },
+  "description": "List the questions (field names, types, options) of one form. GET /reports/forms/{id}/properties.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "form_id": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "form_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_get_form_properties",
+  "output_schema": {},
+  "title": "Get form properties"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get profile"
+  },
+  "description": "Get one employee profile by its external id (contact details, profile fields, optionally active workflows). GET /restapi/v1/profile/{id}.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "include_active_workflows": {
+     "description": "Also return up to 10 active workflows.",
+     "type": "boolean"
+    },
+    "profile_id": {
+     "description": "The externalid of the profile.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "profile_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_get_profile",
+  "output_schema": {},
+  "title": "Get profile"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get workflow data"
+  },
+  "description": "List launched workflow instances (employee, status, start date, custom fields, managers) across all workflows. By default the last year. Returns up to one page; pass next_key for more. GET /reports/workflows/data.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "next_key": {
+     "description": "nextKey from the previous response, to get the next page.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "enboarder_get_workflow_data",
+  "output_schema": {},
+  "title": "Get workflow data"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get data for one workflow"
+  },
+  "description": "List launched instances of ONE workflow (employee, status, start date, custom fields, managers). By default the last year. GET /reports/workflows/{id}/data.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "next_key": {
+     "description": "nextKey from the previous response, to get the next page.",
+     "type": "string"
+    },
+    "workflow_id": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "workflow_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_get_workflow_data_by_id",
+  "output_schema": {},
+  "title": "Get data for one workflow"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "Get workflow properties"
+  },
+  "description": "List the categories, custom fields and stakeholders (managers) configured for one workflow. GET /reports/workflows/{id}/properties.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "workflow_id": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "workflow_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_get_workflow_properties",
+  "output_schema": {},
+  "title": "Get workflow properties"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "title": "Launch a workflow (basic)"
+  },
+  "description": "WRITE: start an onboarding workflow for one employee with one manager (this can send messages to the employee and manager). Needs the employee full name, one contact (email or mobile), the manager full name and contact, and the start date. mode 0 (default) does not launch if the external id already exists. POST /restapi/v1/startwf/basic.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_fields": {
+     "description": "Custom fields as name/value pairs. Names must match the labels in Enboarder.",
+     "items": {
+      "properties": {
+       "name": {
+        "description": "Label of the custom field, or 'brand', 'location', or a category name.",
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "value"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "employee_channel": {
+     "description": "Preferred channel (default mob).",
+     "enum": [
+      "mob",
+      "eml"
+     ],
+     "type": "string"
+    },
+    "employee_email": {
+     "type": "string"
+    },
+    "employee_mobile": {
+     "description": "International format, for example +61415000000.",
+     "type": "string"
+    },
+    "employee_name": {
+     "description": "Full name of the employee.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "external_id": {
+     "description": "Unique id from your system. Enboarder makes one if omitted.",
+     "type": "string"
+    },
+    "manager_channel": {
+     "enum": [
+      "mob",
+      "eml"
+     ],
+     "type": "string"
+    },
+    "manager_email": {
+     "type": "string"
+    },
+    "manager_mobile": {
+     "type": "string"
+    },
+    "manager_name": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "mode": {
+     "anyOf": [
+      {
+       "const": 0,
+       "type": "number"
+      },
+      {
+       "const": 1,
+       "type": "number"
+      },
+      {
+       "const": 2,
+       "type": "number"
+      }
+     ],
+     "description": "0 = skip if external id exists (default); 1 = cancel the existing one and relaunch; 2 = allow several with different criteria."
+    },
+    "start_date": {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "employee_name",
+    "manager_name",
+    "start_date"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_launch_workflow",
+  "output_schema": {},
+  "title": "Launch a workflow (basic)"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List brands"
+  },
+  "description": "List brands of the account. GET /restapi/v1/settings/brand/all.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enboarder_list_brands",
+  "output_schema": {},
+  "title": "List brands"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List categories"
+  },
+  "description": "List categories of the account. GET /restapi/v1/settings/category/all.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enboarder_list_categories",
+  "output_schema": {},
+  "title": "List categories"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List custom fields"
+  },
+  "description": "List custom fields of the account. GET /restapi/v1/settings/customfield/all.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enboarder_list_custom_fields",
+  "output_schema": {},
+  "title": "List custom fields"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List forms"
+  },
+  "description": "List forms (id, name). GET /reports/forms.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enboarder_list_forms",
+  "output_schema": {},
+  "title": "List forms"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List locations"
+  },
+  "description": "List locations of the account. GET /restapi/v1/settings/location/all.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enboarder_list_locations",
+  "output_schema": {},
+  "title": "List locations"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true,
+   "title": "List workflows"
+  },
+  "description": "List workflow definitions (id, name, isActive). Start here to find workflow ids. GET /reports/workflows.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "enboarder_list_workflows",
+  "output_schema": {},
+  "title": "List workflows"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "title": "Update a running workflow"
+  },
+  "description": "WRITE: change a running workflow found by its external id (partial update: send only what changes, for example start_date or custom fields). Fails if the workflow is complete or cancelled. PUT /restapi/v1/updatewf.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "custom_fields": {
+     "description": "Custom fields as name/value pairs. Names must match the labels in Enboarder.",
+     "items": {
+      "properties": {
+       "name": {
+        "description": "Label of the custom field, or 'brand', 'location', or a category name.",
+        "type": "string"
+       },
+       "value": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "value"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "external_id": {
+     "description": "External id of the workflow instance.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "start_date": {
+     "description": "New start date.",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "external_id"
+   ],
+   "type": "object"
+  },
+  "name": "enboarder_update_workflow",
+  "output_schema": {},
+  "title": "Update a running workflow"
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Firmograph Public Plane company enrichment by domain. Paid tool: x402 v2, scheme upto, USDC on Base (eip155:8453), max 30000 atomic (DG-FG-PRICE-001). Without a settled payment the call returns the x402 PaymentRequired object (isError: true). Settlement over MCP is not enabled in this version. Not universal US SMB coverage.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "description": "Company web domain, e.g. example.com",
+     "maxLength": 253,
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "enrich",
+  "output_schema": {},
+  "title": "Firmograph enrich"
+ }
+]

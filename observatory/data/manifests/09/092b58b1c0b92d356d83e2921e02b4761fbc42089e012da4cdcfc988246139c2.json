@@ -1,0 +1,889 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Use this when asked to check an AI agent or MCP server: does it work, is it reachable, is its card valid (\"check this agent\", \"is this MCP server up?\"). Pass just its `url`. Returns READY / FIXES_NEEDED / NO_AGENT_CARD / UNREACHABLE with fixes and a receipt. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "url": "https://www.gaipagents.com/.well-known/agent-card.json"
+    },
+    {
+     "metadata": {
+      "name": "GAIP Broker",
+      "protocolVersion": "2025-06-18",
+      "tools": [],
+      "url": "https://www.gaipagents.com/mcp"
+     }
+    }
+   ],
+   "properties": {
+    "data_classification": {
+     "default": "PUBLIC",
+     "description": "PUBLIC (default) or NON_PERSONAL_PUBLIC. Never send personal data.",
+     "enum": [
+      "PUBLIC",
+      "NON_PERSONAL_PUBLIC"
+     ],
+     "type": "string"
+    },
+    "declared_identity": {
+     "description": "Optional: the name the agent claims.",
+     "type": "string"
+    },
+    "expected_endpoint": {
+     "description": "Optional: the endpoint you expect; a different primary endpoint is reported as ENDPOINT_DRIFT.",
+     "format": "uri",
+     "type": "string"
+    },
+    "intended_task": {
+     "description": "VERIFY_BEFORE_CALL: what you intend to delegate.",
+     "type": "string"
+    },
+    "metadata": {
+     "description": "Alternative to url: the agent card or MCP/OpenAPI document itself.",
+     "type": "object"
+    },
+    "mode": {
+     "description": "CONFORMANCE (default) checks the interface; VERIFY_BEFORE_CALL returns task-specific evidence about `target` for `intended_task`.",
+     "enum": [
+      "CONFORMANCE",
+      "VERIFY_BEFORE_CALL"
+     ],
+     "type": "string"
+    },
+    "protocol": {
+     "description": "Counterparty protocol. Inferred from metadata when omitted, otherwise MCP.",
+     "enum": [
+      "A2A",
+      "MCP",
+      "OPENAPI"
+     ],
+     "type": "string"
+    },
+    "source_url": {
+     "description": "Optional: where `metadata` was published, used only to resolve relative endpoints. Never fetched.",
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "target": {
+     "description": "VERIFY_BEFORE_CALL: the counterparty URL or reference.",
+     "oneOf": [
+      {
+       "format": "uri",
+       "type": "string"
+      },
+      {
+       "type": "object"
+      }
+     ]
+    },
+    "url": {
+     "description": "Public https link to an agent, its A2A agent card, MCP server description or OpenAPI document. GAIP fetches, validates and reach-tests it. Use instead of metadata.",
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "check_agent_conformance",
+  "output_schema": {},
+  "title": "Check an AI agent or MCP server"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Use this before your agent fetches a page (\"may my agent fetch this?\"). Pass the `url` and your `agent` token. Reads robots.txt (RFC 9309), AI-preference lines, RSL, tdmrep.json and llms.txt; returns ALLOWED, DISALLOWED, NO_RULE or UNKNOWN, the rule quoted, the time and a signature. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "agent": "GPTBot",
+     "url": "https://www.gaipagents.com/test-range"
+    }
+   ],
+   "properties": {
+    "agent": {
+     "description": "Your agent's user-agent token as robots.txt names it, e.g. GPTBot or ClaudeBot (a full User-Agent string also works). Default * (any crawler without its own rules).",
+     "maxLength": 300,
+     "type": "string"
+    },
+    "url": {
+     "description": "The public https URL your agent wants to fetch.",
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "user_agent": {
+     "description": "Alternative to agent: your agent's full User-Agent string.",
+     "maxLength": 300,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_check_permission",
+  "output_schema": {},
+  "title": "May my agent fetch this?"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Use this when asked what changed between two versions of an agent card, MCP server description or OpenAPI document (\"did this API break?\"). Pass `prior` and `current`. Returns each change as BREAKING / NON_BREAKING / INFO with migration notes and a receipt. Free, no account; records a GAIP receipt only. Inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": true,
+   "examples": [
+    {
+     "counterparty_id": "example-weather-agent",
+     "current": {
+      "capabilities": {
+       "streaming": true
+      },
+      "name": "Weather Agent",
+      "protocolVersion": "0.3.0",
+      "security": [
+       {
+        "bearer": []
+       }
+      ],
+      "securitySchemes": {
+       "bearer": {
+        "scheme": "bearer",
+        "type": "http"
+       }
+      },
+      "skills": [
+       {
+        "id": "forecast",
+        "name": "Forecast"
+       }
+      ],
+      "url": "https://weather.example.com/v2/a2a",
+      "version": "2.0.0"
+     },
+     "prior": {
+      "capabilities": {
+       "streaming": true
+      },
+      "name": "Weather Agent",
+      "protocolVersion": "0.3.0",
+      "skills": [
+       {
+        "id": "forecast",
+        "name": "Forecast"
+       },
+       {
+        "id": "alerts",
+        "name": "Severe weather alerts"
+       }
+      ],
+      "url": "https://weather.example.com/a2a",
+      "version": "1.4.0"
+     }
+    }
+   ],
+   "properties": {
+    "continuity_handle": {
+     "additionalProperties": false,
+     "description": "Optional: the continuity_handle from an earlier GAIP result; links this call to your earlier ones.",
+     "properties": {
+      "continuity_id": {
+       "type": "string"
+      },
+      "token": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "continuity_id",
+      "token"
+     ],
+     "type": "object"
+    },
+    "counterparty_id": {
+     "description": "Name or URL of the agent/service. Optional.",
+     "type": "string"
+    },
+    "current": {
+     "description": "The later version, same kind as `prior`.",
+     "type": "object"
+    },
+    "data_classification": {
+     "default": "PUBLIC",
+     "description": "PUBLIC (default) or NON_PERSONAL_PUBLIC. Never send personal data.",
+     "enum": [
+      "PUBLIC",
+      "NON_PERSONAL_PUBLIC"
+     ],
+     "type": "string"
+    },
+    "episode_id": {
+     "description": "Optional: your own id to group related calls.",
+     "type": "string"
+    },
+    "independent_operator_id": {
+     "description": "Optional: your operator id (recorded as a claim, not verified).",
+     "type": "string"
+    },
+    "prior": {
+     "description": "The earlier version: agent card, MCP server description, OpenAPI document or snapshot.",
+     "type": "object"
+    },
+    "protocol": {
+     "description": "Counterparty protocol. Inferred from metadata when omitted, otherwise MCP.",
+     "enum": [
+      "A2A",
+      "MCP",
+      "OPENAPI"
+     ],
+     "type": "string"
+    },
+    "synthetic": {
+     "description": "Optional: true marks a test call.",
+     "type": "boolean"
+    },
+    "task_class": {
+     "default": "supplier_snapshot_comparison",
+     "description": "Optional: short name of the task, e.g. weather_forecast.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "prior",
+    "current"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_compare_supplier_snapshots",
+  "output_schema": {},
+  "title": "What changed between two versions"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Use this when an agent, MCP or API call failed (\"why did my call fail?\", \"what does this 429 mean?\"). Pass the `failure` ({code, detail}) or the raw error text. Returns the likely cause, when and how to retry, fix steps and a receipt. GAIP touches no other system. Free, no account; records a GAIP receipt only. Inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": true,
+   "examples": [
+    {
+     "counterparty_id": "example-weather-agent",
+     "failure": {
+      "code": 429,
+      "detail": "HTTP 429 Too Many Requests; Retry-After: 20"
+     }
+    }
+   ],
+   "properties": {
+    "continuity_handle": {
+     "additionalProperties": false,
+     "description": "Optional: the continuity_handle from an earlier GAIP result; links this call to your earlier ones.",
+     "properties": {
+      "continuity_id": {
+       "type": "string"
+      },
+      "token": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "continuity_id",
+      "token"
+     ],
+     "type": "object"
+    },
+    "counterparty_id": {
+     "description": "Name or URL of the agent/service. Optional.",
+     "type": "string"
+    },
+    "data_classification": {
+     "default": "PUBLIC",
+     "description": "PUBLIC (default) or NON_PERSONAL_PUBLIC. Never send personal data.",
+     "enum": [
+      "PUBLIC",
+      "NON_PERSONAL_PUBLIC"
+     ],
+     "type": "string"
+    },
+    "episode_id": {
+     "description": "Optional: your own id to group related calls.",
+     "type": "string"
+    },
+    "failure": {
+     "description": "The failure: {code, detail?, http_status?}, e.g. {\"code\": 429, \"detail\": \"Too Many Requests; Retry-After: 20\"}.",
+     "type": "object"
+    },
+    "independent_operator_id": {
+     "description": "Optional: your operator id (recorded as a claim, not verified).",
+     "type": "string"
+    },
+    "protocol": {
+     "description": "Counterparty protocol. Inferred from metadata when omitted, otherwise MCP.",
+     "enum": [
+      "A2A",
+      "MCP",
+      "OPENAPI"
+     ],
+     "type": "string"
+    },
+    "synthetic": {
+     "description": "Optional: true marks a test call.",
+     "type": "boolean"
+    },
+    "task_class": {
+     "default": "integration_failure_diagnosis",
+     "description": "Optional: short name of the task, e.g. weather_forecast.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "failure"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_diagnose_integration_failure",
+  "output_schema": {},
+  "title": "Why did my agent call fail?"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this when asked which MCP servers or agents changed recently (\"what changed this week?\"). Optional `since` (RFC 3339), `target_id`, `limit` (max 100). Returns the Observatory's hash-chained log of manifest changes: before/after hashes, neutral facts, receipts. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "limit": 20,
+     "since": "2026-09-01T00:00:00Z"
+    }
+   ],
+   "properties": {
+    "limit": {
+     "description": "Optional: maximum entries (1-100).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since": {
+     "description": "Optional: RFC 3339 time, e.g. 2026-09-01T00:00:00Z.",
+     "format": "date-time",
+     "type": "string"
+    },
+    "target_id": {
+     "description": "Optional: an Observatory target id (obs_...).",
+     "pattern": "^obs_[0-9a-f]{24}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "gaip_manifest_changes",
+  "output_schema": {},
+  "title": "What changed recently (manifest log)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Use this to save a dated record of what a public MCP server or A2A agent card declares now. Pass its `url`. GAIP reads it once (robots.txt respected, never tools/call), re-reads it daily and returns the capture id, time and SHA-256 hashes. Not an assessment. Free, no account; records a GAIP receipt only. Inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "url": "<public https URL of the MCP endpoint or A2A agent card to save>"
+    }
+   ],
+   "properties": {
+    "protocol": {
+     "description": "Optional; inferred from the URL (a /.well-known/agent-card.json path is A2A).",
+     "enum": [
+      "MCP",
+      "A2A"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "description": "Public https URL of the MCP endpoint or the A2A agent card.",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_observatory_capture",
+  "output_schema": {},
+  "title": "Save an agent's declarations now"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this when asked about an MCP server's or agent's history (\"has this server changed?\", \"was it up last week?\"). Pass its `url` or `name`. Returns dated facts the Agent Observatory observed: status history, manifest hash, conformance codes, change log. Not an assessment. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "url": "https://huggingface.co/mcp"
+    }
+   ],
+   "properties": {
+    "name": {
+     "description": "Optional: server or agent name to search for.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "target_id": {
+     "description": "Optional: an Observatory target id (obs_...).",
+     "pattern": "^obs_[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "url": {
+     "description": "Public URL of the MCP server or agent to look up.",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "gaip_observatory_lookup",
+  "output_schema": {},
+  "title": "Look up an MCP server's or agent's history"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this when a supplier agent or API you depend on started failing (\"did something change on their side?\"). Pass its `supplier_url` and the `failure`. Returns the diagnosis plus changes GAIP observed around then (correlated in time, not causation), with receipts. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": true,
+   "examples": [
+    {
+     "failure": {
+      "code": 404,
+      "detail": "Not Found"
+     },
+     "failure_started_at": "2026-09-27T12:00:00Z",
+     "supplier_url": "https://weather.example.com/.well-known/agent-card.json"
+    }
+   ],
+   "properties": {
+    "card": {
+     "description": "Optional supplier card / server description you integrated against.",
+     "type": "object"
+    },
+    "counterparty_id": {
+     "description": "Optional: name of the supplier.",
+     "type": "string"
+    },
+    "data_classification": {
+     "default": "PUBLIC",
+     "description": "PUBLIC (default) or NON_PERSONAL_PUBLIC. Never send personal data.",
+     "enum": [
+      "PUBLIC",
+      "NON_PERSONAL_PUBLIC"
+     ],
+     "type": "string"
+    },
+    "failure": {
+     "description": "{code, detail?, http_status?} as for gaip_diagnose_integration_failure.",
+     "type": "object"
+    },
+    "failure_started_at": {
+     "description": "Optional: RFC 3339 time the failures started.",
+     "format": "date-time",
+     "type": "string"
+    },
+    "failures": {
+     "description": "Optional: several failures, each {code, detail}.",
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    },
+    "lookback_days": {
+     "default": 14,
+     "description": "Optional: days of GAIP observations to look back over.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "protocol": {
+     "description": "Omit to infer it from card, transport or the supplier URL path (else UNKNOWN).",
+     "enum": [
+      "A2A",
+      "MCP",
+      "OPENAPI",
+      "UNKNOWN"
+     ],
+     "type": "string"
+    },
+    "supplier_url": {
+     "description": "Public https URL of the supplier's agent card, MCP server or API.",
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "task_class": {
+     "description": "Optional: short name of the task, e.g. weather_forecast.",
+     "type": "string"
+    },
+    "transport": {
+     "description": "Optional transport you used (e.g. streamable-http, sse, GRPC).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "supplier_url"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_supplier_reliability",
+  "output_schema": {},
+  "title": "Why is my supplier failing?"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this before connecting to an MCP server: did its tools change since your `since` date? Pass its `url`, optionally your tools/list `tools` or a digest. Returns dates, change classes, stored hashes and whether yours match the latest GAIP observed. Facts, not a verdict. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "since": "2026-09-01",
+     "url": "https://huggingface.co/mcp"
+    }
+   ],
+   "properties": {
+    "since": {
+     "description": "Your approval date (RFC 3339 or YYYY-MM-DD): changes recorded since then.",
+     "maxLength": 40,
+     "type": "string"
+    },
+    "target_id": {
+     "description": "Optional: an Observatory target id (obs_...).",
+     "pattern": "^obs_[0-9a-f]{24}$",
+     "type": "string"
+    },
+    "tool_digests": {
+     "description": "Per-tool digests in the DRAFT MCP SEP-2636 form (may change).",
+     "items": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+     },
+     "maxItems": 2000,
+     "type": "array"
+    },
+    "tools": {
+     "description": "The `tools` array from your own tools/list; GAIP hashes it and compares.",
+     "items": {
+      "type": "object"
+     },
+     "maxItems": 300,
+     "type": "array"
+    },
+    "tools_digest": {
+     "description": "A SHA-256 (64 hex) of the tool list you approved, as GAIP reported it.",
+     "maxLength": 71,
+     "type": "string"
+    },
+    "url": {
+     "description": "The MCP endpoint (or A2A agent card) URL, exactly as you connect to it.",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "gaip_tools_changed_since",
+  "output_schema": {},
+  "title": "Has this MCP server changed?"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this when asked what changed on a watched agent or service. Pass your `continuity_handle` and optionally a `watch_id`. Returns recent change events: verdict before and after, a change summary, the receipt and webhook delivery status. Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "continuity_handle": {
+      "continuity_id": "<continuity_handle.continuity_id returned by any GAIP tool>",
+      "token": "<continuity_handle.token returned by any GAIP tool>"
+     },
+     "limit": 10,
+     "watch_id": "<watch_id from gaip_watch_register>"
+    }
+   ],
+   "properties": {
+    "continuity_handle": {
+     "description": "The continuity_handle from an earlier GAIP result; proves you own these watches.",
+     "properties": {
+      "continuity_id": {
+       "type": "string"
+      },
+      "token": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "continuity_id",
+      "token"
+     ],
+     "type": "object"
+    },
+    "limit": {
+     "description": "Optional: maximum events to return.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "watch_id": {
+     "description": "The watch_id returned by gaip_watch_register.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "continuity_handle"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_watch_events",
+  "output_schema": {},
+  "title": "Read watch change events"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Use this when asked which agents or services you are watching. Pass your `continuity_handle`. Returns each watch's kind, target, last verdict, last and next check and webhook endpoint (never the secret). Free, read-only, no account; inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "continuity_handle": {
+      "continuity_id": "<continuity_handle.continuity_id returned by any GAIP tool>",
+      "token": "<continuity_handle.token returned by any GAIP tool>"
+     }
+    }
+   ],
+   "properties": {
+    "continuity_handle": {
+     "description": "The continuity_handle from an earlier GAIP result; proves you own these watches.",
+     "properties": {
+      "continuity_id": {
+       "type": "string"
+      },
+      "token": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "continuity_id",
+      "token"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "continuity_handle"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_watch_list",
+  "output_schema": {},
+  "title": "List my watches"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Use this when asked to keep an eye on an agent or MCP server (\"tell me if it changes or goes down\"). Pass the `continuity_handle` from any GAIP result, `kind` and `target_url`. GAIP re-checks every 24 hours (3 free watches), receipts each change and can call your webhook. Free, no account; records a GAIP receipt only. Inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "continuity_handle": {
+      "continuity_id": "<continuity_handle.continuity_id returned by any GAIP tool>",
+      "token": "<continuity_handle.token returned by any GAIP tool>"
+     },
+     "interval_hours": 24,
+     "kind": "AGENT_READINESS",
+     "target_url": "https://weather.example.com/"
+    }
+   ],
+   "properties": {
+    "continuity_handle": {
+     "description": "The continuity_handle from an earlier GAIP result; proves you own these watches.",
+     "properties": {
+      "continuity_id": {
+       "type": "string"
+      },
+      "token": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "continuity_id",
+      "token"
+     ],
+     "type": "object"
+    },
+    "data_classification": {
+     "default": "PUBLIC",
+     "description": "PUBLIC (default) or NON_PERSONAL_PUBLIC. Never send personal data.",
+     "enum": [
+      "PUBLIC",
+      "NON_PERSONAL_PUBLIC"
+     ],
+     "type": "string"
+    },
+    "interval_hours": {
+     "default": 24,
+     "description": "Hours between checks: 24 minimum on the free tier; 1 for DELIVERY_SLA.",
+     "maximum": 168,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "kind": {
+     "description": "AGENT_READINESS (agent URL), SUPPLIER_CARD (published card), DELIVERY_TERMS (terms_id) or DELIVERY_SLA (terms_id plus sla terms).",
+     "enum": [
+      "AGENT_READINESS",
+      "DELIVERY_TERMS",
+      "SUPPLIER_CARD",
+      "DELIVERY_SLA"
+     ],
+     "type": "string"
+    },
+    "sla": {
+     "description": "DELIVERY_SLA only: service-level terms checked on every observation, any of min_uptime_pct, max_latency_ms, required_fields (JSON key paths), freshness_field + max_age_seconds; optional uptime_window_hours, min_observations. Results go only to you.",
+     "type": "object"
+    },
+    "target_url": {
+     "description": "Public https URL (AGENT_READINESS, SUPPLIER_CARD). No query string.",
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    },
+    "terms_id": {
+     "description": "DELIVERY_TERMS or DELIVERY_SLA: terms_id from witness_register_terms.",
+     "type": "string"
+    },
+    "webhook_url": {
+     "description": "Optional: your own public https endpoint for signed change events.",
+     "format": "uri",
+     "maxLength": 2048,
+     "type": "string"
+    }
+   },
+   "required": [
+    "continuity_handle",
+    "kind"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_watch_register",
+  "output_schema": {},
+  "title": "Watch an agent or MCP server for changes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Use this when asked to stop watching an agent or service. Pass your `continuity_handle` and the `watch_id`. Its stored events are deleted; retained receipts stay verifiable. Free, no account; records a GAIP receipt only. Inputs must be public and non-personal.",
+  "input_schema": {
+   "additionalProperties": false,
+   "examples": [
+    {
+     "continuity_handle": {
+      "continuity_id": "<continuity_handle.continuity_id returned by any GAIP tool>",
+      "token": "<continuity_handle.token returned by any GAIP tool>"
+     },
+     "watch_id": "<watch_id from gaip_watch_register>"
+    }
+   ],
+   "properties": {
+    "continuity_handle": {
+     "description": "The continuity_handle from an earlier GAIP result; proves you own these watches.",
+     "properties": {
+      "continuity_id": {
+       "type": "string"
+      },
+      "token": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "continuity_id",
+      "token"
+     ],
+     "type": "object"
+    },
+    "watch_id": {
+     "description": "The watch_id returned by gaip_watch_register.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "continuity_handle",
+    "watch_id"
+   ],
+   "type": "object"
+  },
+  "name": "gaip_watch_remove",
+  "output_schema": {},
+  "title": "Remove a watch"
+ }
+]

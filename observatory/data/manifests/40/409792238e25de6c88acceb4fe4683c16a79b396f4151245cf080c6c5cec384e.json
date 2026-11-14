@@ -1,0 +1,387 @@
+[
+ {
+  "description": "Return public festival feed or calendar export.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "default": 90,
+     "maximum": 366,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "from_date": {
+     "description": "YYYY-MM-DD",
+     "type": "string"
+    },
+    "lat": {
+     "default": -33.8688,
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "default": 151.2093,
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tz": {
+     "default": "Australia/Sydney",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_festival_calendar",
+  "output_schema": {}
+ },
+ {
+  "description": "Return public Jyotish glossary/concept explanation metadata.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "term": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "term"
+   ],
+   "type": "object"
+  },
+  "name": "get_jyotish_glossary_term",
+  "output_schema": {}
+ },
+ {
+  "description": "Return public Jyotish concept explanations without generating private user Kundali data.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "concept": {
+     "default": "lagna",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_kundali_explanation",
+  "output_schema": {}
+ },
+ {
+  "description": "Return public reviewed-source discovery guidance for mantra meanings.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "mantra": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "mantra"
+   ],
+   "type": "object"
+  },
+  "name": "get_mantra_meaning",
+  "output_schema": {}
+ },
+ {
+  "description": "Use public Panchang endpoints for nakshatra context by date/location.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "date": {
+     "description": "YYYY-MM-DD; defaults to today's date at the place (timezone from lat/lng)",
+     "type": "string"
+    },
+    "lat": {
+     "default": -33.8688,
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "default": 151.2093,
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tz": {
+     "default": "Australia/Sydney",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_nakshatra_info",
+  "output_schema": {}
+ },
+ {
+  "description": "Return public Panchang JSON for a supplied date and city/location.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "date": {
+     "description": "YYYY-MM-DD; defaults to today's date at the place (timezone from lat/lng)",
+     "type": "string"
+    },
+    "lat": {
+     "default": -33.8688,
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "default": 151.2093,
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tz": {
+     "default": "Australia/Sydney",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_panchang_by_date_city",
+  "output_schema": {}
+ },
+ {
+  "description": "Return public BDA service and API discovery metadata.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_public_bda_feature_summary",
+  "output_schema": {}
+ },
+ {
+  "description": "Fetch safe public BDA page metadata for a single allowlisted public URL without returning page body content.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "Allowlisted public BDA URL or root-relative public path.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "get_public_page_metadata",
+  "output_schema": {}
+ },
+ {
+  "description": "Return deterministic annual start/end spans for one Tithi in the requested location timezone.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lat": {
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tithi": {
+     "description": "Canonical Tithi slug, for example shukla-navami",
+     "type": "string"
+    },
+    "tz": {
+     "description": "Optional IANA timezone hint",
+     "type": "string"
+    },
+    "year": {
+     "maximum": 2100,
+     "minimum": 1900,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "tithi",
+    "year",
+    "lat",
+    "lng"
+   ],
+   "type": "object"
+  },
+  "name": "get_tithi_calendar",
+  "output_schema": {}
+ },
+ {
+  "description": "Use the public Panchang utility/evidence endpoints for tithi context.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "date": {
+     "description": "YYYY-MM-DD; defaults to today's date at the place (timezone from lat/lng)",
+     "type": "string"
+    },
+    "lat": {
+     "default": -33.8688,
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "default": 151.2093,
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tz": {
+     "default": "Australia/Sydney",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_tithi_info",
+  "output_schema": {}
+ },
+ {
+  "description": "Return public daily Panchang data for a city/date context.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "lat": {
+     "default": -33.8688,
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "default": 151.2093,
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tz": {
+     "default": "Australia/Sydney",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_today_panchang",
+  "output_schema": {}
+ },
+ {
+  "description": "Return certified public ascendant-sign windows from local sunrise to the next local sunrise.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "date": {
+     "description": "YYYY-MM-DD; defaults to today's date at the place (timezone from lat/lng)",
+     "type": "string"
+    },
+    "lat": {
+     "default": -33.8688,
+     "maximum": 90,
+     "minimum": -90,
+     "type": "number"
+    },
+    "lng": {
+     "default": 151.2093,
+     "maximum": 180,
+     "minimum": -180,
+     "type": "number"
+    },
+    "tz": {
+     "default": "Australia/Sydney",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_udaya_lagna",
+  "output_schema": {}
+ },
+ {
+  "description": "List public evaluation endpoints from the filtered public OpenAPI contract, excluding identity, donation, memory, client-log, external-database, alerting, rendered-page, and internal routes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "family": {
+     "description": "Optional public API family/tag/path substring filter.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 100,
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Optional case-insensitive endpoint search string.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_public_api_endpoints",
+  "output_schema": {}
+ },
+ {
+  "description": "Return a paged public URL catalog from BDA sitemaps so agents can discover the full public site without crawling private surfaces.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "family": {
+     "default": "all",
+     "description": "One sitemap family key or all.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 100,
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_sitemaps": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "maximum": 100000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Optional case-insensitive URL substring filter.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_public_sitemap_urls",
+  "output_schema": {}
+ },
+ {
+  "description": "Use canonical public Sanatan Encyclopedia pages and future search contracts.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_sanatan_encyclopedia",
+  "output_schema": {}
+ }
+]

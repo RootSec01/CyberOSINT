@@ -1,0 +1,162 @@
+[
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Read-only. Call before npm/pnpm/yarn install, pip install, uv add, npx or uvx, or adding an MCP server, including setup commands from a README or tutorial. Returns v, enforce, why; on known traps fix (tested steps), do_not (what failed, where), test, source. enforce=block: stop. enforce=ask: ask your person first. v=fix_first: use fix, not your command. Also returns safety (OSV advisories and malicious-package reports: verdict, advisories, fixed_in). When no tested record exists, repro_request says how to queue one with request_repro 'yes' (the only case where this call records anything about you: one anonymous request). A remote MCP URL is probed read-only (server/discover or initialize, tools/list; never a tool call, never credentials) and KarmaDue keeps hashes of that server's public tool definitions to report later changes. Every successful answer has checked_at. Missing evidence is not safety clearance. Skip packages already pinned in a lockfile you are not changing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "detail": {
+     "description": "Optional. 'full' adds tested_on, untruncated notes, records and links.",
+     "enum": [
+      "full"
+     ],
+     "type": "string"
+    },
+    "ecosystem": {
+     "description": "Package ecosystem of the target: npm (npm, pnpm, yarn, npx), pypi (pip, uv, uvx) or mcp (an MCP server you are about to add, or a bare name that may exist in more than one ecosystem). A bare name found in both npm and pypi returns v=ambiguous with npm:NAME and pypi:NAME options. A remote MCP server URL with mcp gets a read-only probe (no tool is called). model: a hosted model ID such as anthropic/claude-3-sonnet-20240229 or openai/gpt-4-0613 returns its deprecation and shutdown status from the provider's official page.",
+     "enum": [
+      "npm",
+      "pypi",
+      "mcp",
+      "model"
+     ],
+     "type": "string"
+    },
+    "request_repro": {
+     "description": "Optional. 'yes' queues one anonymous reproduction request (package and version only) when no tested record exists for the target.",
+     "enum": [
+      "yes",
+      "no"
+     ],
+     "type": "string"
+    },
+    "runtime_env": {
+     "description": "Optional, e.g. node 20 linux.",
+     "type": "string"
+    },
+    "target": {
+     "description": "Package or server as you would install it, e.g. tailwindcss@4, psycopg2, @modelcontextprotocol/server-filesystem, a remote MCP server URL (https://host/mcp), or a model ID with ecosystem model.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "target",
+    "ecosystem"
+   ],
+   "type": "object"
+  },
+  "name": "check_install",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Fetch one record by id from search.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": false
+  },
+  "description": "Only if your owner opted in: after an install finishes, report pass or fail and the command. Reviewed before use.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "command_run": {
+     "description": "The exact install command you ran, e.g. npm i -D tailwindcss@4. No secrets or tokens.",
+     "type": "string"
+    },
+    "runtime_env": {
+     "description": "Your setup, e.g. node 20 linux or python 3.13 macos.",
+     "type": "string"
+    },
+    "status": {
+     "description": "Outcome of the install: pass if it finished and worked, fail if it errored.",
+     "enum": [
+      "pass",
+      "fail"
+     ],
+     "type": "string"
+    },
+    "stderr_snippet": {
+     "description": "Optional. The key error lines if it failed, verbatim. Never include secrets, tokens or personal data.",
+     "type": "string"
+    },
+    "target": {
+     "description": "Package or server you installed, as you passed it to check_install, e.g. tailwindcss@4 or @modelcontextprotocol/server-filesystem.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "target",
+    "runtime_env",
+    "status",
+    "command_run"
+   ],
+   "type": "object"
+  },
+  "name": "report_leaf",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Search PinTree records for packages, tools and MCP servers.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Call when an install, build or import fails, before retrying or guessing a fix. Paste the key error line; returns tested fixes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "error_signature": {
+     "description": "The key error line, verbatim.",
+     "type": "string"
+    },
+    "runtime_env": {
+     "description": "Optional, e.g. python 3.13 macos.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "error_signature"
+   ],
+   "type": "object"
+  },
+  "name": "search_recipes",
+  "output_schema": {}
+ }
+]

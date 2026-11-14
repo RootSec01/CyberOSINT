@@ -1,0 +1,25 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Trouver des réponses validées sur les services, forfaits et modalités d’Effset. Recherche sans génération IA.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "maxLength": 600,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "ask",
+  "output_schema": {}
+ }
+]

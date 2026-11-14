@@ -1,0 +1,1401 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Decode a 6–7-character FAA manufacturer/model/series code to aircraft specifications — manufacturer, model, aircraft category, aircraft type, engine type, number of engines, number of seats, weight class, cruise speed, and type-certificate data sheet/holder. Use faa_search_aircraft_types first to discover a code by manufacturer or model name.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "description": "Manufacturer/model/series code (e.g. \"2072714\") — 6–7 uppercase alphanumeric characters, usually 7. Discover codes via faa_search_aircraft_types.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "faa_get_aircraft_type",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "code"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "aircraftType": {
+     "additionalProperties": false,
+     "description": "Aircraft type as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "builderCertification": {
+     "additionalProperties": false,
+     "description": "Builder certification (Type Certificated, Not Type Certificated, Light Sport) as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "category": {
+     "additionalProperties": false,
+     "description": "Aircraft category (Land, Sea, Amphibian) as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "code": {
+     "description": "The 6–7-character manufacturer/model/series code.",
+     "type": "string"
+    },
+    "cruiseSpeedMph": {
+     "description": "Cruise speed in mph; often blank (permissible field).",
+     "type": "number"
+    },
+    "dataAsOf": {
+     "description": "Source date of the FAA registry snapshot, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "engineType": {
+     "additionalProperties": false,
+     "description": "Engine type as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `mirror_loading`: The FAA registry mirror has a refresh that has not completed. `not_found`: The code is well-formed but does not identify a known aircraft type. `invalid_code`: The input is not a structurally valid code (expected 6–7 uppercase alphanumeric characters). Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "mirror_loading",
+          "not_found",
+          "invalid_code"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "manufacturer": {
+     "description": "Aircraft manufacturer name.",
+     "type": "string"
+    },
+    "model": {
+     "description": "Aircraft model name.",
+     "type": "string"
+    },
+    "notice": {
+     "description": "Refresh, limit, or search guidance when applicable.",
+     "type": "string"
+    },
+    "numberOfEngines": {
+     "description": "Number of engines; may be blank on the reference record.",
+     "type": "number"
+    },
+    "numberOfSeats": {
+     "description": "Number of seats; may be blank on the reference record.",
+     "type": "number"
+    },
+    "typeCertificateDataHolder": {
+     "description": "Type-certificate data holder.",
+     "type": "string"
+    },
+    "typeCertificateDataSheet": {
+     "description": "Type-certificate data sheet identifier.",
+     "type": "string"
+    },
+    "weightClass": {
+     "description": "Weight class as the literal FAA string (e.g. \"CLASS 1\").",
+     "type": "string"
+    },
+    "weightClassLabel": {
+     "description": "FAA maximum gross takeoff weight range in pounds; omitted when the raw weight class is unknown.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "title": "faa-aircraft-registry-mcp-server: get aircraft type"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Resolve whether a US civil aircraft N-number is active, reserved, deregistered, or unknown. Includes available registration and airworthiness status and cancellation history for the number. A reassigned number can have cancellations for different aircraft. Accepts \"N12345\" or \"12345\".",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "nNumber": {
+     "description": "US registration N-number to resolve. Accepts \"N12345\" or \"12345\" (leading N optional). Shape: 1–5 characters — a leading digit 1–9, then digits, optionally ending in 1–2 letters (I and O are unused).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "nNumber"
+   ],
+   "type": "object"
+  },
+  "name": "faa_get_registration_status",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "recordType",
+      "nNumber",
+      "nNumberDisplay"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "airworthinessClass": {
+     "additionalProperties": false,
+     "description": "Airworthiness classification as code + label (active records).",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "airworthinessDate": {
+     "description": "Airworthiness certificate date, YYYY-MM-DD (active records).",
+     "type": "string"
+    },
+    "cancelDate": {
+     "description": "Cancellation date, YYYY-MM-DD (deregistered records).",
+     "type": "string"
+    },
+    "cancellations": {
+     "description": "Cancellation records for this N-number, newest first with undated records last.",
+     "items": {
+      "additionalProperties": false,
+      "description": "One cancellation record for this N-number.",
+      "properties": {
+       "cancelDate": {
+        "description": "Cancellation date, YYYY-MM-DD.",
+        "type": "string"
+       },
+       "exportCountry": {
+        "description": "FAA export destination country.",
+        "type": "string"
+       },
+       "make": {
+        "description": "Aircraft manufacturer name.",
+        "type": "string"
+       },
+       "manufacturerModelCode": {
+        "description": "FAA manufacturer/model/series code.",
+        "type": "string"
+       },
+       "model": {
+        "description": "Aircraft model name.",
+        "type": "string"
+       },
+       "serialNumber": {
+        "description": "Manufacturer serial number.",
+        "type": "string"
+       },
+       "status": {
+        "additionalProperties": false,
+        "description": "Status recorded on the cancellation row.",
+        "properties": {
+         "code": {
+          "description": "The raw code as stored in the FAA registry.",
+          "type": "string"
+         },
+         "label": {
+          "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "code"
+        ],
+        "type": "object"
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "certIssueDate": {
+     "description": "Certificate issue date, YYYY-MM-DD (active records).",
+     "type": "string"
+    },
+    "dataAsOf": {
+     "description": "Source date of the FAA registry snapshot, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `mirror_loading`: The FAA registry mirror has a refresh that has not completed. `invalid_n_number`: The input is not a structurally valid N-number (after the optional leading \"N\": 1–5 characters, a leading digit 1–9, then digits, optionally 1–2 trailing letters; I and O are unused). Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "mirror_loading",
+          "invalid_n_number"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "expirationDate": {
+     "description": "Registration expiration date, YYYY-MM-DD (active records).",
+     "type": "string"
+    },
+    "expirationNoticeDate": {
+     "description": "Date an expiration notice was sent, YYYY-MM-DD (reserved records).",
+     "type": "string"
+    },
+    "exportCountry": {
+     "description": "FAA export destination country (deregistered records).",
+     "type": "string"
+    },
+    "make": {
+     "description": "Aircraft manufacturer name (deregistered records).",
+     "type": "string"
+    },
+    "manufacturerModelCode": {
+     "description": "6–7-character manufacturer/model/series code (deregistered records).",
+     "type": "string"
+    },
+    "modeSCodeHex": {
+     "description": "Mode S code in hex / ICAO 24-bit address (deregistered records).",
+     "type": "string"
+    },
+    "model": {
+     "description": "Aircraft model name (deregistered records).",
+     "type": "string"
+    },
+    "nNumber": {
+     "description": "Normalized N-number without the leading \"N\".",
+     "type": "string"
+    },
+    "nNumberDisplay": {
+     "description": "N-number with the leading \"N\" for display.",
+     "type": "string"
+    },
+    "nNumberForChange": {
+     "description": "The N-number this reservation changes to/from (reserved records).",
+     "type": "string"
+    },
+    "notice": {
+     "description": "Refresh, limit, or search guidance when applicable.",
+     "type": "string"
+    },
+    "purgeDate": {
+     "description": "Scheduled purge date, YYYY-MM-DD (reserved records).",
+     "type": "string"
+    },
+    "recordType": {
+     "description": "Resolved registration state: active, deregistered, reserved, or unknown.",
+     "enum": [
+      "active",
+      "deregistered",
+      "reserved",
+      "unknown"
+     ],
+     "type": "string"
+    },
+    "reserveDate": {
+     "description": "Date the number was reserved, YYYY-MM-DD (reserved records).",
+     "type": "string"
+    },
+    "serialNumber": {
+     "description": "Manufacturer serial number (deregistered records).",
+     "type": "string"
+    },
+    "status": {
+     "additionalProperties": false,
+     "description": "Registration/cancellation status as code + label (active and deregistered records).",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "typeReservation": {
+     "additionalProperties": false,
+     "description": "Type of reservation as code + label (reserved records).",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "yearManufactured": {
+     "description": "Manufacture year (deregistered records).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "title": "faa-aircraft-registry-mcp-server: get registration status"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Decode one US civil aircraft N-number to its full registration record — aircraft make/model, engine, year manufactured, airworthiness, registration status, Mode S (ICAO 24-bit) code, and registered owner (when owner-PII redaction is off). Accepts \"N12345\" or \"12345\" (the leading N is optional). Returns ownerRedacted: true when owner details were withheld. A number that is known but inactive (deregistered or reserved) is not found here — use faa_get_registration_status for its current state.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "nNumber": {
+     "description": "US registration N-number to decode. Accepts \"N12345\" or \"12345\" (leading N optional). Shape: 1–5 characters — a leading digit 1–9, then digits, optionally ending in 1–2 letters (I and O are unused).",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "nNumber"
+   ],
+   "type": "object"
+  },
+  "name": "faa_lookup_registration",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "nNumber",
+      "nNumberDisplay",
+      "fractionalOwner",
+      "ownerRedacted"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "aircraftType": {
+     "additionalProperties": false,
+     "description": "Aircraft type (e.g. Fixed-wing single-engine) as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "airworthinessClass": {
+     "additionalProperties": false,
+     "description": "Airworthiness classification (Standard, Experimental, …) from CERTIFICATION char 1, as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "airworthinessDate": {
+     "description": "Airworthiness certificate date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "approvedOperations": {
+     "description": "Approved operation codes and class-specific labels in FAA record order.",
+     "items": {
+      "additionalProperties": false,
+      "description": "A coded field surfaced as both its raw FAA code and the decoded label.",
+      "properties": {
+       "code": {
+        "description": "The raw code as stored in the FAA registry.",
+        "type": "string"
+       },
+       "label": {
+        "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "code"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "approvedOperationsRaw": {
+     "description": "Raw FAA approved-operations sub-code string; interpretation varies by airworthiness class.",
+     "type": "string"
+    },
+    "certIssueDate": {
+     "description": "Certificate issue date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "dataAsOf": {
+     "description": "Source date of the FAA registry snapshot, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "engineHorsepower": {
+     "description": "Rated horsepower per engine.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "engineMake": {
+     "description": "Engine manufacturer name.",
+     "type": "string"
+    },
+    "engineManufacturerModelCode": {
+     "description": "5-char engine manufacturer/model code.",
+     "type": "string"
+    },
+    "engineModel": {
+     "description": "Engine model name.",
+     "type": "string"
+    },
+    "engineThrustLbs": {
+     "description": "Rated thrust per engine in pounds.",
+     "exclusiveMinimum": 0,
+     "type": "number"
+    },
+    "engineType": {
+     "additionalProperties": false,
+     "description": "Engine type (e.g. Reciprocating, Turbo-fan) as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `mirror_loading`: The FAA registry mirror has a refresh that has not completed. `not_found`: The N-number is well-formed but has no active registration. `invalid_n_number`: The input is not a structurally valid N-number (after the optional leading \"N\": 1–5 characters, a leading digit 1–9, then digits, optionally 1–2 trailing letters; I and O are unused). Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "mirror_loading",
+          "not_found",
+          "invalid_n_number"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "expirationDate": {
+     "description": "Registration expiration date (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "fractionalOwner": {
+     "description": "True when the aircraft is under fractional ownership.",
+     "type": "boolean"
+    },
+    "kitManufacturer": {
+     "description": "Kit manufacturer (amateur-built aircraft); often blank.",
+     "type": "string"
+    },
+    "kitModel": {
+     "description": "Kit model (amateur-built aircraft); often blank.",
+     "type": "string"
+    },
+    "lastActionDate": {
+     "description": "Date of the last registration action (YYYY-MM-DD).",
+     "type": "string"
+    },
+    "make": {
+     "description": "Aircraft manufacturer name.",
+     "type": "string"
+    },
+    "manufacturerModelCode": {
+     "description": "6–7-character manufacturer/model/series code.",
+     "type": "string"
+    },
+    "modeSCodeHex": {
+     "description": "Mode S code in hex — the ICAO 24-bit address used to key live flight-tracking data.",
+     "type": "string"
+    },
+    "modeSCodeOctal": {
+     "description": "Mode S transponder code in octal.",
+     "type": "string"
+    },
+    "model": {
+     "description": "Aircraft model name.",
+     "type": "string"
+    },
+    "nNumber": {
+     "description": "Normalized N-number without the leading \"N\" (the registry storage form).",
+     "type": "string"
+    },
+    "nNumberDisplay": {
+     "description": "N-number in conventional display form, with the leading \"N\".",
+     "type": "string"
+    },
+    "notice": {
+     "description": "Refresh, limit, or search guidance when applicable.",
+     "type": "string"
+    },
+    "owner": {
+     "additionalProperties": false,
+     "description": "Registrant name/address; present only when redaction is off.",
+     "properties": {
+      "city": {
+       "description": "City.",
+       "type": "string"
+      },
+      "country": {
+       "description": "Country code.",
+       "type": "string"
+      },
+      "county": {
+       "description": "County code.",
+       "type": "string"
+      },
+      "name": {
+       "description": "Registrant name.",
+       "type": "string"
+      },
+      "otherNames": {
+       "description": "Co-owner names (1–5 on record); only present when PII redaction is off.",
+       "items": {
+        "description": "A co-owner name.",
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "state": {
+       "description": "Two-letter state/territory abbreviation.",
+       "type": "string"
+      },
+      "street": {
+       "description": "Street address line 1.",
+       "type": "string"
+      },
+      "street2": {
+       "description": "Street address line 2.",
+       "type": "string"
+      },
+      "typeRegistrant": {
+       "additionalProperties": false,
+       "description": "Registrant type (Individual, LLC, Corporation, Government, …) as code + label.",
+       "properties": {
+        "code": {
+         "description": "The raw code as stored in the FAA registry.",
+         "type": "string"
+        },
+        "label": {
+         "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+         "type": "string"
+        }
+       },
+       "required": [
+        "code"
+       ],
+       "type": "object"
+      },
+      "zip": {
+       "description": "Postal/ZIP code.",
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "ownerRedacted": {
+     "description": "True when owner name/address were withheld from this payload by the redaction gate.",
+     "type": "boolean"
+    },
+    "region": {
+     "additionalProperties": false,
+     "description": "Registrant's FAA region as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "serialNumber": {
+     "description": "Manufacturer serial number.",
+     "type": "string"
+    },
+    "status": {
+     "additionalProperties": false,
+     "description": "Registration status (e.g. Valid registration) as code + label.",
+     "properties": {
+      "code": {
+       "description": "The raw code as stored in the FAA registry.",
+       "type": "string"
+      },
+      "label": {
+       "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code"
+     ],
+     "type": "object"
+    },
+    "uniqueId": {
+     "description": "FAA unique aircraft identifier.",
+     "type": "string"
+    },
+    "yearManufactured": {
+     "description": "Year the aircraft was manufactured; often blank (permissible field).",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "title": "faa-aircraft-registry-mcp-server: lookup registration"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search FAA aircraft types by manufacturer/model name, aircraft type code, or category code to discover 6–7-character manufacturer/model/series codes and browse specifications. Pass a code to faa_get_aircraft_type for specs or faa_search_registrations as manufacturerModelCode for exact registration matches, then faa_lookup_registration for details. At least one filter is required. Every response reports totalCount (all matches, not just this page); when more remain, it returns nextOffset — pass it back as offset to page forward.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "aircraftType": {
+     "description": "FAA aircraft type code: 1–9, H (Hybrid Lift), O (Other), exact match. Trimmed and uppercased; blank is unset.",
+     "type": "string"
+    },
+    "category": {
+     "description": "Aircraft category code: 1 (Land), 2 (Sea), 3 (Amphibian), exact match. Trimmed; blank is unset.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 25,
+     "description": "Requested page size (positive integer, default 25); requests above 200 are clamped.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Zero-based index of the first result to return — pass the nextOffset from a previous response, with identical filters, to page forward (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Aircraft manufacturer or model. Each search term matches a token prefix, such as 172 matching 172S.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "faa_search_aircraft_types",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "aircraftTypes",
+      "totalCount"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "aircraftTypes": {
+     "description": "Matching aircraft-reference summaries for this page (up to limit).",
+     "items": {
+      "additionalProperties": false,
+      "description": "A decoded aircraft-reference summary; use code with faa_get_aircraft_type for full specs.",
+      "properties": {
+       "aircraftType": {
+        "additionalProperties": false,
+        "description": "Aircraft type as code + label.",
+        "properties": {
+         "code": {
+          "description": "The raw code as stored in the FAA registry.",
+          "type": "string"
+         },
+         "label": {
+          "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "code"
+        ],
+        "type": "object"
+       },
+       "category": {
+        "additionalProperties": false,
+        "description": "Aircraft category (Land, Sea, Amphibian) as code + label.",
+        "properties": {
+         "code": {
+          "description": "The raw code as stored in the FAA registry.",
+          "type": "string"
+         },
+         "label": {
+          "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "code"
+        ],
+        "type": "object"
+       },
+       "code": {
+        "description": "6–7-character manufacturer/model/series code — pass to faa_get_aircraft_type for full specs or faa_search_registrations as manufacturerModelCode for exact registration matches.",
+        "type": "string"
+       },
+       "manufacturer": {
+        "description": "Aircraft manufacturer name.",
+        "type": "string"
+       },
+       "model": {
+        "description": "Aircraft model name.",
+        "type": "string"
+       },
+       "numberOfEngines": {
+        "description": "Number of engines; may be blank.",
+        "type": "number"
+       },
+       "numberOfSeats": {
+        "description": "Number of seats; may be blank.",
+        "type": "number"
+       }
+      },
+      "required": [
+       "code"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "cap": {
+     "description": "Applied page limit when truncated.",
+     "type": "number"
+    },
+    "dataAsOf": {
+     "description": "Source date of the FAA registry snapshot, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `mirror_loading`: The FAA registry mirror has a refresh that has not completed. `invalid_aircraft_type`: aircraftType is not 1–9, H or O. `invalid_category`: category is not 1, 2 or 3. `no_filters`: No search filter was supplied. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "mirror_loading",
+          "invalid_aircraft_type",
+          "invalid_category",
+          "no_filters"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "nextOffset": {
+     "description": "Offset for the next page, when more matches remain.",
+     "type": "number"
+    },
+    "notice": {
+     "description": "Refresh, limit, or search guidance when applicable.",
+     "type": "string"
+    },
+    "shown": {
+     "description": "Number of results on this page when truncated.",
+     "type": "number"
+    },
+    "totalCount": {
+     "description": "Total matches across all pages. Always present.",
+     "type": "number"
+    },
+    "truncated": {
+     "description": "Present and true when more matches remain.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "faa-aircraft-registry-mcp-server: search aircraft types"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search active US civil aircraft registrations by owner name, make/model, exact manufacturerModelCode, serial number, state, aircraft type, or Mode S (hex) code. Discover codes with faa_search_aircraft_types and get full records with faa_lookup_registration. Filters are AND-combined and at least one is required. Owner-name search is available on deployments that expose owner PII. Responses report totalCount across all pages and return nextOffset when more matches remain.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "aircraftType": {
+     "description": "FAA aircraft type code: 1–9, H (Hybrid Lift), O (Other), exact match. Trimmed and uppercased; blank is unset.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 25,
+     "description": "Requested page size (positive integer, default 25); requests above 200 are clamped.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "makeModel": {
+     "description": "Aircraft make or model. Each search term matches a token prefix, such as 172 matching 172S.",
+     "type": "string"
+    },
+    "manufacturerModelCode": {
+     "description": "Exact FAA manufacturer/model/series code: 6–7 alphanumeric characters, trimmed and uppercased; blank is unset. Discover codes with faa_search_aircraft_types. AND-combined with other filters.",
+     "type": "string"
+    },
+    "modeSCode": {
+     "description": "Six hexadecimal characters for the Mode S code (ICAO 24-bit address), exact match. Trimmed and uppercased; blank is unset.",
+     "type": "string"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Zero-based index of the first result to return — pass the nextOffset from a previous response, with identical filters, to page forward (default 0).",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "ownerName": {
+     "description": "Registrant name to match (full-text). Rejected when owner-PII redaction is on.",
+     "type": "string"
+    },
+    "serialNumber": {
+     "description": "Exact manufacturer serial number, trimmed and matched case-insensitively. Leading zeros, punctuation, and internal spaces are significant. Blank is unset. Use manufacturerModelCode or makeModel to narrow duplicate serials.",
+     "type": "string"
+    },
+    "state": {
+     "description": "Two ASCII letters for a state, territory or military postal code (e.g. WA, GU, AE, AP; exact match). Trimmed and uppercased; blank is unset.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "faa_search_registrations",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "anyOf": [
+    {
+     "not": {
+      "required": [
+       "error"
+      ]
+     },
+     "required": [
+      "registrations",
+      "totalCount"
+     ]
+    },
+    {
+     "required": [
+      "error"
+     ]
+    }
+   ],
+   "properties": {
+    "cap": {
+     "description": "Applied page limit when truncated.",
+     "type": "number"
+    },
+    "dataAsOf": {
+     "description": "Source date of the FAA registry snapshot, YYYY-MM-DD.",
+     "format": "date",
+     "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": {},
+     "description": "Present when the call failed. Absent on success.",
+     "properties": {
+      "code": {
+       "description": "JSON-RPC error code for this failure.",
+       "maximum": 9007199254740991,
+       "minimum": -9007199254740991,
+       "type": "integer"
+      },
+      "data": {
+       "additionalProperties": {},
+       "properties": {
+        "reason": {
+         "description": "Machine-readable failure mode. Declared by this tool: `mirror_loading`: The FAA registry mirror has a refresh that has not completed. `invalid_code`: manufacturerModelCode is not 6–7 alphanumeric characters after normalization. `invalid_state`: state is not two ASCII letters. `invalid_mode_s_code`: modeSCode is not six hexadecimal characters. `invalid_aircraft_type`: aircraftType is not 1–9, H or O. `owner_search_disabled`: ownerName was supplied while owner-PII redaction is enabled on this deployment. `no_filters`: No search filter was supplied. Other values are possible when a failure originates below the handler.",
+         "examples": [
+          "mirror_loading",
+          "invalid_code",
+          "invalid_state",
+          "invalid_mode_s_code",
+          "invalid_aircraft_type",
+          "owner_search_disabled",
+          "no_filters"
+         ],
+         "type": "string"
+        },
+        "recovery": {
+         "additionalProperties": {},
+         "description": "Actionable next step for the caller.",
+         "properties": {
+          "hint": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "hint"
+         ],
+         "type": "object"
+        },
+        "retryable": {
+         "description": "Whether retrying may succeed.",
+         "type": "boolean"
+        }
+       },
+       "type": "object"
+      },
+      "message": {
+       "description": "Human-readable description of what went wrong.",
+       "type": "string"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "nextOffset": {
+     "description": "Offset for the next page, when more matches remain.",
+     "type": "number"
+    },
+    "notice": {
+     "description": "Refresh, limit, or search guidance when applicable.",
+     "type": "string"
+    },
+    "registrations": {
+     "description": "Matching registration summaries for this page (up to limit).",
+     "items": {
+      "additionalProperties": false,
+      "description": "A decoded registration summary; use nNumber with faa_lookup_registration for full detail.",
+      "properties": {
+       "aircraftType": {
+        "additionalProperties": false,
+        "description": "Aircraft type as code + label.",
+        "properties": {
+         "code": {
+          "description": "The raw code as stored in the FAA registry.",
+          "type": "string"
+         },
+         "label": {
+          "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "code"
+        ],
+        "type": "object"
+       },
+       "make": {
+        "description": "Aircraft manufacturer name.",
+        "type": "string"
+       },
+       "manufacturerModelCode": {
+        "description": "FAA manufacturer/model/series code (6–7 characters); use with faa_get_aircraft_type for specs or manufacturerModelCode to find registrations of the same type.",
+        "type": "string"
+       },
+       "modeSCodeHex": {
+        "description": "Mode S code in hex (ICAO 24-bit address).",
+        "type": "string"
+       },
+       "model": {
+        "description": "Aircraft model name.",
+        "type": "string"
+       },
+       "nNumber": {
+        "description": "Normalized N-number without the leading \"N\".",
+        "type": "string"
+       },
+       "nNumberDisplay": {
+        "description": "N-number with the leading \"N\" for display.",
+        "type": "string"
+       },
+       "ownerName": {
+        "description": "Registrant name; present only when owner-PII redaction is off.",
+        "type": "string"
+       },
+       "ownerRedacted": {
+        "description": "True when owner name was withheld by the redaction gate.",
+        "type": "boolean"
+       },
+       "serialNumber": {
+        "description": "Manufacturer serial number as stored by the FAA.",
+        "type": "string"
+       },
+       "state": {
+        "description": "Registrant state/territory abbreviation.",
+        "type": "string"
+       },
+       "status": {
+        "additionalProperties": false,
+        "description": "Registration status as code + label.",
+        "properties": {
+         "code": {
+          "description": "The raw code as stored in the FAA registry.",
+          "type": "string"
+         },
+         "label": {
+          "description": "The decoded human-readable label; omitted when the code is unrecognized.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "code"
+        ],
+        "type": "object"
+       },
+       "yearManufactured": {
+        "description": "Year manufactured; often blank.",
+        "type": "number"
+       }
+      },
+      "required": [
+       "nNumber",
+       "nNumberDisplay",
+       "ownerRedacted"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "shown": {
+     "description": "Number of results on this page when truncated.",
+     "type": "number"
+    },
+    "totalCount": {
+     "description": "Total matches across all pages. Always present.",
+     "type": "number"
+    },
+    "truncated": {
+     "description": "Present and true when more matches remain.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "title": "faa-aircraft-registry-mcp-server: search registrations"
+ }
+]

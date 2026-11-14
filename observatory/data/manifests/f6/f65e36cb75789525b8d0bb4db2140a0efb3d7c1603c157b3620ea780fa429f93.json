@@ -1,0 +1,98 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Check live safety conditions at a coordinate on US public land: active wildfire perimeters and distance to the nearest fire, river and streamflow level against seasonal normals, advisory-grade weather in the next 7 days, open park closures and hazard alerts, and air quality. Returns a 0-100 Trip Safety Score. Call this whenever someone asks whether a place is safe to visit, whether a fire or smoke is affecting it, whether a trail or road is closed, or whether a river is runnable. It reports what was CHECKED and what is unknown separately, so absence of a warning is never presented as an all-clear.",
+  "input_schema": {
+   "properties": {
+    "latitude": {
+     "description": "Latitude in decimal degrees, -90 to 90.",
+     "type": "number"
+    },
+    "longitude": {
+     "description": "Longitude in decimal degrees, -180 to 180.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "latitude",
+    "longitude"
+   ],
+   "type": "object"
+  },
+  "name": "check_conditions",
+  "output_schema": {},
+  "title": "Live safety conditions for a place"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find campgrounds within a radius of a coordinate across federal, state and private land, with whether each is reservable and a booking link. Call this when someone asks where to camp near a place. Returns the campground's own page so conditions and site detail can be read next.",
+  "input_schema": {
+   "properties": {
+    "latitude": {
+     "description": "Latitude, -90 to 90.",
+     "type": "number"
+    },
+    "longitude": {
+     "description": "Longitude, -180 to 180.",
+     "type": "number"
+    },
+    "radius_miles": {
+     "description": "Search radius in miles. Defaults to 25, max 100.",
+     "type": "number"
+    },
+    "reservable_only": {
+     "description": "Only campgrounds that take reservations. Defaults to false, which also returns first-come sites.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "latitude",
+    "longitude"
+   ],
+   "type": "object"
+  },
+  "name": "find_campgrounds",
+  "output_schema": {},
+  "title": "Campgrounds near a coordinate"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find named hiking trails within a radius of a coordinate, ranked by how much is known about each rather than by raw length, so service roads and sidewalks do not lead the list. Returns distance, elevation gain, and route shape where known. Call this when someone asks what to hike near a place.",
+  "input_schema": {
+   "properties": {
+    "latitude": {
+     "description": "Latitude, -90 to 90.",
+     "type": "number"
+    },
+    "longitude": {
+     "description": "Longitude, -180 to 180.",
+     "type": "number"
+    },
+    "radius_miles": {
+     "description": "Search radius in miles. Defaults to 25, max 100.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "latitude",
+    "longitude"
+   ],
+   "type": "object"
+  },
+  "name": "find_trails",
+  "output_schema": {},
+  "title": "Trails near a coordinate"
+ }
+]

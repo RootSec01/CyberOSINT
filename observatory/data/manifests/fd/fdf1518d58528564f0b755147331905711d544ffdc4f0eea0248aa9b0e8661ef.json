@@ -1,0 +1,344 @@
+[
+ {
+  "description": "Compare exactly two AI tools side-by-side. Returns structured field matrix and 'Choose A if... Choose B if...' verdict. Use this when a user wants to decide between two specific tools. For finding tools first, use search_listings or semantic_search.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug1": {
+     "description": "First tool's slug (e.g. 'cursor')",
+     "type": "string"
+    },
+    "slug2": {
+     "description": "Second tool's slug (e.g. 'claude-code')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug1",
+    "slug2"
+   ],
+   "type": "object"
+  },
+  "name": "compare_listings",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the full agenticness evaluation breakdown: 9 dimensions (action capability, autonomy, planning, adaptation, state continuity, reliability, interoperability, safety, operator sovereignty) scored 0-4 each (max 36, Agenticness rubric v3.1) with evidence-based reasoning. Use this for deep analysis of one tool's AI agent capabilities. For a quick score, get_listing includes the overall score. For comparing scores, use compare_listings.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "description": "The listing slug",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_agenticness_details",
+  "output_schema": {}
+ },
+ {
+  "description": "Get all published listings in one specific category, sorted by agenticness score. Use this to browse a category. To see all categories first, use list_categories. To search across ALL categories, use search_listings or semantic_search.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "description": "The category slug (e.g. 'coding-agents', 'general-purpose-agents')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_category",
+  "output_schema": {}
+ },
+ {
+  "description": "Get full details for one specific AI tool by its slug — includes features, pricing, agenticness scores, and structured attributes. Use this when you know the exact tool slug. To find a slug, use search_listings first. For comparing two tools, use compare_listings. Note: null on boolean fields means 'unknown', false means 'confirmed no'.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "description": "The listing slug (e.g. 'cursor', 'claude-code', 'openclaw')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_listing",
+  "output_schema": {}
+ },
+ {
+  "description": "Get all categories with descriptions and listing counts. Use this to discover what categories exist before filtering. To get listings IN a category, use get_category with the slug. Categories are split into PEOPLE (individual use) and TEAMS (team/enterprise) cohorts.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_categories",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the most recently added AI tool listings, sorted by creation date. Use this to see what's new. For finding specific tools, use search_listings. For browsing by category, use get_category.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "default": 10,
+     "description": "Number of listings to return",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_recent",
+  "output_schema": {}
+ },
+ {
+  "description": "Get all tags grouped by type (pricing, platform, capability, deployment, model, autonomy, use-case). Use this to discover available filter values. Tags can be used as filters in search_listings. This does NOT return listings — use search_listings or get_category for that.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_tags",
+  "output_schema": {}
+ },
+ {
+  "description": "Get AI-powered tool recommendations for a specific need. This is the recommended starting point — describe what you're looking for in natural language and get curated, ranked results with explanations. Handles search, filtering, scoring, and ranking in one call. Use this instead of chaining search_listings + get_listing + compare_listings.\n\nExamples:\n- \"best coding agent for a small startup on a budget\"\n- \"open source alternative to Cursor for VS Code\"\n- \"autonomous customer support agent with MCP support\"\n- \"self-hosted data analysis tool for enterprise\"",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "constraints": {
+     "description": "Optional structured constraints to narrow results",
+     "properties": {
+      "category": {
+       "description": "Category slug to filter by (e.g. 'coding-agents', 'customer-support')",
+       "type": "string"
+      },
+      "maxResults": {
+       "default": 5,
+       "description": "Number of recommendations to return",
+       "maximum": 10,
+       "minimum": 1,
+       "type": "number"
+      },
+      "mcpSupport": {
+       "description": "Require MCP (Model Context Protocol) support",
+       "type": "boolean"
+      },
+      "minRelevanceScore": {
+       "description": "Drop recommendations whose relevanceScore (0-100) is below this floor. Use to suppress weak matches.",
+       "maximum": 100,
+       "minimum": 0,
+       "type": "integer"
+      },
+      "openSource": {
+       "description": "Require open source tools",
+       "type": "boolean"
+      },
+      "selfHosted": {
+       "description": "Require self-hosted/on-premise deployment",
+       "type": "boolean"
+      }
+     },
+     "type": "object"
+    },
+    "question": {
+     "description": "Natural language description of what you need. Be specific about your use case, team size, budget, deployment preferences, etc.",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "question"
+   ],
+   "type": "object"
+  },
+  "name": "recommend_tools",
+  "output_schema": {}
+ },
+ {
+  "description": "Search for agentic AI tools by keyword query with optional filters. Use this for keyword-based search. For natural language queries like 'something that automates email', use semantic_search instead. For browsing all tools in a category, use get_category instead.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "autonomyLevel": {
+     "description": "Filter by autonomy level",
+     "enum": [
+      "COPILOT",
+      "SEMI_AUTONOMOUS",
+      "FULLY_AUTONOMOUS"
+     ],
+     "type": "string"
+    },
+    "category": {
+     "description": "Filter by category slug (e.g. 'coding-agents', 'general-purpose-agents')",
+     "type": "string"
+    },
+    "cohort": {
+     "description": "Filter by cohort: PEOPLE (individual tools) or TEAMS (team/enterprise tools)",
+     "enum": [
+      "PEOPLE",
+      "TEAMS"
+     ],
+     "type": "string"
+    },
+    "deploymentModel": {
+     "description": "Filter by deployment model",
+     "enum": [
+      "CLOUD",
+      "SELF_HOSTED",
+      "HYBRID",
+      "ON_DEVICE"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Max results to return",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "number"
+    },
+    "mcpSupport": {
+     "description": "Filter to tools with MCP (Model Context Protocol) support",
+     "type": "boolean"
+    },
+    "minScore": {
+     "default": 1,
+     "description": "Minimum agenticness score (default 1 to exclude unscored/junk entries, set to 0 to include all)",
+     "maximum": 36,
+     "minimum": 0,
+     "type": "number"
+    },
+    "openSource": {
+     "description": "Filter to open-source tools only",
+     "type": "boolean"
+    },
+    "query": {
+     "description": "Search query (e.g. 'code review', 'open source coding agent')",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_listings",
+  "output_schema": {}
+ },
+ {
+  "description": "Search for AI tools using natural language with AI-powered semantic matching. Best for conceptual queries like 'something that automates my email workflow'. Supports structured filters to narrow results (e.g., openSource + deploymentModel). For exact name/keyword searches, use search_listings instead. For comparing specific tools, use compare_listings.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "autonomyLevel": {
+     "description": "Filter by autonomy level",
+     "enum": [
+      "ASSISTED",
+      "SEMI_AUTONOMOUS",
+      "FULLY_AUTONOMOUS"
+     ],
+     "type": "string"
+    },
+    "category": {
+     "description": "Filter by category slug",
+     "type": "string"
+    },
+    "cohort": {
+     "description": "Filter by cohort",
+     "enum": [
+      "PEOPLE",
+      "TEAMS"
+     ],
+     "type": "string"
+    },
+    "deploymentModel": {
+     "description": "Filter by deployment model",
+     "enum": [
+      "CLOUD",
+      "ON_DEVICE",
+      "SELF_HOSTED",
+      "HYBRID"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 5,
+     "description": "Max results to return",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "number"
+    },
+    "mcpSupport": {
+     "description": "Filter by MCP (Model Context Protocol) support",
+     "type": "boolean"
+    },
+    "minScore": {
+     "description": "Minimum agenticness score (0-36)",
+     "maximum": 36,
+     "minimum": 0,
+     "type": "number"
+    },
+    "openSource": {
+     "description": "Filter by open source status (true/false)",
+     "type": "boolean"
+    },
+    "query": {
+     "description": "Natural language search query",
+     "maxLength": 500,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "semantic_search",
+  "output_schema": {}
+ }
+]

@@ -1,0 +1,190 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the current installation progress ONCE, on demand. Call this only when the user explicitly asks how the deploy is going (e.g. \"what is the status\", \"did it finish\") — never on a timer and never in a polling loop. The deploy takes 8-14 minutes and the authoritative status channels are the email pipeline + the dashboard; one read on request is enough. Returns the current step, the list of completed steps (~44 total in a full bootstrap), and whether installation is done or failed.",
+  "input_schema": {
+   "properties": {
+    "session_id": {
+     "description": "The session_id returned by register_and_deploy or retry_deploy.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "session_id"
+   ],
+   "type": "object"
+  },
+  "name": "check_status",
+  "output_schema": {},
+  "title": "Check Deployment Status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Project reference / help desk about Fractera. Use this to answer ANY user question about what Fractera is, how it works, its architecture, components, modes, data ownership, pricing, use cases, partner program, etc. — especially while a deploy is running and the user wants to learn more. TOKEN-ECONOMY: call with NO arguments first to get the lightweight list of section ids+titles, then call again with a single `section` id to fetch just that section. NEVER try to fetch everything at once; pull only the section(s) relevant to the user question. Set `lang:\"ru\"` for Russian-speaking users.",
+  "input_schema": {
+   "properties": {
+    "lang": {
+     "description": "Language of the returned content. Defaults to \"en\". Use \"ru\" for Russian-speaking users.",
+     "enum": [
+      "en",
+      "ru"
+     ],
+     "type": "string"
+    },
+    "section": {
+     "description": "A section id from the list returned when called with no section. Omit to get the list (table of contents) first.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_project_info",
+  "output_schema": {},
+  "title": "Get Project Information"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the final entry address of the server once installation is complete. In phase-1 (IP-first) this is a plain-HTTP Admin URL of the form http://<IP>:3002 — the server has NO domain and NO HTTPS cert yet (attaching a custom domain with HTTPS is an optional later step the user does inside Admin -> Personal Domain). Call this once after check_status reports status=\"done\".",
+  "input_schema": {
+   "properties": {
+    "session_id": {
+     "description": "The session_id used during installation.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "session_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_subdomain",
+  "output_schema": {},
+  "title": "Get Workspace Address"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return a single recommended VPS provider for users who do not yet have a server. Call this ONLY when the user explicitly says they have no server. The user buys the VPS at this provider and comes back with IP + password.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_vps_recommendation",
+  "output_schema": {},
+  "title": "Get VPS Recommendation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Register a new Fractera user and start the deployment of their server in one atomic call. Use this AFTER you have collected the user's email (entered twice for typo protection), server IP, and root password. Creates the User row (or reuses an existing one with the same email), creates a free Subscription, creates a ServerToken, wipes any previous installation on the target server, and launches bootstrap. The deploy is IP-first (phase-1): the server comes up on plain HTTP at http://<IP>:3002 in 8-14 minutes; it does NOT get a domain or HTTPS cert here (that is an optional later step inside the workspace). Returns session_id (for a single on-demand check_status read — do not poll) and server_token (so the user can recover via retry_deploy if anything breaks). Call this AT MOST ONCE per conversation.",
+  "input_schema": {
+   "properties": {
+    "components_selected": {
+     "description": "REQUIRED, must be true. Nothing is selectable any more — every server gets the same set — so this only records that you TOLD the user what gets installed (Q5): the app, the database and file storage with vector memory, sign-in, and the control panel.",
+     "type": "boolean"
+    },
+    "email": {
+     "description": "The email the user typed (and confirmed by re-typing). Welcome / failure emails go here.",
+     "type": "string"
+    },
+    "email_confirmed": {
+     "description": "REQUIRED, must be true. Set this ONLY after the user has typed their email a SECOND time (Q2) and the two entries match (case-insensitive, trimmed). Do not set it if you only asked once.",
+     "type": "boolean"
+    },
+    "ip": {
+     "description": "IPv4 address of the user's VPS, e.g. 185.10.20.30.",
+     "type": "string"
+    },
+    "lang": {
+     "description": "Optional — the two-letter code of the language the user is talking to you in (e.g. \"ru\" if the conversation is in Russian). Their new app is built in English PLUS this language, and this language becomes its default; pass \"en\" or omit for an English-only app. Adding more languages later is a switch in the Admin panel, so this is not a permanent choice — it just means their site opens in their own language from the first minute.",
+     "enum": [
+      "en",
+      "es",
+      "fr",
+      "it",
+      "ru",
+      "de",
+      "pt",
+      "pl",
+      "tr",
+      "nl"
+     ],
+     "type": "string"
+    },
+    "login": {
+     "description": "Optional — defaults to \"root\". Override only if the VPS provider gave a non-root username.",
+     "type": "string"
+    },
+    "password": {
+     "description": "Root password for the VPS.",
+     "type": "string"
+    },
+    "terms_accepted": {
+     "description": "REQUIRED, must be true. Set this ONLY after the user has explicitly confirmed in the chat that they (1) have read and agree to Fractera's Terms of Service (https://www.fractera.ai/en/terms) and Privacy Policy (https://www.fractera.ai/en/privacy), and (2) understand they MUST change their server root password immediately after installation — Fractera never stores it and has no way to access the server afterwards. If the user has not given this explicit agreement, do NOT call this tool: ask for it first (and offer to explain the documents right in the chat).",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "email",
+    "email_confirmed",
+    "ip",
+    "password",
+    "components_selected",
+    "terms_accepted"
+   ],
+   "type": "object"
+  },
+  "name": "register_and_deploy",
+  "output_schema": {},
+  "title": "Deploy Fractera Workspace"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Retry a failed deployment using a server_token (from the failure email, the deploy-progress UI, or the dashboard). Wipes the previous broken install and runs a fresh deploy on the SAME server. Returns a new session_id — poll with check_status. Use this when the user reports a failed deploy or pastes a server_token.",
+  "input_schema": {
+   "properties": {
+    "ip": {
+     "description": "Optional — only pass if the user discovered the original IP was wrong (e.g. typo). Otherwise the stored IP is used.",
+     "type": "string"
+    },
+    "login": {
+     "description": "Optional — Linux user, defaults to root.",
+     "type": "string"
+    },
+    "password": {
+     "description": "Optional — only pass if the user discovered the original password was wrong. Otherwise the stored password is used.",
+     "type": "string"
+    },
+    "server_token": {
+     "description": "The unique server token the user received in the deploy-failure email, the active deploy UI, or the dashboard. Acts as the authorisation for this retry.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "server_token"
+   ],
+   "type": "object"
+  },
+  "name": "retry_deploy",
+  "output_schema": {},
+  "title": "Retry Failed Deployment"
+ }
+]

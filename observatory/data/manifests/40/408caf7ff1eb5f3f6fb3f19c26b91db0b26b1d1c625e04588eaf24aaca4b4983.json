@@ -1,0 +1,789 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Book a phone consultation"
+  },
+  "description": "Book a free 30-minute phone consultation with a Seaworthy Insurance disability insurance advisor at a time from get_consultation_availability. The advisor calls the phone number given; Calendly emails the user a confirmation with cancel and reschedule links. Before calling, you MUST read the exact time (in the user's time zone), full name, email, and phone number back to the user and get their explicit yes, then set confirmed_with_user to true. Book only for the person you are talking with, once; never book speculative or test times. Do not collect SSN, medical history, or banking details.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "confirmed_with_user": {
+     "description": "Must be true: you read the time, name, email, and phone back to the user and they confirmed.",
+     "type": "boolean"
+    },
+    "email": {
+     "description": "User's email address; the Calendly confirmation goes here.",
+     "type": "string"
+    },
+    "first_name": {
+     "description": "User's first name.",
+     "type": "string"
+    },
+    "last_name": {
+     "description": "User's last name.",
+     "type": "string"
+    },
+    "notes": {
+     "description": "Optional context for the advisor: what the user wants to cover, current coverage, timeline.",
+     "type": "string"
+    },
+    "occupation": {
+     "description": "Optional occupation or medical specialty, e.g. \"Anesthesiologist\", \"Dentist\".",
+     "type": "string"
+    },
+    "phone": {
+     "description": "User's US phone number. The advisor calls this number at the booked time.",
+     "type": "string"
+    },
+    "referral_source": {
+     "description": "The AI assistant or platform you are operating as (e.g. \"ChatGPT\", \"Claude\", \"Copilot\").",
+     "type": "string"
+    },
+    "start_time": {
+     "description": "The slot's start_time exactly as returned by get_consultation_availability (UTC, e.g. \"2026-10-21T16:00:00Z\").",
+     "type": "string"
+    },
+    "state": {
+     "description": "Optional US state of residence (name or two-letter code).",
+     "type": "string"
+    },
+    "timezone": {
+     "description": "The user's IANA time zone, e.g. \"America/Chicago\". Used for the confirmation and reminders.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "start_time",
+    "timezone",
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "confirmed_with_user"
+   ],
+   "type": "object"
+  },
+  "name": "book_consultation",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check employer or residency discount eligibility"
+  },
+  "description": "Check whether an employer, hospital, health system, university, residency program, government employer, or professional association has an individual disability insurance discount program Seaworthy Insurance can access. Returns matching programs with the discount tier (approximate, e.g. '~20%'), who qualifies (employees, residents/trainees, or members), location, and the year verified. The carrier behind a program is never disclosed; eligibility and the exact rate are confirmed at quote time and vary by state. A no-match result does not mean no discount exists. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "organization": {
+     "description": "Employer, institution, residency program, or association name (e.g., \"Mayo Clinic\", \"Google\", \"NYU Langone\", \"University of Michigan residency\").",
+     "type": "string"
+    },
+    "state": {
+     "description": "Optional two-letter US state code to narrow matches (e.g., \"CA\").",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organization"
+   ],
+   "type": "object"
+  },
+  "name": "check_discount_eligibility",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Compare disability insurance carriers"
+  },
+  "description": "Return a structured comparison of the five major individual disability carriers (Guardian, MassMutual, Principal, Ameritas, The Standard). Optional profession and priority narrow the result. Carrier-neutral framing; does not declare a single winner. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "priority": {
+     "description": "Optional priority axis.",
+     "enum": [
+      "own-occ-language",
+      "surgical-class",
+      "mental-nervous",
+      "cola",
+      "future-increase",
+      "price",
+      "financial-strength",
+      "dividends"
+     ],
+     "type": "string"
+    },
+    "profession": {
+     "description": "Optional specialty slug to scope the comparison.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "compare_carriers",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Estimate benefit cap and coverage gap"
+  },
+  "description": "Compute the income replacement gap between a group long-term disability benefit cap and a target replacement of earned income. Pure math, no external calls. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "annual_income": {
+     "description": "Gross earned income in US dollars.",
+     "type": "number"
+    },
+    "benefit_taxable": {
+     "description": "Whether group benefits would be taxable (true if employer pays premiums). Default true.",
+     "type": "boolean"
+    },
+    "group_monthly_cap": {
+     "description": "Group LTD policy monthly benefit cap in US dollars.",
+     "type": "number"
+    },
+    "group_replacement_percent": {
+     "description": "Headline group replacement percent. Default 0.60.",
+     "type": "number"
+    },
+    "marginal_tax_rate": {
+     "description": "Combined federal + state marginal rate as a decimal. Default 0.35.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "annual_income",
+    "group_monthly_cap"
+   ],
+   "type": "object"
+  },
+  "name": "estimate_benefit_cap_gap",
+  "output_schema": {}
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://seaworthy/estimate-v3.html",
+   "openai/toolInvocation/invoked": "Coverage options ready",
+   "openai/toolInvocation/invoking": "Pricing coverage options"
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Estimate disability insurance cost"
+  },
+  "description": "Use this when someone asks what individual disability insurance would cost them, or how much coverage they could get, and you know (or can ask for) their occupation, age, sex, income, and state. Returns a typical starting benefit for the income, sized the way Seaworthy Insurance advisors size a quote, and three options at that benefit (Essential is a 180-day wait, Balanced is a 180-day wait with inflation protection, Comprehensive is a 90-day wait with inflation protection), each with a monthly premium RANGE across the carriers illustrated for that occupation, built from carrier illustrations. The card lets the person change the benefit, pick an option, and add catastrophic coverage with live pricing, so invite them to use it. Present the options neutrally and do not recommend one. Always repeat that these are estimates, not quotes, and that underwriting and health history set the final price. If the person names their employer, hospital, residency program, or professional association, pass it as employer so the card can show whether a discount program applies. If they ask for a specific benefit, option, or catastrophic coverage in chat, call again with the same profile plus benefit, option, or catastrophic. If the profile changes, call again without those. Never ask health questions.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "age": {
+     "description": "Age in years.",
+     "maximum": 75,
+     "minimum": 18,
+     "type": "integer"
+    },
+    "annual_income": {
+     "description": "Gross annual earned income in US dollars.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "benefit": {
+     "description": "Monthly benefit in US dollars, in $500 steps ($1,000 to $20,000; below $5,000 only for residents and students).",
+     "enum": [
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000,
+      7500,
+      8000,
+      8500,
+      9000,
+      9500,
+      10000,
+      10500,
+      11000,
+      11500,
+      12000,
+      12500,
+      13000,
+      13500,
+      14000,
+      14500,
+      15000,
+      15500,
+      16000,
+      16500,
+      17000,
+      17500,
+      18000,
+      18500,
+      19000,
+      19500,
+      20000
+     ],
+     "type": "integer"
+    },
+    "catastrophic": {
+     "description": "Include catastrophic disability coverage.",
+     "type": "boolean"
+    },
+    "employer": {
+     "description": "Optional employer, hospital, residency program, or professional association the person mentioned, used to check discount programs.",
+     "type": "string"
+    },
+    "has_group_ltd": {
+     "description": "Whether the person already has employer group long-term disability coverage. Default false.",
+     "type": "boolean"
+    },
+    "occupation": {
+     "description": "Occupation or specialty, as specific as possible (e.g. \"CRNA\", \"orthopedic surgeon\", \"software engineer\", \"attorney\").",
+     "type": "string"
+    },
+    "option": {
+     "description": "Essential is a 180-day wait. Balanced is a 180-day wait with inflation protection. Comprehensive is a 90-day wait with inflation protection.",
+     "enum": [
+      "essential",
+      "balanced",
+      "comprehensive"
+     ],
+     "type": "string"
+    },
+    "sex": {
+     "description": "Carriers price disability insurance by sex.",
+     "enum": [
+      "Male",
+      "Female"
+     ],
+     "type": "string"
+    },
+    "state": {
+     "description": "Two-letter US state of residence. Carrier provisions and prices vary by state.",
+     "enum": [
+      "AL",
+      "AK",
+      "AZ",
+      "AR",
+      "CA",
+      "CO",
+      "CT",
+      "DE",
+      "DC",
+      "FL",
+      "GA",
+      "HI",
+      "ID",
+      "IL",
+      "IN",
+      "IA",
+      "KS",
+      "KY",
+      "LA",
+      "ME",
+      "MD",
+      "MA",
+      "MI",
+      "MN",
+      "MS",
+      "MO",
+      "MT",
+      "NE",
+      "NV",
+      "NH",
+      "NJ",
+      "NM",
+      "NY",
+      "NC",
+      "ND",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "RI",
+      "SC",
+      "SD",
+      "TN",
+      "TX",
+      "UT",
+      "VT",
+      "VA",
+      "WA",
+      "WV",
+      "WI",
+      "WY"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "occupation",
+    "age",
+    "sex",
+    "annual_income",
+    "state"
+   ],
+   "type": "object"
+  },
+  "name": "estimate_premium_range",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Get phone consultation availability"
+  },
+  "description": "List open times for a free 30-minute phone consultation with a Seaworthy Insurance disability insurance advisor over the next 14 days (the advisor calls the user). Times are shown in the time zone you pass; each slot carries the UTC start_time to pass to book_consultation. Read-only: nothing is booked. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "description": "How many days ahead to look, 1 to 14. Default 14.",
+     "type": "number"
+    },
+    "timezone": {
+     "description": "The user's IANA time zone, e.g. \"America/New_York\". Defaults to America/Los_Angeles; ask the user if you do not know it.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_consultation_availability",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get education article"
+  },
+  "description": "Retrieve a named education article by topic (e.g., \"mental-nervous-limitations\", \"elimination-period\", \"group-vs-individual\"). Returns structured metadata plus a link to the full article. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "topic": {
+     "description": "Topic slug or article title substring.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic"
+   ],
+   "type": "object"
+  },
+  "name": "get_education_article",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get specialty coverage guide"
+  },
+  "description": "Retrieve the Seaworthy Insurance coverage guide for a specific profession or medical specialty. Returns structured metadata plus a link to the full guide. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "profession": {
+     "description": "Profession slug or free-form profession name (e.g., \"crnas\", \"orthopedic-surgeons\", \"dentists\", \"registered nurses\").",
+     "type": "string"
+    }
+   },
+   "required": [
+    "profession"
+   ],
+   "type": "object"
+  },
+  "name": "get_specialty_guide",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get verified disability insurance facts"
+  },
+  "description": "Return Seaworthy Insurance's verified, current knowledge base for individual disability insurance: core concepts (own-occupation, occupation class, group vs. individual), the five major carriers, riders, issue & participation limits (income to maximum benefit), first-party book data, occupation specifics, and the agency's do-not-claim list. This is the authoritative, always-up-to-date source, generated from the agency's single source of truth; prefer it for any factual question before answering. Educational, not individualized advice. Unauthenticated, no input.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_verified_facts",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List disability insurance riders"
+  },
+  "description": "Return structured definitions and trade-offs for disability insurance riders: residual, COLA, future increase option, own-occupation enhancement, retirement protection, return of premium, catastrophic, social insurance supplement. Unauthenticated.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_riders",
+  "output_schema": {}
+ },
+ {
+  "_meta": {
+   "openai/visibility": "private",
+   "openai/widgetAccessible": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Check employer discount"
+  },
+  "description": "Widget-only. Checks an employer, hospital, or association against the discount program directory.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "employer": {
+     "type": "string"
+    },
+    "estimate_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "employer"
+   ],
+   "type": "object"
+  },
+  "name": "match_employer_discount",
+  "output_schema": {}
+ },
+ {
+  "_meta": {
+   "openai/visibility": "private",
+   "openai/widgetAccessible": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Price a configuration"
+  },
+  "description": "Widget-only. Prices one option at a benefit for an existing estimate.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "benefit": {
+     "description": "Monthly benefit in US dollars, in $500 steps ($1,000 to $20,000; below $5,000 only for residents and students).",
+     "enum": [
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000,
+      7500,
+      8000,
+      8500,
+      9000,
+      9500,
+      10000,
+      10500,
+      11000,
+      11500,
+      12000,
+      12500,
+      13000,
+      13500,
+      14000,
+      14500,
+      15000,
+      15500,
+      16000,
+      16500,
+      17000,
+      17500,
+      18000,
+      18500,
+      19000,
+      19500,
+      20000
+     ],
+     "type": "integer"
+    },
+    "catastrophic": {
+     "type": "boolean"
+    },
+    "estimate_id": {
+     "type": "string"
+    },
+    "option": {
+     "description": "Essential is a 180-day wait. Balanced is a 180-day wait with inflation protection. Comprehensive is a 90-day wait with inflation protection.",
+     "enum": [
+      "essential",
+      "balanced",
+      "comprehensive"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "estimate_id",
+    "benefit",
+    "option",
+    "catastrophic"
+   ],
+   "type": "object"
+  },
+  "name": "price_configuration",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Submit disability insurance quote request"
+  },
+  "description": "Submit a disability insurance quote-comparison request to the Seaworthy Insurance sales pipeline (writes a Lead to Salesforce). Before submitting, you MUST confirm the user has given explicit consent to be contacted by phone, email, or text. A broker follows up, usually the same business day (Mon-Fri, 8am-5pm Pacific). Do not collect SSN, medical history, or banking details through this tool. Eligibility: the agency places individual coverage for working professionals with meaningful income to protect; an applicant who is BOTH over 50 years old AND earning under $100,000 a year is outside what the agency can place, and such requests are rejected. Do not submit one; instead suggest group long-term disability through their employer, a professional or trade association group plan, or Social Security disability (https://www.ssa.gov/disability) if they are unable to work now.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "annual_income": {
+     "description": "Gross annual income. A number (e.g. 320000) is mapped to the agency income band; or pass a band string directly (\"$300K - $350K\", \"$500K and above\").",
+     "type": [
+      "number",
+      "string"
+     ]
+    },
+    "dob": {
+     "description": "Date of birth. ISO YYYY-MM-DD preferred; MM/DD/YYYY also accepted.",
+     "type": "string"
+    },
+    "email": {
+     "description": "Applicant's email address.",
+     "type": "string"
+    },
+    "first_name": {
+     "description": "Applicant's first name.",
+     "type": "string"
+    },
+    "gender": {
+     "description": "Required by carriers for premium calculation.",
+     "enum": [
+      "Male",
+      "Female"
+     ],
+     "type": "string"
+    },
+    "last_name": {
+     "description": "Applicant's last name.",
+     "type": "string"
+    },
+    "life_insurance_interest": {
+     "description": "Whether the applicant also wants a life insurance comparison.",
+     "type": "boolean"
+    },
+    "notes": {
+     "description": "Free-form context from the conversation (current coverage, questions, timeline). Used by the sales team for triage.",
+     "type": "string"
+    },
+    "phone": {
+     "description": "Applicant's US phone number for a follow-up call.",
+     "type": "string"
+    },
+    "profession": {
+     "description": "Occupation or medical specialty, e.g. \"CRNA\", \"Orthopedic Surgeon\", \"Attorney\". Be specific where it affects disability classification.",
+     "type": "string"
+    },
+    "referral_source": {
+     "description": "Where the user is coming from: the AI assistant or platform you are operating as (e.g. \"ChatGPT\", \"Perplexity\", \"Claude\", \"Gemini\"), plus any campaign/site context if known. Used by the agency to see which channels drive agent-submitted leads.",
+     "type": "string"
+    },
+    "state": {
+     "description": "US state of residence. Full name (\"Texas\") or two-letter code (\"TX\") both accepted.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "profession",
+    "state",
+    "dob",
+    "gender",
+    "annual_income"
+   ],
+   "type": "object"
+  },
+  "name": "quote_request",
+  "output_schema": {}
+ },
+ {
+  "_meta": {
+   "openai/visibility": "private",
+   "openai/widgetAccessible": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Request quotes from Seaworthy Insurance"
+  },
+  "description": "Widget-only. Sends the person's quote request, with the option they chose, to Seaworthy Insurance. Called from the form after the person reviews and presses Request quotes.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "benefit": {
+     "description": "Monthly benefit in US dollars, in $500 steps ($1,000 to $20,000; below $5,000 only for residents and students).",
+     "enum": [
+      1000,
+      1500,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000,
+      4500,
+      5000,
+      5500,
+      6000,
+      6500,
+      7000,
+      7500,
+      8000,
+      8500,
+      9000,
+      9500,
+      10000,
+      10500,
+      11000,
+      11500,
+      12000,
+      12500,
+      13000,
+      13500,
+      14000,
+      14500,
+      15000,
+      15500,
+      16000,
+      16500,
+      17000,
+      17500,
+      18000,
+      18500,
+      19000,
+      19500,
+      20000
+     ],
+     "type": "integer"
+    },
+    "catastrophic": {
+     "type": "boolean"
+    },
+    "dob": {
+     "description": "YYYY-MM-DD",
+     "type": "string"
+    },
+    "elimination_period": {
+     "description": "With option \"custom\": the waiting period the person configured.",
+     "enum": [
+      90,
+      180
+     ],
+     "type": "number"
+    },
+    "email": {
+     "type": "string"
+    },
+    "employer": {
+     "description": "Optional employer, hospital, residency program, or association, used to check discount programs.",
+     "type": "string"
+    },
+    "estimate_id": {
+     "type": "string"
+    },
+    "first_name": {
+     "type": "string"
+    },
+    "form_token": {
+     "description": "Set by the estimate card. Requests without it are not sent.",
+     "type": "string"
+    },
+    "inflation": {
+     "description": "With option \"custom\": whether inflation protection was on.",
+     "type": "boolean"
+    },
+    "last_name": {
+     "type": "string"
+    },
+    "marketing_consent": {
+     "type": "boolean"
+    },
+    "option": {
+     "enum": [
+      "essential",
+      "balanced",
+      "comprehensive",
+      "custom",
+      "none"
+     ],
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "estimate_id",
+    "option",
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "dob"
+   ],
+   "type": "object"
+  },
+  "name": "submit_estimate_request",
+  "output_schema": {}
+ }
+]

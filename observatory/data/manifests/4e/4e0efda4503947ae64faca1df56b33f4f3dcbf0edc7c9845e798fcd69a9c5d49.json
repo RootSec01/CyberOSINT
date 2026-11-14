@@ -1,0 +1,318 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Compare Hyperliquid vaults"
+  },
+  "description": "Compare two to five current vault records side by side using the same timestamped fields. It does not choose a winner or allocate capital.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "vaults": {
+     "items": {
+      "maxLength": 240,
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 5,
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "vaults"
+   ],
+   "type": "object"
+  },
+  "name": "compare_vaults",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Compare Hyperliquid vaults"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Explain vault risk"
+  },
+  "description": "Explain one vault's current VaultVision risk score, component values, drawdown evidence, and data caveats without converting the model into investment advice.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "vault": {
+     "maxLength": 240,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "vault"
+   ],
+   "type": "object"
+  },
+  "name": "explain_vault_risk",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Explain vault risk"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Fetch VaultVision record"
+  },
+  "description": "Fetch one VaultVision search result by its vault: or page: identifier and return current structured evidence with a canonical URL.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "maxLength": 240,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Fetch VaultVision record"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get HLP metrics"
+  },
+  "description": "Return the current VaultVision record for Hyperliquidity Provider (HLP), including timestamped TVL, performance, drawdown, risk, and deposit context when available.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_hlp_metrics",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get HLP metrics"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get recent vault alerts"
+  },
+  "description": "Return recent rule-based VaultVision vault signals such as risk, entry, TVL, flow, or APR changes. Signals are monitoring context, not execution instructions.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 20,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "since_ts": {
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_recent_alerts",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get recent vault alerts"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get one Hyperliquid vault"
+  },
+  "description": "Get the latest available VaultVision record for one vault ID, canonical slug, URL, or exact vault name, including risk, drawdown, entry, TVL, and deposit context.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "vault": {
+     "maxLength": 240,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "vault"
+   ],
+   "type": "object"
+  },
+  "name": "get_vault",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Get one Hyperliquid vault"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Rank Hyperliquid vaults"
+  },
+  "description": "Return the current evidence-gated VaultVision ranking snapshot. Ranking is a first-party model and must not be presented as guaranteed future performance.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "ranking_type": {
+     "default": "risk-adjusted",
+     "enum": [
+      "risk-adjusted",
+      "verified",
+      "estimated"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "rank_vaults",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Rank Hyperliquid vaults"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search VaultVision"
+  },
+  "description": "Search current Hyperliquid vault records and canonical VaultVision research pages. Use this standard discovery tool before fetch when the requested entity is ambiguous.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 10,
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "maxLength": 160,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Search VaultVision"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Search Hyperliquid vaults"
+  },
+  "description": "Filter and sort current Hyperliquid vaults by name, TVL, modeled risk, drawdown, entry quality, and observed deposit status. Returns evidence, not a recommendation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "accepts_deposits": {
+     "type": "boolean"
+    },
+    "entry_label": {
+     "maxLength": 40,
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_drawdown_pct": {
+     "maximum": 100,
+     "minimum": 0,
+     "type": "number"
+    },
+    "max_risk_score": {
+     "maximum": 100,
+     "minimum": 0,
+     "type": "number"
+    },
+    "min_tvl_usd": {
+     "minimum": 0,
+     "type": "number"
+    },
+    "query": {
+     "maxLength": 160,
+     "type": "string"
+    },
+    "sort_by": {
+     "default": "relevance",
+     "enum": [
+      "relevance",
+      "tvl",
+      "risk",
+      "drawdown",
+      "return_30d",
+      "entry"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_vaults",
+  "output_schema": {
+   "additionalProperties": true,
+   "type": "object"
+  },
+  "title": "Search Hyperliquid vaults"
+ }
+]

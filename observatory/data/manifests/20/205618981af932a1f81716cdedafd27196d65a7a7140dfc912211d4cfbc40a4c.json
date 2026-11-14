@@ -1,0 +1,626 @@
+[
+ {
+  "description": "Trigger full LinkedIn profile enrichment via Apify (~$0.002, idempotent).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "leadId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "leadId"
+   ],
+   "type": "object"
+  },
+  "name": "lead_enrich",
+  "output_schema": {}
+ },
+ {
+  "description": "Get full details of one lead: profile, discovery context (fit reason, pain hypothesis, role signals, disqualifiers), the AI-drafted outreach sequence (lead.outreach), warmth score, and status.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "leadId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "leadId"
+   ],
+   "type": "object"
+  },
+  "name": "lead_get",
+  "output_schema": {}
+ },
+ {
+  "description": "Push leads to your connected CRM (HubSpot, Close, Pipedrive, Zoho). Each lead becomes a contact / deal in the destination. Lead status does not change automatically — call lead_update_status to mark as `pushed` once CRM confirms.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "leadIds": {
+     "items": {
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "provider": {
+     "enum": [
+      "hubspot",
+      "close",
+      "pipedrive",
+      "zoho"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "leadIds"
+   ],
+   "type": "object"
+  },
+  "name": "lead_push_to_crm",
+  "output_schema": {}
+ },
+ {
+  "description": "Re-draft the lead's AI outreach sequence (LinkedIn/X steps). Optional instructions steer the rewrite. Capped per lead — edit directly once the cap is hit.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "instructions": {
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "leadId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "leadId"
+   ],
+   "type": "object"
+  },
+  "name": "lead_regenerate_sequence",
+  "output_schema": {}
+ },
+ {
+  "description": "Search leads in the workspace. A lead is always a person discovered on LinkedIn. Filter by warmth, status, or text.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "page": {
+     "default": 1,
+     "maximum": 9007199254740991,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageSize": {
+     "default": 20,
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "productId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "search": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "status": {
+     "items": {
+      "enum": [
+       "new",
+       "seen",
+       "saved",
+       "pushed",
+       "archived"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "warmth": {
+     "items": {
+      "enum": [
+       "hot",
+       "warm",
+       "cool"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "workflowTag": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "lead_search",
+  "output_schema": {}
+ },
+ {
+  "description": "Replace the lead's outreach sequence steps with edited versions (marks the sequence as edited).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "leadId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "steps": {
+     "items": {
+      "properties": {
+       "body": {
+        "type": "string"
+       },
+       "channel": {
+        "type": "string"
+       },
+       "delayDays": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+       },
+       "order": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+       },
+       "purpose": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "order",
+       "channel",
+       "purpose",
+       "delayDays",
+       "body"
+      ],
+      "type": "object"
+     },
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "leadId",
+    "steps"
+   ],
+   "type": "object"
+  },
+  "name": "lead_update_sequence",
+  "output_schema": {}
+ },
+ {
+  "description": "Move a lead through the triage funnel. Valid transitions: NEW → SEEN/SAVED/PUSHED/ARCHIVED, SEEN ↔ SAVED, SAVED → PUSHED/ARCHIVED, PUSHED → ARCHIVED, ARCHIVED → SEEN. PUSHED is irreversible — it marks handoff to an outreach tool / CRM.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "leadId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "status": {
+     "enum": [
+      "new",
+      "seen",
+      "saved",
+      "pushed",
+      "archived"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "leadId",
+    "status"
+   ],
+   "type": "object"
+  },
+  "name": "lead_update_status",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new product. You can set sell (name/description/keywords/competitors), the structured offer, voice, and reach (roles/seniority/functions). Company firmographics (industries/size/country) are set in the dashboard, not here. Brand fields are optional and can be filled later via product_update.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "competitors": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "description": {
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "domain": {
+     "maxLength": 255,
+     "type": "string"
+    },
+    "icp": {
+     "properties": {
+      "jobFunctions": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "seniorityLevels": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "targetRoles": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "type": "object"
+    },
+    "keywords": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "name": {
+     "maxLength": 100,
+     "type": "string"
+    },
+    "offer": {
+     "properties": {
+      "callToAction": {
+       "type": "string"
+      },
+      "headline": {
+       "type": "string"
+      },
+      "pricingContext": {
+       "type": "string"
+      },
+      "proofPoints": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "riskReversal": {
+       "type": "string"
+      },
+      "targetPainPoint": {
+       "type": "string"
+      },
+      "uniqueMechanism": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "headline",
+      "targetPainPoint",
+      "uniqueMechanism",
+      "proofPoints",
+      "callToAction"
+     ],
+     "type": "object"
+    },
+    "voice": {
+     "properties": {
+      "customInstructions": {
+       "type": "string"
+      },
+      "doNots": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "personality": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "tone": {
+       "enum": [
+        "professional",
+        "friendly",
+        "casual",
+        "authoritative"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "tone",
+      "personality"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "product_create",
+  "output_schema": {}
+ },
+ {
+  "description": "Delete a product. Fails only if it's the workspace's only product. Its audience and leads cascade-delete.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "productId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "productId"
+   ],
+   "type": "object"
+  },
+  "name": "product_delete",
+  "output_schema": {}
+ },
+ {
+  "description": "Resolved brand profile for a product, returned as nested sections with human-readable labels: sell (name/description/keywords/competitors/offer), fit (company firmographics), reach (roles/seniority/functions), plus offer, voice, and domain. Drives all AI scoring + outreach drafting for that product.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "productId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "productId"
+   ],
+   "type": "object"
+  },
+  "name": "product_get",
+  "output_schema": {}
+ },
+ {
+  "description": "List every product/brand tracked by this workspace. Each product has its own brand profile, audience, and leads. Returns id, name, and timestamps.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "product_list",
+  "output_schema": {}
+ },
+ {
+  "description": "Update a product. Partial — only provided fields change. You can set sell (name/description/keywords/competitors), the structured offer, voice, and reach (roles/seniority/functions). Company firmographics (industries/size/country) are set in the dashboard, not here. Reach labels are resolved strictly to canonical IDs; unknown values rejected.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "competitors": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "description": {
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "domain": {
+     "maxLength": 255,
+     "type": "string"
+    },
+    "icp": {
+     "properties": {
+      "jobFunctions": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "seniorityLevels": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "targetRoles": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "type": "object"
+    },
+    "keywords": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "name": {
+     "maxLength": 100,
+     "type": "string"
+    },
+    "offer": {
+     "properties": {
+      "callToAction": {
+       "type": "string"
+      },
+      "headline": {
+       "type": "string"
+      },
+      "pricingContext": {
+       "type": "string"
+      },
+      "proofPoints": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "riskReversal": {
+       "type": "string"
+      },
+      "targetPainPoint": {
+       "type": "string"
+      },
+      "uniqueMechanism": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "headline",
+      "targetPainPoint",
+      "uniqueMechanism",
+      "proofPoints",
+      "callToAction"
+     ],
+     "type": "object"
+    },
+    "productId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "voice": {
+     "properties": {
+      "customInstructions": {
+       "type": "string"
+      },
+      "doNots": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "personality": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "tone": {
+       "enum": [
+        "professional",
+        "friendly",
+        "casual",
+        "authoritative"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "tone",
+      "personality"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "productId"
+   ],
+   "type": "object"
+  },
+  "name": "product_update",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the valid Seniority Level and Job Function labels for product targeting (the reach dimensions MCP can set; roles are free text). Call this before product_update — unknown labels are rejected, never silently dropped.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "field": {
+     "enum": [
+      "seniorityLevels",
+      "jobFunctions"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "workspace_icp_options",
+  "output_schema": {}
+ },
+ {
+  "description": "Current workspace usage vs plan limits: leads delivered this billing period, team members, products, AI compute budget, daily/monthly caps.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "workspace_usage",
+  "output_schema": {}
+ }
+]
