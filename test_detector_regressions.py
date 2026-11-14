@@ -75,7 +75,7 @@ def test_enumeration_does_not_claim_tool_execution_access(auth):
         assert 'authentication required' not in rce['inference']
         assert 'unknown' in rce['inference'].lower()
     if auth is False:
-        exposure = next(f for f in fs if f['category'] == 'auth_bypass')
+        exposure = next(f for f in fs if f['category'] == 'open_capability')
         assert 'tool invocation' in exposure['inference'].lower()
         assert 'not tested' in exposure['inference'].lower()
 

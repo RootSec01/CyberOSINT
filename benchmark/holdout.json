@@ -126,7 +126,7 @@
       "rationale": "Declaration-level label: sensitive; no tool invocation or vulnerability validation.",
       "expected_categories": [
         "rce",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -191,7 +191,7 @@
       "rationale": "Declaration-level label: sensitive; no tool invocation or vulnerability validation.",
       "expected_categories": [
         "secrets_leakage",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -221,7 +221,7 @@
       },
       "rationale": "Declaration-level label: sensitive; no tool invocation or vulnerability validation.",
       "expected_categories": [
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,

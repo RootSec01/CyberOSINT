@@ -17,7 +17,7 @@ import mcp_detectors
 
 BASE = Path(__file__).resolve().parent
 CORPUS = BASE / 'benchmark'
-CATEGORIES = ('rce', 'auth_bypass', 'path_traversal', 'secrets_leakage',
+CATEGORIES = ('rce', 'open_capability', 'path_traversal', 'secrets_leakage',
               'prompt_injection', 'tool_poisoning')
 GROUPS = {'safe': 20, 'sensitive': 20, 'ambiguous': 10, 'malicious_metadata': 10}
 HOLDOUT = {'safe': 4, 'sensitive': 4, 'ambiguous': 2, 'malicious_metadata': 2}

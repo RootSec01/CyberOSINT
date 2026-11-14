@@ -9,7 +9,7 @@ import { scanStreamUrl } from "../lib/api.js";
 // Executable Evidence Graph — branching attack graph driven by the live SSE
 // stream. Columns: TARGET · AGENT · ACCESS · CAPABILITIES · IMPACT · DOWNSTREAM.
 // Each capability owns a lane (impact + downstream on the same row — no false
-// vertical sequence). Click any node to trace its verified path and open its
+// vertical sequence). Click any node to trace its evidence path and open its
 // evidence. Adaptive: any node count stays spaced. Drag to pan, wheel to zoom.
 const NS = "http://www.w3.org/2000/svg";
 const TONE = { signal: "#2DD4BF", crit: "#FF5C6C", high: "#FF9F45", med: "#FFC94D", low: "#4CC3FF", mist: "#6C7D90" };

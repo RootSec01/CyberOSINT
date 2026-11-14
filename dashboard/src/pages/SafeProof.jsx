@@ -40,7 +40,7 @@ function SafeProof() {
     <div className="flex-1 flex flex-col min-w-0">
       <Topbar
         title="Safe Proof"
-        subtitle="Watch the attack map build live — then read the verified certificate. No data touched, no dangerous tool invoked."
+        subtitle="Evidence path for one MCP endpoint. No data is touched and no dangerous tool is invoked."
       />
       <div className="flex-1 overflow-auto p-6 space-y-6">
         <form
@@ -111,12 +111,12 @@ function SafeProof() {
               <span className="text-signal">🛡</span>
             </div>
             <h3 className="font-display font-600 text-mist-100 text-[15px]">
-              Watch a verified attack unfold — safely
+              Trace an endpoint's evidence path
             </h3>
             <p className="text-[13px] text-mist-300 mt-1.5 leading-relaxed">
-              Point Safe Proof at a verified MCP endpoint. The graph draws the
-              discovery and attack path node-by-node as it happens, mapped to
-              MITRE ATT&CK — then a full certificate is produced. Dangerous tools
+              Point Safe Proof at an MCP endpoint you are authorized to assess.
+              The graph draws discovery and potential impact node by node, mapped
+              to MITRE ATT&CK, and an evidence report follows. Dangerous tools
               are never invoked. Try your lab server on 127.0.0.1:9500.
             </p>
           </div>

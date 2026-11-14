@@ -313,7 +313,7 @@ def build_attack_graph(server: dict, auth_required, canary: Optional[dict],
     add("target", "access", target, "signal",
         {"verdict": "Reachable", "disc": "endpoint reachable"})
     add("mcp", "agent", "MCP server", "crit" if unauth else "high",
-        {"verdict": "MCP verified", "tier": "OBSERVED",
+        {"verdict": "MCP confirmed", "tier": "OBSERVED",
          "disc": f"server/{method} → protocolVersions:[{proto}]",
          "reach": "handshake completed", "verify": "protocol negotiated"},
         tier="OBSERVED", sub=proto)

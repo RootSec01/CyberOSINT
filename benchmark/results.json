@@ -3,17 +3,17 @@
   "split": "both",
   "scope": "Synthetic MCP declaration labels; no exploit, authentication bypass, or credential validity verified",
   "runtime": {
-    "python": "3.13.12",
+    "python": "3.13.18",
     "implementation": "CPython"
   },
   "corpus_sha256": {
-    "development.json": "edc50e4048533e13ed4609fdda74a601472b95b1781cd399bdb1963aedf7395d",
-    "holdout.json": "f9d53dbaa3b5309042b076114e3a618b255b5b65164a9147d71ed0cd2a3d0288"
+    "development.json": "b6cdc998263e42e8259786f1cc964f14552676f4d539b26324f1882cea8f5a86",
+    "holdout.json": "27458db034c05ae153d7dc9a777425aadf11f304f136833583bf66c6cffd207d"
   },
   "detector_code_sha256": {
-    "benchmark_runner.py": "4b2558ef9f442fae151bda19a93292b08965a9f8dcd128b5cc5baa851d9e66c2",
-    "mcp_detectors.py": "20516f253df0f7a8237e6804c7dc537c7ac000c73b67f0d4546e2833db97aa75",
-    "safe_proof.py": "7831625013fcd74bdca2c1edadcd5dbe27cfab4ce2e2a6d641badb7fac05619f",
+    "benchmark_runner.py": "2d700a8bbe9b8195fea2b68e1904b45370d2dd391d86be448e1e1f59447128a8",
+    "mcp_detectors.py": "ee7dfc86fa88b97fddda67c566a488d09caefabc07f164912e9ce014a5e4a774",
+    "safe_proof.py": "f60f829c9edda7a4409c00be61d44cc74c77c0543775e56d8d1a300685baa27e",
     "secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
   },
   "cases_total": 72,
@@ -38,7 +38,7 @@
       "recall": 1.0,
       "f1": 1.0
     },
-    "auth_bypass": {
+    "open_capability": {
       "tp": 15,
       "fp": 0,
       "tn": 45,
@@ -383,18 +383,18 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "rce": [
           "OBSERVED"
         ],
-        "rce": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -439,18 +439,18 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "rce": [
           "OBSERVED"
         ],
-        "rce": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -478,18 +478,18 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "rce": [
           "OBSERVED"
         ],
-        "rce": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -517,18 +517,18 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "rce": [
           "OBSERVED"
         ],
-        "rce": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -539,19 +539,19 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "path_traversal"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "path_traversal"
       ],
       "evidence_levels": {
-        "auth_bypass": [
-          "OBSERVED"
-        ],
         "path_traversal": [
           "INFERRED"
+        ],
+        "open_capability": [
+          "OBSERVED"
         ]
       }
     },
@@ -595,19 +595,19 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "path_traversal"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "path_traversal"
       ],
       "evidence_levels": {
-        "auth_bypass": [
-          "OBSERVED"
-        ],
         "path_traversal": [
           "INFERRED"
+        ],
+        "open_capability": [
+          "OBSERVED"
         ]
       }
     },
@@ -617,19 +617,19 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "secrets_leakage"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "secrets_leakage"
       ],
       "evidence_levels": {
-        "auth_bypass": [
-          "OBSERVED"
-        ],
         "secrets_leakage": [
           "INFERRED"
+        ],
+        "open_capability": [
+          "OBSERVED"
         ]
       }
     },
@@ -663,10 +663,10 @@
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "tool_poisoning": [
+        "secrets_leakage": [
           "INFERRED"
         ],
-        "secrets_leakage": [
+        "tool_poisoning": [
           "INFERRED"
         ]
       }
@@ -677,23 +677,23 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "secrets_leakage"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "secrets_leakage",
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "auth_bypass": [
-          "OBSERVED"
-        ],
         "tool_poisoning": [
           "INFERRED"
         ],
         "secrets_leakage": [
           "INFERRED"
+        ],
+        "open_capability": [
+          "OBSERVED"
         ]
       }
     },
@@ -703,13 +703,13 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass"
+        "open_capability"
       ],
       "predicted": [
-        "auth_bypass"
+        "open_capability"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -720,13 +720,13 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass"
+        "open_capability"
       ],
       "predicted": [
-        "auth_bypass"
+        "open_capability"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -737,13 +737,13 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass"
+        "open_capability"
       ],
       "predicted": [
-        "auth_bypass"
+        "open_capability"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -754,13 +754,13 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass"
+        "open_capability"
       ],
       "predicted": [
-        "auth_bypass"
+        "open_capability"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -803,10 +803,10 @@
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "tool_poisoning": [
+        "secrets_leakage": [
           "INFERRED"
         ],
-        "secrets_leakage": [
+        "tool_poisoning": [
           "INFERRED"
         ]
       }
@@ -879,10 +879,10 @@
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "tool_poisoning": [
+        "secrets_leakage": [
           "INFERRED"
         ],
-        "secrets_leakage": [
+        "tool_poisoning": [
           "INFERRED"
         ]
       }
@@ -900,11 +900,11 @@
         "secrets_leakage"
       ],
       "evidence_levels": {
-        "secrets_leakage": [
-          "INFERRED"
-        ],
         "prompt_injection": [
           "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
         ]
       }
     },
@@ -1042,11 +1042,11 @@
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "tool_poisoning": [
-          "INFERRED"
-        ],
         "secrets_leakage": [
           "OBSERVED"
+        ],
+        "tool_poisoning": [
+          "INFERRED"
         ]
       }
     },
@@ -1064,11 +1064,11 @@
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "tool_poisoning": [
-          "INFERRED"
-        ],
         "secrets_leakage": [
           "OBSERVED"
+        ],
+        "tool_poisoning": [
+          "INFERRED"
         ]
       }
     },
@@ -1114,18 +1114,18 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "rce"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "rce": [
           "OBSERVED"
         ],
-        "rce": [
+        "open_capability": [
           "OBSERVED"
         ]
       }
@@ -1153,19 +1153,19 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass",
+        "open_capability",
         "secrets_leakage"
       ],
       "predicted": [
-        "auth_bypass",
+        "open_capability",
         "secrets_leakage"
       ],
       "evidence_levels": {
-        "auth_bypass": [
-          "OBSERVED"
-        ],
         "secrets_leakage": [
           "INFERRED"
+        ],
+        "open_capability": [
+          "OBSERVED"
         ]
       }
     },
@@ -1175,13 +1175,13 @@
       "group": "sensitive",
       "scored": true,
       "expected": [
-        "auth_bypass"
+        "open_capability"
       ],
       "predicted": [
-        "auth_bypass"
+        "open_capability"
       ],
       "evidence_levels": {
-        "auth_bypass": [
+        "open_capability": [
           "OBSERVED"
         ]
       }

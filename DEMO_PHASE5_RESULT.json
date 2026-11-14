@@ -19,7 +19,7 @@
       "severity": "Critical",
       "dangerous_tools": 3,
       "finding_categories": [
-        "auth_bypass",
+        "open_capability",
         "path_traversal",
         "rce"
       ],

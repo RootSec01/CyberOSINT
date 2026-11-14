@@ -574,7 +574,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "rce",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -665,7 +665,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "rce",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -726,7 +726,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "rce",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -787,7 +787,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "rce",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -818,7 +818,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "path_traversal",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -921,7 +921,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "path_traversal",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -956,7 +956,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "secrets_leakage",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -1047,7 +1047,7 @@
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
         "secrets_leakage",
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -1077,7 +1077,7 @@
       },
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -1107,7 +1107,7 @@
       },
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -1137,7 +1137,7 @@
       },
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,
@@ -1167,7 +1167,7 @@
       },
       "rationale": "Advertised capability and authentication posture; no invocation or exploit claimed.",
       "expected_categories": [
-        "auth_bypass"
+        "open_capability"
       ],
       "server": {
         "is_mcp": true,

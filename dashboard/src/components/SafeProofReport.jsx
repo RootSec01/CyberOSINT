@@ -17,7 +17,7 @@ const DETECTOR_LABEL = {
   rce: "Exposed Command-Execution Capability",
   path_traversal: "Potential Unconstrained Filesystem Path",
   secrets_leakage: "Secrets / Credential Exposure",
-  auth_bypass: "Unauthenticated Sensitive Capability Exposure",
+  open_capability: "Unauthenticated Sensitive Capability Exposure",
   prompt_injection: "Prompt-Injection Markers in Declaration",
   tool_poisoning: "Deceptive or Hidden Tool Declaration",
 };
@@ -213,7 +213,7 @@ function SafeProofReport({ proof }) {
         <div className="panel p-5">
           <h3 className="text-[11px] uppercase tracking-[0.14em] text-mist-300 mb-1">
             MCP threat detectors — {proof.mcp_findings.length} finding
-            {proof.mcp_findings.length === 1 ? "" : "s"} · MITRE ATT&amp;CK · OWASP LLM Top 10
+            {proof.mcp_findings.length === 1 ? "" : "s"} · MITRE ATT&amp;CK / ATLAS · OWASP MCP Top 10
           </h3>
           <p className="text-[11px] text-mist-300 mb-4">
             Passive analysis of declared tools and metadata — nothing was invoked.
@@ -247,9 +247,9 @@ function SafeProofReport({ proof }) {
                           {f.technique_id}
                         </span>
                       )}
-                      {f.owasp_llm && (
+                      {f.owasp_mcp && (
                         <span className="font-mono text-[10px] text-mist-200 border border-edge rounded px-1.5 py-0.5">
-                          {f.owasp_llm}
+                          {f.owasp_mcp}
                         </span>
                       )}
                     </span>

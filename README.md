@@ -18,7 +18,7 @@
 <p align="center">
   <img alt="Python: 3.13" src="https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white"> <img alt="FastAPI: 0.121" src="https://img.shields.io/badge/FastAPI-0.121-009688?style=flat&logo=fastapi&logoColor=white"> <img alt="React: 18" src="https://img.shields.io/badge/React-18-087EA4?style=flat&logo=react&logoColor=white"> <img alt="Vite: 5" src="https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite&logoColor=white"> <img alt="Tailwind CSS: 3" src="https://img.shields.io/badge/Tailwind%20CSS-3-06B6D4?style=flat&logo=tailwindcss&logoColor=white"> <img alt="SQLAlchemy: 2.0" src="https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white">
   <br>
-  <img alt="PostgreSQL: Production" src="https://img.shields.io/badge/PostgreSQL-Production-4169E1?style=flat&logo=postgresql&logoColor=white"> <img alt="SQLite: Local Dev" src="https://img.shields.io/badge/SQLite-Local%20Dev-003B57?style=flat&logo=sqlite&logoColor=white"> <img alt="MCP spec: 2026-07-28" src="https://img.shields.io/badge/MCP%20spec-2026--07--28-0F151E?style=flat"> <img alt="MITRE ATT&amp;CK: Mapped" src="https://img.shields.io/badge/MITRE%20ATT%26CK-Mapped-B91C1C?style=flat"> <img alt="Tests: 246 passing" src="https://img.shields.io/badge/Tests-246%20passing-2EA043?style=flat&logo=pytest&logoColor=white"> <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-6E7781?style=flat">
+  <img alt="PostgreSQL: Production" src="https://img.shields.io/badge/PostgreSQL-Production-4169E1?style=flat&logo=postgresql&logoColor=white"> <img alt="SQLite: Local Dev" src="https://img.shields.io/badge/SQLite-Local%20Dev-003B57?style=flat&logo=sqlite&logoColor=white"> <img alt="MCP spec: 2026-07-28" src="https://img.shields.io/badge/MCP%20spec-2026--07--28-0F151E?style=flat"> <img alt="MITRE ATT&amp;CK: Mapped" src="https://img.shields.io/badge/MITRE%20ATT%26CK-Mapped-B91C1C?style=flat"> <img alt="Tests: 258 passing" src="https://img.shields.io/badge/Tests-258%20passing-2EA043?style=flat&logo=pytest&logoColor=white"> <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-6E7781?style=flat">
   <br>
   <img alt="AI Copilot: Offline-first" src="https://img.shields.io/badge/AI%20Copilot-Offline--first-1F9E86?style=flat"> <img alt="Status: Working Prototype | Actively Developed" src="https://img.shields.io/badge/Status-Working%20Prototype%20%7C%20Actively%20Developed-38E8C4?style=flat">
 </p>
@@ -53,7 +53,7 @@ can do, or when that silently changes.
 
 1. **Discover** — passive signals from Shodan, Censys and Certificate Transparency.
 2. **Negotiate** — real MCP handshake: `server/discover` (2026-07-28 spec) with fallback to legacy `initialize`; `tools/list` is read. No tool is invoked.
-3. **Classify & detect** — capability classifier plus six passive detectors, each mapped to MITRE ATT&CK and OWASP Top 10 for LLM Applications (v1.1 numbering).
+3. **Classify & detect** — capability classifier plus six passive detectors, mapped to MITRE ATT&CK (ATLAS for prompt injection) and the OWASP MCP Top 10.
 4. **Safe Proof** — every step is graded by evidence level; the only call ever made is to a read-only canary tool on a loopback lab server.
 5. **Monitor** — re-scans, typed drift between the last two scans, a versioned manifest fingerprint, and alerts on escalation only.
 6. **Explain** — evidence-grounded Copilot: Offline by default; Redacted (identifiers stripped before any hosted-model call) or Local-LLM modes.
@@ -81,14 +81,16 @@ facts, and a separate interpretation.
 
 ### Detectors
 
-| Slug | Finding title | ATT&CK | OWASP LLM (v1.1) |
+| Slug | Finding title | MITRE | OWASP MCP Top 10 |
 |---|---|---|---|
-| `rce` | Exposed Command-Execution Capability | T1059 | LLM01 |
-| `auth_bypass` | Unauthenticated Sensitive Capability Exposure | T1190 | LLM08 |
-| `path_traversal` | Potential Unconstrained Filesystem Path | T1083 | LLM06 |
-| `secrets_leakage` | Secrets / Credential Exposure | T1552 | LLM06 |
-| `prompt_injection` | Prompt-Injection Markers in Declaration / Server Metadata | T1059.004 | LLM01 |
-| `tool_poisoning` | Deceptive or Hidden Tool Declaration | T1036 | LLM09 |
+| `rce` | Exposed Command-Execution Capability | T1059 | MCP05 Command Injection & Execution |
+| `open_capability` | Unauthenticated Sensitive Capability Exposure | T1190 | MCP07 Insufficient Authentication & Authorization |
+| `path_traversal` | Potential Unconstrained Filesystem Path | T1083 | — |
+| `secrets_leakage` | Secrets / Credential Exposure | T1552 | MCP01 Token Mismanagement & Secret Exposure |
+| `prompt_injection` | Prompt-Injection Markers in Declaration / Server Metadata | AML.T0051.001 (ATLAS) | MCP06 Prompt Injection via Contextual Payloads |
+| `tool_poisoning` | Deceptive or Hidden Tool Declaration | T1036 | MCP03 Tool Poisoning |
+
+`path_traversal` has no close OWASP MCP Top 10 category and is left unmapped rather than forced into one.
 
 ![Detector findings with evidence levels](docs/images/detector-findings.jpg)
 
@@ -102,7 +104,7 @@ redeploying it three times. Reproduced output (`DEMO_PHASE5_RESULT.json`):
 | Stage | Lab profile | Severity | Dangerous tools | Detector categories | Alerts |
 |---|---|---|---|---|---|
 | Baseline | read-only tools, no auth | Medium | 0 | — | 0 |
-| Exposure | shell / SQL / file tools, no auth | Critical | 3 | `auth_bypass`, `path_traversal`, `rce` | 1 |
+| Exposure | shell / SQL / file tools, no auth | Critical | 3 | `open_capability`, `path_traversal`, `rce` | 1 |
 | Remediation re-scan | read-only tools again | Medium | 0 | — | 1 (retained as history) |
 
 The exposure scan reports drift of *3 new dangerous tools, 1 severity change, 4 tools added,
@@ -127,7 +129,7 @@ together with SHA-256 hashes of the corpus and detector code.
 
 ### Test suite
 
-246 automated tests (`python3 -m pytest -q`). One live-UI test runs only when `dashboard/dist`
+258 automated tests (`python3 -m pytest -q`). One live-UI test runs only when `dashboard/dist`
 has been built.
 
 ## Safety and scope
@@ -175,7 +177,7 @@ per-tenant isolation.
 2. Microsoft Security Blog, *When configuration becomes a vulnerability*, 14 May 2026 — <https://www.microsoft.com/en-us/security/blog/2026/05/14/configuration-becomes-vulnerability-exploitable-misconfigurations-ai-apps/>
 3. Wiz, *The risk hiding behind exposed MCP servers*, 28 Jul 2026 — <https://www.wiz.io/blog/the-risk-hiding-behind-exposed-mcp-servers>
 4. Model Context Protocol, *2026-07-28 specification* (SEP-2575) — <https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/>
-5. MITRE ATT&CK — <https://attack.mitre.org/> · OWASP Top 10 for LLM Applications — <https://owasp.org/www-project-top-10-for-large-language-model-applications/>
+5. MITRE ATT&CK — <https://attack.mitre.org/> · MITRE ATLAS — <https://atlas.mitre.org/> · OWASP MCP Top 10 — <https://owasp.org/www-project-mcp-top-10/>
 
 ## License
 

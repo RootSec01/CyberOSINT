@@ -20,15 +20,15 @@ was and was not established — the language never claims more than the evidence
   verification_status: always NOT_EXECUTED here (no dangerous tool is invoked).
   confidence: 0..1, per finding.
 
-Detector categories (slug → defensible title), each mapped to MITRE ATT&CK and
-OWASP LLM Top 10:
+Detector categories (slug → defensible title), mapped to MITRE ATT&CK (ATLAS for
+prompt injection) and the OWASP MCP Top 10 where a category fits:
 
-  rce               "Exposed Command-Execution Capability"           (T1059 / LLM01)
-  auth_bypass       "Unauthenticated Sensitive Capability Exposure"  (T1190 / LLM08)
-  path_traversal    "Potential Unconstrained Filesystem Path"        (T1083 / LLM06)
-  secrets_leakage   "Secrets / Credential Exposure"                  (T1552 / LLM06)
-  prompt_injection  "Prompt-Injection Markers in Declaration"        (LLM01)
-  tool_poisoning    "Deceptive or Hidden Tool Declaration"           (T1036 / LLM09)
+  rce               "Exposed Command-Execution Capability"           (T1059 / MCP05)
+  open_capability   "Unauthenticated Sensitive Capability Exposure"  (T1190 / MCP07)
+  path_traversal    "Potential Unconstrained Filesystem Path"        (T1083)
+  secrets_leakage   "Secrets / Credential Exposure"                  (T1552 / MCP01)
+  prompt_injection  "Prompt-Injection Markers in Declaration"        (AML.T0051.001 / MCP06)
+  tool_poisoning    "Deceptive or Hidden Tool Declaration"           (T1036 / MCP03)
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ EVIDENCE_LEVELS = ("OBSERVED", "INFERRED", "DEMONSTRATED", "VERIFIED")
 
 # --- text signals -----------------------------------------------------------
 
-# Model-directed instruction injection (OWASP LLM01). Whole-phrase, case-insensitive.
+# Model-directed instruction injection. Whole-phrase, case-insensitive.
 _INJECTION_PATTERNS = [
     r"ignore\s+(?:all\s+)?(?:the\s+)?(?:previous|prior|above|earlier)\s+instructions",
     r"disregard\s+(?:all\s+)?(?:previous|prior|above)",
@@ -121,7 +121,7 @@ def _finding(fid, category, severity, title, *, finding_type, evidence_level,
         "verification_status": verification_status,
         "affected_tool": tool,
         "technique_id": tid,
-        "owasp_llm": owasp,
+        "owasp_mcp": owasp,
         "recommendation": rec,
         # one-line human summary kept for back-compat / compact UIs
         "evidence": inference or (observed_facts[0] if observed_facts else ""),
@@ -156,7 +156,7 @@ def _detect_rce(tool, flags, unauth, auth_required=None) -> Optional[dict]:
                       else "Enumeration required authentication. " if auth_required is True
                       else "Authentication state is unknown. ")
                    + "Tool invocation and arbitrary execution were NOT tested."),
-        tool=name, tid="T1059", owasp="LLM01",
+        tool=name, tid="T1059", owasp="MCP05:2025",
         rec="Remove the command-execution tool from the exposed surface, or gate it "
             "behind strict authorization and an allowlist of non-shell operations.")
 
@@ -190,7 +190,7 @@ def _detect_path_traversal(tool, flags, unauth) -> Optional[dict]:
         inference="The schema does not constrain the path, so directory traversal "
                   "(e.g. ../) is not prevented at the interface. Backend validation "
                   "may still exist; traversal was NOT confirmed.",
-        tool=name, tid="T1083", owasp="LLM06",
+        tool=name, tid="T1083", owasp=None,
         rec="Constrain path arguments to an allowlist or a validated base directory; "
             "reject '..' and absolute paths server-side.")
 
@@ -217,7 +217,7 @@ def _detect_secrets(tool, flags, unauth) -> Optional[dict]:
                    "was not validated. Tool invocation was not tested." if literal else
                    "The declaration suggests credential access; no literal credential "
                    "was observed and tool invocation was not tested."),
-        tool=name, tid="T1552", owasp="LLM06",
+        tool=name, tid="T1552", owasp="MCP01:2025",
         rec="Do not expose credential-returning tools externally; move secrets to a "
             "vault and scrub secret-shaped values from tool metadata.")
 
@@ -238,7 +238,7 @@ def _detect_prompt_injection(tool, unauth) -> Optional[dict]:
                                 f"instruction text: “{frag}…”"],
                 inference="Tool metadata carries text that could steer an agent "
                           "(prompt injection). Impact depends on the consuming agent.",
-                tool=name, tid="T1059.004", owasp="LLM01",
+                tool=name, tid="AML.T0051.001", owasp="MCP06:2025",
                 rec="Treat tool metadata as untrusted; strip/curate descriptions before "
                     "presenting them to an agent, and pin a trusted tool manifest.")
     return None
@@ -268,7 +268,7 @@ def _detect_tool_poisoning(tool, flags) -> Optional[dict]:
         observed_facts=[f"tool '{name}' " + r for r in facts],
         inference="The declaration is hidden or contradicts the tool's name, a "
                   "hallmark of tool poisoning / rug-pull.",
-        tool=name, tid="T1036", owasp="LLM09",
+        tool=name, tid="T1036", owasp="MCP03:2025",
         rec="Reject tools whose metadata is hidden or contradicts their name; require "
             "a reviewed, signed tool manifest before an agent may load them.")
 
@@ -300,7 +300,7 @@ def run_detectors(server: Dict[str, Any]) -> List[Dict[str, Any]]:
                                 "model-directed instruction text"],
                 inference="Server-advertised metadata carries text that could steer "
                           "a consuming agent.",
-                tool=None, tid="T1059.004", owasp="LLM01",
+                tool=None, tid="AML.T0051.001", owasp="MCP06:2025",
                 rec="Treat server-advertised metadata as untrusted input to any agent."))
             break
 
@@ -323,13 +323,13 @@ def run_detectors(server: Dict[str, Any]) -> List[Dict[str, Any]]:
                 det["id"] = f"{det['category']}:{digest}:{occurrence}"
                 findings.append(det)
 
-    # auth_bypass is a server-level finding: any dangerous capability + no auth
+    # Server-level finding: any dangerous capability listed with no credential presented.
     if unauth:
         dangerous_names = [t.get("name") for t in tools
                            if set(safe_proof._classify(t)) & safe_proof._DANGEROUS]
         if dangerous_names:
             findings.append(_finding(
-                "auth_bypass", "auth_bypass", "Critical",
+                "open_capability", "open_capability", "Critical",
                 "Unauthenticated Sensitive Capability Exposure",
                 finding_type="unauthenticated_sensitive_capability",
                 evidence_level="OBSERVED", confidence=0.98,
@@ -339,7 +339,7 @@ def run_detectors(server: Dict[str, Any]) -> List[Dict[str, Any]]:
                 inference="Sensitive capabilities were advertised during unauthenticated "
                           "enumeration. Tool invocation and its authorization controls "
                           "were not tested; this does not establish an authentication bypass.",
-                tool=None, tid="T1190", owasp="LLM08",
+                tool=None, tid="T1190", owasp="MCP07:2025",
                 rec="Require authentication on the MCP endpoint before any tool is "
                     "listed or callable; fail closed when no credential is presented."))
 

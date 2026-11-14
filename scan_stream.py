@@ -111,7 +111,7 @@ def mcp_scan_events(host: str, port: int, use_tls: bool = False,
                 pause()
                 break
 
-    yield stage("proof", "Reasoning verified blast radius")
+    yield stage("proof", "Mapping potential impact")
     proof = safe_proof.build_safe_proof(server, canary=canary)
     pause()
 
@@ -172,7 +172,7 @@ def graph_scan_events(host: str, port: int, use_tls: bool = False,
                     server.get("url") or endpoint, tool["name"])
                 break
 
-    yield stage("proof", "Reasoning verified blast radius")
+    yield stage("proof", "Mapping potential impact")
     proof = safe_proof.build_safe_proof(server, canary=canary)
     graph = proof.get("graph") or {"nodes": [], "edges": []}
 
@@ -184,7 +184,7 @@ def graph_scan_events(host: str, port: int, use_tls: bool = False,
     last_stage = None
     for n in graph["nodes"]:
         # a light stage line as each phase begins, for the status strip
-        phase = {"access": "Mapping target", "agent": "Agent verified",
+        phase = {"access": "Mapping target", "agent": "MCP server confirmed",
                  "step": "Access assessment", "cap": "Enumerating capabilities",
                  "impact": "Deriving impact", "down": "Reasoning downstream"}.get(n["kind"])
         if phase and phase != last_stage:
