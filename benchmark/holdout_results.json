@@ -3,14 +3,14 @@
   "split": "holdout",
   "scope": "Synthetic MCP declaration labels; no exploit, authentication bypass, or credential validity verified",
   "runtime": {
-    "python": "3.12.14",
+    "python": "3.13.7",
     "implementation": "CPython"
   },
   "corpus_sha256": {
     "holdout.json": "f9d53dbaa3b5309042b076114e3a618b255b5b65164a9147d71ed0cd2a3d0288"
   },
   "detector_code_sha256": {
-    "benchmark_runner.py": "4b2558ef9f442fae151bda19a93292b08965a9f8dcd128b5cc5baa851d9e66c2",
+    "benchmark_runner.py": "fdf7ed2ea232a8952b226930b567af51f5936b0f325b261337f1997d117eb151",
     "mcp_detectors.py": "20516f253df0f7a8237e6804c7dc537c7ac000c73b67f0d4546e2833db97aa75",
     "safe_proof.py": "7831625013fcd74bdca2c1edadcd5dbe27cfab4ce2e2a6d641badb7fac05619f",
     "secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"

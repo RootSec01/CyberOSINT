@@ -146,6 +146,13 @@ export function scanAssetNow(id) {
 export function getDrift(id) {
   return fetch(`/api/assets/${id}/drift`, { headers: authHeaders() }).then(asJson);
 }
+// Standing exposure lifecycle for one asset: what is open, what was proven
+// closed and by which scan, and what came back. `state` filters the list
+// ("exposed" = open + regressed); the summary always covers the whole asset.
+export function getExposures(id, state = "") {
+  const q = state ? `?state=${encodeURIComponent(state)}` : "";
+  return fetch(`/api/assets/${id}/exposures${q}`, { headers: authHeaders() }).then(asJson);
+}
 export function getAlerts(unacknowledged = false) {
   const q = unacknowledged ? "?unacknowledged=true" : "";
   return fetch(`/api/alerts${q}`, { headers: authHeaders() }).then(asJson);

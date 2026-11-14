@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db import Base
@@ -110,6 +112,41 @@ class Alert(Base):
     run_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
     acknowledged: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, index=True)
+
+
+class ExposureState(Base):
+    """One exposure on one asset, and where it sits in its remediation lifecycle.
+
+    An Alert records that exposure *increased*. This records whether a specific
+    exposure is still there, when it was proven closed, and whether it came back
+    afterwards. See ``exposure_state.py`` for the state machine and the rules
+    that stop an unobserved scan from claiming a remediation.
+    """
+    __tablename__ = "exposure_states"
+    __table_args__ = (
+        UniqueConstraint("asset_id", "key", name="uq_exposure_asset_key"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), index=True, nullable=False)
+    # tool:<name> | auth:anonymous | cve:<id> — stable across scans.
+    key: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)       # tool | auth | cve
+    label: Mapped[str] = mapped_column(String(255), nullable=False)
+    detail: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    state: Mapped[str] = mapped_column(                                 # open | remediated | regressed
+        String(16), default="open", nullable=False, index=True)
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False)
+    remediated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    regressed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    times_regressed: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    # The scan that proved the current state, and the manifest it read.
+    evidence_run_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    evidence_fingerprint: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
 
 class UserSettings(Base):
