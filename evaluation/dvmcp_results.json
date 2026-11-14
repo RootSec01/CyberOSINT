@@ -1,0 +1,251 @@
+{
+ "lab": "https://github.com/harishsg993010/damn-vulnerable-MCP-server",
+ "lab_commit": "cdc4c6b5b76353203effcb26058e50fa6067d3a6",
+ "expected_commit": "cdc4c6b5b76353203effcb26058e50fa6067d3a6",
+ "in_scope": 6,
+ "detected": 5,
+ "missed": 1,
+ "out_of_scope": 9,
+ "not_scanned": 0,
+ "challenges": [
+  {
+   "id": 1,
+   "name": "Basic Prompt Injection",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 2,
+   "severity": "Medium",
+   "findings": []
+  },
+  {
+   "id": 2,
+   "name": "Tool Poisoning",
+   "in_scope": true,
+   "expected_any": [
+    "tool_poisoning",
+    "prompt_injection"
+   ],
+   "outcome": "detected",
+   "started": true,
+   "listed": true,
+   "tools": 3,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "prompt_injection",
+    "secrets_leakage",
+    "tool_poisoning"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Excessive Permission Scope",
+   "in_scope": true,
+   "expected_any": [
+    "path_traversal",
+    "open_capability"
+   ],
+   "outcome": "detected",
+   "started": true,
+   "listed": true,
+   "tools": 3,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "path_traversal"
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Rug Pull Attack",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 3,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "rce"
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Tool Shadowing",
+   "in_scope": true,
+   "expected_any": [
+    "tool_poisoning",
+    "prompt_injection"
+   ],
+   "outcome": "detected",
+   "started": true,
+   "listed": true,
+   "tools": 4,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "prompt_injection",
+    "secrets_leakage",
+    "tool_poisoning"
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Indirect Prompt Injection",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 4,
+   "severity": "Critical",
+   "findings": [
+    "open_capability"
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Token Theft",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 4,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "rce",
+    "secrets_leakage"
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Malicious Code Execution",
+   "in_scope": true,
+   "expected_any": [
+    "rce"
+   ],
+   "outcome": "detected",
+   "started": true,
+   "listed": true,
+   "tools": 3,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "rce"
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Remote Access Control",
+   "in_scope": true,
+   "expected_any": [
+    "rce"
+   ],
+   "outcome": "missed",
+   "started": true,
+   "listed": true,
+   "tools": 5,
+   "severity": "Medium",
+   "findings": []
+  },
+  {
+   "id": 10,
+   "name": "Multi-Vector Attack",
+   "in_scope": true,
+   "expected_any": [
+    "tool_poisoning",
+    "prompt_injection",
+    "rce"
+   ],
+   "outcome": "detected",
+   "started": true,
+   "listed": true,
+   "tools": 6,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "path_traversal",
+    "prompt_injection",
+    "rce",
+    "secrets_leakage"
+   ]
+  },
+  {
+   "id": 11,
+   "name": "JWT Claim Forgery",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 5,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "secrets_leakage"
+   ]
+  },
+  {
+   "id": 12,
+   "name": "Hidden Identity Override",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 8,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "secrets_leakage"
+   ]
+  },
+  {
+   "id": 13,
+   "name": "Privilege Escalation via Workflow IDOR",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 7,
+   "severity": "Critical",
+   "findings": [
+    "open_capability",
+    "secrets_leakage"
+   ]
+  },
+  {
+   "id": 14,
+   "name": "Marketplace Plugin Poisoning",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 7,
+   "severity": "High",
+   "findings": [
+    "prompt_injection"
+   ]
+  },
+  {
+   "id": 15,
+   "name": "Dependency Confusion",
+   "in_scope": false,
+   "expected_any": [],
+   "outcome": "out_of_scope",
+   "started": true,
+   "listed": true,
+   "tools": 9,
+   "severity": "Medium",
+   "findings": []
+  }
+ ]
+}
