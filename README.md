@@ -30,7 +30,8 @@ Raqeeb is entered in SAIF 2026 under the name CyberOSINT.
 2. **Negotiate** the real protocol (`server/discover`, falling back to `initialize`) and read `tools/list`.
 3. **Classify** each declared tool by capability and run six passive detectors over the declarations.
 4. **Grade** every statement by how it was established (see evidence levels).
-5. **Monitor** each server: typed drift between scans, a manifest fingerprint, alerts on escalation only.
+5. **Monitor** each server: typed drift between scans, a manifest fingerprint, alerts on escalation only,
+   and a lifecycle for every exposure: open, proven closed, or back after a fix.
 
 ## Field study
 
@@ -120,6 +121,34 @@ reference library exists.
 | `DEMONSTRATED` | A read-only canary ran against an authorized loopback lab server. |
 | `VERIFIED` | Reserved. The external, non-executing path never reaches it. |
 
+## Exposure lifecycle
+
+Drift says what changed between the last two scans. The lifecycle keeps the standing answer per
+asset, for every dangerous tool, anonymous access and CVE (`raqeeb/exposure_state.py`):
+
+| State | Meaning |
+|---|---|
+| `open` | Seen by the latest scan that could see it. |
+| `remediated` | Absent from a later scan whose evidence proves the absence. The scan, the manifest fingerprint and the reason are stored. |
+| `regressed` | Remediated, then seen again. The alert that fires anyway says the exposure returned. |
+
+Presence is always evidence; absence is evidence only when the scan could have seen the exposure.
+Otherwise the exposure is held open and the reason is recorded:
+
+- a skipped, unauthorized or simulated scan, or an unconfirmed MCP server, changes nothing;
+- tools close only when `tools/list` was read to the last page without an error;
+- anonymous access closes only when the scan observed authentication being required;
+- CVEs close only when the report holds the complete list, not the top 15;
+- surface scans never close MCP exposures, and the other way round.
+
+Identity comes from the manifest snapshot drift already stores. A tool whose declaration changes
+keeps its history (`definition changed`). A tool renamed with an identical declaration moves to the
+new name instead of being closed and reopened. A tool still declared but no longer dangerous is
+closed with that reason, separately from one that was removed.
+
+`GET /api/assets/{id}/exposures` returns the states (`?state=exposed` for open and regressed), and
+the Assets page shows them under **Lifecycle**.
+
 ## Detectors
 
 | Slug | Finding | MITRE | OWASP MCP Top 10 |
@@ -161,7 +190,7 @@ design. They measure regression, not field accuracy.
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python3 -m pytest -q
+python3 -m pytest -q                               # 323 tests
 
 cd dashboard && npm install && npm run build && cd ..
 python3 -m lab.lifecycle --serve --port 8000        # http://127.0.0.1:8000
@@ -171,7 +200,16 @@ To run the API on its own: copy `.env.example` to `.env`, then `uvicorn raqeeb.m
 
 With `APP_ENV=production` the application refuses unsafe settings at startup
 (`raqeeb/deployment_config.py`). Use PostgreSQL (`requirements-production.txt`) and run
-`python3 -m raqeeb.prepare_production_schema` once on a new, empty database.
+`python3 -m raqeeb.prepare_production_schema` once on a new, empty database. A database created
+before the exposure lifecycle needs one reviewed step, which is a dry run unless told to apply:
+
+```bash
+python3 -m raqeeb.migrations            # lists pending migrations
+python3 -m raqeeb.migrations --apply    # adds exposure_states, then runs the readiness check
+```
+
+CI runs the suite on Linux, macOS and Windows with SQLite, and the lifecycle and migration tests
+against PostgreSQL 16.
 
 ## Safety and scope
 
