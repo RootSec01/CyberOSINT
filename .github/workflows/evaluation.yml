@@ -8,6 +8,7 @@ on:
       - "evaluation/**"
       - "raqeeb/mcp_detectors.py"
       - "raqeeb/mcp_protocol.py"
+      - "reference/data/index.json"
 
 concurrency:
   group: evaluation
@@ -16,6 +17,8 @@ concurrency:
 env:
   LAB_REPOSITORY: harishsg993010/damn-vulnerable-MCP-server
   LAB_COMMIT: cdc4c6b5b76353203effcb26058e50fa6067d3a6
+  BENCHMARK_REPOSITORY: zhiqiangwang4/MCPTox-Benchmark
+  BENCHMARK_COMMIT: f85189f9ad12504c197c7f920ab818a40657b1fa
 
 jobs:
   # Starts the lab's deliberately vulnerable servers, so it runs with a read-only token.
@@ -55,8 +58,40 @@ jobs:
           path: evaluation/dvmcp_results.json
           retention-days: 3
 
+  # Reads the benchmark's data files only; nothing from it is executed or stored here.
+  mcptox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BENCHMARK_REPOSITORY }}
+          ref: ${{ env.BENCHMARK_COMMIT }}
+          path: benchmark-under-test
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: pip install -r requirements.txt
+
+      - run: python -m evaluation.mcptox --benchmark benchmark-under-test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mcptox-results
+          path: evaluation/mcptox_results.json
+          retention-days: 3
+
   publish:
-    needs: dvmcp
+    needs: [dvmcp, mcptox]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -65,15 +100,16 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: dvmcp-results
+          pattern: "*-results"
           path: evaluation
+          merge-multiple: true
 
       - name: Commit the results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add evaluation/dvmcp_results.json
+          git add evaluation/dvmcp_results.json evaluation/mcptox_results.json
           git diff --cached --quiet && exit 0
-          git commit -m "evaluation: DVMCP results"
+          git commit -m "evaluation: results"
           git pull --rebase
           git push

@@ -1,0 +1,12 @@
+{
+ "benchmark": "https://github.com/zhiqiangwang4/MCPTox-Benchmark",
+ "commit": "f85189f9ad12504c197c7f920ab818a40657b1fa",
+ "paper": "MCPTox: A Benchmark for Tool Poisoning Attack on Real-World MCP Servers (AAAI 2026)",
+ "written": "2026-11-14, after reading the field names of pure_tool.json and before running any detector on its contents",
+ "positives": "Every entry of pure_tool.json: one poisoned tool, declared alone with its tool_name and tool_content as the description, on a server that requires authentication.",
+ "negatives": "Every distinct tool declaration in reference/data (real releases of published packages), each declared alone on a server that requires authentication.",
+ "alarm": "A finding of category tool_poisoning or prompt_injection.",
+ "reported": ["recall on positives, overall and per attack template", "false-alarm rate on negatives"],
+ "expectation": "The detectors match explicit markers: override phrases, hidden characters, concealment wording. MCPTox poisonings are fluent natural-language instructions, so recall is expected to be low, plausibly under one half. There is no pass mark; the number is reported as measured.",
+ "redistribution": "The benchmark ships no licence. It is fetched from its source at evaluation time and none of its text is copied into this repository; results hold counts and entry identifiers only."
+}

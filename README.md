@@ -84,15 +84,32 @@ None of the 287 hosted servers in the field study is a deployment of these 30 pa
 `unknown`. The library applies to self-hosted deployments of published packages, not to bespoke
 hosted services.
 
-## Evaluation on a third-party lab
+## Evaluation on third-party material
 
-`evaluation/` scans the 15 challenges of the
-[Damn Vulnerable MCP Server](https://github.com/harishsg993010/damn-vulnerable-MCP-server) at a pinned
-commit, sending only the handshake and `tools/list`. Which challenges a passive scan should catch was
-written down before any of them was started (`evaluation/dvmcp_expectations.json`): six have a
-weakness visible in what the server declares, nine depend on calling tools or on server logic and are
-marked out of scope. The `evaluation` workflow runs the scan and commits
-`evaluation/dvmcp_results.json`, misses included.
+`evaluation/` scores the platform on servers and data it did not write. What would count as a
+result was written down before each run, and the `evaluation` workflow produces the result files
+from pinned commits of the sources.
+
+**Damn Vulnerable MCP Server**, 15 challenges, handshake and `tools/list` only
+([expectations](evaluation/dvmcp_expectations.json), [results](evaluation/dvmcp_results.json)):
+
+| | |
+|---|---:|
+| Weakness visible in what the server declares (in scope) | 6 |
+| Detected | 5 |
+| Missed (challenge 9: nothing in the declaration shows the tool reaches a shell) | 1 |
+| Weakness needs a tool call or lies in server logic (out of scope) | 9 |
+
+This run also showed that the protocol client did not carry the session id that servers built with
+the official SDK require, and read zero tools from them. That is fixed and covered by a test.
+
+**MCPTox** (AAAI 2026), 485 poisoned tool descriptions written for 45 real servers, against 2,121
+distinct tool declarations from the reference library as the clean set
+([protocol](evaluation/mcptox_protocol.json), [results](evaluation/mcptox_results.json)). The result
+is in the results file; the pattern-based poisoning and injection detectors were expected to do badly
+on fluent natural-language poisonings, and they do. Detecting an altered declaration by comparing it
+with the published release does not depend on how the alteration is worded, which is why the
+reference library exists.
 
 ## Evidence levels
 
