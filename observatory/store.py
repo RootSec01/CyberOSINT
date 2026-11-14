@@ -7,7 +7,7 @@ import threading
 from pathlib import Path
 from typing import Optional
 
-import manifest_fingerprint
+from raqeeb import manifest_fingerprint
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 

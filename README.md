@@ -1,148 +1,104 @@
 <p align="center">
-  <img src="docs/images/logo.png" alt="CyberOSINT logo" width="150">
+  <img src="docs/images/logo.png" alt="Raqeeb" width="120">
 </p>
 
-<h1 align="center">CyberOSINT</h1>
+<h1 align="center">Raqeeb</h1>
 
 <p align="center">
-  <strong>Discover, verify and monitor exposed MCP servers — without invoking a single dangerous tool.</strong>
-</p>
-
-<p align="center">
-  <a href="#how-it-works">How it works</a> ·
-  <a href="#results">Results</a> ·
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#safety-and-scope">Safety</a>
+  Find exposed MCP servers, read what they declare, and notice when that changes.<br>
+  No dangerous tool is ever invoked.
 </p>
 
 <p align="center">
-  <img alt="Python: 3.13" src="https://img.shields.io/badge/Python-3.13-3776AB?style=flat&logo=python&logoColor=white"> <img alt="FastAPI: 0.121" src="https://img.shields.io/badge/FastAPI-0.121-009688?style=flat&logo=fastapi&logoColor=white"> <img alt="React: 18" src="https://img.shields.io/badge/React-18-087EA4?style=flat&logo=react&logoColor=white"> <img alt="Vite: 5" src="https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite&logoColor=white"> <img alt="Tailwind CSS: 3" src="https://img.shields.io/badge/Tailwind%20CSS-3-06B6D4?style=flat&logo=tailwindcss&logoColor=white"> <img alt="SQLAlchemy: 2.0" src="https://img.shields.io/badge/SQLAlchemy-2.0-D71F00?style=flat&logo=sqlalchemy&logoColor=white">
-  <br>
-  <img alt="PostgreSQL: Production" src="https://img.shields.io/badge/PostgreSQL-Production-4169E1?style=flat&logo=postgresql&logoColor=white"> <img alt="SQLite: Local Dev" src="https://img.shields.io/badge/SQLite-Local%20Dev-003B57?style=flat&logo=sqlite&logoColor=white"> <img alt="MCP spec: 2026-07-28" src="https://img.shields.io/badge/MCP%20spec-2026--07--28-0F151E?style=flat"> <img alt="MITRE ATT&amp;CK: Mapped" src="https://img.shields.io/badge/MITRE%20ATT%26CK-Mapped-B91C1C?style=flat"> <img alt="Tests: 258 passing" src="https://img.shields.io/badge/Tests-258%20passing-2EA043?style=flat&logo=pytest&logoColor=white"> <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-6E7781?style=flat">
-  <br>
-  <img alt="AI Copilot: Offline-first" src="https://img.shields.io/badge/AI%20Copilot-Offline--first-1F9E86?style=flat"> <img alt="Status: Working Prototype | Actively Developed" src="https://img.shields.io/badge/Status-Working%20Prototype%20%7C%20Actively%20Developed-38E8C4?style=flat">
+  <a href="https://github.com/RootSec01/CyberOSINT/actions/workflows/tests.yml"><img alt="tests" src="https://github.com/RootSec01/CyberOSINT/actions/workflows/tests.yml/badge.svg"></a>
+  <a href="https://github.com/RootSec01/CyberOSINT/actions/workflows/observatory.yml"><img alt="observatory" src="https://github.com/RootSec01/CyberOSINT/actions/workflows/observatory.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-6E7781"></a>
 </p>
-
----
-
-CyberOSINT is an exposure-management platform for the agentic attack surface. It finds Model Context
-Protocol (MCP) servers, negotiates the real protocol with them, grades what each one advertises as
-evidence, and watches for the moment a trusted agent silently becomes dangerous.
 
 ![Evidence graph for an exposed lab MCP server](docs/images/evidence-graph.jpg)
-<sub>Evidence graph captured from the running platform (loopback lab server). Each node carries its MITRE ATT&CK technique and evidence level.</sub>
 
----
+AI agents reach real systems through the Model Context Protocol. An MCP server lists the tools an
+agent may call: run a command, query a database, read a file. Port and CVE scanners can tell you the
+server is reachable. They cannot tell you what an agent connected to it is able to do, or that the
+answer changed after last week's redeploy.
 
-## Why this matters
+Raqeeb is entered in SAIF 2026 under the name CyberOSINT.
 
-AI agents reach real systems through MCP. An MCP server lists the tools an agent may call — run
-commands, query databases, read files. Exposed on the internet without authentication, those tools
-become a new attack surface:
+## What it does
 
-| Signal | Source |
-|---|---|
-| 12,520 internet-accessible MCP services across 8,758 IP addresses (as of 28 Apr 2026) | [Censys][1] |
-| 15% of remote MCP servers seen by Defender for Cloud allow unauthenticated access to sensitive data and operations | [Microsoft][2] |
-| ~70% of the exposed MCP servers found share their full tool catalog with anonymous users | [Wiz][3] |
+1. **Discover** MCP servers tied to an organization from Shodan, Censys and Certificate Transparency.
+2. **Negotiate** the real protocol (`server/discover`, falling back to `initialize`) and read `tools/list`.
+3. **Classify** each declared tool by capability and run six passive detectors over the declarations.
+4. **Grade** every statement by how it was established (see evidence levels).
+5. **Monitor** each server: typed drift between scans, a manifest fingerprint, alerts on escalation only.
 
-Port and CVE scanners report that a service is reachable. They do not report what an exposed agent
-can do, or when that silently changes.
+## Field study
 
-## How it works
+`observatory/` re-reads a fixed sample of public MCP servers every day and records what each one
+declares. The sample was drawn once, with a fixed seed, from the official MCP Registry
+(62,855 records read; 35,077 credential-free remote endpoints on 26,445 hosts; 500 sampled, one per
+host).
 
-1. **Discover** — passive signals from Shodan, Censys and Certificate Transparency.
-2. **Negotiate** — real MCP handshake: `server/discover` (2026-07-28 spec) with fallback to legacy `initialize`; `tools/list` is read. No tool is invoked.
-3. **Classify & detect** — capability classifier plus six passive detectors, mapped to MITRE ATT&CK (ATLAS for prompt injection) and the OWASP MCP Top 10.
-4. **Safe Proof** — every step is graded by evidence level; the only call ever made is to a read-only canary tool on a loopback lab server.
-5. **Monitor** — re-scans, typed drift between the last two scans, a versioned manifest fingerprint, and alerts on escalation only.
-6. **Explain** — evidence-grounded Copilot: Offline by default; Redacted (identifiers stripped before any hosted-model call) or Local-LLM modes.
+First full snapshot, 14 November 2026:
 
-```mermaid
-flowchart LR
-  A[Discover<br/>Shodan · Censys · CT] --> B[Negotiate<br/>server/discover · initialize]
-  B --> C[Classify & detect<br/>6 passive detectors]
-  C --> D[Safe Proof<br/>OBSERVED · DEMONSTRATED · INFERRED]
-  D --> E[Monitor<br/>drift · manifest fingerprint · alerts]
-  E --> F[Explain<br/>evidence-grounded Copilot]
-```
+| Outcome | Endpoints |
+|---|---:|
+| Listed its tools with no credentials | 297 |
+| Asked for authentication | 149 |
+| Listed in the registry but not answering as MCP | 32 |
+| Unreachable | 21 |
+| Resolved to a non-public address, not contacted | 1 |
 
-### Evidence levels
+A second run from a different network 73 minutes later reached 303 servers, and all 297 seen from
+both places returned identical tool declarations. Method, data layout and opt-out are described in
+[observatory/README.md](observatory/README.md). Every run is a commit in this repository.
+
+## Evidence levels
 
 | Level | Meaning |
 |---|---|
-| `OBSERVED` | A protocol or metadata fact seen directly (tool advertised, no auth challenge, marker present). |
-| `INFERRED` | Reasoned from schema or description — not confirmed behaviour. |
-| `DEMONSTRATED` | A safe read-only canary ran in an authorized loopback lab. |
-| `VERIFIED` | Reserved. The external, non-executing path never reaches this level. |
+| `OBSERVED` | A protocol or metadata fact seen directly. |
+| `INFERRED` | Reasoned from a schema or description. Not confirmed behaviour. |
+| `DEMONSTRATED` | A read-only canary ran against an authorized loopback lab server. |
+| `VERIFIED` | Reserved. The external, non-executing path never reaches it. |
 
-Every detector finding carries `verification_status: NOT_EXECUTED`, a confidence value, the observed
-facts, and a separate interpretation.
+## Detectors
 
-### Detectors
-
-| Slug | Finding title | MITRE | OWASP MCP Top 10 |
+| Slug | Finding | MITRE | OWASP MCP Top 10 |
 |---|---|---|---|
-| `rce` | Exposed Command-Execution Capability | T1059 | MCP05 Command Injection & Execution |
-| `open_capability` | Unauthenticated Sensitive Capability Exposure | T1190 | MCP07 Insufficient Authentication & Authorization |
-| `path_traversal` | Potential Unconstrained Filesystem Path | T1083 | — |
-| `secrets_leakage` | Secrets / Credential Exposure | T1552 | MCP01 Token Mismanagement & Secret Exposure |
-| `prompt_injection` | Prompt-Injection Markers in Declaration / Server Metadata | AML.T0051.001 (ATLAS) | MCP06 Prompt Injection via Contextual Payloads |
-| `tool_poisoning` | Deceptive or Hidden Tool Declaration | T1036 | MCP03 Tool Poisoning |
+| `rce` | Exposed command-execution capability | T1059 | MCP05 |
+| `open_capability` | Sensitive capability listed without authentication | T1190 | MCP07 |
+| `path_traversal` | Potentially unconstrained filesystem path | T1083 | none |
+| `secrets_leakage` | Secret or credential exposure | T1552 | MCP01 |
+| `prompt_injection` | Prompt-injection markers in a declaration | AML.T0051.001 (ATLAS) | MCP06 |
+| `tool_poisoning` | Deceptive or hidden tool declaration | T1036 | MCP03 |
 
-`path_traversal` has no close OWASP MCP Top 10 category and is left unmapped rather than forced into one.
+`path_traversal` has no close OWASP MCP Top 10 category and is left unmapped.
 
-![Detector findings with evidence levels](docs/images/detector-findings.jpg)
+## Results on synthetic data
 
-## Results
+**Lifecycle demo.** `python3 -m lab.lifecycle` drives the real HTTP API against a loopback MCP server
+that is redeployed three times (`lab/lifecycle_result.json`):
 
-### Lifecycle demo (isolated loopback lab)
+| Stage | Lab profile | Severity | Dangerous tools | Alerts |
+|---|---|---|---:|---:|
+| Baseline | read-only tools, no auth | Medium | 0 | 0 |
+| Exposure | shell, SQL and file tools, no auth | Critical | 3 | 1 |
+| Remediation | read-only tools again | Medium | 0 | 1 (kept as history) |
 
-`python3 demo_lifecycle.py` runs the real HTTP API against a synthetic MCP server on `127.0.0.1`,
-redeploying it three times. Reproduced output (`DEMO_PHASE5_RESULT.json`):
+**Detector benchmark.** 72 labelled declarations in `benchmark/`, 12 of them ambiguous and excluded
+from scoring.
 
-| Stage | Lab profile | Severity | Dangerous tools | Detector categories | Alerts |
-|---|---|---|---|---|---|
-| Baseline | read-only tools, no auth | Medium | 0 | — | 0 |
-| Exposure | shell / SQL / file tools, no auth | Critical | 3 | `open_capability`, `path_traversal`, `rce` | 1 |
-| Remediation re-scan | read-only tools again | Medium | 0 | — | 1 (retained as history) |
-
-The exposure scan reports drift of *3 new dangerous tools, 1 severity change, 4 tools added,
-1 removed, 1 manifest fingerprint change*. The remediated state is **not** risk-free: anonymous
-enumeration remains.
-
-### Detector benchmark (offline, synthetic)
-
-`benchmark/` holds 72 labelled cases (60 development, 12 held out); 12 ambiguous cases are reported
-but excluded from binary scoring. Metrics are micro-averaged over six detector decisions per case.
-
-| Split | Scored cases | TP | FP | TN | FN | Precision | Recall | F1 |
+| Split | Scored | TP | FP | TN | FN | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | Development | 50 | 40 | 3 | 256 | 1 | 93.0% | 97.6% | 95.2% |
 | Holdout | 10 | 8 | 0 | 52 | 0 | 100% | 100% | 100% |
 | Combined | 60 | 48 | 3 | 308 | 1 | 94.1% | 98.0% | 96.0% |
 
-**Limitations, stated plainly:** the cases are synthetic and labelled by one author; the holdout is
-drawn from the same synthetic design; categories describe advertised declarations, not confirmed
-vulnerabilities. These numbers are not field accuracy. Errors are kept in `benchmark/results.json`
-together with SHA-256 hashes of the corpus and detector code.
+These cases are synthetic and were labelled by one author, and the holdout comes from the same
+design. They measure regression, not field accuracy.
 
-### Test suite
-
-258 automated tests (`python3 -m pytest -q`). One live-UI test runs only when `dashboard/dist`
-has been built.
-
-## Safety and scope
-
-- Dangerous tools are never invoked. Detectors are passive and inspect declarations only.
-- Active checks require operator authorization; DNS-TXT ownership proof can be enforced
-  (`REQUIRE_OWNERSHIP_PROOF=true`).
-- The canary runs only on loopback and only against an allow-listed read-only tool. Side effects of
-  an external invocation are reported as `unknown`, never as a safety attestation.
-- `APP_ENV=production` refuses unsafe configuration, and the lab server and demos refuse to run in
-  production. Sample datasets are used only when `APP_ENV=demo` and are labelled as demo data.
-
-## Quick start
+## Run it
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
@@ -150,39 +106,41 @@ pip install -r requirements.txt
 python3 -m pytest -q
 
 cd dashboard && npm install && npm run build && cd ..
-python3 demo_lifecycle.py --serve --port 8000      # http://127.0.0.1:8000
+python3 -m lab.lifecycle --serve --port 8000        # http://127.0.0.1:8000
 ```
 
-Copy `.env.example` to `.env` and fill in only the sources you use.
+To run the API on its own: copy `.env.example` to `.env`, then `uvicorn raqeeb.main:app`.
 
-**Production:** set `APP_ENV=production` — the app then refuses unsafe settings at startup
-(see `deployment_config.py`). Use PostgreSQL (`pip install -r requirements-production.txt`) and run
-`python3 prepare_production_schema.py` once on a new, empty database.
+With `APP_ENV=production` the application refuses unsafe settings at startup
+(`raqeeb/deployment_config.py`). Use PostgreSQL (`requirements-production.txt`) and run
+`python3 -m raqeeb.prepare_production_schema` once on a new, empty database.
 
-## Stack
+## Safety and scope
 
-Python · FastAPI · SQLAlchemy (SQLite / PostgreSQL) · React + Vite + Tailwind · JWT + bcrypt ·
-per-tenant isolation.
+- Detectors read declarations only. No tool on a third-party server is ever called.
+- Active checks need operator authorization, and DNS TXT ownership proof can be enforced.
+- The canary runs only on loopback, against an allow-listed read-only tool.
+- The lab server and the demos refuse to start in production.
 
-## Future work
+## Layout
 
-- Independent, field-sourced detector corpus with a second reviewer and confidence intervals
-- Semantic tool-poisoning analysis beyond pattern matching
-- Reviewed migrations for existing databases; shared rate-limit store for multi-instance scaling
-- Internal sensor for private and localhost MCP servers
+```
+raqeeb/        platform: API, protocol negotiation, detectors, drift, storage
+observatory/   daily field study of public MCP servers, with its data
+lab/           loopback MCP server and the lifecycle demo
+benchmark/     labelled declarations and the offline scorer
+dashboard/     React interface
+tests/         test suite
+```
 
 ## References
 
-1. Censys, *MCP Servers on the Internet*, May 2026 — <https://censys.com/blog/mcp-servers-on-the-internet/>
-2. Microsoft Security Blog, *When configuration becomes a vulnerability*, 14 May 2026 — <https://www.microsoft.com/en-us/security/blog/2026/05/14/configuration-becomes-vulnerability-exploitable-misconfigurations-ai-apps/>
-3. Wiz, *The risk hiding behind exposed MCP servers*, 28 Jul 2026 — <https://www.wiz.io/blog/the-risk-hiding-behind-exposed-mcp-servers>
-4. Model Context Protocol, *2026-07-28 specification* (SEP-2575) — <https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/>
-5. MITRE ATT&CK — <https://attack.mitre.org/> · MITRE ATLAS — <https://atlas.mitre.org/> · OWASP MCP Top 10 — <https://owasp.org/www-project-mcp-top-10/>
+1. Censys, *MCP Servers on the Internet*, May 2026. <https://censys.com/blog/mcp-servers-on-the-internet/>
+2. Microsoft Security Blog, *When configuration becomes a vulnerability*, 14 May 2026. <https://www.microsoft.com/en-us/security/blog/2026/05/14/configuration-becomes-vulnerability-exploitable-misconfigurations-ai-apps/>
+3. Wiz, *The risk hiding behind exposed MCP servers*, 28 Jul 2026. <https://www.wiz.io/blog/the-risk-hiding-behind-exposed-mcp-servers>
+4. OWASP MCP Top 10. <https://owasp.org/www-project-mcp-top-10/>
+5. MITRE ATT&CK <https://attack.mitre.org/> and MITRE ATLAS <https://atlas.mitre.org/>
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-[1]: https://censys.com/blog/mcp-servers-on-the-internet/
-[2]: https://www.microsoft.com/en-us/security/blog/2026/05/14/configuration-becomes-vulnerability-exploitable-misconfigurations-ai-apps/
-[3]: https://www.wiz.io/blog/the-risk-hiding-behind-exposed-mcp-servers
+MIT. See [LICENSE](LICENSE).

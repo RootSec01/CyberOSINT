@@ -11,10 +11,10 @@
     "holdout.json": "27458db034c05ae153d7dc9a777425aadf11f304f136833583bf66c6cffd207d"
   },
   "detector_code_sha256": {
-    "benchmark_runner.py": "2d700a8bbe9b8195fea2b68e1904b45370d2dd391d86be448e1e1f59447128a8",
-    "mcp_detectors.py": "ee7dfc86fa88b97fddda67c566a488d09caefabc07f164912e9ce014a5e4a774",
-    "safe_proof.py": "f60f829c9edda7a4409c00be61d44cc74c77c0543775e56d8d1a300685baa27e",
-    "secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
+    "benchmark/runner.py": "bf03e7078c94b0355c6fd4f73ec8bae3616a4486138da434f322dfe9ff03f3d3",
+    "raqeeb/mcp_detectors.py": "5f66fba8a3f4694af23a4e5395e2d513fa0bd82f7487e8e61c5bf48145a397e0",
+    "raqeeb/safe_proof.py": "1095bb50d1f6d65f11fe4b493f112afa9d4f436e478c0a661305d25ca581f7bf",
+    "raqeeb/secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
   },
   "cases_total": 72,
   "cases_scored": 60,
@@ -547,11 +547,11 @@
         "path_traversal"
       ],
       "evidence_levels": {
-        "path_traversal": [
-          "INFERRED"
-        ],
         "open_capability": [
           "OBSERVED"
+        ],
+        "path_traversal": [
+          "INFERRED"
         ]
       }
     },
@@ -603,11 +603,11 @@
         "path_traversal"
       ],
       "evidence_levels": {
-        "path_traversal": [
-          "INFERRED"
-        ],
         "open_capability": [
           "OBSERVED"
+        ],
+        "path_traversal": [
+          "INFERRED"
         ]
       }
     },
@@ -686,14 +686,14 @@
         "tool_poisoning"
       ],
       "evidence_levels": {
-        "tool_poisoning": [
-          "INFERRED"
-        ],
         "secrets_leakage": [
           "INFERRED"
         ],
         "open_capability": [
           "OBSERVED"
+        ],
+        "tool_poisoning": [
+          "INFERRED"
         ]
       }
     },

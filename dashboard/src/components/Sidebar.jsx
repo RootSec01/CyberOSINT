@@ -38,7 +38,7 @@ function Sidebar() {
           </div>
           <div>
             <div className="font-display font-600 text-[15px] leading-none text-mist-100">
-              CyberOSINT
+              Raqeeb
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-mist-300 mt-1">
               Intelligence
