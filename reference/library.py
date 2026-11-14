@@ -21,6 +21,7 @@ class Library:
         self.manifests = ManifestStore(self.root / "manifests")
         self._index_path = self.root / "index.json"
         self.packages: dict = {}
+        self._tools: dict[str, list] = {}
         if self._index_path.exists():
             self.packages = json.loads(self._index_path.read_text(encoding="utf-8"))["packages"]
 
@@ -54,6 +55,11 @@ class Library:
             listed = [(v, r) for v, r in entry["versions"].items() if r.get("manifest")]
             for version, release in sorted(listed, key=lambda item: item[1]["published"]):
                 yield name, version, release
+
+    def tools(self, digest: str) -> list:
+        if digest not in self._tools:
+            self._tools[digest] = self.manifests.load(digest)
+        return self._tools[digest]
 
     def by_digest(self) -> dict[str, list[tuple[str, str]]]:
         found: dict[str, list[tuple[str, str]]] = {}

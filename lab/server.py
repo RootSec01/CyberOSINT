@@ -59,8 +59,8 @@ _TOOLS = {
 }
 
 
-def _make_handler(mode: str, auth_token: str | None, profile: str):
-    tools = _TOOLS[profile]
+def _make_handler(mode: str, auth_token: str | None, profile: str, tools: list | None = None):
+    tools = _TOOLS[profile] if tools is None else tools
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):  # keep test output clean
@@ -155,10 +155,10 @@ def _make_handler(mode: str, auth_token: str | None, profile: str):
 
 
 def make_server(mode: str, port: int, auth_token: str | None = None,
-                profile: str = "dangerous") -> HTTPServer:
+                profile: str = "dangerous", tools: list | None = None) -> HTTPServer:
     if os.getenv("APP_ENV", "development").lower() == "production":
         raise RuntimeError("lab MCP server is disabled in production")
-    handler = _make_handler(mode, auth_token, profile)
+    handler = _make_handler(mode, auth_token, profile, tools)
     return HTTPServer(("127.0.0.1", port), handler)
 
 

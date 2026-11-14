@@ -56,6 +56,7 @@ from raqeeb import drift
 from raqeeb import copilot
 from raqeeb import secrets_provider
 from raqeeb import ownership
+from raqeeb import provenance
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
 def _env_flag(name: str, default: str = "false") -> bool:
@@ -443,6 +444,8 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
         proof = safe_proof.build_safe_proof(
             server, canary=canary,
             authorization={"granted_by": user.username, **authorization_ctx})
+        if proof.get("is_mcp"):
+            proof["provenance"] = provenance.assess(server.get("tools"))
 
         payload = {
             "run_id": server.get("url") or f"{host}:{port}",
@@ -457,6 +460,7 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
         asset.last_run_id = str(payload.get("run_id") or "")
         db.commit()
         _maybe_raise_alert(db, user, asset, payload)
+        _maybe_raise_provenance_alert(db, asset, payload)
         return payload
 
     # OSINT surface pipeline for domain / ip / cidr / asn / org
@@ -533,6 +537,42 @@ def _maybe_raise_alert(db: Session, user: User, asset: Asset,
         kind="drift",
         title=f"Exposure increased on {asset.label or asset.value}",
         detail=diff.get("summary"),
+        run_id=str(current_payload.get("run_id") or ""),
+    )
+    db.add(alert)
+    db.commit()
+    _dispatch_alert_webhook(alert)
+    return alert
+
+
+def _maybe_raise_provenance_alert(db: Session, asset: Asset,
+                                  current_payload: Dict[str, Any]) -> "Alert | None":
+    """Alert when declarations deviate from the published release, once per distinct deviation."""
+    assessment = (current_payload.get("safe_proof") or {}).get("provenance") or {}
+    detail = provenance.alert_text(assessment)
+    if detail is None:
+        return None
+    rows = (
+        db.query(Run)
+        .filter(Run.user_id == asset.user_id, Run.target_value == asset.value)
+        .order_by(Run.created_at.desc())
+        .limit(2)
+        .all()
+    )
+    if len(rows) == 2:
+        try:
+            earlier = json.loads(rows[1].report_json or "{}")
+        except (ValueError, TypeError):
+            earlier = {}
+        if provenance.alert_text((earlier.get("safe_proof") or {}).get("provenance") or {}) == detail:
+            return None
+    alert = Alert(
+        user_id=asset.user_id,
+        asset_id=asset.id,
+        severity="High",
+        kind="provenance",
+        title=f"Declared tools differ from the published release on {asset.label or asset.value}",
+        detail=detail,
         run_id=str(current_payload.get("run_id") or ""),
     )
     db.add(alert)
@@ -1300,6 +1340,8 @@ async def api_safe_proof(
     proof = safe_proof.build_safe_proof(
         server, canary=canary,
         authorization={"granted_by": user.username, **authorization_ctx})
+    if proof.get("is_mcp"):
+        proof["provenance"] = provenance.assess(server.get("tools"))
 
     _persist_run(
         db, user,

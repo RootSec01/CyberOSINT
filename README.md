@@ -74,6 +74,12 @@ was installed in a throwaway directory, started over stdio and asked for `tools/
 answers `match`, `subset`, `deviation` or `unknown` and names the release and the tools that differ
 ([reference/README.md](reference/README.md)).
 
+Every scan now carries this verdict. `python3 -m lab.tampering` serves the published
+`server-filesystem` 2.3.0 declarations twice on loopback, once as shipped and once with a hidden
+sentence appended to one description. Both are first scans, so drift has nothing to compare:
+the first is reported as `match`, the second as `deviation` naming `read_file`, with the published
+and observed text side by side and an alert (`lab/tampering_result.json`).
+
 None of the 287 hosted servers in the field study is a deployment of these 30 packages; all are
 `unknown`. The library applies to self-hosted deployments of published packages, not to bespoke
 hosted services.
