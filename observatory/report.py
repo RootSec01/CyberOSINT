@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 
+from raqeeb.declarations import compare
+
 from .store import Archive
 
 
@@ -13,21 +15,6 @@ class ManifestChange:
     added: list[str] = field(default_factory=list)
     removed: list[str] = field(default_factory=list)
     redefined: list[str] = field(default_factory=list)
-
-
-def _by_name(tools: list) -> dict[str, list]:
-    grouped: dict[str, list] = {}
-    for tool in tools:
-        grouped.setdefault(tool.get("name", ""), []).append(tool)
-    return grouped
-
-
-def compare_manifests(before: list, after: list) -> tuple[list[str], list[str], list[str]]:
-    old, new = _by_name(before), _by_name(after)
-    added = sorted(new.keys() - old.keys())
-    removed = sorted(old.keys() - new.keys())
-    redefined = sorted(name for name in old.keys() & new.keys() if old[name] != new[name])
-    return added, removed, redefined
 
 
 def outcome_counts(run: dict) -> Counter:
@@ -44,7 +31,7 @@ def manifest_changes(archive: Archive, earlier: dict, later: dict) -> list[Manif
             continue
         if previous["manifest"] == observation["manifest"]:
             continue
-        added, removed, redefined = compare_manifests(
+        added, removed, redefined = compare(
             archive.load_manifest(previous["manifest"]),
             archive.load_manifest(observation["manifest"]))
         changes.append(ManifestChange(observation["id"], observation["url"],

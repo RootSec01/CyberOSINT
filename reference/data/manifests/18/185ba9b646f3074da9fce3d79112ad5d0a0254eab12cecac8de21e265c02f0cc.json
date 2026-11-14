@@ -1,0 +1,4785 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Firecrawl agent"
+  },
+  "description": "\nRun web research that returns structured data when the URLs are not known or the answer spans several sites. Describe the fields you need in `prompt`, optionally pass a JSON `schema` and seed `urls`, and the research agent searches, navigates, reads pages, and returns JSON assembled across sources. Use it to research an entity plus its fields (founders, pricing, contact details), to build lists and datasets (companies, people, products, jobs, papers), and for pages that need navigation or interaction to reach the data. Optional `effort` sets the reasoning budget, `maxCredits` caps spend, and `strictConstrainToURLs` keeps the agent to the supplied `urls`.\n\nThis call returns only a job ID, not the research result. Read the job with `firecrawl_agent_status` until it reaches `completed` or `failed`; a typical research run takes one to three minutes. For one known URL use `firecrawl_scrape` (with formats: [\"json\"] for structured output); for a plain lookup that a results page answers, use `firecrawl_search`.\n\nThe job also returns a `threadId`. To continue that thread, pass it with a follow-up `prompt`; omitted `mode`, `urls`, `schema` and exchange settings carry over from the previous turn.\n\nThe agent only calls Alexandria providers whose terms the team has accepted. `exchange.skippedProviders` lists gated providers. With `exchange.onTermsRequired` \"ask\", a terms `pendingApproval` and `exchange.requiresAction` carry the `approvalId` and provider requirements. Read terms/show through `firecrawl_scrape`. An organization admin must accept terms in the Firecrawl dashboard at the provider URL or https://www.firecrawl.dev/app/settings?tab=data-sources. Ignore any terms/accept call in the API response. Only after the admin confirms acceptance, resume with the same `threadId` and `exchange.approve: {approvalId}`; this does not accept terms. To decline, use `exchange.decline: {approvalId}`. Never infer acceptance from a data request.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "effort": {
+     "description": "Reasoning budget for the agent task.",
+     "enum": [
+      "low",
+      "medium",
+      "high"
+     ],
+     "type": "string"
+    },
+    "exchange": {
+     "additionalProperties": false,
+     "description": "Alexandria provider settings for this turn, forwarded as the request's exchange object.",
+     "properties": {
+      "approve": {
+       "additionalProperties": false,
+       "description": "Answer yes to the pendingApproval the previous turn of this thread ended on (its id, also exchange.requiresAction.approvalId). Needs threadId. For a terms offer, send it only after an organization admin confirms acceptance in the Firecrawl dashboard; this does not accept terms. callIds and always are ignored on terms offers. For paid calls, callIds picks a subset (default all) and always stops asking for the rest of the thread.",
+       "properties": {
+        "always": {
+         "type": "boolean"
+        },
+        "approvalId": {
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+         "type": "string"
+        },
+        "callIds": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "required": [
+        "approvalId"
+       ],
+       "type": "object"
+      },
+      "decline": {
+       "additionalProperties": false,
+       "description": "Answer no to that pendingApproval. Needs threadId. A declined terms offer keeps those providers out of the rest of the thread.",
+       "properties": {
+        "approvalId": {
+         "format": "uuid",
+         "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+         "type": "string"
+        }
+       },
+       "required": [
+        "approvalId"
+       ],
+       "type": "object"
+      },
+      "enabled": {
+       "description": "Let the agent call Alexandria providers. On by default.",
+       "type": "boolean"
+      },
+      "maxCalls": {
+       "description": "Most provider calls the agent may make in this turn.",
+       "maximum": 30,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "onTermsRequired": {
+       "description": "What to do when a provider the agent would use needs data terms the team has not accepted. Gated providers are never called. \"skip\" (default): answer with accepted providers and list the rest in exchange.skippedProviders. \"ask\": the same, plus a terms pendingApproval and exchange.requiresAction. Read terms with terms/show; an organization admin accepts them in the Firecrawl dashboard. There is no auto-accept. Omitted on a follow-up keeps the previous turn's value.",
+       "enum": [
+        "skip",
+        "ask"
+       ],
+       "type": "string"
+      },
+      "requireApproval": {
+       "description": "End the turn with a paid-call pendingApproval before any paid provider call. Requires mode \"chat\" on the same request, even on a follow-up.",
+       "type": "boolean"
+      },
+      "toolkits": {
+       "description": "Pin up to 5 providers the agent may use, by slug. Omitted means the whole catalog.",
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 5,
+       "type": "array"
+      }
+     },
+     "type": "object"
+    },
+    "maxCredits": {
+     "description": "Spending limit in credits for this run. Defaults to 2500 on the API.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "mode": {
+     "description": "\"extract\" (default) returns the complete structured result every turn. \"chat\" lets a follow-up that asks no new data get a short reply in message instead of a re-run; required for exchange.requireApproval. Omitted on a follow-up keeps the previous turn's mode.",
+     "enum": [
+      "extract",
+      "chat"
+     ],
+     "type": "string"
+    },
+    "prompt": {
+     "maxLength": 10000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "schema": {
+     "additionalProperties": false,
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "strictConstrainToURLs": {
+     "description": "If true, agent will only visit URLs provided in the urls array.",
+     "type": "boolean"
+    },
+    "threadId": {
+     "description": "Continue this thread: the threadId from an earlier firecrawl_agent or firecrawl_agent_status result. Omit to start a new thread.",
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "urls": {
+     "items": {
+      "format": "uri",
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "prompt"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_agent",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "The queued research job. The result is read with `firecrawl_agent_status`.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "id": {
+     "description": "Agent job identifier, for `firecrawl_agent_status`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "status": {
+     "description": "Job state at submission time.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "threadId": {
+     "description": "Research thread this job belongs to.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "threadTurn": {
+     "description": "Turn number of this job within its thread.",
+     "type": [
+      "number",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl agent"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Firecrawl agent status"
+  },
+  "description": "\nRetrieve progress or final results for a `firecrawl_agent` job ID. A `processing` response is non-terminal and does not contain the final research result. Check again after 15–30 seconds until the status is `completed` or `failed`; a typical research run takes one to three minutes and complex jobs can take longer. If the job cannot finish within the task's available time, use `firecrawl_search` and `firecrawl_scrape` to complete the requested output.\n\nReturns job status, progress information, and result data when completed.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_agent_status",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Progress or final result of a research agent job.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "creditsUsed": {
+     "description": "Credits the job consumed.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Research result, present once the job has completed."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "exchange": {
+     "description": "What the job did with Alexandria providers: onTermsRequired, paidCalls, creditsUsed, skippedProviders (gated providers that would have helped), and requiresAction (approvalId and provider requirements). Read terms with terms/show. Ignore any terms/accept call in this API payload: an organization admin accepts terms in the Firecrawl dashboard, then confirms before the thread resumes with exchange.approve: {approvalId}."
+    },
+    "expiresAt": {
+     "description": "When the job result expires and can no longer be read.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "id": {
+     "description": "Agent job identifier.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "message": {
+     "description": "The agent's reply; in chat mode, the short answer to a follow-up."
+    },
+    "mode": {
+     "description": "Agent mode the job ran in.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "model": {
+     "description": "Agent model that ran the job.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "notice": {
+     "description": "Set when the run stopped at its credit limit: what that means and how to continue.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "partial": {
+     "description": "Incomplete best-effort result of a `failed` run; never a completed answer."
+    },
+    "partialSchemaValid": {
+     "description": "Whether `partial` matches the requested schema, when one was supplied.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "pendingApproval": {
+     "description": "Set when the job ended waiting on the caller. Answer it by calling firecrawl_agent with this threadId and exchange.approve or exchange.decline carrying its id. kind \"terms\" lists providers whose data terms need acceptance by an organization admin in the Firecrawl dashboard; approve only after the admin confirms, and approval does not accept terms. Otherwise calls lists paid calls waiting for approval."
+    },
+    "progress": {
+     "description": "Progress information for a running job."
+    },
+    "sources": {
+     "description": "Sources the agent read."
+    },
+    "status": {
+     "description": "Job state: `processing` is non-terminal; `completed` and `failed` are terminal.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "stopReason": {
+     "description": "Why a `failed` run stopped early; `credit_limit_reached` means it hit maxCredits.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "suggestions": {
+     "description": "Follow-ups the agent offers; send one as the prompt of the next turn with this threadId."
+    },
+    "threadId": {
+     "description": "Research thread this job belongs to.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "threadTurn": {
+     "description": "Turn number of this job within its thread.",
+     "type": [
+      "number",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl agent status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Firecrawl crawl status"
+  },
+  "description": "\nRetrieve the current status, progress, and available results for an existing crawl ID. This only reads Firecrawl job state and does not start or modify the crawl.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_check_crawl_status",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Crawl job state and the documents collected so far.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "completed": {
+     "description": "Pages crawled so far.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "creditsUsed": {
+     "description": "Credits the crawl consumed.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Scraped documents collected by the crawl."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "expiresAt": {
+     "description": "When the crawl results expire.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "id": {
+     "description": "Crawl identifier, for `firecrawl_check_crawl_status`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "next": {
+     "description": "URL of the next page of results, when the data is paginated.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "status": {
+     "description": "Crawl state, such as `scraping`, `completed`, or `failed`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "total": {
+     "description": "Pages the crawl expects to visit.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "url": {
+     "description": "The URL the crawl started from.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl crawl status"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Firecrawl site crawl"
+  },
+  "description": "\nStart a multi-page crawl at a website URL, poll it to a terminal state, and return the final status and collected data. Scope can be bounded with include/exclude paths, depth, page limit, subdomain/external-link controls, sitemap handling, delay, and scrape options.\n\nCrawl results can be large; use conservative limits when full-site coverage is unnecessary. Webhooks and interactive scrape actions are unavailable in safe mode. Returns the crawl ID, status, and page data.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "allowExternalLinks": {
+     "type": "boolean"
+    },
+    "allowSubdomains": {
+     "type": "boolean"
+    },
+    "crawlEntireDomain": {
+     "type": "boolean"
+    },
+    "deduplicateSimilarURLs": {
+     "type": "boolean"
+    },
+    "delay": {
+     "type": "number"
+    },
+    "excludePaths": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "ignoreQueryParameters": {
+     "type": "boolean"
+    },
+    "includePaths": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "type": "number"
+    },
+    "maxConcurrency": {
+     "type": "number"
+    },
+    "maxDiscoveryDepth": {
+     "type": "number"
+    },
+    "prompt": {
+     "type": "string"
+    },
+    "scrapeOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "actions": {
+       "items": {
+        "properties": {
+         "direction": {
+          "enum": [
+           "up",
+           "down"
+          ],
+          "type": "string"
+         },
+         "fullPage": {
+          "type": "boolean"
+         },
+         "key": {
+          "type": "string"
+         },
+         "milliseconds": {
+          "type": "number"
+         },
+         "script": {
+          "type": "string"
+         },
+         "selector": {
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         },
+         "type": {
+          "enum": [
+           "wait",
+           "screenshot",
+           "scroll",
+           "scrape",
+           "click",
+           "write",
+           "press",
+           "executeJavascript",
+           "generatePDF"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "type"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "excludeTags": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "formats": {
+       "items": {
+        "enum": [
+         "markdown",
+         "html",
+         "rawHtml",
+         "screenshot",
+         "links",
+         "summary",
+         "changeTracking",
+         "branding",
+         "json",
+         "query",
+         "audio"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "includeTags": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "jsonOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "prompt": {
+         "type": "string"
+        },
+        "schema": {
+         "additionalProperties": false,
+         "propertyNames": {
+          "type": "string"
+         },
+         "type": "object"
+        }
+       },
+       "type": "object"
+      },
+      "location": {
+       "additionalProperties": false,
+       "properties": {
+        "country": {
+         "type": "string"
+        },
+        "languages": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "type": "object"
+      },
+      "lockdown": {
+       "type": "boolean"
+      },
+      "maxAge": {
+       "type": "number"
+      },
+      "mobile": {
+       "type": "boolean"
+      },
+      "onlyMainContent": {
+       "type": "boolean"
+      },
+      "parsers": {
+       "items": {
+        "enum": [
+         "pdf"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "pdfOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "maxPages": {
+         "maximum": 10000,
+         "minimum": 1,
+         "type": "integer"
+        }
+       },
+       "type": "object"
+      },
+      "profile": {
+       "additionalProperties": false,
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "saveChanges": {
+         "type": "boolean"
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "type": "object"
+      },
+      "proxy": {
+       "enum": [
+        "basic",
+        "stealth",
+        "enhanced",
+        "auto"
+       ],
+       "type": "string"
+      },
+      "queryOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "mode": {
+         "default": "freeform",
+         "enum": [
+          "directQuote",
+          "freeform"
+         ],
+         "type": "string"
+        },
+        "prompt": {
+         "maxLength": 10000,
+         "type": "string"
+        }
+       },
+       "required": [
+        "prompt"
+       ],
+       "type": "object"
+      },
+      "redactPII": {
+       "type": "boolean"
+      },
+      "removeBase64Images": {
+       "type": "boolean"
+      },
+      "screenshotOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "fullPage": {
+         "type": "boolean"
+        },
+        "quality": {
+         "type": "number"
+        },
+        "viewport": {
+         "additionalProperties": false,
+         "properties": {
+          "height": {
+           "type": "number"
+          },
+          "width": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "width",
+          "height"
+         ],
+         "type": "object"
+        }
+       },
+       "type": "object"
+      },
+      "skipTlsVerification": {
+       "type": "boolean"
+      },
+      "storeInCache": {
+       "type": "boolean"
+      },
+      "waitFor": {
+       "type": "number"
+      },
+      "zeroDataRetention": {
+       "type": "boolean"
+      }
+     },
+     "type": "object"
+    },
+    "sitemap": {
+     "enum": [
+      "skip",
+      "include",
+      "only"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "type": "string"
+    },
+    "webhook": {
+     "type": "string"
+    },
+    "webhookHeaders": {
+     "additionalProperties": false,
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_crawl",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Crawl job state and the documents collected so far.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "completed": {
+     "description": "Pages crawled so far.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "creditsUsed": {
+     "description": "Credits the crawl consumed.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Scraped documents collected by the crawl."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "expiresAt": {
+     "description": "When the crawl results expire.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "id": {
+     "description": "Crawl identifier, for `firecrawl_check_crawl_status`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "next": {
+     "description": "URL of the next page of results, when the data is paginated.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "status": {
+     "description": "Crawl state, such as `scraping`, `completed`, or `failed`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "total": {
+     "description": "Pages the crawl expects to visit.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "url": {
+     "description": "The URL the crawl started from.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl site crawl"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Firecrawl credit usage"
+  },
+  "description": "\nGet the authenticated Firecrawl team's current credit balance or historical credit consumption. Use the current view to answer how many credits remain or to check billing-period boundaries. Use the historical view for monthly usage reporting and trend analysis.\n\nThe current view returns `remainingCredits`, `planCredits`, `billingPeriodStart`, and `billingPeriodEnd`. Extra purchased or granted credits can make `remainingCredits` greater than `planCredits`. Billing-period dates may be null when the upstream billing provider has no period metadata.\n\nThe historical view returns periods sorted by start date with `startDate`, `endDate`, and `creditsUsed`. Set `byApiKey` to include separate periods per API key, identified by the optional `apiKey` field. The newest period's `endDate` can be null.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "byApiKey": {
+     "description": "Break historical usage down by API key. When view is omitted, true selects the historical view; it cannot be combined with view \"current\".",
+     "type": "boolean"
+    },
+    "view": {
+     "description": "Select current balance or historical monthly usage. Defaults to current.",
+     "enum": [
+      "current",
+      "historical"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "firecrawl_credit_usage",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "The team credit balance, or historical credit consumption by period.",
+   "properties": {
+    "billingPeriodEnd": {
+     "description": "End of the current billing period; null when the billing provider reports no period.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "billingPeriodStart": {
+     "description": "Start of the current billing period; null when the billing provider reports no period.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "periods": {
+     "description": "Historical periods sorted by start date, each with `startDate`, `endDate`, `creditsUsed`, and `apiKey` when broken down by key."
+    },
+    "planCredits": {
+     "description": "Credits included in the plan for the period.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "remainingCredits": {
+     "description": "Credits left in the current billing period; can exceed `planCredits` when extra credits were purchased or granted.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl credit usage"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl developer search"
+  },
+  "description": "\nSearch an index of public repositories, GitHub issues, merged pull requests, repository READMEs, and code documentation for programming questions that need external documentation or upstream evidence.\n\nReturns ranked results with an ID, source type, URL, title, and the matched passages in markdown.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "k": {
+     "description": "Number of ranked results to return (default 10).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Natural-language developer question or search phrase, including the library, error message, or API involved when relevant.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "skills": {
+     "description": "Set to \"only\" to search only agent-skill files.",
+     "enum": [
+      "only"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_developer_search",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Ranked developer-index results with their matched passages.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "results": {
+     "description": "Ranked results, in the order the text block lists them.",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "id": {
+        "description": "Stable result id, such as `issue:owner/repo#123` or `doc:<hash>`; its prefix gives the source type.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "passages": {
+        "description": "Matched passages.",
+        "items": {
+         "additionalProperties": {},
+         "properties": {
+          "text": {
+           "description": "Matched passage, in markdown.",
+           "type": [
+            "string",
+            "null"
+           ]
+          }
+         },
+         "type": "object"
+        },
+        "type": "array"
+       },
+       "title": {
+        "description": "Result title.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "description": "Source URL.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Firecrawl developer search"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Firecrawl feedback"
+  },
+  "description": "\nSubmit concise quality feedback for a completed search, scrape, parse, or map job. Provide the endpoint, job ID, rating, and relevant issue codes or small contextual fields; omit large page contents and raw outputs.\n\nFor an Alexandria session, set endpoint to `alexandria`, omit jobId, and provide requestedWebsite (url and requestedFunctionality), objective, rationale, and rating. objective is the underlying goal behind the session: what you or your user were ultimately trying to accomplish (for example, \"shortlist federal IT contracts to bid on this quarter\"), not only what was needed from this website. Optional providerFeedback and capabilityFeedback describe gaps or errors. Capability issues: new_capability_request (requires requestedFunctionality), missing_capability, insufficient_functionality, incorrect_result, execution_error, other. Alexandria feedback must arrive within about 2 minutes of the team's latest Alexandria search, discovery, or execution; later feedback is rejected. Eligible feedback can refund 1 credit; refunds are subject to daily caps per website and per team.\n\nReturns submission status, feedback ID, and accounting fields.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "capabilityFeedback": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "issue": {
+        "enum": [
+         "new_capability_request",
+         "missing_capability",
+         "insufficient_functionality",
+         "incorrect_result",
+         "execution_error",
+         "other"
+        ],
+        "type": "string"
+       },
+       "name": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       },
+       "provider": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       },
+       "requestedFunctionality": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "type": "string"
+       },
+       "why": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "provider",
+       "issue",
+       "why"
+      ],
+      "type": "object"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "endpoint": {
+     "enum": [
+      "search",
+      "scrape",
+      "parse",
+      "map",
+      "alexandria"
+     ],
+     "type": "string"
+    },
+    "issues": {
+     "items": {
+      "maxLength": 80,
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "jobId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "metadata": {
+     "additionalProperties": false,
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "missingContent": {
+     "items": {
+      "properties": {
+       "description": {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       "topic": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic"
+      ],
+      "type": "object"
+     },
+     "maxItems": 50,
+     "type": "array"
+    },
+    "note": {
+     "maxLength": 4000,
+     "type": "string"
+    },
+    "objective": {
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "pageNumbers": {
+     "items": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+     },
+     "maxItems": 100,
+     "type": "array"
+    },
+    "providerFeedback": {
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "issue": {
+        "enum": [
+         "missing_provider",
+         "insufficient_coverage",
+         "provider_unavailable",
+         "other"
+        ],
+        "type": "string"
+       },
+       "name": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       },
+       "why": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "name",
+       "issue",
+       "why"
+      ],
+      "type": "object"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "querySuggestions": {
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "rating": {
+     "enum": [
+      "good",
+      "bad",
+      "partial"
+     ],
+     "type": "string"
+    },
+    "rationale": {
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "requestedWebsite": {
+     "additionalProperties": false,
+     "properties": {
+      "requestedFunctionality": {
+       "maxLength": 2000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "url": {
+       "format": "uri",
+       "maxLength": 2048,
+       "type": "string"
+      }
+     },
+     "required": [
+      "url",
+      "requestedFunctionality"
+     ],
+     "type": "object"
+    },
+    "tags": {
+     "items": {
+      "maxLength": 80,
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "type": "string"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    },
+    "valuableSources": {
+     "items": {
+      "properties": {
+       "reason": {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       "url": {
+        "format": "uri",
+        "type": "string"
+       }
+      },
+      "required": [
+       "url"
+      ],
+      "type": "object"
+     },
+     "maxItems": 50,
+     "type": "array"
+    }
+   },
+   "required": [
+    "endpoint",
+    "rating"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_feedback",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Result of submitting feedback.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "alreadySubmitted": {
+     "description": "Whether feedback for this job was already recorded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "creditsRefunded": {
+     "description": "Credits refunded for this submission, when eligible.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "creditsRefundedToday": {
+     "description": "Credits refunded to the team so far this UTC day.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "dailyCapReached": {
+     "description": "Whether the daily refund cap is reached; further feedback today still records but refunds nothing.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "dailyRefundCap": {
+     "description": "The team's daily refund cap in credits.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Payload returned with the accepted feedback."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "feedbackErrorCode": {
+     "description": "Machine-readable reason the submission was rejected.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "feedbackId": {
+     "description": "Identifier of the recorded feedback.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "message": {
+     "description": "Human-readable result of the submission.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "raw": {
+     "description": "Response body when it was not JSON.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "retryable": {
+     "description": "Whether retrying the submission can succeed.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "status": {
+     "description": "HTTP status when the submission was rejected.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "websiteCapReached": {
+     "description": "Alexandria only: whether this website's daily refund cap is reached; feedback about other websites can still refund.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl feedback"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Find Tools"
+  },
+  "description": "Browse Alexandria data providers and workflows or read a selected contract. Alexandria covers companies, people, jobs, finance and filings, public records and government spending, real estate, places and restaurants, retail and prices, package registries and developer data, news, research, and more: typed, sourced records through published contracts. Prefer normal firecrawl_search for a data task; it already returns matching providers. Use this tool when the contract you need was not returned in full, to browse a category when search found nothing, or before scraping the same fields from several pages. Discovery is free. Use query for semantic discovery or urls to find providers for a website. With no arguments, browse categories, then providers and tools. Contracts describe the inputs and outputs for execution through firecrawl_scrape. nextTool identifies further discovery or pagination. Discovery does not execute providers. Use firecrawl_search when you also need web results.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "capabilities": {
+     "description": "Exact capability IDs. A selected capability expands its complete contract by default.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "categories": {
+     "description": "Category IDs returned by an empty call. Lists providers by default.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "expand": {
+     "description": "Use [\"options\", \"response\"] for inputs and output shape without example payloads; [] keeps results compact. Omit for full contracts on selected capabilities.",
+     "items": {
+      "enum": [
+       "options",
+       "response",
+       "examples"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "groups": {
+     "description": "Optional group IDs for explicit group browsing.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "level": {
+     "enum": [
+      "categories",
+      "providers",
+      "groups",
+      "tools"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "providers": {
+     "description": "Provider IDs returned by category browsing. Lists compact tools by default.",
+     "items": {
+      "minLength": 1,
+      "type": "string"
+     },
+     "maxItems": 50,
+     "minItems": 1,
+     "type": "array"
+    },
+    "query": {
+     "description": "Semantic lookup of tools for the data you need. Selectors constrain the search.",
+     "maxLength": 2000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "urls": {
+     "items": {
+      "pattern": "^https?:\\/\\/",
+      "type": "string"
+     },
+     "maxItems": 100,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "firecrawl_find_tools",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One page of the Alexandria catalogue: categories, providers, tools, or one contract.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "creditsCost": {
+     "description": "Credits this call consumed.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Discovery page in `data.alexandria[0].data`, with `level`, `items`, `total`, and an optional `nextTool`."
+    },
+    "delivery": {
+     "description": "`retained` when the full result stayed server-side instead of being inlined.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "estimatedTokens": {
+     "description": "Estimated token cost of the full result.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "feedbackTool": {
+     "description": "Pointer to the feedback tool for reporting how this result served the task."
+    },
+    "idleTtlSeconds": {
+     "description": "Seconds a retained workspace stays available while idle.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "inlineTokenBudget": {
+     "description": "Token budget above which a result is retained rather than inlined.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "message": {
+     "description": "Guidance that accompanies the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "nextTool": {
+     "description": "A follow-up tool call (`{name, arguments}`) that continues or inspects this result."
+    },
+    "receipt": {
+     "description": "Billing receipt for the execution."
+    },
+    "requestId": {
+     "description": "Identifier of this Alexandria execution.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "responseBytes": {
+     "description": "Size of the full result in bytes.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "scrape_id": {
+     "description": "Identifier of the underlying scrape.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "tokenEstimateMethod": {
+     "description": "How `estimatedTokens` was derived.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "workspaceId": {
+     "description": "Workspace holding a retained result, for inspection through virtual Bash.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Find Tools"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl Government Index search"
+  },
+  "description": "\nSearch an index of primary law and regulatory material from US federal, state, and local government sources (statutes, regulations, codes, court opinions, and other government publications) for legal or regulatory questions that need the governing text or an official source.\n\nReturns ranked results with a position, title, URL, and matched snippet.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "k": {
+     "description": "Number of ranked results to return (default 10).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Natural-language legal or regulatory question or search phrase, including the jurisdiction, agency, or citation when relevant.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_gov_search",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Ranked Government Index results with their matched snippets.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "results": {
+     "description": "Ranked results, in the order the text block lists them.",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "description": {
+        "description": "Matched snippet.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "position": {
+        "description": "Rank of the result, starting at 1.",
+        "type": [
+         "number",
+         "null"
+        ]
+       },
+       "title": {
+        "description": "Result title.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "url": {
+        "description": "Source URL.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Firecrawl Government Index search"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Firecrawl interact"
+  },
+  "description": "\nOpen or reuse a live browser session to navigate a page, click controls, fill fields, or run browser code. Provide either `url` or `scrapeId`, and either a natural-language `prompt` or executable `code`; code can run as Bash, Python, or Node with a bounded timeout.\n\nThis acts on the live site, so actions such as form submission can create persistent external side effects. Returns execution output, stdout/stderr, exit status, and session viewing URLs.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "language": {
+     "enum": [
+      "bash",
+      "python",
+      "node"
+     ],
+     "type": "string"
+    },
+    "prompt": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "scrapeId": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "scrapeOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "actions": {
+       "items": {
+        "properties": {
+         "direction": {
+          "enum": [
+           "up",
+           "down"
+          ],
+          "type": "string"
+         },
+         "fullPage": {
+          "type": "boolean"
+         },
+         "key": {
+          "type": "string"
+         },
+         "milliseconds": {
+          "type": "number"
+         },
+         "script": {
+          "type": "string"
+         },
+         "selector": {
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         },
+         "type": {
+          "enum": [
+           "wait",
+           "screenshot",
+           "scroll",
+           "scrape",
+           "click",
+           "write",
+           "press",
+           "executeJavascript",
+           "generatePDF"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "type"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "excludeTags": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "formats": {
+       "items": {
+        "enum": [
+         "markdown",
+         "html",
+         "rawHtml",
+         "screenshot",
+         "links",
+         "summary",
+         "changeTracking",
+         "branding",
+         "json",
+         "query",
+         "audio"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "includeTags": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "jsonOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "prompt": {
+         "type": "string"
+        },
+        "schema": {
+         "additionalProperties": false,
+         "propertyNames": {
+          "type": "string"
+         },
+         "type": "object"
+        }
+       },
+       "type": "object"
+      },
+      "location": {
+       "additionalProperties": false,
+       "properties": {
+        "country": {
+         "type": "string"
+        },
+        "languages": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "type": "object"
+      },
+      "lockdown": {
+       "type": "boolean"
+      },
+      "maxAge": {
+       "type": "number"
+      },
+      "mobile": {
+       "type": "boolean"
+      },
+      "onlyMainContent": {
+       "type": "boolean"
+      },
+      "parsers": {
+       "items": {
+        "enum": [
+         "pdf"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "pdfOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "maxPages": {
+         "maximum": 10000,
+         "minimum": 1,
+         "type": "integer"
+        }
+       },
+       "type": "object"
+      },
+      "profile": {
+       "additionalProperties": false,
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "saveChanges": {
+         "type": "boolean"
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "type": "object"
+      },
+      "proxy": {
+       "enum": [
+        "basic",
+        "stealth",
+        "enhanced",
+        "auto"
+       ],
+       "type": "string"
+      },
+      "queryOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "mode": {
+         "default": "freeform",
+         "enum": [
+          "directQuote",
+          "freeform"
+         ],
+         "type": "string"
+        },
+        "prompt": {
+         "maxLength": 10000,
+         "type": "string"
+        }
+       },
+       "required": [
+        "prompt"
+       ],
+       "type": "object"
+      },
+      "redactPII": {
+       "type": "boolean"
+      },
+      "removeBase64Images": {
+       "type": "boolean"
+      },
+      "screenshotOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "fullPage": {
+         "type": "boolean"
+        },
+        "quality": {
+         "type": "number"
+        },
+        "viewport": {
+         "additionalProperties": false,
+         "properties": {
+          "height": {
+           "type": "number"
+          },
+          "width": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "width",
+          "height"
+         ],
+         "type": "object"
+        }
+       },
+       "type": "object"
+      },
+      "skipTlsVerification": {
+       "type": "boolean"
+      },
+      "storeInCache": {
+       "type": "boolean"
+      },
+      "waitFor": {
+       "type": "number"
+      },
+      "zeroDataRetention": {
+       "type": "boolean"
+      }
+     },
+     "type": "object"
+    },
+    "timeout": {
+     "maximum": 300,
+     "minimum": 1,
+     "type": "number"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "firecrawl_interact",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Result of a browser interaction, with the session identifier to continue or stop it.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "Payload returned by the interaction."
+    },
+    "error": {
+     "description": "Why the interaction or the session could not run."
+    },
+    "exitCode": {
+     "description": "Exit status of the executed code.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "liveUrl": {
+     "description": "URL for viewing the live session.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "output": {
+     "description": "Execution output."
+    },
+    "result": {
+     "description": "Interaction result, when it is not an object of its own."
+    },
+    "scrapeId": {
+     "description": "Session identifier; pass it to reuse the session or to `firecrawl_interact_stop`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "sessionUrl": {
+     "description": "URL for viewing the live session.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "stderr": {
+     "description": "Standard error of the executed code.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "stdout": {
+     "description": "Standard output of the executed code.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "url": {
+     "description": "The URL the session was opened from, when opening failed.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl interact"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false,
+   "title": "Stop Firecrawl interact session"
+  },
+  "description": "\nStop the live interact session associated with a `scrapeId` and release its resources. Returns a success confirmation.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "scrapeId": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "scrapeId"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_interact_stop",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Confirmation that the interact session was stopped.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "message": {
+     "description": "Confirmation that the session was stopped.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "scrapeId": {
+     "description": "Session that was stopped.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Stop Firecrawl interact session"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl website map"
+  },
+  "description": "\nEnumerate URLs indexed under one website through Firecrawl without fetching each page's content. Use this when the request asks for a site's URL inventory, when several relevant pages must be located, or when the desired page URL is unknown. An optional `search` term narrows the URL list, while sitemap, subdomain, query-parameter, and result-limit options control coverage.\n\nReturns matching URLs rather than page bodies. Retrieve one page with `firecrawl_scrape`; collect content across multiple pages with `firecrawl_crawl`. Authenticated responses can include an `id` for optional map feedback.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "ignoreQueryParameters": {
+     "type": "boolean"
+    },
+    "includeSubdomains": {
+     "type": "boolean"
+    },
+    "limit": {
+     "type": "number"
+    },
+    "search": {
+     "type": "string"
+    },
+    "sitemap": {
+     "enum": [
+      "include",
+      "skip",
+      "only"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_map",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "URLs indexed under the requested website.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "id": {
+     "description": "Identifier of the map run, for optional map feedback.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "links": {
+     "description": "URLs discovered under the website."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl website map"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get Firecrawl monitor check"
+  },
+  "description": "\nRetrieve one monitor check and its page-level results, optionally filtered by page status. Pages report `same`, `new`, `changed`, `removed`, or `error`; configured goal judging can add a meaningful-change decision.\n\nMarkdown tracking returns a unified text diff, JSON tracking returns field paths with previous/current values and a current snapshot, and mixed tracking returns both. Returns one page of results plus a `next` URL when more pages exist.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "checkId": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "limit": {
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "pageStatus": {
+     "enum": [
+      "same",
+      "new",
+      "changed",
+      "removed",
+      "error"
+     ],
+     "type": "string"
+    },
+    "skip": {
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id",
+    "checkId"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_check",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One monitor check with its page-level diff results.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "The check and its page-level results: each page reports `same`, `new`, `changed`, `removed`, or `error`, with diffs and any goal judgment."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "next": {
+     "description": "URL of the next page of results, when more exist.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "pagination": {
+     "description": "Pagination metadata for the page results."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get Firecrawl monitor check"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List Firecrawl monitor checks"
+  },
+  "description": "\nList historical checks for a monitor, optionally filtered by status and bounded by a result limit. Returns one page of check summaries and pagination metadata.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    },
+    "limit": {
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "offset": {
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "status": {
+     "enum": [
+      "queued",
+      "running",
+      "completed",
+      "failed",
+      "partial",
+      "skipped_overlap"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_checks",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One page of historical checks for the monitor.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "One page of check summaries."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "pagination": {
+     "description": "Pagination metadata for the listing."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Firecrawl monitor checks"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Create Firecrawl monitor"
+  },
+  "description": "\nCreate a recurring scrape, crawl, or search monitor that compares each check with its retained predecessor. The simple form accepts `page`/`pages` or `queries` plus a plain-language `goal`; the advanced `body` form controls targets, schedule, change-tracking formats, judging, retention, webhook, and notifications.\n\nIn the simple form, a `goal` is required. If `queries` contains one or more non-empty values and is supplied with `page`/`pages`, `queries` create the search target and page targets are ignored. A monitor schedules future network checks and can send configured email or webhook notifications. Returns the created monitor.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "additionalProperties": false,
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "email": {
+     "type": "string"
+    },
+    "excludeDomains": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "goal": {
+     "type": "string"
+    },
+    "includeDiffs": {
+     "type": "boolean"
+    },
+    "includeDomains": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "maxResults": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "name": {
+     "type": "string"
+    },
+    "page": {
+     "type": "string"
+    },
+    "pages": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "queries": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "scheduleText": {
+     "type": "string"
+    },
+    "searchWindow": {
+     "enum": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "24h",
+      "7d"
+     ],
+     "type": "string"
+    },
+    "timezone": {
+     "type": "string"
+    },
+    "webhookUrl": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_create",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One monitor record.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "The monitor record: configuration, schedule, targets, and current state."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Create Firecrawl monitor"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Delete Firecrawl monitor"
+  },
+  "description": "\nPermanently delete a monitor by ID and stop its future schedule. This operation cannot be undone and returns deletion status.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_delete",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Deletion status for the monitor.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "Deletion details, when the API returns any."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Delete Firecrawl monitor"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Get Firecrawl monitor"
+  },
+  "description": "\nRetrieve one monitor by ID, including its configuration and current state. This does not run or modify the monitor.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_get",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One monitor record.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "The monitor record: configuration, schedule, targets, and current state."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Get Firecrawl monitor"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "List Firecrawl monitors"
+  },
+  "description": "\nList monitors for the authenticated account with optional pagination controls. Returns one page of monitor records and pagination metadata.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "offset": {
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_list",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One page of monitors for the authenticated account.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "One page of monitor records."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "pagination": {
+     "description": "Pagination metadata for the listing."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "List Firecrawl monitors"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Run Firecrawl monitor now"
+  },
+  "description": "\nQueue an immediate check for a monitor outside its normal schedule. This starts network work for the monitor's configured targets and returns the queued check.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_run",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "The check queued outside the monitor schedule.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "The queued check."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Run Firecrawl monitor now"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Update Firecrawl monitor"
+  },
+  "description": "\nPatch an existing monitor by ID. The body can change its name, active/paused status, schedule, targets, goal, judging, webhook, notifications, or retention; these changes affect future scheduled checks.\n\nReturns the updated monitor.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "additionalProperties": false,
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_monitor_update",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "One monitor record.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "The monitor record: configuration, schedule, targets, and current state."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Update Firecrawl monitor"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Firecrawl file parsing"
+  },
+  "description": "\nParse one supported document into markdown, HTML, links, summary, targeted answers, or JSON matching a schema. Supported inputs include common HTML, PDF, Word, RTF, OpenDocument, and spreadsheet files; PDF parsing can be bounded with `pdfOptions.maxPages`.\n\nLocal MCP reads `filePath` from the server filesystem. Hosted MCP uses two calls: first provide `filePath` to receive upload instructions, upload locally, then call again with the returned `uploadRef`; do not send both fields together. Remote web URLs belong in `firecrawl_scrape`.\n\nSet `redactPII` to request redaction of personally identifiable information in the returned content. `zeroDataRetention` requires an eligible authenticated account; omit it for anonymous keyless use. Returns upload instructions for hosted phase one or parsed document content for the final call. Authenticated final responses can include a `data.metadata.scrapeId` for optional parse feedback.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "contentType": {
+     "description": "Optional MIME type override. If omitted, the server infers the file kind from the extension.",
+     "type": "string"
+    },
+    "excludeTags": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "filePath": {
+     "description": "Absolute or relative path to a local file to parse. Supported: .html, .htm, .pdf, .docx, .doc, .odt, .rtf, .xlsx, .xls",
+     "minLength": 1,
+     "type": "string"
+    },
+    "formats": {
+     "items": {
+      "enum": [
+       "markdown",
+       "html",
+       "rawHtml",
+       "links",
+       "summary",
+       "json",
+       "query"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "includeTags": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "jsonOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "prompt": {
+       "type": "string"
+      },
+      "schema": {
+       "additionalProperties": false,
+       "propertyNames": {
+        "type": "string"
+       },
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "maxAge": {
+     "description": "Ignored: parse never reuses or stores indexed content.",
+     "type": "number"
+    },
+    "onlyMainContent": {
+     "type": "boolean"
+    },
+    "parsers": {
+     "items": {
+      "enum": [
+       "pdf"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "pdfOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "maxPages": {
+       "maximum": 10000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "proxy": {
+     "enum": [
+      "basic",
+      "auto"
+     ],
+     "type": "string"
+    },
+    "queryOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "mode": {
+       "default": "freeform",
+       "enum": [
+        "directQuote",
+        "freeform"
+       ],
+       "type": "string"
+      },
+      "prompt": {
+       "maxLength": 10000,
+       "type": "string"
+      }
+     },
+     "required": [
+      "prompt"
+     ],
+     "type": "object"
+    },
+    "redactPII": {
+     "type": "boolean"
+    },
+    "removeBase64Images": {
+     "type": "boolean"
+    },
+    "skipTlsVerification": {
+     "type": "boolean"
+    },
+    "storeInCache": {
+     "type": "boolean"
+    },
+    "zeroDataRetention": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "filePath"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_parse",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Parsed document content, or the upload instructions for the hosted two-call flow.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "data": {
+     "description": "Parsed document content; can include `data.metadata.scrapeId` for parse feedback."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "message": {
+     "description": "Guidance for the next call.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "mode": {
+     "description": "Which phase of the hosted flow produced this response.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "nextToolCall": {
+     "description": "Hosted phase one: the second `firecrawl_parse` call to make once the upload succeeds, as `{name, arguments}`."
+    },
+    "notes": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "Hosted phase one: constraints on completing the upload flow."
+    },
+    "raw": {
+     "description": "Response body when it was not JSON.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "upload": {
+     "additionalProperties": false,
+     "description": "Hosted phase one: how to upload the local file.",
+     "properties": {
+      "command": {
+       "description": "Local command that performs the upload. It carries no Firecrawl API key.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "expiresAt": {
+       "description": "When the upload URL expires.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "fields": {
+       "description": "Form fields the upload request must send, for a POST upload."
+      },
+      "headers": {
+       "description": "Headers the upload request must send."
+      },
+      "maxSizeBytes": {
+       "description": "Largest file the upload URL accepts.",
+       "type": [
+        "number",
+        "null"
+       ]
+      },
+      "method": {
+       "description": "HTTP method for the upload.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "uploadRef": {
+       "description": "Reference to pass back on the second call.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "uploadUrl": {
+       "description": "URL to upload the local file to.",
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl file parsing"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl inspect research paper"
+  },
+  "description": "\nRetrieve canonical metadata for one paper ID, such as an arXiv, PMC, PMID, or DOI identifier. Returns the title, abstract, authors, categories, source IDs, and dates as markdown.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "paperId": {
+     "description": "Canonical paperId or primaryId such as `arxiv:1706.03762`, `pmcid:PMC12530322`, `pmid:40953549`, or `doi:10.1016/j.neunet.2025.108095`.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "paperId"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_research_inspect_paper",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Canonical metadata for one paper.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "paper": {
+     "additionalProperties": false,
+     "description": "Canonical metadata for the requested paper, absent when it was not found.",
+     "properties": {
+      "abstract": {
+       "description": "Paper abstract.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "authors": {
+       "description": "Authors, as a comma-joined string or as `{name, affiliation}` entries."
+      },
+      "categories": {
+       "anyOf": [
+        {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Paper categories, such as `cs.LG`."
+      },
+      "createdDate": {
+       "description": "Date the paper was first indexed or published.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "ids": {
+       "description": "Source identifiers by namespace, such as `arxiv`, `doi`, or `pmid`."
+      },
+      "paperId": {
+       "description": "Canonical paper identifier.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "primaryId": {
+       "description": "Display identifier, ordered for citation and fetch use.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "title": {
+       "description": "Paper title.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "updateDate": {
+       "description": "Date the paper was last updated.",
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl inspect research paper"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl read research paper"
+  },
+  "description": "\nRetrieve in-body passages from one paper that are relevant to a specific question. Full text is available only for indexed papers; `k` controls the number of passages.\n\nReturns matching passages or a notice when full text is unavailable.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "k": {
+     "description": "Number of passages to return (default 4).",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "paperId": {
+     "description": "Canonical paperId or primaryId such as `arxiv:1706.03762`, `pmcid:PMC12530322`, `pmid:40953549`, or `doi:10.1016/j.neunet.2025.108095`.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "question": {
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "paperId",
+    "question"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_research_read_paper",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Full-text passages from one paper.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "passages": {
+     "description": "In-body passages relevant to the question; empty when no full text is indexed.",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "text": {
+        "description": "Passage text.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "passages"
+   ],
+   "type": "object"
+  },
+  "title": "Firecrawl read research paper"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl related research papers"
+  },
+  "description": "\nFind citation-graph candidates from one to ten `seed_ids`; the first ID is the primary seed and later IDs are anchors. `mode` defaults to `similar` (co-citation/bibliographic coupling); `citers` returns papers citing a seed and `references` papers cited by a seed. `intent` ranks candidates.\n\nReturns ranked candidates and the evaluated pool size.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "intent": {
+     "minLength": 1,
+     "type": "string"
+    },
+    "k": {
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "mode": {
+     "enum": [
+      "similar",
+      "citers",
+      "references"
+     ],
+     "type": "string"
+    },
+    "rerank": {
+     "description": "Apply an additional rerank over the fused candidates.",
+     "type": "boolean"
+    },
+    "seed_ids": {
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 10,
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "seed_ids",
+    "intent"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_research_related_papers",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Ranked citation-graph candidates and the size of the evaluated pool.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "note": {
+     "description": "Note about how the candidates were produced.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "poolSize": {
+     "description": "Number of candidates evaluated before ranking.",
+     "type": "number"
+    },
+    "results": {
+     "description": "Ranked citation-graph candidates.",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "abstract": {
+        "description": "Paper abstract.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "authors": {
+        "description": "Authors, as a comma-joined string or as `{name, affiliation}` entries."
+       },
+       "categories": {
+        "anyOf": [
+         {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Paper categories, such as `cs.LG`."
+       },
+       "createdDate": {
+        "description": "Date the paper was first indexed or published.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "ids": {
+        "description": "Source identifiers by namespace, such as `arxiv`, `doi`, or `pmid`."
+       },
+       "paperId": {
+        "description": "Canonical paper identifier.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "primaryId": {
+        "description": "Display identifier, ordered for citation and fetch use.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "title": {
+        "description": "Paper title.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "updateDate": {
+        "description": "Date the paper was last updated.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results",
+    "poolSize"
+   ],
+   "type": "object"
+  },
+  "title": "Firecrawl related research papers"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl research paper search"
+  },
+  "description": "\nSearch paper metadata and abstracts with a natural-language query across the indexed corpus, which spans biomedical, life-science, and clinical literature (PubMed, bioRxiv, medRxiv) alongside arXiv and other scientific sources. Optional author, category, and date filters constrain results.\n\nSeveral distinct framings of the same question surface different papers than a single query does.\n\nReturns ranked papers with canonical IDs, titles, authors, and abstracts.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "authors": {
+     "description": "Author substring filter(s); ALL must match (case-insensitive).",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "categories": {
+     "description": "Paper category filter(s) (e.g. `cs.LG`); ALL provided values must match.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "from": {
+     "description": "Inclusive lower bound on created/updated date (`YYYY-MM-DD`).",
+     "type": "string"
+    },
+    "k": {
+     "description": "Number of ranked papers to return (default 40).",
+     "maximum": 500,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Natural-language research topic or question, including methods, systems, conditions, populations, interventions, or outcomes when relevant.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "to": {
+     "description": "Inclusive upper bound on created/updated date (`YYYY-MM-DD`).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_research_search_papers",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Ranked papers with canonical IDs, titles, authors, and abstracts.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "results": {
+     "description": "Ranked papers, in the order the text block lists them.",
+     "items": {
+      "additionalProperties": {},
+      "properties": {
+       "abstract": {
+        "description": "Paper abstract.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "authors": {
+        "description": "Authors, as a comma-joined string or as `{name, affiliation}` entries."
+       },
+       "categories": {
+        "anyOf": [
+         {
+          "items": {
+           "type": "string"
+          },
+          "type": "array"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Paper categories, such as `cs.LG`."
+       },
+       "createdDate": {
+        "description": "Date the paper was first indexed or published.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "ids": {
+        "description": "Source identifiers by namespace, such as `arxiv`, `doi`, or `pmid`."
+       },
+       "paperId": {
+        "description": "Canonical paper identifier.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "primaryId": {
+        "description": "Display identifier, ordered for citation and fetch use.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "title": {
+        "description": "Paper title.",
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "updateDate": {
+        "description": "Date the paper was last updated.",
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      },
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "results"
+   ],
+   "type": "object"
+  },
+  "title": "Firecrawl research paper search"
+ },
+ {
+  "_meta": {
+   "anthropic/alwaysLoad": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Firecrawl scrape"
+  },
+  "description": "\nScrape one URL and return its content: markdown by default, or HTML, links, screenshots, branding data, a targeted answer, or JSON matching a supplied schema. Use it when the request identifies a page and needs its content or defined fields. Use `firecrawl_search` when additional web sources are needed; on an authenticated session, `firecrawl_map` lists a site's URLs and `firecrawl_crawl` collects a set of pages.\n\nFirecrawl may serve recently indexed content; set `maxAge: 0` for a live fetch or a smaller `maxAge` to bound staleness. A successful response does not by itself confirm the page is still current. Browser actions can change the live page when interactive actions are enabled. Authenticated responses can include a `metadata.scrapeId` for optional scrape feedback.\n\nOn an authenticated session with Alexandria access, `firecrawl_search` with `sources` unset and `firecrawl_find_tools` can discover providers for the same fields across several pages; a matching provider returns typed records in one call. Keyless sessions have no provider matches.\n\nAlexandria mode, on an authenticated session with Alexandria access: `alexandria` selects catalogued capability execution and is mutually exclusive with `url`.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "actions": {
+     "items": {
+      "properties": {
+       "direction": {
+        "enum": [
+         "up",
+         "down"
+        ],
+        "type": "string"
+       },
+       "fullPage": {
+        "type": "boolean"
+       },
+       "key": {
+        "type": "string"
+       },
+       "milliseconds": {
+        "type": "number"
+       },
+       "script": {
+        "type": "string"
+       },
+       "selector": {
+        "type": "string"
+       },
+       "text": {
+        "type": "string"
+       },
+       "type": {
+        "enum": [
+         "wait",
+         "screenshot",
+         "scroll",
+         "scrape",
+         "click",
+         "write",
+         "press",
+         "executeJavascript",
+         "generatePDF"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "type"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "alexandria": {
+     "anyOf": [
+      {
+       "properties": {
+        "capability": {
+         "description": "Capability address as returned by search or discover, e.g. \"series/observations\".",
+         "minLength": 1,
+         "type": "string"
+        },
+        "options": {
+         "additionalProperties": {},
+         "description": "Capability options as declared by its contract.",
+         "propertyNames": {
+          "type": "string"
+         },
+         "type": "object"
+        },
+        "provider": {
+         "description": "Provider slug, e.g. \"fred\".",
+         "minLength": 1,
+         "type": "string"
+        },
+        "version": {
+         "description": "Optional published workflow version. Omit to use the latest version.",
+         "maxLength": 128,
+         "minLength": 1,
+         "type": "string"
+        }
+       },
+       "required": [
+        "provider",
+        "capability"
+       ],
+       "type": "object"
+      },
+      {
+       "items": {
+        "properties": {
+         "capability": {
+          "description": "Capability address as returned by search or discover, e.g. \"series/observations\".",
+          "minLength": 1,
+          "type": "string"
+         },
+         "options": {
+          "additionalProperties": {},
+          "description": "Capability options as declared by its contract.",
+          "propertyNames": {
+           "type": "string"
+          },
+          "type": "object"
+         },
+         "provider": {
+          "description": "Provider slug, e.g. \"fred\".",
+          "minLength": 1,
+          "type": "string"
+         },
+         "version": {
+          "description": "Optional published workflow version. Omit to use the latest version.",
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "provider",
+         "capability"
+        ],
+        "type": "object"
+       },
+       "maxItems": 10,
+       "minItems": 1,
+       "type": "array"
+      }
+     ],
+     "description": "Catalogued Alexandria capability invocation, mutually exclusive with url. One {provider, capability, options} object or an array of 1-10, with contracts available through firecrawl_search or firecrawl_find_tools. Each call may include version to pin a published workflow; omitting it uses latest. Only requestId and timeout are supported alongside alexandria. The selected contract marks required inputs and any requiresOneOf groups (at least one member per group); it may include example.request/example.response and response.key (which may differ from records). Where pagination is declared, its fields govern paging with the same filters; catalogue next is separate from provider pagination. Returns per-capability results in data.alexandria with data, records, or an error with a code; individual capabilities can fail even when the outer response succeeds. Requires an API key on a team with Alexandria enabled. Some providers require accepted terms; blocked requests return the applicable requirements."
+    },
+    "domainTools": {
+     "description": "URL mode only: include domain-matched Alexandria tools for the page in tools on the returned document. Ignored with alexandria.",
+     "type": "boolean"
+    },
+    "excludeTags": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "formats": {
+     "items": {
+      "enum": [
+       "markdown",
+       "html",
+       "rawHtml",
+       "screenshot",
+       "links",
+       "summary",
+       "changeTracking",
+       "branding",
+       "json",
+       "query",
+       "audio"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "includeTags": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "jsonOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "prompt": {
+       "type": "string"
+      },
+      "schema": {
+       "additionalProperties": false,
+       "propertyNames": {
+        "type": "string"
+       },
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "location": {
+     "additionalProperties": false,
+     "properties": {
+      "country": {
+       "type": "string"
+      },
+      "languages": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      }
+     },
+     "type": "object"
+    },
+    "lockdown": {
+     "type": "boolean"
+    },
+    "maxAge": {
+     "type": "number"
+    },
+    "mobile": {
+     "type": "boolean"
+    },
+    "onlyMainContent": {
+     "type": "boolean"
+    },
+    "parsers": {
+     "items": {
+      "enum": [
+       "pdf"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "pdfOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "maxPages": {
+       "maximum": 10000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     "type": "object"
+    },
+    "profile": {
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string"
+      },
+      "saveChanges": {
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "name"
+     ],
+     "type": "object"
+    },
+    "proxy": {
+     "enum": [
+      "basic",
+      "stealth",
+      "enhanced",
+      "auto"
+     ],
+     "type": "string"
+    },
+    "queryOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "mode": {
+       "default": "freeform",
+       "enum": [
+        "directQuote",
+        "freeform"
+       ],
+       "type": "string"
+      },
+      "prompt": {
+       "maxLength": 10000,
+       "type": "string"
+      }
+     },
+     "required": [
+      "prompt"
+     ],
+     "type": "object"
+    },
+    "redactPII": {
+     "type": "boolean"
+    },
+    "removeBase64Images": {
+     "type": "boolean"
+    },
+    "requestId": {
+     "description": "Idempotency key bound to one Alexandria execution payload. Generated when omitted and returned with the result.",
+     "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+     "type": "string"
+    },
+    "screenshotOptions": {
+     "additionalProperties": false,
+     "properties": {
+      "fullPage": {
+       "type": "boolean"
+      },
+      "quality": {
+       "type": "number"
+      },
+      "viewport": {
+       "additionalProperties": false,
+       "properties": {
+        "height": {
+         "type": "number"
+        },
+        "width": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "width",
+        "height"
+       ],
+       "type": "object"
+      }
+     },
+     "type": "object"
+    },
+    "skipTlsVerification": {
+     "type": "boolean"
+    },
+    "storeInCache": {
+     "type": "boolean"
+    },
+    "timeout": {
+     "description": "Execution timeout in milliseconds.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "toolDetail": {
+     "description": "URL mode only: domain discovery detail, summary by default; compact returns provider/capability/description, full includes contracts. Ignored with alexandria.",
+     "enum": [
+      "compact",
+      "summary",
+      "full"
+     ],
+     "type": "string"
+    },
+    "url": {
+     "format": "uri",
+     "type": "string"
+    },
+    "waitFor": {
+     "type": "number"
+    },
+    "zeroDataRetention": {
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "firecrawl_scrape",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "A scraped document, or the Alexandria execution envelope when `alexandria` was passed.",
+   "properties": {
+    "actions": {
+     "description": "Results of the browser actions that ran during the scrape."
+    },
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "answer": {
+     "description": "Targeted answer to the question that was asked of the page.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "attributes": {
+     "description": "Values collected by the requested attribute selectors."
+    },
+    "audio": {
+     "description": "Audio extracted from the page."
+    },
+    "blocks": {
+     "description": "Typed PDF layout blocks, when `parsers[].blocks` is set."
+    },
+    "branding": {
+     "description": "Branding data extracted from the page."
+    },
+    "changeTracking": {
+     "description": "Change-tracking comparison against the previous scrape."
+    },
+    "creditsCost": {
+     "description": "Credits this call consumed.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Alexandria mode: per-capability results in `data.alexandria`, each with `data`, `records`, or an `error`."
+    },
+    "delivery": {
+     "description": "`retained` when the full result stayed server-side instead of being inlined.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "estimatedTokens": {
+     "description": "Estimated token cost of the full result.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "feedbackTool": {
+     "description": "Pointer to the feedback tool for reporting how this result served the task."
+    },
+    "highlights": {
+     "description": "Highlighted passages from the page."
+    },
+    "html": {
+     "description": "Processed HTML of the page.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "idleTtlSeconds": {
+     "description": "Seconds a retained workspace stays available while idle.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "images": {
+     "description": "Images found on the page."
+    },
+    "inlineTokenBudget": {
+     "description": "Token budget above which a result is retained rather than inlined.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "json": {
+     "description": "Structured data matching the requested JSON schema or prompt."
+    },
+    "links": {
+     "description": "Links found on the page."
+    },
+    "markdown": {
+     "description": "Page content as markdown.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "menu": {
+     "description": "Menu data extracted from the page."
+    },
+    "message": {
+     "description": "Guidance that accompanies the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "metadata": {
+     "description": "Page metadata; authenticated responses can include `metadata.scrapeId` for scrape feedback."
+    },
+    "nextTool": {
+     "description": "A follow-up tool call (`{name, arguments}`) that continues or inspects this result."
+    },
+    "pages": {
+     "description": "Physical PDF pages, when `parsers[].pages` is set."
+    },
+    "product": {
+     "description": "Product data extracted from the page."
+    },
+    "rawHtml": {
+     "description": "Unprocessed HTML of the page.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "receipt": {
+     "description": "Billing receipt for the execution."
+    },
+    "requestId": {
+     "description": "Identifier of this Alexandria execution.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "responseBytes": {
+     "description": "Size of the full result in bytes.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "scrape_id": {
+     "description": "Identifier of the underlying scrape.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "screenshot": {
+     "description": "Screenshot of the page."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "summary": {
+     "description": "Summary of the page content.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "tokenEstimateMethod": {
+     "description": "How `estimatedTokens` was derived.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "tools": {
+     "description": "Domain-matched Alexandria tools for the page, when `domainTools` is set."
+    },
+    "video": {
+     "description": "Video extracted from the page."
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "workspaceId": {
+     "description": "Workspace holding a retained result, for inspection through virtual Bash.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl scrape"
+ },
+ {
+  "_meta": {
+   "anthropic/alwaysLoad": true
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": true,
+   "title": "Firecrawl web search"
+  },
+  "description": "\nSearch web, news, or image sources and return ranked results with query-relevant highlights. Each web result is a title, URL, and description; use `firecrawl_scrape` on a result URL when the excerpt is not enough.\n\nAuthenticated search also returns matching Alexandria data providers in data.tools (companies, people, jobs, finance and filings, public records and government spending, real estate, places and restaurants, retail and prices, package registries and developer data, news, research, and more). Prefer a provider over scraping pages when the task needs the same fields across several entities, exact figures or timestamps, provenance, or many records; use web results when they already answer the question. A search with sources: [\"web\"] omits semantic provider discovery; domainTools: true can still return website-matched tools. Web-only results use domainTools: false.\n\nOn an authenticated session, tool matches describe available capabilities; `firecrawl_find_tools` returns their contracts and `firecrawl_scrape` with an `alexandria` body executes a selected capability. Keyless sessions get no Alexandria matches in data.tools.\n\nFor a programming question, add `categories: [\"developer\"]`; its hits return in `data.web` with `category: \"developer\"`. For a legal or regulatory question, `categories: [\"gov\"]` returns hits in `data.web` with `category: \"gov\"` and cannot be combined with other categories; authenticated sessions also have `firecrawl_gov_search` as the dedicated tool. `categories: [\"research\"]` restricts web results to research-affiliated websites; the `firecrawl_research_*` tools are a separate surface over paper abstracts and full text (PubMed, bioRxiv, medRxiv, arXiv). Query operators, domain filters, `categories`, `toolDetail` and `scrapeOptions` are described on their parameters. Returns source-type result groups and usage metadata. Authenticated responses can include an `id` for optional search feedback.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "categories": {
+     "description": "Limit results to specific source types. `research` restricts ordinary web results to research-affiliated websites and returns page snippets, which is separate from the `firecrawl_research_*` tools that search paper abstracts and full text across biomedical (PubMed, bioRxiv, medRxiv) and arXiv literature; `pdf` searches PDF results; `developer` searches an index built for coding agents over public repositories, GitHub issues, merged pull requests, repository READMEs, and code documentation; `gov` searches the Government Index of US federal, state, and local legal and regulatory sources, the index behind firecrawl_gov_search, and cannot be combined with other categories. `developer` and `gov` return hits in `data.web` with `category` set to their name; the other categories also filter `data.web`.",
+     "items": {
+      "enum": [
+       "research",
+       "pdf",
+       "developer",
+       "gov"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "clientModel": {
+     "description": "Optional model identifier, if known.",
+     "maxLength": 128,
+     "minLength": 1,
+     "type": "string"
+    },
+    "domainTools": {
+     "description": "Include domain-matched tools for result URLs. Defaults to true when Alexandria is combined with web, news or images; semantic-only search leaves domain matching off.",
+     "type": "boolean"
+    },
+    "enterprise": {
+     "items": {
+      "enum": [
+       "default",
+       "anon",
+       "zdr"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "excludeDomains": {
+     "description": "Hostnames to leave out of results. Mutually exclusive with includeDomains.",
+     "items": {
+      "maxLength": 253,
+      "minLength": 1,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "filter": {
+     "type": "string"
+    },
+    "highlights": {
+     "description": "Return query-relevant page excerpts for web and news results when available (default). Highlights appear in web `description` and news `snippet`; otherwise, original snippets are returned. Set to false to keep the original search snippets.",
+     "type": "boolean"
+    },
+    "includeDomains": {
+     "description": "Hostnames to restrict results to. Mutually exclusive with excludeDomains.",
+     "items": {
+      "maxLength": 253,
+      "minLength": 1,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$",
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "limit": {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "location": {
+     "type": "string"
+    },
+    "objective": {
+     "description": "Optional broader goal for this search, if known. Avoid sensitive information.",
+     "maxLength": 5000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "query": {
+     "description": "Query for web and semantic tool discovery. Operators include quoted phrases, `-term`, `site:host`, `inurl:term`, `intitle:term`, and `related:host`; the set is non-exhaustive. Catalogue browsing is available through firecrawl_find_tools.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "scrapeOptions": {
+     "additionalProperties": false,
+     "description": "Attach page content for web results in the same call. These fetches ignore maxAge, so use firecrawl_scrape when you need a live fetch. scrapeOptions fetches web pages, never Alexandria provider tools.",
+     "properties": {
+      "actions": {
+       "items": {
+        "properties": {
+         "direction": {
+          "enum": [
+           "up",
+           "down"
+          ],
+          "type": "string"
+         },
+         "fullPage": {
+          "type": "boolean"
+         },
+         "key": {
+          "type": "string"
+         },
+         "milliseconds": {
+          "type": "number"
+         },
+         "script": {
+          "type": "string"
+         },
+         "selector": {
+          "type": "string"
+         },
+         "text": {
+          "type": "string"
+         },
+         "type": {
+          "enum": [
+           "wait",
+           "screenshot",
+           "scroll",
+           "scrape",
+           "click",
+           "write",
+           "press",
+           "executeJavascript",
+           "generatePDF"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "type"
+        ],
+        "type": "object"
+       },
+       "type": "array"
+      },
+      "excludeTags": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "formats": {
+       "items": {
+        "enum": [
+         "markdown",
+         "html",
+         "rawHtml",
+         "screenshot",
+         "links",
+         "summary",
+         "changeTracking",
+         "branding",
+         "json",
+         "query",
+         "audio"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "includeTags": {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "jsonOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "prompt": {
+         "type": "string"
+        },
+        "schema": {
+         "additionalProperties": false,
+         "propertyNames": {
+          "type": "string"
+         },
+         "type": "object"
+        }
+       },
+       "type": "object"
+      },
+      "location": {
+       "additionalProperties": false,
+       "properties": {
+        "country": {
+         "type": "string"
+        },
+        "languages": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        }
+       },
+       "type": "object"
+      },
+      "lockdown": {
+       "type": "boolean"
+      },
+      "maxAge": {
+       "type": "number"
+      },
+      "mobile": {
+       "type": "boolean"
+      },
+      "onlyMainContent": {
+       "type": "boolean"
+      },
+      "parsers": {
+       "items": {
+        "enum": [
+         "pdf"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "pdfOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "maxPages": {
+         "maximum": 10000,
+         "minimum": 1,
+         "type": "integer"
+        }
+       },
+       "type": "object"
+      },
+      "profile": {
+       "additionalProperties": false,
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "saveChanges": {
+         "type": "boolean"
+        }
+       },
+       "required": [
+        "name"
+       ],
+       "type": "object"
+      },
+      "proxy": {
+       "enum": [
+        "basic",
+        "stealth",
+        "enhanced",
+        "auto"
+       ],
+       "type": "string"
+      },
+      "queryOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "mode": {
+         "default": "freeform",
+         "enum": [
+          "directQuote",
+          "freeform"
+         ],
+         "type": "string"
+        },
+        "prompt": {
+         "maxLength": 10000,
+         "type": "string"
+        }
+       },
+       "required": [
+        "prompt"
+       ],
+       "type": "object"
+      },
+      "redactPII": {
+       "type": "boolean"
+      },
+      "removeBase64Images": {
+       "type": "boolean"
+      },
+      "screenshotOptions": {
+       "additionalProperties": false,
+       "properties": {
+        "fullPage": {
+         "type": "boolean"
+        },
+        "quality": {
+         "type": "number"
+        },
+        "viewport": {
+         "additionalProperties": false,
+         "properties": {
+          "height": {
+           "type": "number"
+          },
+          "width": {
+           "type": "number"
+          }
+         },
+         "required": [
+          "width",
+          "height"
+         ],
+         "type": "object"
+        }
+       },
+       "type": "object"
+      },
+      "skipTlsVerification": {
+       "type": "boolean"
+      },
+      "storeInCache": {
+       "type": "boolean"
+      },
+      "waitFor": {
+       "type": "number"
+      },
+      "zeroDataRetention": {
+       "type": "boolean"
+      }
+     },
+     "type": "object"
+    },
+    "sources": {
+     "description": "Search sources; authenticated sessions default to web + alexandria, keyless sessions to web only. A search with sources: [\"web\"] omits semantic provider discovery; domainTools: true can still return website-matched tools. Web-only results use domainTools: false. Use [\"alexandria\"] alone for provider discovery without web results.",
+     "items": {
+      "anyOf": [
+       {
+        "enum": [
+         "web",
+         "images",
+         "news",
+         "alexandria",
+         "exchange"
+        ],
+        "type": "string"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "type": {
+          "enum": [
+           "web",
+           "images",
+           "news",
+           "alexandria",
+           "exchange"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "type"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "type": "array"
+    },
+    "tbs": {
+     "type": "string"
+    },
+    "toolDetail": {
+     "description": "Compact by default. Compact returns only provider, capability and description; full includes contracts. Inspect selected compact tools with firecrawl_find_tools providers and capabilities.",
+     "enum": [
+      "compact",
+      "summary",
+      "full"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_search",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Ranked search results grouped by source.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "creditsUsed": {
+     "description": "Credits this search consumed.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Ranked results grouped by source, such as `web`, `news`, `images`, and `alexandria`."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "feedbackTool": {
+     "description": "Pointer to the feedback tool for this search."
+    },
+    "id": {
+     "description": "Search identifier, for optional `firecrawl_search_feedback`.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "nextTool": {
+     "description": "A follow-up tool call that continues this search."
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "tools": {
+     "description": "Domain-matched Alexandria tools for the results."
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl web search"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Firecrawl search feedback"
+  },
+  "description": "\nRecords schema-validated quality feedback for a prior `firecrawl_search` UUID `searchId`. A `good` rating requires a valuable source, `partial` a valuable source or at least one `missingContent` entry, and `bad` at least one `missingContent` entry or a query suggestion; caps are 50 `valuableSources` and 20 `missingContent` entries.\n\nEligibility is limited to successful searches within the feedback age window. The record is idempotent per search ID. Eligible first feedback for a search can refund 1 credit; refunds are subject to the team's daily cap. The response reports whether a refund was applied, along with submission and daily-cap status.\n",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "missingContent": {
+     "description": "Array of specific pieces of content the agent expected to find but did not. One entry per distinct topic. Each entry has a short `topic` and optional longer `description`.",
+     "items": {
+      "properties": {
+       "description": {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       "topic": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+       }
+      },
+      "required": [
+       "topic"
+      ],
+      "type": "object"
+     },
+     "maxItems": 20,
+     "type": "array"
+    },
+    "querySuggestions": {
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "rating": {
+     "enum": [
+      "good",
+      "bad",
+      "partial"
+     ],
+     "type": "string"
+    },
+    "searchId": {
+     "format": "uuid",
+     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+     "type": "string"
+    },
+    "valuableSources": {
+     "items": {
+      "properties": {
+       "reason": {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       "url": {
+        "format": "uri",
+        "type": "string"
+       }
+      },
+      "required": [
+       "url"
+      ],
+      "type": "object"
+     },
+     "maxItems": 50,
+     "type": "array"
+    }
+   },
+   "required": [
+    "searchId",
+    "rating"
+   ],
+   "type": "object"
+  },
+  "name": "firecrawl_search_feedback",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Result of submitting feedback.",
+   "properties": {
+    "agent_hints": {
+     "description": "Optional response guidance from the Firecrawl API.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "alreadySubmitted": {
+     "description": "Whether feedback for this job was already recorded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "creditsRefunded": {
+     "description": "Credits refunded for this submission, when eligible.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "creditsRefundedToday": {
+     "description": "Credits refunded to the team so far this UTC day.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "dailyCapReached": {
+     "description": "Whether the daily refund cap is reached; further feedback today still records but refunds nothing.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "dailyRefundCap": {
+     "description": "The team's daily refund cap in credits.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "data": {
+     "description": "Payload returned with the accepted feedback."
+    },
+    "error": {
+     "description": "Error message or error object when the call did not succeed."
+    },
+    "feedbackErrorCode": {
+     "description": "Machine-readable reason the submission was rejected.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "feedbackId": {
+     "description": "Identifier of the recorded feedback.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "message": {
+     "description": "Human-readable result of the submission.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "raw": {
+     "description": "Response body when it was not JSON.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "retryable": {
+     "description": "Whether retrying the submission can succeed.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "status": {
+     "description": "HTTP status when the submission was rejected.",
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "success": {
+     "description": "Whether the API call succeeded.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    },
+    "warning": {
+     "description": "Non-fatal warning about the result.",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "websiteCapReached": {
+     "description": "Alexandria only: whether this website's daily refund cap is reached; feedback about other websites can still refund.",
+     "type": [
+      "boolean",
+      "null"
+     ]
+    }
+   },
+   "type": "object"
+  },
+  "title": "Firecrawl search feedback"
+ }
+]

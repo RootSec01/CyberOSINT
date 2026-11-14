@@ -1,0 +1,479 @@
+[
+ {
+  "description": "A powerful web crawler that initiates a structured web crawl starting from a specified base URL. The crawler expands from that point like a graph, following internal links across pages. You can control how deep and wide it goes, and guide it to focus on specific sections of the site.",
+  "input_schema": {
+   "properties": {
+    "allow_external": {
+     "default": true,
+     "description": "Whether to return external links in the final response",
+     "type": "boolean"
+    },
+    "extract_depth": {
+     "default": "basic",
+     "description": "Advanced extraction retrieves more data, including tables and embedded content, with higher success but may increase latency",
+     "enum": [
+      "basic",
+      "advanced"
+     ],
+     "type": "string"
+    },
+    "format": {
+     "default": "markdown",
+     "description": "The format of the extracted web page content. markdown returns content in markdown format. text returns plain text and may increase latency.",
+     "enum": [
+      "markdown",
+      "text"
+     ],
+     "type": "string"
+    },
+    "include_favicon": {
+     "default": false,
+     "description": "Whether to include the favicon URL for each result",
+     "type": "boolean"
+    },
+    "instructions": {
+     "description": "Natural language instructions for the crawler. Instructions specify which types of pages the crawler should return.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 50,
+     "description": "Total number of links the crawler will process before stopping",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_breadth": {
+     "default": 20,
+     "description": "Max number of links to follow per level of the tree (i.e., per page)",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_depth": {
+     "default": 1,
+     "description": "Max depth of the crawl. Defines how far from the base URL the crawler can explore.",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "select_domains": {
+     "default": [],
+     "description": "Regex patterns to restrict crawling to specific domains or subdomains (e.g., ^docs\\.example\\.com$)",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "select_paths": {
+     "default": [],
+     "description": "Regex patterns to select only URLs with specific path patterns (e.g., /docs/.*, /api/v1.*)",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "url": {
+     "description": "The root URL to begin the crawl",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "tavily_crawl",
+  "output_schema": {}
+ },
+ {
+  "description": "A powerful web content extraction tool that retrieves and processes raw content from specified URLs, ideal for data collection, content analysis, and research tasks.",
+  "input_schema": {
+   "properties": {
+    "extract_depth": {
+     "default": "basic",
+     "description": "Depth of extraction - 'basic' or 'advanced', if usrls are linkedin use 'advanced' or if explicitly told to use advanced",
+     "enum": [
+      "basic",
+      "advanced"
+     ],
+     "type": "string"
+    },
+    "format": {
+     "default": "markdown",
+     "description": "The format of the extracted web page content. markdown returns content in markdown format. text returns plain text and may increase latency.",
+     "enum": [
+      "markdown",
+      "text"
+     ],
+     "type": "string"
+    },
+    "include_favicon": {
+     "default": false,
+     "description": "Whether to include the favicon URL for each result",
+     "type": "boolean"
+    },
+    "include_images": {
+     "default": false,
+     "description": "Include a list of images extracted from the urls in the response",
+     "type": "boolean"
+    },
+    "query": {
+     "description": "User intent query for reranking extracted chunks based on relevance",
+     "type": "string"
+    },
+    "urls": {
+     "description": "List of URLs to extract content from",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "urls"
+   ],
+   "type": "object"
+  },
+  "name": "tavily_extract",
+  "output_schema": {}
+ },
+ {
+  "description": "A powerful web mapping tool that creates a structured map of website URLs, allowing you to discover and analyze site structure, content organization, and navigation paths. Perfect for site audits, content discovery, and understanding website architecture.",
+  "input_schema": {
+   "properties": {
+    "allow_external": {
+     "default": true,
+     "description": "Whether to return external links in the final response",
+     "type": "boolean"
+    },
+    "instructions": {
+     "description": "Natural language instructions for the crawler",
+     "type": "string"
+    },
+    "limit": {
+     "default": 50,
+     "description": "Total number of links the crawler will process before stopping",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_breadth": {
+     "default": 20,
+     "description": "Max number of links to follow per level of the tree (i.e., per page)",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_depth": {
+     "default": 1,
+     "description": "Max depth of the mapping. Defines how far from the base URL the crawler can explore",
+     "minimum": 1,
+     "type": "integer"
+    },
+    "select_domains": {
+     "default": [],
+     "description": "Regex patterns to restrict crawling to specific domains or subdomains (e.g., ^docs\\.example\\.com$)",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "select_paths": {
+     "default": [],
+     "description": "Regex patterns to select only URLs with specific path patterns (e.g., /docs/.*, /api/v1.*)",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "url": {
+     "description": "The root URL to begin the mapping",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "tavily_map",
+  "output_schema": {}
+ },
+ {
+  "description": "A powerful web search tool that provides comprehensive, real-time results using Tavily's AI search engine. Returns relevant web content with customizable parameters for result count, content type, and domain filtering. Ideal for gathering current information, news, and detailed web content analysis.",
+  "input_schema": {
+   "properties": {
+    "country": {
+     "default": "",
+     "description": "Boost search results from a specific country. This will prioritize content from the selected country in the search results. Available only if topic is general. Country names MUST be written in lowercase, plain English, with spaces and no underscores.",
+     "enum": [
+      "afghanistan",
+      "albania",
+      "algeria",
+      "andorra",
+      "angola",
+      "argentina",
+      "armenia",
+      "australia",
+      "austria",
+      "azerbaijan",
+      "bahamas",
+      "bahrain",
+      "bangladesh",
+      "barbados",
+      "belarus",
+      "belgium",
+      "belize",
+      "benin",
+      "bhutan",
+      "bolivia",
+      "bosnia and herzegovina",
+      "botswana",
+      "brazil",
+      "brunei",
+      "bulgaria",
+      "burkina faso",
+      "burundi",
+      "cambodia",
+      "cameroon",
+      "canada",
+      "cape verde",
+      "central african republic",
+      "chad",
+      "chile",
+      "china",
+      "colombia",
+      "comoros",
+      "congo",
+      "costa rica",
+      "croatia",
+      "cuba",
+      "cyprus",
+      "czech republic",
+      "denmark",
+      "djibouti",
+      "dominican republic",
+      "ecuador",
+      "egypt",
+      "el salvador",
+      "equatorial guinea",
+      "eritrea",
+      "estonia",
+      "ethiopia",
+      "fiji",
+      "finland",
+      "france",
+      "gabon",
+      "gambia",
+      "georgia",
+      "germany",
+      "ghana",
+      "greece",
+      "guatemala",
+      "guinea",
+      "haiti",
+      "honduras",
+      "hungary",
+      "iceland",
+      "india",
+      "indonesia",
+      "iran",
+      "iraq",
+      "ireland",
+      "israel",
+      "italy",
+      "jamaica",
+      "japan",
+      "jordan",
+      "kazakhstan",
+      "kenya",
+      "kuwait",
+      "kyrgyzstan",
+      "latvia",
+      "lebanon",
+      "lesotho",
+      "liberia",
+      "libya",
+      "liechtenstein",
+      "lithuania",
+      "luxembourg",
+      "madagascar",
+      "malawi",
+      "malaysia",
+      "maldives",
+      "mali",
+      "malta",
+      "mauritania",
+      "mauritius",
+      "mexico",
+      "moldova",
+      "monaco",
+      "mongolia",
+      "montenegro",
+      "morocco",
+      "mozambique",
+      "myanmar",
+      "namibia",
+      "nepal",
+      "netherlands",
+      "new zealand",
+      "nicaragua",
+      "niger",
+      "nigeria",
+      "north korea",
+      "north macedonia",
+      "norway",
+      "oman",
+      "pakistan",
+      "panama",
+      "papua new guinea",
+      "paraguay",
+      "peru",
+      "philippines",
+      "poland",
+      "portugal",
+      "qatar",
+      "romania",
+      "russia",
+      "rwanda",
+      "saudi arabia",
+      "senegal",
+      "serbia",
+      "singapore",
+      "slovakia",
+      "slovenia",
+      "somalia",
+      "south africa",
+      "south korea",
+      "south sudan",
+      "spain",
+      "sri lanka",
+      "sudan",
+      "sweden",
+      "switzerland",
+      "syria",
+      "taiwan",
+      "tajikistan",
+      "tanzania",
+      "thailand",
+      "togo",
+      "trinidad and tobago",
+      "tunisia",
+      "turkey",
+      "turkmenistan",
+      "uganda",
+      "ukraine",
+      "united arab emirates",
+      "united kingdom",
+      "united states",
+      "uruguay",
+      "uzbekistan",
+      "venezuela",
+      "vietnam",
+      "yemen",
+      "zambia",
+      "zimbabwe"
+     ],
+     "type": "string"
+    },
+    "days": {
+     "default": 3,
+     "description": "The number of days back from the current date to include in the search results. This specifies the time frame of data to be retrieved. Please note that this feature is only available when using the 'news' search topic",
+     "type": "number"
+    },
+    "end_date": {
+     "default": "",
+     "description": "Will return all results before the specified end date. Required to be written in the format YYYY-MM-DD",
+     "type": "string"
+    },
+    "exclude_domains": {
+     "default": [],
+     "description": "List of domains to specifically exclude, if the user asks to exclude a domain set this to the domain of the site",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "include_domains": {
+     "default": [],
+     "description": "A list of domains to specifically include in the search results, if the user asks to search on specific sites set this to the domain of the site",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "include_favicon": {
+     "default": false,
+     "description": "Whether to include the favicon URL for each result",
+     "type": "boolean"
+    },
+    "include_image_descriptions": {
+     "default": false,
+     "description": "Include a list of query-related images and their descriptions in the response",
+     "type": "boolean"
+    },
+    "include_images": {
+     "default": false,
+     "description": "Include a list of query-related images in the response",
+     "type": "boolean"
+    },
+    "include_raw_content": {
+     "default": false,
+     "description": "Include the cleaned and parsed HTML content of each search result",
+     "type": "boolean"
+    },
+    "max_results": {
+     "default": 10,
+     "description": "The maximum number of search results to return",
+     "maximum": 20,
+     "minimum": 5,
+     "type": "number"
+    },
+    "query": {
+     "description": "Search query",
+     "type": "string"
+    },
+    "search_depth": {
+     "default": "basic",
+     "description": "The depth of the search. 'basic' for generic results, 'advanced' for more thorough search, 'fast' for optimized low latency with high relevance, 'ultra-fast' for prioritizing latency above all else",
+     "enum": [
+      "basic",
+      "advanced",
+      "fast",
+      "ultra-fast"
+     ],
+     "type": "string"
+    },
+    "start_date": {
+     "default": "",
+     "description": "Will return all results after the specified start date. Required to be written in the format YYYY-MM-DD.",
+     "type": "string"
+    },
+    "time_range": {
+     "description": "The time range back from the current date to include in the search results. This feature is available for both 'general' and 'news' search topics",
+     "enum": [
+      "day",
+      "week",
+      "month",
+      "year",
+      "d",
+      "w",
+      "m",
+      "y"
+     ],
+     "type": "string"
+    },
+    "topic": {
+     "default": "general",
+     "description": "The category of the search. This will determine which of our agents will be used for the search",
+     "enum": [
+      "general",
+      "news"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "tavily_search",
+  "output_schema": {}
+ }
+]

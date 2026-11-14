@@ -1,0 +1,193 @@
+[
+ {
+  "description": "Get directions between two points",
+  "input_schema": {
+   "properties": {
+    "destination": {
+     "description": "Ending point address or coordinates",
+     "type": "string"
+    },
+    "mode": {
+     "description": "Travel mode (driving, walking, bicycling, transit)",
+     "enum": [
+      "driving",
+      "walking",
+      "bicycling",
+      "transit"
+     ],
+     "type": "string"
+    },
+    "origin": {
+     "description": "Starting point address or coordinates",
+     "type": "string"
+    }
+   },
+   "required": [
+    "origin",
+    "destination"
+   ],
+   "type": "object"
+  },
+  "name": "maps_directions",
+  "output_schema": {}
+ },
+ {
+  "description": "Calculate travel distance and time for multiple origins and destinations",
+  "input_schema": {
+   "properties": {
+    "destinations": {
+     "description": "Array of destination addresses or coordinates",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "mode": {
+     "description": "Travel mode (driving, walking, bicycling, transit)",
+     "enum": [
+      "driving",
+      "walking",
+      "bicycling",
+      "transit"
+     ],
+     "type": "string"
+    },
+    "origins": {
+     "description": "Array of origin addresses or coordinates",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "origins",
+    "destinations"
+   ],
+   "type": "object"
+  },
+  "name": "maps_distance_matrix",
+  "output_schema": {}
+ },
+ {
+  "description": "Get elevation data for locations on the earth",
+  "input_schema": {
+   "properties": {
+    "locations": {
+     "description": "Array of locations to get elevation for",
+     "items": {
+      "properties": {
+       "latitude": {
+        "type": "number"
+       },
+       "longitude": {
+        "type": "number"
+       }
+      },
+      "required": [
+       "latitude",
+       "longitude"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "locations"
+   ],
+   "type": "object"
+  },
+  "name": "maps_elevation",
+  "output_schema": {}
+ },
+ {
+  "description": "Convert an address into geographic coordinates",
+  "input_schema": {
+   "properties": {
+    "address": {
+     "description": "The address to geocode",
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "maps_geocode",
+  "output_schema": {}
+ },
+ {
+  "description": "Get detailed information about a specific place",
+  "input_schema": {
+   "properties": {
+    "place_id": {
+     "description": "The place ID to get details for",
+     "type": "string"
+    }
+   },
+   "required": [
+    "place_id"
+   ],
+   "type": "object"
+  },
+  "name": "maps_place_details",
+  "output_schema": {}
+ },
+ {
+  "description": "Convert coordinates into an address",
+  "input_schema": {
+   "properties": {
+    "latitude": {
+     "description": "Latitude coordinate",
+     "type": "number"
+    },
+    "longitude": {
+     "description": "Longitude coordinate",
+     "type": "number"
+    }
+   },
+   "required": [
+    "latitude",
+    "longitude"
+   ],
+   "type": "object"
+  },
+  "name": "maps_reverse_geocode",
+  "output_schema": {}
+ },
+ {
+  "description": "Search for places using Google Places API",
+  "input_schema": {
+   "properties": {
+    "location": {
+     "description": "Optional center point for the search",
+     "properties": {
+      "latitude": {
+       "type": "number"
+      },
+      "longitude": {
+       "type": "number"
+      }
+     },
+     "type": "object"
+    },
+    "query": {
+     "description": "Search query",
+     "type": "string"
+    },
+    "radius": {
+     "description": "Search radius in meters (max 50000)",
+     "type": "number"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "maps_search_places",
+  "output_schema": {}
+ }
+]

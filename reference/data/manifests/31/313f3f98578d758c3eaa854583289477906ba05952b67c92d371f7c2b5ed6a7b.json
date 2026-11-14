@@ -1,0 +1,94 @@
+[
+ {
+  "description": "Get field mappings for a specific Elasticsearch index",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "index": {
+     "description": "Name of the Elasticsearch index to get mappings for",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "index"
+   ],
+   "type": "object"
+  },
+  "name": "get_mappings",
+  "output_schema": {}
+ },
+ {
+  "description": "Get shard information for all or specific indices",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "index": {
+     "description": "Optional index name to get shard information for",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_shards",
+  "output_schema": {}
+ },
+ {
+  "description": "List all available Elasticsearch indices",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "indexPattern": {
+     "description": "Index pattern of Elasticsearch indices to list",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "indexPattern"
+   ],
+   "type": "object"
+  },
+  "name": "list_indices",
+  "output_schema": {}
+ },
+ {
+  "description": "Perform an Elasticsearch search with the provided query DSL. Highlights are always enabled.",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "explain": {
+     "default": false,
+     "description": "Whether to include explanation of how the query was executed",
+     "type": "boolean"
+    },
+    "index": {
+     "description": "Name of the Elasticsearch index to search",
+     "minLength": 1,
+     "type": "string"
+    },
+    "profile": {
+     "default": false,
+     "description": "Whether to include query profiling information",
+     "type": "boolean"
+    },
+    "queryBody": {
+     "additionalProperties": {},
+     "description": "Complete Elasticsearch query DSL object that can include query, size, from, sort, etc.",
+     "type": "object"
+    }
+   },
+   "required": [
+    "index",
+    "queryBody"
+   ],
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {}
+ }
+]

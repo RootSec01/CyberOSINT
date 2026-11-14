@@ -1,0 +1,74 @@
+[
+ {
+  "description": "Create a new branch in a GitHub repository",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "create_branch",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new issue in a GitHub repository",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "create_issue",
+  "output_schema": {}
+ },
+ {
+  "description": "Create or update a single file in a GitHub repository",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "create_or_update_file",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new pull request in a GitHub repository",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "create_pull_request",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new GitHub repository in your account",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "create_repository",
+  "output_schema": {}
+ },
+ {
+  "description": "Fork a GitHub repository to your account or specified organization",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "fork_repository",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the contents of a file or directory from a GitHub repository",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "get_file_contents",
+  "output_schema": {}
+ },
+ {
+  "description": "Push multiple files to a GitHub repository in a single commit",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "push_files",
+  "output_schema": {}
+ },
+ {
+  "description": "Search for GitHub repositories",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#"
+  },
+  "name": "search_repositories",
+  "output_schema": {}
+ }
+]

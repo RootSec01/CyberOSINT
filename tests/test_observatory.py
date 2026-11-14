@@ -11,7 +11,8 @@ from observatory.__main__ import main, take_snapshot
 from observatory.probe import probe
 from observatory.registry import (OFFICIAL, Endpoint, build_sample, draw_sample,
                                   endpoint_id, open_endpoints)
-from observatory.store import Archive, manifest_digest
+from observatory.store import Archive
+from raqeeb.declarations import tools_digest
 
 
 def entry(name, url, *, latest=True, status="active", kind="streamable-http", **remote):
@@ -192,9 +193,9 @@ def test_manifest_digest_ignores_tool_and_key_order():
            {"name": "b", "description": "y"}]
     two = [{"description": "y", "name": "b"},
            {"inputSchema": {"properties": {}, "type": "object"}, "description": "x", "name": "a"}]
-    assert manifest_digest(one) == manifest_digest(two)
+    assert tools_digest(one) == tools_digest(two)
     two[0]["description"] = "y​"
-    assert manifest_digest(one) != manifest_digest(two)
+    assert tools_digest(one) != tools_digest(two)
 
 
 def test_snapshots_share_unchanged_manifests_and_surface_redeployments(lab, tmp_path, capsys):

@@ -1,0 +1,140 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Read a webpage's full content as clean markdown. Use after web_search_exa when highlights are insufficient or to read any URL.\n\nBest for: Extracting full content from known URLs. Batch multiple URLs in one call.\nReturns: Clean text content and metadata from the page(s).",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "maxAgeHours": {
+     "description": "Maximum age of cached content in hours. 0 = always fetch fresh content, omit = use cached content with fresh fetch fallback.",
+     "type": "number"
+    },
+    "maxCharacters": {
+     "description": "Maximum characters to extract per page (must be a number, default: 3000)",
+     "type": "number"
+    },
+    "subpageTarget": {
+     "description": "Keywords to prioritize when selecting subpages",
+     "type": "string"
+    },
+    "subpages": {
+     "description": "Number of subpages to also crawl from each URL.",
+     "type": "number"
+    },
+    "urls": {
+     "description": "URLs to read. Batch multiple URLs in one call.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "urls"
+   ],
+   "type": "object"
+  },
+  "name": "crawling_exa",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find code examples, documentation, and programming solutions. \n\nBest for: Any programming question - API usage, library examples, code snippets, debugging help.\nReturns: Relevant code and documentation.\n\nQuery tips: describe what you're looking for specifically. \"Python requests library POST with JSON body\" not \"python http\".\nIf highlights are insufficient, follow up with crawling_exa on the best URLs.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "numResults": {
+     "description": "Number of search results to return (must be a number, default: 8)",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "number"
+    },
+    "query": {
+     "description": "Search query to find relevant context for APIs, Libraries, and SDKs. For example, 'React useState hook examples', 'Python pandas dataframe filtering', 'Express.js middleware', 'Next js partial prerendering configuration'",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "get_code_context_exa",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search the web for any topic and get clean, ready-to-use content.\n\nBest for: Finding current information, news, facts, or answering questions about any topic.\nReturns: Clean text content from top search results, ready for LLM use.\n\nQuery tips: describe the ideal page, not keywords. \"blog post comparing React and Vue performance\" not \"React vs Vue\".\nIf highlights are insufficient, follow up with crawling_exa on the best URLs.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "freshness": {
+     "description": "How recent results should be. Only set when recency matters.",
+     "enum": [
+      "24h",
+      "week",
+      "month",
+      "year",
+      "any"
+     ],
+     "type": "string"
+    },
+    "includeDomains": {
+     "description": "List of domains to include in the search. If specified, results will only come from these domains.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "numResults": {
+     "description": "Number of search results to return (must be a number, default: 8)",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "number"
+    },
+    "query": {
+     "description": "Natural language search query. Should be a semantically rich description of the ideal page, not just keywords.",
+     "type": "string"
+    },
+    "type": {
+     "description": "Search type - 'auto': balanced search (default), 'fast': quick results",
+     "enum": [
+      "auto",
+      "fast"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "web_search_exa",
+  "output_schema": {}
+ }
+]

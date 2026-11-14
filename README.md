@@ -53,6 +53,31 @@ A second run from a different network 73 minutes later reached 303 servers, and 
 both places returned identical tool declarations. Method, data layout and opt-out are described in
 [observatory/README.md](observatory/README.md). Every run is a commit in this repository.
 
+## Reference library
+
+Drift detection compares a server with its own earlier state, so a server that was altered before
+the first scan becomes its own baseline. `reference/` adds a second point of comparison: what the
+package's publisher actually shipped. Each stable npm release of 30 widely used MCP server packages
+was installed in a throwaway directory, started over stdio and asked for `tools/list`.
+
+| | |
+|---|---:|
+| Releases installed | 706 |
+| Releases that listed their tools | 673 |
+| Distinct tool manifests | 336 |
+| Release-to-release steps | 643 |
+| Steps where the declarations changed | 310 |
+| Steps that added at least one tool | 96 |
+| Steps that only redefined existing tools | 201 |
+
+`python3 -m reference summary` reproduces the table. Given a server's `tools/list`, `identify`
+answers `match`, `subset`, `deviation` or `unknown` and names the release and the tools that differ
+([reference/README.md](reference/README.md)).
+
+None of the 287 hosted servers in the field study is a deployment of these 30 packages; all are
+`unknown`. The library applies to self-hosted deployments of published packages, not to bespoke
+hosted services.
+
 ## Evidence levels
 
 | Level | Meaning |
@@ -127,6 +152,7 @@ With `APP_ENV=production` the application refuses unsafe settings at startup
 ```
 raqeeb/        platform: API, protocol negotiation, detectors, drift, storage
 observatory/   daily field study of public MCP servers, with its data
+reference/     what published MCP server packages declare, release by release
 lab/           loopback MCP server and the lifecycle demo
 benchmark/     labelled declarations and the offline scorer
 dashboard/     React interface

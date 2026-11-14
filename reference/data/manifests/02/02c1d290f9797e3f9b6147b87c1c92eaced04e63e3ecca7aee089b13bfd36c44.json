@@ -1,0 +1,1021 @@
+[
+ {
+  "annotations": {
+   "description": "Run an aggregation against a MongoDB collection",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "aggregate"
+  },
+  "description": "Run an aggregation against a MongoDB collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "pipeline": {
+     "description": "An array of aggregation stages to execute",
+     "items": {
+      "additionalProperties": true,
+      "properties": {},
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "responseBytesLimit": {
+     "default": 1048576,
+     "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded. Note to LLM: If the entire aggregation result is required, use the \"export\" tool instead of increasing this limit.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "pipeline"
+   ],
+   "type": "object"
+  },
+  "name": "aggregate",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Describe the indexes for a collection",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "collection-indexes"
+  },
+  "description": "Describe the indexes for a collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "collection-indexes",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Describe the schema for a collection",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "collection-schema"
+  },
+  "description": "Describe the schema for a collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "responseBytesLimit": {
+     "default": 1048576,
+     "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded.",
+     "type": "number"
+    },
+    "sampleSize": {
+     "default": 50,
+     "description": "Number of documents to sample for schema inference",
+     "type": "number"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "collection-schema",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Gets the size of the collection",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "collection-storage-size"
+  },
+  "description": "Gets the size of the collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "collection-storage-size",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Connect to a MongoDB instance. The config resource captures if the server is already connected to a MongoDB cluster. If the user has configured a connection string or has previously called the connect tool, a connection is already established and there's no need to call this tool unless the user has explicitly requested to switch to a new MongoDB cluster.",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "connect"
+  },
+  "description": "Connect to a MongoDB instance. The config resource captures if the server is already connected to a MongoDB cluster. If the user has configured a connection string or has previously called the connect tool, a connection is already established and there's no need to call this tool unless the user has explicitly requested to switch to a new MongoDB cluster.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "description": "Options for connecting to MongoDB.",
+   "properties": {
+    "connectionString": {
+     "description": "MongoDB connection string (in the mongodb:// or mongodb+srv:// format)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "connectionString"
+   ],
+   "type": "object"
+  },
+  "name": "connect",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Gets the number of documents in a MongoDB collection using db.collection.count() and query as an optional filter parameter",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "count"
+  },
+  "description": "Gets the number of documents in a MongoDB collection using db.collection.count() and query as an optional filter parameter",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "query": {
+     "additionalProperties": true,
+     "description": "A filter/query parameter. Allows users to filter the documents to count. Matches the syntax of the filter argument of db.collection.count().",
+     "properties": {},
+     "type": "object"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "count",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
+   "destructiveHint": false,
+   "readOnlyHint": false,
+   "title": "create-collection"
+  },
+  "description": "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "create-collection",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Create an index for a collection",
+   "destructiveHint": false,
+   "readOnlyHint": false,
+   "title": "create-index"
+  },
+  "description": "Create an index for a collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "keys": {
+     "additionalProperties": {},
+     "description": "The index definition",
+     "properties": {},
+     "type": "object"
+    },
+    "name": {
+     "description": "The name of the index",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "keys"
+   ],
+   "type": "object"
+  },
+  "name": "create-index",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Returns statistics that reflect the use state of a single database",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "db-stats"
+  },
+  "description": "Returns statistics that reflect the use state of a single database",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database"
+   ],
+   "type": "object"
+  },
+  "name": "db-stats",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Removes all documents that match the filter from a MongoDB collection",
+   "destructiveHint": true,
+   "readOnlyHint": false,
+   "title": "delete-many"
+  },
+  "description": "Removes all documents that match the filter from a MongoDB collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "filter": {
+     "additionalProperties": true,
+     "description": "The query filter, specifying the deletion criteria. Matches the syntax of the filter argument of db.collection.deleteMany()",
+     "properties": {},
+     "type": "object"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "delete-many",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Removes a collection or view from the database. The method also removes any indexes associated with the dropped collection.",
+   "destructiveHint": true,
+   "readOnlyHint": false,
+   "title": "drop-collection"
+  },
+  "description": "Removes a collection or view from the database. The method also removes any indexes associated with the dropped collection.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "drop-collection",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Removes the specified database, deleting the associated data files",
+   "destructiveHint": true,
+   "readOnlyHint": false,
+   "title": "drop-database"
+  },
+  "description": "Removes the specified database, deleting the associated data files",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database"
+   ],
+   "type": "object"
+  },
+  "name": "drop-database",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Returns statistics describing the execution of the winning plan chosen by the query optimizer for the evaluated method",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "explain"
+  },
+  "description": "Returns statistics describing the execution of the winning plan chosen by the query optimizer for the evaluated method",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "method": {
+     "description": "The method and its arguments to run",
+     "items": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "arguments": {
+          "additionalProperties": false,
+          "properties": {
+           "pipeline": {
+            "description": "An array of aggregation stages to execute",
+            "items": {
+             "additionalProperties": true,
+             "properties": {},
+             "type": "object"
+            },
+            "type": "array"
+           },
+           "responseBytesLimit": {
+            "default": 1048576,
+            "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded. Note to LLM: If the entire aggregation result is required, use the \"export\" tool instead of increasing this limit.",
+            "type": "number"
+           }
+          },
+          "required": [
+           "pipeline"
+          ],
+          "type": "object"
+         },
+         "name": {
+          "const": "aggregate",
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "arguments"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "arguments": {
+          "additionalProperties": false,
+          "properties": {
+           "filter": {
+            "additionalProperties": true,
+            "description": "The query filter, matching the syntax of the query argument of db.collection.find()",
+            "properties": {},
+            "type": "object"
+           },
+           "limit": {
+            "default": 10,
+            "description": "The maximum number of documents to return",
+            "type": "number"
+           },
+           "projection": {
+            "additionalProperties": true,
+            "description": "The projection, matching the syntax of the projection argument of db.collection.find()",
+            "properties": {},
+            "type": "object"
+           },
+           "responseBytesLimit": {
+            "default": 1048576,
+            "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded. Note to LLM: If the entire query result is required, use the \"export\" tool instead of increasing this limit.",
+            "type": "number"
+           },
+           "sort": {
+            "additionalProperties": {},
+            "description": "A document, describing the sort order, matching the syntax of the sort argument of cursor.sort(). The keys of the object are the fields to sort on, while the values are the sort directions (1 for ascending, -1 for descending).",
+            "properties": {},
+            "type": "object"
+           }
+          },
+          "type": "object"
+         },
+         "name": {
+          "const": "find",
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "arguments"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "arguments": {
+          "additionalProperties": false,
+          "properties": {
+           "query": {
+            "additionalProperties": true,
+            "description": "A filter/query parameter. Allows users to filter the documents to count. Matches the syntax of the filter argument of db.collection.count().",
+            "properties": {},
+            "type": "object"
+           }
+          },
+          "type": "object"
+         },
+         "name": {
+          "const": "count",
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "arguments"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "type": "array"
+    },
+    "verbosity": {
+     "default": "queryPlanner",
+     "description": "The verbosity of the explain plan, defaults to queryPlanner. If the user wants to know how fast is a query in execution time, use executionStats. It supports all verbosities as defined in the MongoDB Driver.",
+     "enum": [
+      "queryPlanner",
+      "queryPlannerExtended",
+      "executionStats",
+      "allPlansExecution"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "method"
+   ],
+   "type": "object"
+  },
+  "name": "explain",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Export a query or aggregation results in the specified EJSON format.",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "export"
+  },
+  "description": "Export a query or aggregation results in the specified EJSON format.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "exportTarget": {
+     "description": "The export target along with its arguments.",
+     "items": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "arguments": {
+          "additionalProperties": false,
+          "description": "The arguments for 'find' operation.",
+          "properties": {
+           "filter": {
+            "additionalProperties": true,
+            "description": "The query filter, matching the syntax of the query argument of db.collection.find()",
+            "properties": {},
+            "type": "object"
+           },
+           "limit": {
+            "type": "number"
+           },
+           "projection": {
+            "additionalProperties": true,
+            "description": "The projection, matching the syntax of the projection argument of db.collection.find()",
+            "properties": {},
+            "type": "object"
+           },
+           "responseBytesLimit": {
+            "default": 1048576,
+            "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded. Note to LLM: If the entire query result is required, use the \"export\" tool instead of increasing this limit.",
+            "type": "number"
+           },
+           "sort": {
+            "additionalProperties": {},
+            "description": "A document, describing the sort order, matching the syntax of the sort argument of cursor.sort(). The keys of the object are the fields to sort on, while the values are the sort directions (1 for ascending, -1 for descending).",
+            "properties": {},
+            "type": "object"
+           }
+          },
+          "type": "object"
+         },
+         "name": {
+          "const": "find",
+          "description": "The literal name 'find' to represent a find cursor as target.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "arguments"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "arguments": {
+          "additionalProperties": false,
+          "description": "The arguments for 'aggregate' operation.",
+          "properties": {
+           "pipeline": {
+            "description": "An array of aggregation stages to execute",
+            "items": {
+             "additionalProperties": true,
+             "properties": {},
+             "type": "object"
+            },
+            "type": "array"
+           },
+           "responseBytesLimit": {
+            "default": 1048576,
+            "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded. Note to LLM: If the entire aggregation result is required, use the \"export\" tool instead of increasing this limit.",
+            "type": "number"
+           }
+          },
+          "required": [
+           "pipeline"
+          ],
+          "type": "object"
+         },
+         "name": {
+          "const": "aggregate",
+          "description": "The literal name 'aggregate' to represent an aggregation cursor as target.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "name",
+         "arguments"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "type": "array"
+    },
+    "exportTitle": {
+     "description": "A short description to uniquely identify the export.",
+     "type": "string"
+    },
+    "jsonExportFormat": {
+     "default": "relaxed",
+     "description": "The format to be used when exporting collection data as EJSON with default being relaxed.\nrelaxed: A string format that emphasizes readability and interoperability at the expense of type preservation. That is, conversion from relaxed format to BSON can lose type information.\ncanonical: A string format that emphasizes type preservation at the expense of readability and interoperability. That is, conversion from canonical to BSON will generally preserve type information except in certain specific cases.",
+     "enum": [
+      "relaxed",
+      "canonical"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "exportTitle",
+    "exportTarget"
+   ],
+   "type": "object"
+  },
+  "name": "export",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Run a find query against a MongoDB collection",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "find"
+  },
+  "description": "Run a find query against a MongoDB collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "filter": {
+     "additionalProperties": true,
+     "description": "The query filter, matching the syntax of the query argument of db.collection.find()",
+     "properties": {},
+     "type": "object"
+    },
+    "limit": {
+     "default": 10,
+     "description": "The maximum number of documents to return",
+     "type": "number"
+    },
+    "projection": {
+     "additionalProperties": true,
+     "description": "The projection, matching the syntax of the projection argument of db.collection.find()",
+     "properties": {},
+     "type": "object"
+    },
+    "responseBytesLimit": {
+     "default": 1048576,
+     "description": "The maximum number of bytes to return in the response. This value is capped by the server’s configured maxBytesPerQuery and cannot be exceeded. Note to LLM: If the entire query result is required, use the \"export\" tool instead of increasing this limit.",
+     "type": "number"
+    },
+    "sort": {
+     "additionalProperties": {},
+     "description": "A document, describing the sort order, matching the syntax of the sort argument of cursor.sort(). The keys of the object are the fields to sort on, while the values are the sort directions (1 for ascending, -1 for descending).",
+     "properties": {},
+     "type": "object"
+    }
+   },
+   "required": [
+    "database",
+    "collection"
+   ],
+   "type": "object"
+  },
+  "name": "find",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Insert an array of documents into a MongoDB collection",
+   "destructiveHint": false,
+   "readOnlyHint": false,
+   "title": "insert-many"
+  },
+  "description": "Insert an array of documents into a MongoDB collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "documents": {
+     "description": "The array of documents to insert, matching the syntax of the document argument of db.collection.insertMany()",
+     "items": {
+      "additionalProperties": true,
+      "description": "An individual MongoDB document",
+      "properties": {},
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "documents"
+   ],
+   "type": "object"
+  },
+  "name": "insert-many",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "List all collections for a given database",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "list-collections"
+  },
+  "description": "List all collections for a given database",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database"
+   ],
+   "type": "object"
+  },
+  "name": "list-collections",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "List all databases for a MongoDB connection",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "list-databases"
+  },
+  "description": "List all databases for a MongoDB connection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list-databases",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Returns the most recent logged mongod events",
+   "destructiveHint": false,
+   "readOnlyHint": true,
+   "title": "mongodb-logs"
+  },
+  "description": "Returns the most recent logged mongod events",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "default": 50,
+     "description": "The maximum number of log entries to return.",
+     "maximum": 1024,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "type": {
+     "default": "global",
+     "description": "The type of logs to return. Global returns all recent log entries, while startupWarnings returns only warnings and errors from when the process started.",
+     "enum": [
+      "global",
+      "startupWarnings"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "mongodb-logs",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Renames a collection in a MongoDB database",
+   "destructiveHint": false,
+   "readOnlyHint": false,
+   "title": "rename-collection"
+  },
+  "description": "Renames a collection in a MongoDB database",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "dropTarget": {
+     "default": false,
+     "description": "If true, drops the target collection if it exists",
+     "type": "boolean"
+    },
+    "newName": {
+     "description": "The new name for the collection",
+     "type": "string"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "newName"
+   ],
+   "type": "object"
+  },
+  "name": "rename-collection",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "description": "Updates all documents that match the specified filter for a collection",
+   "destructiveHint": false,
+   "readOnlyHint": false,
+   "title": "update-many"
+  },
+  "description": "Updates all documents that match the specified filter for a collection",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "collection": {
+     "description": "Collection name",
+     "type": "string"
+    },
+    "database": {
+     "description": "Database name",
+     "type": "string"
+    },
+    "filter": {
+     "additionalProperties": true,
+     "description": "The selection criteria for the update, matching the syntax of the filter argument of db.collection.updateOne()",
+     "properties": {},
+     "type": "object"
+    },
+    "update": {
+     "additionalProperties": true,
+     "description": "An update document describing the modifications to apply using update operator expressions",
+     "properties": {},
+     "type": "object"
+    },
+    "upsert": {
+     "description": "Controls whether to insert a new document if no documents match the filter",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "database",
+    "collection",
+    "update"
+   ],
+   "type": "object"
+  },
+  "name": "update-many",
+  "output_schema": {}
+ }
+]

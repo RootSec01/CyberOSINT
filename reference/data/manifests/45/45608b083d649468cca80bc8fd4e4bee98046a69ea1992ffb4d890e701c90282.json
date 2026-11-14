@@ -1,0 +1,142 @@
+[
+ {
+  "description": "Click an element on the page",
+  "input_schema": {
+   "properties": {
+    "selector": {
+     "description": "CSS selector for element to click",
+     "type": "string"
+    }
+   },
+   "required": [
+    "selector"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_click",
+  "output_schema": {}
+ },
+ {
+  "description": "Execute JavaScript in the browser console",
+  "input_schema": {
+   "properties": {
+    "script": {
+     "description": "JavaScript code to execute",
+     "type": "string"
+    }
+   },
+   "required": [
+    "script"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_evaluate",
+  "output_schema": {}
+ },
+ {
+  "description": "Fill out an input field",
+  "input_schema": {
+   "properties": {
+    "selector": {
+     "description": "CSS selector for input field",
+     "type": "string"
+    },
+    "value": {
+     "description": "Value to fill",
+     "type": "string"
+    }
+   },
+   "required": [
+    "selector",
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_fill",
+  "output_schema": {}
+ },
+ {
+  "description": "Hover an element on the page",
+  "input_schema": {
+   "properties": {
+    "selector": {
+     "description": "CSS selector for element to hover",
+     "type": "string"
+    }
+   },
+   "required": [
+    "selector"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_hover",
+  "output_schema": {}
+ },
+ {
+  "description": "Navigate to a URL",
+  "input_schema": {
+   "properties": {
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_navigate",
+  "output_schema": {}
+ },
+ {
+  "description": "Take a screenshot of the current page or a specific element",
+  "input_schema": {
+   "properties": {
+    "height": {
+     "description": "Height in pixels (default: 600)",
+     "type": "number"
+    },
+    "name": {
+     "description": "Name for the screenshot",
+     "type": "string"
+    },
+    "selector": {
+     "description": "CSS selector for element to screenshot",
+     "type": "string"
+    },
+    "width": {
+     "description": "Width in pixels (default: 800)",
+     "type": "number"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_screenshot",
+  "output_schema": {}
+ },
+ {
+  "description": "Select an element on the page with Select tag",
+  "input_schema": {
+   "properties": {
+    "selector": {
+     "description": "CSS selector for element to select",
+     "type": "string"
+    },
+    "value": {
+     "description": "Value to select",
+     "type": "string"
+    }
+   },
+   "required": [
+    "selector",
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "puppeteer_select",
+  "output_schema": {}
+ }
+]

@@ -1,0 +1,762 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Echoes back the input string",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "message": {
+     "description": "Message to echo",
+     "type": "string"
+    }
+   },
+   "required": [
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "echo",
+  "output_schema": {},
+  "title": "Echo Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Demonstrates how annotations can be used to provide metadata about content.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "includeImage": {
+     "default": false,
+     "description": "Whether to include an example image",
+     "type": "boolean"
+    },
+    "messageType": {
+     "description": "Type of message to demonstrate different annotation patterns",
+     "enum": [
+      "error",
+      "success",
+      "debug"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "messageType"
+   ],
+   "type": "object"
+  },
+  "name": "get-annotated-message",
+  "output_schema": {},
+  "title": "Get Annotated Message Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns all environment variables, helpful for debugging MCP server configuration. Values of credential-like names (a KEY, TOKEN, SECRET, PASSWORD, PASSWD, CREDENTIAL, AUTH or COOKIE name segment) are masked as \"<redacted>\" unless GET_ENV_INCLUDE_SECRETS is set to 1 or true in the server's environment.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get-env",
+  "output_schema": {},
+  "title": "Print Environment Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns its region argument and the Mcp-Param-Region HTTP header it arrived in. Demonstrates x-mcp-header (a 2026-07-28 Streamable HTTP client mirrors the argument into the header) and JSON Schema 2020-12 input and output schemas.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "region": {
+     "description": "A region name, e.g. eu-west. Mirrored into the Mcp-Param-Region HTTP header.",
+     "type": "string",
+     "x-mcp-header": "Region"
+    },
+    "repeat": {
+     "default": 1,
+     "description": "How many times to repeat the region in the result (1-3)",
+     "maximum": 3,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "region"
+   ],
+   "type": "object"
+  },
+  "name": "get-header-params",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "region": {
+     "type": "string"
+    },
+    "regionHeader": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "description": "The Mcp-Param-Region header the request carried, if any"
+    },
+    "repeated": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "region",
+    "regionHeader",
+    "repeated"
+   ],
+   "type": "object"
+  },
+  "title": "Get Header Params Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns up to ten resource links that reference different types of resources",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "count": {
+     "default": 3,
+     "description": "Number of resource links to return (1-10)",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get-resource-links",
+  "output_schema": {},
+  "title": "Get Resource Links Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns a resource reference that can be used by MCP clients",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "resourceId": {
+     "default": 1,
+     "description": "ID of the text or blob resource to fetch, a positive integer",
+     "type": "number"
+    },
+    "resourceType": {
+     "default": "Text",
+     "description": "Whether to reference a text resource or a blob resource",
+     "enum": [
+      "Text",
+      "Blob"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get-resource-reference",
+  "output_schema": {},
+  "title": "Get Resource Reference Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns structured content along with an output schema for client data validation",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "location": {
+     "description": "Choose city",
+     "enum": [
+      "New York",
+      "Chicago",
+      "Los Angeles"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "location"
+   ],
+   "type": "object"
+  },
+  "name": "get-structured-content",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "conditions": {
+     "description": "Weather conditions description",
+     "type": "string"
+    },
+    "humidity": {
+     "description": "Humidity percentage",
+     "type": "number"
+    },
+    "temperature": {
+     "description": "Temperature in celsius",
+     "type": "number"
+    }
+   },
+   "required": [
+    "temperature",
+    "conditions",
+    "humidity"
+   ],
+   "type": "object"
+  },
+  "title": "Get Structured Content Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns the sum of two numbers",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "a": {
+     "description": "First number",
+     "type": "number"
+    },
+    "b": {
+     "description": "Second number",
+     "type": "number"
+    }
+   },
+   "required": [
+    "a",
+    "b"
+   ],
+   "type": "object"
+  },
+  "name": "get-sum",
+  "output_schema": {},
+  "title": "Get Sum Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns a tiny MCP logo image.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get-tiny-image",
+  "output_schema": {},
+  "title": "Get Tiny Image Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Compresses a single file using gzip compression. Depending upon the selected output type, returns either the compressed data as a gzipped resource or a resource link, allowing it to be downloaded in a subsequent request: during the current session for a 2025-era client, or for ten minutes at a minted URI on protocol version 2026-07-28.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "data": {
+     "default": "https://raw.githubusercontent.com/modelcontextprotocol/servers/refs/heads/main/README.md",
+     "description": "URL or data URI of the file content to compress",
+     "format": "uri",
+     "type": "string"
+    },
+    "name": {
+     "default": "README.md.gz",
+     "description": "Name of the output file (at most 255 characters)",
+     "maxLength": 255,
+     "type": "string"
+    },
+    "outputType": {
+     "default": "resourceLink",
+     "description": "How the resulting gzipped file should be returned. 'resourceLink' returns a link to a resource that can be read later, 'resource' returns a full resource object.",
+     "enum": [
+      "resourceLink",
+      "resource"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "gzip-file-as-resource",
+  "output_schema": {},
+  "title": "GZip File as Resource Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Toggles simulated, random-leveled logging on or off. Deprecated: 2025-era clients only, since protocol version 2026-07-28 removes logging/setLevel; use trigger-log-messages with a per-request log level instead.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "toggle-simulated-logging",
+  "output_schema": {},
+  "title": "Toggle Simulated Logging"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Toggles simulated resource subscription updates on or off. Deprecated: 2025-era clients only, since protocol version 2026-07-28 removes resources/subscribe; use trigger-resource-update with a subscriptions/listen stream instead.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "toggle-subscriber-updates",
+  "output_schema": {},
+  "title": "Toggle Subscriber Updates"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Sends a notifications/<list>/list_changed for the tool, prompt or resource list. On protocol version 2026-07-28 it is delivered on each subscriptions/listen stream that asked for that list; a 2025-era client receives it unsolicited.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "list": {
+     "description": "Which list to announce as changed",
+     "enum": [
+      "tools",
+      "prompts",
+      "resources"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "list"
+   ],
+   "type": "object"
+  },
+  "name": "trigger-list-changed",
+  "output_schema": {},
+  "title": "Trigger List Changed Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Sends one log message at each logging level during the call. On protocol version 2026-07-28 only the messages at or above the level the request names in _meta (io.modelcontextprotocol/logLevel) are sent, and none if it names no level; a 2025-era client gets those at or above the level it set with logging/setLevel. Deprecated: logging is deprecated as of protocol version 2026-07-28.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "trigger-log-messages",
+  "output_schema": {},
+  "title": "Trigger Log Messages Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Demonstrates a long running operation with progress updates.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "duration": {
+     "default": 10,
+     "description": "Duration of the operation in seconds",
+     "type": "number"
+    },
+    "steps": {
+     "default": 5,
+     "description": "Number of steps in the operation",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "trigger-long-running-operation",
+  "output_schema": {},
+  "title": "Trigger Long Running Operation Tool"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Sends a notifications/resources/updated for a resource URI. On protocol version 2026-07-28 it is delivered on each subscriptions/listen stream whose resourceSubscriptions name the URI; a 2025-era client receives it once it has called resources/subscribe for the URI.",
+  "icons": [
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxRjI5MzciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "light"
+   },
+   {
+    "mimeType": "image/svg+xml",
+    "sizes": [
+     "any"
+    ],
+    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGOUZBRkIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTQuNyA2LjNhNCA0IDAgMCAwLTUuNCA1LjRMMyAxOGwzIDMgNi4zLTYuM2E0IDQgMCAwIDAgNS40LTUuNGwtMi41IDIuNS0yLjQtLjYtLjYtMi40eiIvPjwvc3ZnPg==",
+    "theme": "dark"
+   }
+  ],
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "uri": {
+     "description": "The URI of the resource to announce as updated, e.g. demo://resource/dynamic/text/1",
+     "type": "string"
+    }
+   },
+   "required": [
+    "uri"
+   ],
+   "type": "object"
+  },
+  "name": "trigger-resource-update",
+  "output_schema": {},
+  "title": "Trigger Resource Update Tool"
+ }
+]

@@ -1,0 +1,25 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false,
+   "title": "Browser"
+  },
+  "description": "Controls the user's Chrome. Runs one command per line, stopping at the first error. Actions print one ✓ line, reads print their output. Do many steps per call.\ngoto <url> | back | forward | reload\nclick <target>\nfill <target> \"<text>\" [--submit]\ntype \"<text>\"\npress <key>\nselect <target> \"<value>\"\ncheck <target> | uncheck <target>\nwait <ms> | wait --text \"<text>\" | wait <target>\ntab list | tab new [<url>] | tab select <id> | tab close\nsnapshot [<target>] [-i] [--depth N]\nfind \"<text>\"\nget text|value|url|title [<target>]\nscreenshot [<target>]\neval \"<js function>\"   # runs in the page\nMore (help <command>): hover, drag, upload, dialog, console, errors, requests, request, styles, cdp\nTargets: e12 (a snapshot ref), getByRole('button', { name: 'Go' }), getByLabel/getByText/getByPlaceholder('…'), or CSS.\nQuote text with spaces: \"like this\".",
+  "input_schema": {
+   "properties": {
+    "commands": {
+     "description": "Command lines, one per line",
+     "type": "string"
+    }
+   },
+   "required": [
+    "commands"
+   ],
+   "type": "object"
+  },
+  "name": "browser",
+  "output_schema": {}
+ }
+]

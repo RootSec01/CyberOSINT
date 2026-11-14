@@ -1,0 +1,113 @@
+[
+ {
+  "description": "Research any company to get business information, news, and insights.\n\nBest for: Learning about a company's products, services, recent news, or industry position.\nReturns: Company information from trusted business sources.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "companyName": {
+     "description": "Name of the company to research",
+     "type": "string"
+    },
+    "numResults": {
+     "description": "Number of search results to return (must be a number, default: 3)",
+     "type": "number"
+    }
+   },
+   "required": [
+    "companyName"
+   ],
+   "type": "object"
+  },
+  "name": "company_research_exa",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find code examples, documentation, and programming solutions. Searches GitHub, Stack Overflow, and official docs.\n\nBest for: Any programming question - API usage, library examples, code snippets, debugging help.\nReturns: Relevant code and documentation, formatted for easy reading.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "Search query to find relevant context for APIs, Libraries, and SDKs. For example, 'React useState hook examples', 'Python pandas dataframe filtering', 'Express.js middleware', 'Next js partial prerendering configuration'",
+     "type": "string"
+    },
+    "tokensNum": {
+     "default": 5000,
+     "description": "Number of tokens to return (must be a number, 1000-50000). Default is 5000 tokens. Adjust this value based on how much context you need - use lower values for focused queries and higher values for comprehensive documentation.",
+     "maximum": 50000,
+     "minimum": 1000,
+     "type": "number"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "get_code_context_exa",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search the web for any topic and get clean, ready-to-use content.\n\nBest for: Finding current information, news, facts, or answering questions about any topic.\nReturns: Clean text content from top search results, ready for LLM use.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "contextMaxCharacters": {
+     "description": "Maximum characters for context string optimized for LLMs (must be a number, default: 10000)",
+     "type": "number"
+    },
+    "livecrawl": {
+     "description": "Live crawl mode - 'fallback': use live crawling as backup if cached content unavailable, 'preferred': prioritize live crawling (default: 'fallback')",
+     "enum": [
+      "fallback",
+      "preferred"
+     ],
+     "type": "string"
+    },
+    "numResults": {
+     "description": "Number of search results to return (must be a number, default: 8)",
+     "type": "number"
+    },
+    "query": {
+     "description": "Websearch query",
+     "type": "string"
+    },
+    "type": {
+     "description": "Search type - 'auto': balanced search (default), 'fast': quick results",
+     "enum": [
+      "auto",
+      "fast"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "web_search_exa",
+  "output_schema": {}
+ }
+]

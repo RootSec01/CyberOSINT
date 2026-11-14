@@ -1,0 +1,1145 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Cleanup all managed resources",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "cleanup",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Execute a command in a Kubernetes pod or container and return the output. Command must be an array of strings where the first element is the executable and remaining elements are arguments. This executes directly without shell interpretation for security.",
+  "input_schema": {
+   "properties": {
+    "command": {
+     "description": "Command to execute as an array of strings (e.g. [\"ls\", \"-la\", \"/app\"]). First element is the executable, remaining are arguments. Shell operators like pipes, redirects, or command chaining are not supported - use explicit array format for security.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "container": {
+     "description": "Container name (required when pod has multiple containers)",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the pod to execute the command in",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "timeout": {
+     "description": "Timeout for command - 60000 milliseconds if not specified",
+     "type": "number"
+    }
+   },
+   "required": [
+    "name",
+    "command"
+   ],
+   "type": "object"
+  },
+  "name": "exec_in_pod",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Get documentation for a Kubernetes resource or field",
+  "input_schema": {
+   "properties": {
+    "apiVersion": {
+     "description": "API version to use (e.g. 'apps/v1')",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "output": {
+     "default": "plaintext",
+     "description": "Output format (plaintext or plaintext-openapiv2)",
+     "enum": [
+      "plaintext",
+      "plaintext-openapiv2"
+     ],
+     "type": "string"
+    },
+    "recursive": {
+     "default": false,
+     "description": "Print the fields of fields recursively",
+     "type": "boolean"
+    },
+    "resource": {
+     "description": "Resource name or field path (e.g. 'pods' or 'pods.spec.containers')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "resource"
+   ],
+   "type": "object"
+  },
+  "name": "explain_resource",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Install a Helm chart with support for both standard and template-based installation",
+  "input_schema": {
+   "properties": {
+    "chart": {
+     "description": "Chart name (e.g., 'nginx') or path to chart directory",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "createNamespace": {
+     "default": true,
+     "description": "Create namespace if it doesn't exist",
+     "type": "boolean"
+    },
+    "name": {
+     "description": "Name of the Helm release",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "repo": {
+     "description": "Helm repository URL (optional if using local chart path)",
+     "type": "string"
+    },
+    "useTemplate": {
+     "default": false,
+     "description": "Use helm template + kubectl apply instead of helm install (bypasses auth issues)",
+     "type": "boolean"
+    },
+    "values": {
+     "description": "Custom values to override chart defaults",
+     "type": "object"
+    },
+    "valuesFile": {
+     "description": "Path to values file (alternative to values object)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "chart",
+    "namespace"
+   ],
+   "type": "object"
+  },
+  "name": "install_helm_chart",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Apply a Kubernetes YAML manifest from a string or file",
+  "input_schema": {
+   "properties": {
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "dryRun": {
+     "default": false,
+     "description": "If true, only validate the resource, don't actually execute the operation",
+     "type": "boolean"
+    },
+    "filename": {
+     "description": "Path to a YAML file to apply (optional - use either manifest or filename)",
+     "type": "string"
+    },
+    "force": {
+     "default": false,
+     "description": "If true, immediately remove resources from API and bypass graceful deletion",
+     "type": "boolean"
+    },
+    "manifest": {
+     "description": "YAML manifest to apply",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "kubectl_apply",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Manage Kubernetes contexts - list, get, or set the current context",
+  "input_schema": {
+   "properties": {
+    "detailed": {
+     "default": false,
+     "description": "Include detailed information about the context",
+     "type": "boolean"
+    },
+    "name": {
+     "description": "Name of the context to set as current (required for set operation)",
+     "type": "string"
+    },
+    "operation": {
+     "default": "list",
+     "description": "Operation to perform: list contexts, get current context, or set current context",
+     "enum": [
+      "list",
+      "get",
+      "set"
+     ],
+     "type": "string"
+    },
+    "output": {
+     "default": "json",
+     "description": "Output format",
+     "enum": [
+      "json",
+      "yaml",
+      "name",
+      "custom"
+     ],
+     "type": "string"
+    },
+    "showCurrent": {
+     "default": true,
+     "description": "When listing contexts, highlight which one is currently active",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "operation"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_context",
+  "output_schema": {}
+ },
+ {
+  "description": "Create Kubernetes resources using various methods (from file or using subcommands)",
+  "input_schema": {
+   "properties": {
+    "annotations": {
+     "description": "Annotations to apply to the resource (e.g. [\"key1=value1\", \"key2=value2\"])",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "command": {
+     "description": "Command to run in the container",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "dryRun": {
+     "default": false,
+     "description": "If true, only validate the resource, don't actually execute the operation",
+     "type": "boolean"
+    },
+    "filename": {
+     "description": "Path to a YAML file to create resources from",
+     "type": "string"
+    },
+    "fromFile": {
+     "description": "Path to file for creating configmap (e.g. [\"key1=/path/to/file1\", \"key2=/path/to/file2\"])",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "fromLiteral": {
+     "description": "Key-value pair for creating configmap (e.g. [\"key1=value1\", \"key2=value2\"])",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "image": {
+     "description": "Image to use for the containers in the deployment",
+     "type": "string"
+    },
+    "labels": {
+     "description": "Labels to apply to the resource (e.g. [\"key1=value1\", \"key2=value2\"])",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "manifest": {
+     "description": "YAML manifest to create resources from",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the resource to create",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "output": {
+     "default": "yaml",
+     "description": "Output format. One of: json|yaml|name|go-template|go-template-file|template|templatefile|jsonpath|jsonpath-as-json|jsonpath-file",
+     "enum": [
+      "json",
+      "yaml",
+      "name",
+      "go-template",
+      "go-template-file",
+      "template",
+      "templatefile",
+      "jsonpath",
+      "jsonpath-as-json",
+      "jsonpath-file"
+     ],
+     "type": "string"
+    },
+    "port": {
+     "description": "Port that the container exposes",
+     "type": "number"
+    },
+    "replicas": {
+     "default": 1,
+     "description": "Number of replicas to create for the deployment",
+     "type": "number"
+    },
+    "resourceType": {
+     "description": "Type of resource to create (namespace, configmap, deployment, service, etc.)",
+     "type": "string"
+    },
+    "schedule": {
+     "description": "Cron schedule expression for the CronJob (e.g. \"*/5 * * * *\")",
+     "type": "string"
+    },
+    "secretType": {
+     "description": "Type of secret to create (generic, docker-registry, tls)",
+     "enum": [
+      "generic",
+      "docker-registry",
+      "tls"
+     ],
+     "type": "string"
+    },
+    "serviceType": {
+     "description": "Type of service to create (clusterip, nodeport, loadbalancer, externalname)",
+     "enum": [
+      "clusterip",
+      "nodeport",
+      "loadbalancer",
+      "externalname"
+     ],
+     "type": "string"
+    },
+    "suspend": {
+     "default": false,
+     "description": "Whether to suspend the CronJob",
+     "type": "boolean"
+    },
+    "tcpPort": {
+     "description": "Port pairs for tcp service (e.g. [\"80:8080\", \"443:8443\"])",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "validate": {
+     "default": true,
+     "description": "If true, validate resource schema against server schema",
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "kubectl_create",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Delete Kubernetes resources by resource type, name, labels, or from a manifest file",
+  "input_schema": {
+   "properties": {
+    "allNamespaces": {
+     "default": false,
+     "description": "If true, delete resources across all namespaces",
+     "type": "boolean"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "filename": {
+     "description": "Path to a YAML file to delete resources from (optional)",
+     "type": "string"
+    },
+    "force": {
+     "default": false,
+     "description": "If true, immediately remove resources from API and bypass graceful deletion",
+     "type": "boolean"
+    },
+    "gracePeriodSeconds": {
+     "description": "Period of time in seconds given to the resource to terminate gracefully",
+     "type": "number"
+    },
+    "labelSelector": {
+     "description": "Delete resources matching this label selector (e.g. 'app=nginx')",
+     "type": "string"
+    },
+    "manifest": {
+     "description": "YAML manifest defining resources to delete (optional)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the resource to delete",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "resourceType": {
+     "description": "Type of resource to delete (e.g., pods, deployments, services, etc.)",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "kubectl_delete",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Describe Kubernetes resources by resource type, name, and optionally namespace",
+  "input_schema": {
+   "properties": {
+    "allNamespaces": {
+     "default": false,
+     "description": "If true, describe resources across all namespaces",
+     "type": "boolean"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the resource to describe",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "resourceType": {
+     "description": "Type of resource to describe (e.g., pods, deployments, services, etc.)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "resourceType",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_describe",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Execute any kubectl command with the provided arguments and flags",
+  "input_schema": {
+   "properties": {
+    "allNamespaces": {
+     "default": false,
+     "description": "If true, run the command across all namespaces",
+     "type": "boolean"
+    },
+    "args": {
+     "description": "Additional command arguments",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "command": {
+     "description": "The kubectl command to execute (e.g. patch, rollout, top)",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "flags": {
+     "additionalProperties": true,
+     "description": "Command flags as key-value pairs",
+     "type": "object"
+    },
+    "name": {
+     "description": "Resource name",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "outputFormat": {
+     "description": "Output format (e.g. json, yaml, wide)",
+     "enum": [
+      "json",
+      "yaml",
+      "wide",
+      "name",
+      "custom"
+     ],
+     "type": "string"
+    },
+    "resourceType": {
+     "description": "Resource type (e.g. pod, deployment)",
+     "type": "string"
+    },
+    "subCommand": {
+     "description": "Subcommand if applicable (e.g. 'history' for rollout)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "command"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_generic",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Get or list Kubernetes resources by resource type, name, and optionally namespace",
+  "input_schema": {
+   "properties": {
+    "allNamespaces": {
+     "default": false,
+     "description": "If true, list resources across all namespaces",
+     "type": "boolean"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "fieldSelector": {
+     "description": "Filter resources by field selector (e.g. 'metadata.name=my-pod')",
+     "type": "string"
+    },
+    "labelSelector": {
+     "description": "Filter resources by label selector (e.g. 'app=nginx')",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the resource (optional - if not provided, lists all resources of the specified type)",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "output": {
+     "default": "json",
+     "description": "Output format",
+     "enum": [
+      "json",
+      "yaml",
+      "wide",
+      "name",
+      "custom"
+     ],
+     "type": "string"
+    },
+    "resourceType": {
+     "description": "Type of resource to get (e.g., pods, deployments, services, configmaps, events, etc.)",
+     "type": "string"
+    },
+    "sortBy": {
+     "description": "Sort events by a field (default: lastTimestamp). Only applicable for events.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "resourceType"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_get",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Get logs from Kubernetes resources like pods, deployments, or jobs",
+  "input_schema": {
+   "properties": {
+    "container": {
+     "description": "Container name (required when pod has multiple containers)",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "follow": {
+     "default": false,
+     "description": "Follow logs output (not recommended, may cause timeouts)",
+     "type": "boolean"
+    },
+    "labelSelector": {
+     "description": "Filter resources by label selector",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the resource",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "previous": {
+     "default": false,
+     "description": "Include logs from previously terminated containers",
+     "type": "boolean"
+    },
+    "resourceType": {
+     "description": "Type of resource to get logs from",
+     "enum": [
+      "pod",
+      "deployment",
+      "job",
+      "cronjob"
+     ],
+     "type": "string"
+    },
+    "since": {
+     "description": "Show logs since relative time (e.g. '5s', '2m', '3h')",
+     "type": "string"
+    },
+    "sinceTime": {
+     "description": "Show logs since absolute time (RFC3339)",
+     "type": "string"
+    },
+    "tail": {
+     "description": "Number of lines to show from end of logs",
+     "type": "number"
+    },
+    "timestamps": {
+     "default": false,
+     "description": "Include timestamps in logs",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "resourceType",
+    "name",
+    "namespace"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_logs",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Update field(s) of a resource using strategic merge patch, JSON merge patch, or JSON patch",
+  "input_schema": {
+   "properties": {
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "dryRun": {
+     "default": false,
+     "description": "If true, only validate the resource, don't actually execute the operation",
+     "type": "boolean"
+    },
+    "name": {
+     "description": "Name of the resource to patch",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "patchData": {
+     "description": "Patch data as a JSON object",
+     "type": "object"
+    },
+    "patchFile": {
+     "description": "Path to a file containing the patch data (alternative to patchData)",
+     "type": "string"
+    },
+    "patchType": {
+     "default": "strategic",
+     "description": "Type of patch to apply",
+     "enum": [
+      "strategic",
+      "merge",
+      "json"
+     ],
+     "type": "string"
+    },
+    "resourceType": {
+     "description": "Type of resource to patch (e.g., pods, deployments, services)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "resourceType",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_patch",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": false
+  },
+  "description": "Reconnect to the Kubernetes API server by recreating all API clients. Use this after cluster upgrades (e.g., EKS control plane upgrades that rotate ENIs/IPs) to force fresh DNS resolution and new TCP connections.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "kubectl_reconnect",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Manage the rollout of a resource (e.g., deployment, daemonset, statefulset)",
+  "input_schema": {
+   "properties": {
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the resource",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "resourceType": {
+     "default": "deployment",
+     "description": "Type of resource to manage rollout for",
+     "enum": [
+      "deployment",
+      "daemonset",
+      "statefulset"
+     ],
+     "type": "string"
+    },
+    "revision": {
+     "description": "Revision to rollback to (for undo subcommand)",
+     "type": "number"
+    },
+    "subCommand": {
+     "default": "status",
+     "description": "Rollout subcommand to execute",
+     "enum": [
+      "history",
+      "pause",
+      "restart",
+      "resume",
+      "status",
+      "undo"
+     ],
+     "type": "string"
+    },
+    "timeout": {
+     "description": "The length of time to wait before giving up (e.g., '30s', '1m', '2m30s')",
+     "type": "string"
+    },
+    "toRevision": {
+     "description": "Revision to roll back to (for history subcommand)",
+     "type": "number"
+    },
+    "watch": {
+     "default": false,
+     "description": "Watch the rollout status in real-time until completion",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "subCommand",
+    "resourceType",
+    "name",
+    "namespace"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_rollout",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Scale a Kubernetes deployment",
+  "input_schema": {
+   "properties": {
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the deployment to scale",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "replicas": {
+     "description": "Number of replicas to scale to",
+     "type": "number"
+    },
+    "resourceType": {
+     "default": "deployment",
+     "description": "Resource type to scale (deployment, replicaset, statefulset)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "replicas"
+   ],
+   "type": "object"
+  },
+  "name": "kubectl_scale",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "List the API resources available in the cluster",
+  "input_schema": {
+   "properties": {
+    "apiGroup": {
+     "description": "API group to filter by",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "namespaced": {
+     "description": "If true, only show namespaced resources",
+     "type": "boolean"
+    },
+    "output": {
+     "default": "wide",
+     "description": "Output format (wide, name, or no-headers)",
+     "enum": [
+      "wide",
+      "name",
+      "no-headers"
+     ],
+     "type": "string"
+    },
+    "verbs": {
+     "description": "List of verbs to filter by",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_api_resources",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Manage Kubernetes nodes with cordon, drain, and uncordon operations",
+  "input_schema": {
+   "properties": {
+    "confirmDrain": {
+     "default": false,
+     "description": "Explicit confirmation to drain the node (required for drain operation)",
+     "type": "boolean"
+    },
+    "deleteLocalData": {
+     "default": false,
+     "description": "Delete local data even if emptyDir volumes are used (for drain operation)",
+     "type": "boolean"
+    },
+    "dryRun": {
+     "default": false,
+     "description": "Show what would be done without actually doing it (for drain operation)",
+     "type": "boolean"
+    },
+    "force": {
+     "default": false,
+     "description": "Force the operation even if there are pods not managed by a ReplicationController, ReplicaSet, Job, DaemonSet or StatefulSet (for drain operation)",
+     "type": "boolean"
+    },
+    "gracePeriod": {
+     "default": -1,
+     "description": "Period of time in seconds given to each pod to terminate gracefully (for drain operation). If set to -1, uses the kubectl default grace period.",
+     "type": "number"
+    },
+    "ignoreDaemonsets": {
+     "default": true,
+     "description": "Ignore DaemonSet-managed pods (for drain operation)",
+     "type": "boolean"
+    },
+    "nodeName": {
+     "description": "Name of the node to operate on (required for cordon, drain, uncordon)",
+     "type": "string"
+    },
+    "operation": {
+     "description": "Node operation to perform",
+     "enum": [
+      "cordon",
+      "drain",
+      "uncordon"
+     ],
+     "type": "string"
+    },
+    "timeout": {
+     "default": "0",
+     "description": "The length of time to wait before giving up (for drain operation, e.g., '5m', '1h')",
+     "type": "string"
+    }
+   },
+   "required": [
+    "operation"
+   ],
+   "type": "object"
+  },
+  "name": "node_management",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Verify that the counterpart is still responsive and the connection is alive.",
+  "input_schema": {
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "ping",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "title": "Port Forward"
+  },
+  "description": "Forward a local port to a port on a Kubernetes resource",
+  "input_schema": {
+   "properties": {
+    "localPort": {
+     "type": "number"
+    },
+    "namespace": {
+     "type": "string"
+    },
+    "resourceName": {
+     "type": "string"
+    },
+    "resourceType": {
+     "type": "string"
+    },
+    "targetPort": {
+     "type": "number"
+    }
+   },
+   "required": [
+    "resourceType",
+    "resourceName",
+    "localPort",
+    "targetPort"
+   ],
+   "type": "object"
+  },
+  "name": "port_forward",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "title": "Stop Port Forward"
+  },
+  "description": "Stop a port-forward process",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "stop_port_forward",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Uninstall a Helm chart release",
+  "input_schema": {
+   "properties": {
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the Helm release to uninstall",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "namespace"
+   ],
+   "type": "object"
+  },
+  "name": "uninstall_helm_chart",
+  "output_schema": {}
+ },
+ {
+  "annotations": {
+   "destructiveHint": true
+  },
+  "description": "Upgrade an existing Helm chart release",
+  "input_schema": {
+   "properties": {
+    "chart": {
+     "description": "Chart name or path to chart directory",
+     "type": "string"
+    },
+    "context": {
+     "default": "",
+     "description": "Kubeconfig Context to use for the command (optional - defaults to null)",
+     "type": "string"
+    },
+    "name": {
+     "description": "Name of the Helm release to upgrade",
+     "type": "string"
+    },
+    "namespace": {
+     "default": "default",
+     "description": "Kubernetes namespace",
+     "type": "string"
+    },
+    "repo": {
+     "description": "Helm repository URL (optional if using local chart path)",
+     "type": "string"
+    },
+    "values": {
+     "description": "Custom values to override chart defaults",
+     "type": "object"
+    },
+    "valuesFile": {
+     "description": "Path to values file (alternative to values object)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "chart",
+    "namespace"
+   ],
+   "type": "object"
+  },
+  "name": "upgrade_helm_chart",
+  "output_schema": {}
+ }
+]

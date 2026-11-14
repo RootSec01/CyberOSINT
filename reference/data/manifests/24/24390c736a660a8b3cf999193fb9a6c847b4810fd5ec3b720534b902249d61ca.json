@@ -1,0 +1,758 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Append text to the end of a file, creating the file if it does not exist. The existing content is never changed or replaced. The text is appended exactly as given, with no newline added before or after it, so end it with a newline if the next append should start on a new line. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "content": {
+     "description": "Text to append, exactly as given. No newline is added: end it with \\n if the next append should start on a new line.",
+     "type": "string"
+    },
+    "path": {
+     "description": "The file to append to; it is created if it does not exist. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path",
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "append_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Append File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Copy a file to a new location, without reading its content into the conversation. Copies one regular file, keeping its permissions and modification time; directories are not copied. If the destination exists, the operation will fail: it never overwrites. Both source and destination must be within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "destination": {
+     "description": "Where to create the copy; nothing may exist there yet",
+     "type": "string"
+    },
+    "source": {
+     "description": "The file to copy",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source",
+    "destination"
+   ],
+   "type": "object"
+  },
+  "name": "copy_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Copy File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Create a new directory or ensure a directory exists. Can create multiple nested directories in one operation. If the directory already exists, this operation will succeed silently. Perfect for setting up directory structures for projects or ensuring required paths exist. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "path": {
+     "description": "The directory to create, with any missing parents; an existing directory is left as is. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "create_directory",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Create Directory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get a recursive tree view of files and directories as a JSON structure. Each entry includes 'name', 'type' (file/directory), and 'children' for directories. Files have no children array, while directories always have a children array (which may be empty), except at the last level when 'depth' limits the tree: those directories are not read and have no children array. The output is formatted with 2-space indentation for readability. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "depth": {
+     "description": "How many levels to descend: 1 lists only the entries directly in path. Directories at the last level have no children array. Omit for the whole tree.",
+     "exclusiveMinimum": 0,
+     "maximum": 9007199254740991,
+     "type": "integer"
+    },
+    "excludePatterns": {
+     "default": [],
+     "description": "Patterns for entries to leave out, with their contents, matched against each entry's path relative to path. A pattern with no '*' matches that name at any depth ('node_modules' leaves out every node_modules directory); a pattern with '*' is a glob matched as written, and one ending in '/**' also leaves out the directory it names.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "path": {
+     "description": "The directory at the root of the tree. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "directory_tree",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Directory Tree"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Make line-based edits to a text file. Edits apply in order, each to the result of the ones before it, and each replaces the first match of its oldText with newText. oldText must match the file's text exactly, except that line endings (LF or CRLF) never matter and, when there is no exact match, a run of whole lines matches if each line is equal once leading and trailing whitespace is ignored (newText then takes the file's indentation). Whitespace inside a line must match. If any edit has no match, nothing is written and the error shows the closest lines of the file, numbered, to copy oldText from. Returns a git-style diff showing the changes made. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "dryRun": {
+     "default": false,
+     "description": "Preview changes using git-style diff format",
+     "type": "boolean"
+    },
+    "edits": {
+     "description": "The replacements to make, applied in order, each to the result of the ones before it. If any one has no match, none is written.",
+     "items": {
+      "properties": {
+       "newText": {
+        "description": "Text to replace with",
+        "type": "string"
+       },
+       "oldText": {
+        "description": "Text to search for - must match exactly",
+        "type": "string"
+       }
+      },
+      "required": [
+       "oldText",
+       "newText"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "path": {
+     "description": "The text file to edit. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path",
+    "edits"
+   ],
+   "type": "object"
+  },
+  "name": "edit_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Edit File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve detailed metadata about a file or directory. Returns comprehensive information including size, creation time, last modified time, permissions, type and hard-link count. This tool is perfect for understanding file characteristics without reading the actual content. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "path": {
+     "description": "The file or directory to describe. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "get_file_info",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Get File Info"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Returns the list of directories that this server is allowed to access. Subdirectories within these allowed directories are also accessible. Use this to understand which directories and their nested paths are available before trying to access files.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_allowed_directories",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "List Allowed Directories"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the files and directories directly inside a path, each marked [FILE] or [DIR]. Use it to see what a directory contains; when you also need each entry's size or want entries sorted by size, use list_directory_with_sizes instead, and for a recursive view use directory_tree. Returns one line per entry. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "path": {
+     "description": "The directory to list. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "list_directory",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "List Directory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the files and directories directly inside a path with each file's size, marked [FILE] or [DIR], sorted by name or by size, largest first (sortBy). Use it when sizes matter, such as finding the largest files; for names only, use list_directory, which returns less text. Returns one line per entry, followed by the totals. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "path": {
+     "description": "The directory to list. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    },
+    "sortBy": {
+     "default": "name",
+     "description": "Sort entries by name or size",
+     "enum": [
+      "name",
+      "size"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "list_directory_with_sizes",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "List Directory with Sizes"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Move or rename files and directories. Can move files between directories and rename them in a single operation. If the destination exists, the operation will fail. Works across different directories and can be used for simple renaming within the same directory. Both source and destination must be within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "destination": {
+     "description": "Its new path, including the name; nothing may exist there yet. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    },
+    "source": {
+     "description": "The file or directory to move or rename. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "source",
+    "destination"
+   ],
+   "type": "object"
+  },
+  "name": "move_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Move File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the complete contents of a file as text. DEPRECATED: Use read_text_file instead.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "head": {
+     "description": "If provided, returns only the first N lines of the file",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "path": {
+     "description": "The file to read as text. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    },
+    "tail": {
+     "description": "If provided, returns only the last N lines of the file",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "read_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Read File (Deprecated)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read a file and return it as a base64-encoded content block with its MIME type. Image and audio files are returned as image/audio content; any other file type is returned as an embedded resource. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "path": {
+     "description": "The image, audio or other file to read as base64. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "read_media_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "items": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "properties": {
+         "data": {
+          "type": "string"
+         },
+         "mimeType": {
+          "type": "string"
+         },
+         "type": {
+          "enum": [
+           "image",
+           "audio"
+          ],
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "data",
+         "mimeType"
+        ],
+        "type": "object"
+       },
+       {
+        "additionalProperties": false,
+        "properties": {
+         "resource": {
+          "additionalProperties": false,
+          "properties": {
+           "blob": {
+            "type": "string"
+           },
+           "mimeType": {
+            "type": "string"
+           },
+           "uri": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "uri",
+           "blob"
+          ],
+          "type": "object"
+         },
+         "type": {
+          "const": "resource",
+          "type": "string"
+         }
+        },
+        "required": [
+         "type",
+         "resource"
+        ],
+        "type": "object"
+       }
+      ]
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Read Media File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the contents of multiple files simultaneously. This is more efficient than reading files one by one when you need to analyze or compare multiple files. Each file's content is returned with its path as a reference. Failed reads for individual files won't stop the entire operation. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "paths": {
+     "description": "Array of file paths to read. Each path must be a string pointing to a valid file within allowed directories.",
+     "items": {
+      "type": "string"
+     },
+     "minItems": 1,
+     "type": "array"
+    }
+   },
+   "required": [
+    "paths"
+   ],
+   "type": "object"
+  },
+  "name": "read_multiple_files",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Read Multiple Files"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the complete contents of a file from the file system as text. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Use the 'head' parameter to read only the first N lines of a file, or the 'tail' parameter to read only the last N lines of a file. Operates on the file as text regardless of extension. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "head": {
+     "description": "If provided, returns only the first N lines of the file",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "path": {
+     "description": "The file to read as text. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    },
+    "tail": {
+     "description": "If provided, returns only the last N lines of the file",
+     "maximum": 9007199254740991,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "read_text_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Read Text File"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find files and directories by NAME, not by content: this tool never reads or searches inside files. It walks the tree under 'path' and matches a glob pattern against each entry's path relative to 'path' (case-sensitive). Use '*.ext' to match entries directly under 'path', and '**/*.ext' or '**/name' to match at any depth. Returns full paths to all matching items. Great for finding files when you don't know their exact location. Only searches within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "excludePatterns": {
+     "default": [],
+     "description": "Patterns for entries to leave out, with their contents, matched against each entry's path relative to path. A pattern with no '*' matches that name at any depth ('node_modules' leaves out every node_modules directory); a pattern with '*' is a glob matched as written, and one ending in '/**' also leaves out the directory it names.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "path": {
+     "description": "The directory to search under. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    },
+    "pattern": {
+     "description": "Glob matched against each entry's path relative to path, never its content: '*.ts' matches directly under path, '**/*.ts' at any depth.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path",
+    "pattern"
+   ],
+   "type": "object"
+  },
+  "name": "search_files",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Search Files"
+ },
+ {
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Create a new file or completely overwrite an existing file with new content. Use with caution as it will overwrite existing files without warning. Handles text content with proper encoding. Only works within allowed directories.",
+  "input_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "properties": {
+    "content": {
+     "description": "The complete text the file will contain, replacing any it had",
+     "type": "string"
+    },
+    "path": {
+     "description": "The file to create, or to overwrite if it exists; its parent directory must exist. Absolute, or relative to an allowed directory; it must resolve inside the allowed directories.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path",
+    "content"
+   ],
+   "type": "object"
+  },
+  "name": "write_file",
+  "output_schema": {
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "additionalProperties": false,
+   "properties": {
+    "content": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "content"
+   ],
+   "type": "object"
+  },
+  "title": "Write File"
+ }
+]

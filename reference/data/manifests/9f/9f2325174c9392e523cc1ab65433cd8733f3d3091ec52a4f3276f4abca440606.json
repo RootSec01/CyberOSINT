@@ -1,0 +1,507 @@
+[
+ {
+  "description": "Use Seer to analyze an issue in Sentry, identify a root cause, and suggest a fix for it.\n\nUse this tool when you need to:\n- Determine the root cause of an issue.\n- Generate a plan for fixing an issue.\n- Implement a fix for an issue.\n\nThis operation may take some time, so you should call `get_seer_issue_fix_status()` to check the status of the analysis after you begin it.\n\n<examples>\n### Analyze and propose a fix for 'ISSUE-123' in Sentry\n\n```\nbegin_seer_issue_fix(organizationSlug='my-organization', issueId='ISSUE-123')\n```\n</examples>\n\n<hints>\n- Always check to see if an issue fix is already in progress for before calling this tool by using `get_seer_issue_fix_status()`.\n- If the user provides the issueUrl, you can ignore the organizationSlug and issueId parameters.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "issueId": {
+     "description": "The Issue ID. e.g. `PROJECT-1Z43`",
+     "type": "string"
+    },
+    "issueUrl": {
+     "description": "The URL of the issue. e.g. https://my-organization.sentry.io/issues/PROJECT-1Z43",
+     "format": "uri",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "begin_seer_issue_fix",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new Sentry DSN for a specific project.\n\nBe careful when using this tool!\n\nUse this tool when you need to:\n- Create a new DSN for a specific project\n\n<examples>\n### Create a new DSN for the 'my-project' project\n\n```\ncreate_dsn(organizationSlug='my-organization', projectSlug='my-project', name='Production')\n```\n\n</examples>\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<projectSlug>.\n- If any parameter is ambiguous, you should clarify with the user what they meant.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "The name of the DSN to create, for example 'Production'.",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "projectSlug": {
+     "description": "The project's slug. You can find a list of existing projects in an organization using the `find_projects()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug",
+    "projectSlug",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "create_dsn",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new project in Sentry, giving you access to a new SENTRY_DSN.\n\nBe careful when using this tool!\n\nUse this tool when you need to:\n- Create a new project in a Sentry organization\n\n<examples>\n### Create a new javascript project in the 'my-organization' organization\n\n```\ncreate_project(organizationSlug='my-organization', teamSlug='my-team', name='my-project', platform='javascript')\n```\n\n</examples>\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<teamSlug>.\n- If any parameter is ambiguous, you should clarify with the user what they meant.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "The name of the project to create. Typically this is commonly the name of the repository or service. It is only used as a visual label in Sentry.",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "platform": {
+     "description": "The platform for the project. e.g., python, javascript, react, etc.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    },
+    "teamSlug": {
+     "description": "The team's slug. You can find a list of existing teams in an organization using the `find_teams()` tool.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug",
+    "teamSlug",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "create_project",
+  "output_schema": {}
+ },
+ {
+  "description": "Create a new team in Sentry.\n\nBe careful when using this tool!\n\nUse this tool when you need to:\n- Create a new team in a Sentry organization\n\n<hints>\n- If any parameter is ambiguous, you should clarify with the user what they meant.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "The name of the team to create.",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug",
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "create_team",
+  "output_schema": {}
+ },
+ {
+  "description": "List all Sentry DSNs for a specific project.\n\nUse this tool when you need to:\n- Retrieve a SENTRY_DSN for a specific project\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<projectSlug>.\n- If only one parameter is provided, and it could be either `organizationSlug` or `projectSlug`, its probably `organizationSlug`, but if you're really uncertain you might want to call `find_organizations()` first.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "projectSlug": {
+     "description": "The project's slug. You can find a list of existing projects in an organization using the `find_projects()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug",
+    "projectSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_dsns",
+  "output_schema": {}
+ },
+ {
+  "description": "Find errors in Sentry using advanced search syntax.\n\nUse this tool when you need to:\n- Search for production errors in a specific file.\n- Analyze error patterns and frequencies.\n- Find recent or frequently occurring errors.\n\n<examples>\n### Find common errors within a file\n\nTo find common errors within a file, you can use the `filename` parameter. This is a suffix based search, so only using the filename or the direct parent folder of the file. The parent folder is preferred when the filename is in a subfolder or a common filename. If you provide generic filenames like `index.js` you're going to end up finding errors that are might be from completely different projects.\n\n```\nfind_errors(organizationSlug='my-organization', filename='index.js', sortBy='count')\n```\n\n### Find recent crashes from the 'peated' project\n\n```\nfind_errors(organizationSlug='my-organization', query='is:unresolved error.handled:false', projectSlug='peated', sortBy='last_seen')\n```\n\n</examples>\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<projectSlug>.\n- If only one parameter is provided, and it could be either `organizationSlug` or `projectSlug`, its probably `organizationSlug`, but if you're really uncertain you should call `find_organizations()` first.\n- If you are looking for issues, in a way that you might be looking for something like 'unresolved errors', you should use the `find_issues()` tool\n- You can use the `find_tags()` tool to see what user-defined tags are available.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "filename": {
+     "description": "The filename to search for errors in.",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "projectSlug": {
+     "description": "The project's slug. This will default to all projects you have access to. It is encouraged to specify this when possible.",
+     "type": "string"
+    },
+    "query": {
+     "description": "The search query to apply. Use the `help(subject=\"query_syntax\")` tool to get more information about the query syntax rather than guessing.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    },
+    "sortBy": {
+     "default": "last_seen",
+     "description": "Sort the results either by the last time they occurred or the count of occurrences.",
+     "enum": [
+      "last_seen",
+      "count"
+     ],
+     "type": "string"
+    },
+    "transaction": {
+     "description": "The transaction name. Also known as the endpoint, or route name.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_errors",
+  "output_schema": {}
+ },
+ {
+  "description": "Find issues in Sentry.\n\nUse this tool when you need to:\n- View all issues in a Sentry organization\n\nIf you're looking for more granular data beyond a summary of identified problems, you should use the `find_errors()` or `find_transactions()` tools instead.\n\n<examples>\n### Find the newest unresolved issues across 'my-organization'\n\n```\nfind_issues(organizationSlug='my-organization', query='is:unresolved', sortBy='last_seen')\n```\n\n### Find the most frequently occurring crashes in the 'my-project' project\n\n```\nfind_issues(organizationSlug='my-organization', projectSlug='my-project', query='is:unresolved error.handled:false', sortBy='count')\n```\n\n</examples>\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<projectSlug>.\n- You can use the `find_tags()` tool to see what user-defined tags are available.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "projectSlug": {
+     "description": "The project's slug. You can find a list of existing projects in an organization using the `find_projects()` tool.",
+     "type": "string"
+    },
+    "query": {
+     "description": "The search query to apply. Use the `help(subject=\"query_syntax\")` tool to get more information about the query syntax rather than guessing.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    },
+    "sortBy": {
+     "description": "Sort the results either by the last time they occurred, the first time they occurred, the count of occurrences, or the number of users affected.",
+     "enum": [
+      "last_seen",
+      "first_seen",
+      "count",
+      "userCount"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_issues",
+  "output_schema": {}
+ },
+ {
+  "description": "Find organizations that the user has access to in Sentry.\n\nUse this tool when you need to:\n- View all organizations in Sentry\n- Find an organization's slug to aid other tool requests",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "find_organizations",
+  "output_schema": {}
+ },
+ {
+  "description": "Find projects in Sentry.\n\nUse this tool when you need to:\n- View all projects in a Sentry organization\n- Find a project's slug to aid other tool requests",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_projects",
+  "output_schema": {}
+ },
+ {
+  "description": "Find releases in Sentry.\n\nUse this tool when you need to:\n- Find recent releases in a Sentry organization\n- Find the most recent version released of a specific project\n- Determine when a release was deployed to an environment\n\n<examples>\n### Find the most recent releases in the 'my-organization' organization\n\n```\nfind_releases(organizationSlug='my-organization')\n```\n\n### Find releases matching '2ce6a27' in the 'my-organization' organization\n\n```\nfind_releases(organizationSlug='my-organization', query='2ce6a27')\n```\n</examples>\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<projectSlug>.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "projectSlug": {
+     "description": "The project's slug. This will default to all projects you have access to. It is encouraged to specify this when possible.",
+     "type": "string"
+    },
+    "query": {
+     "description": "Search for versions which contain the provided string.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_releases",
+  "output_schema": {}
+ },
+ {
+  "description": "Find tags in Sentry.\n\nUse this tool when you need to:\n- Find tags available to use in search queries (such as `find_issues()` or `find_errors()`)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_tags",
+  "output_schema": {}
+ },
+ {
+  "description": "Find teams in an organization in Sentry.\n\nUse this tool when you need to:\n- View all teams in a Sentry organization\n- Find a team's slug to aid other tool requests",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_teams",
+  "output_schema": {}
+ },
+ {
+  "description": "Find transactions in Sentry using advanced search syntax.\n\nTransactions are segments of traces that are associated with a specific route or endpoint.\n\nUse this tool when you need to:\n- Search for production transaction data to understand performance.\n- Analyze traces and latency patterns.\n- Find examples of recent requests to endpoints.\n\n<examples>\n### Find slow requests to a route\n\n...\n\n```\nfind_transactions(organizationSlug='my-organization', transaction='/checkout', sortBy='latency')\n```\n\n</examples>\n\n<hints>\n- If the user passes a parameter in the form of name/otherName, its likely in the format of <organizationSlug>/<projectSlug>.\n- If only one parameter is provided, and it could be either `organizationSlug` or `projectSlug`, its probably `organizationSlug`, but if you're really uncertain you might want to call `find_organizations()` first.\n- You can use the `find_tags()` tool to see what user-defined tags are available.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "projectSlug": {
+     "description": "The project's slug. This will default to all projects you have access to. It is encouraged to specify this when possible.",
+     "type": "string"
+    },
+    "query": {
+     "description": "The search query to apply. Use the `help(subject=\"query_syntax\")` tool to get more information about the query syntax rather than guessing.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    },
+    "sortBy": {
+     "default": "timestamp",
+     "description": "Sort the results either by the timestamp of the request (most recent first) or the duration of the request (longest first).",
+     "enum": [
+      "timestamp",
+      "duration"
+     ],
+     "type": "string"
+    },
+    "transaction": {
+     "description": "The transaction name. Also known as the endpoint, or route name.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "organizationSlug"
+   ],
+   "type": "object"
+  },
+  "name": "find_transactions",
+  "output_schema": {}
+ },
+ {
+  "description": "Retrieve issue details from Sentry for a specific Issue ID, including the stacktrace and error message if available. Either issueId or issueUrl MUST be provided.\n\nUse this tool when you need to:\n- Investigate a specific production error\n- Access detailed error information and stacktraces from Sentry\n\n<examples>\n### Get details for issue ID 'CLOUDFLARE-MCP-41'\n\n```\nget_issue_details(organizationSlug='my-organization', issueId='CLOUDFLARE-MCP-41')\n```\n\n### Get details for event ID 'c49541c747cb4d8aa3efb70ca5aba243'\n\n```\nget_event_details(organizationSlug='my-organization', eventId='c49541c747cb4d8aa3efb70ca5aba243')\n```\n</examples>\n<hints>\n- If the user provides the `issueUrl`, you can ignore the other parameters.\n- If the user provides `issueId` or `eventId` (only one is needed), `organizationSlug` is required.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "eventId": {
+     "description": "The ID of the event.",
+     "type": "string"
+    },
+    "issueId": {
+     "description": "The Issue ID. e.g. `PROJECT-1Z43`",
+     "type": "string"
+    },
+    "issueUrl": {
+     "description": "The URL of the issue. e.g. https://my-organization.sentry.io/issues/PROJECT-1Z43",
+     "format": "uri",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_issue_details",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the status of a root cause analysis for an issue in Sentry.\n\nUse this tool when you need to:\n- Get the root cause analysis for an issue.\n- Get the status of a fix for an issue.\n\n<examples>\n### Get the status of a fix for the 'ISSUE-123' issue\n\n```\nget_seer_issue_fix_status(organizationSlug='my-organization', issueId='ISSUE-123')\n```\n\n</examples>\n\n<hints>\n- If the user provides the issueUrl, you can ignore the organizationSlug and issueId parameters.\n</hints>",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "issueId": {
+     "description": "The Issue ID. e.g. `PROJECT-1Z43`",
+     "type": "string"
+    },
+    "issueUrl": {
+     "description": "The URL of the issue. e.g. https://my-organization.sentry.io/issues/PROJECT-1Z43",
+     "format": "uri",
+     "type": "string"
+    },
+    "organizationSlug": {
+     "description": "The organization's slug. You can find a existing list of organizations you have access to using the `find_organizations()` tool.",
+     "type": "string"
+    },
+    "regionUrl": {
+     "description": "The region URL for the organization you're querying, if known.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_seer_issue_fix_status",
+  "output_schema": {}
+ }
+]

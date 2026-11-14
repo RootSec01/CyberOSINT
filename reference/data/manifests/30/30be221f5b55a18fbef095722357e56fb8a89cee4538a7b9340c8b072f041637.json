@@ -1,0 +1,113 @@
+[
+ {
+  "description": "Adds two numbers",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "a": {
+     "description": "First number",
+     "type": "number"
+    },
+    "b": {
+     "description": "Second number",
+     "type": "number"
+    }
+   },
+   "required": [
+    "a",
+    "b"
+   ],
+   "type": "object"
+  },
+  "name": "add",
+  "output_schema": {}
+ },
+ {
+  "description": "Echoes back the input",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "message": {
+     "description": "Message to echo",
+     "type": "string"
+    }
+   },
+   "required": [
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "echo",
+  "output_schema": {}
+ },
+ {
+  "description": "Returns the MCP_TINY_IMAGE",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "getTinyImage",
+  "output_schema": {}
+ },
+ {
+  "description": "Demonstrates a long running operation with progress updates",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "default": 10,
+     "description": "Duration of the operation in seconds",
+     "type": "number"
+    },
+    "steps": {
+     "default": 5,
+     "description": "Number of steps in the operation",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "longRunningOperation",
+  "output_schema": {}
+ },
+ {
+  "description": "Prints all environment variables, helpful for debugging MCP server configuration",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "printEnv",
+  "output_schema": {}
+ },
+ {
+  "description": "Samples from an LLM using MCP's sampling feature",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "maxTokens": {
+     "default": 100,
+     "description": "Maximum number of tokens to generate",
+     "type": "number"
+    },
+    "prompt": {
+     "description": "The prompt to send to the LLM",
+     "type": "string"
+    }
+   },
+   "required": [
+    "prompt"
+   ],
+   "type": "object"
+  },
+  "name": "sampleLLM",
+  "output_schema": {}
+ }
+]

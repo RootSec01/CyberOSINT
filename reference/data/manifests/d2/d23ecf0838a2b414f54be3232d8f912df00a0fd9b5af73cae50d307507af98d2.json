@@ -1,0 +1,29 @@
+[
+ {
+  "description": "Performs retrieval from the AWS Knowledge Base using the provided query and Knowledge Base ID.",
+  "input_schema": {
+   "properties": {
+    "knowledgeBaseId": {
+     "description": "The ID of the AWS Knowledge Base",
+     "type": "string"
+    },
+    "n": {
+     "default": 3,
+     "description": "Number of results to retrieve",
+     "type": "number"
+    },
+    "query": {
+     "description": "The query to perform retrieval on",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query",
+    "knowledgeBaseId"
+   ],
+   "type": "object"
+  },
+  "name": "retrieve_from_aws_kb",
+  "output_schema": {}
+ }
+]

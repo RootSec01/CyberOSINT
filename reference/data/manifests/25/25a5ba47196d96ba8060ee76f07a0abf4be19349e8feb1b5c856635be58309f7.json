@@ -1,0 +1,15 @@
+[
+ {
+  "description": "Navigate to a URL",
+  "input_schema": {
+   "properties": {
+    "url": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "navigate",
+  "output_schema": {}
+ }
+]

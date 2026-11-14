@@ -1,0 +1,217 @@
+[
+ {
+  "description": "Perform click on a web page",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "element": {
+     "description": "Human-readable element description used to obtain permission to interact with the element",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Exact target element reference from the page snapshot",
+     "type": "string"
+    }
+   },
+   "required": [
+    "element",
+    "ref"
+   ],
+   "type": "object"
+  },
+  "name": "browser_click",
+  "output_schema": {}
+ },
+ {
+  "description": "Get the console logs from the browser",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "browser_get_console_logs",
+  "output_schema": {}
+ },
+ {
+  "description": "Go back to the previous page",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "browser_go_back",
+  "output_schema": {}
+ },
+ {
+  "description": "Go forward to the next page",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "browser_go_forward",
+  "output_schema": {}
+ },
+ {
+  "description": "Hover over element on page",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "element": {
+     "description": "Human-readable element description used to obtain permission to interact with the element",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Exact target element reference from the page snapshot",
+     "type": "string"
+    }
+   },
+   "required": [
+    "element",
+    "ref"
+   ],
+   "type": "object"
+  },
+  "name": "browser_hover",
+  "output_schema": {}
+ },
+ {
+  "description": "Navigate to a URL",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "url": {
+     "description": "The URL to navigate to",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "browser_navigate",
+  "output_schema": {}
+ },
+ {
+  "description": "Press a key on the keyboard",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "key": {
+     "description": "Name of the key to press or a character to generate, such as `ArrowLeft` or `a`",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key"
+   ],
+   "type": "object"
+  },
+  "name": "browser_press_key",
+  "output_schema": {}
+ },
+ {
+  "description": "Select an option in a dropdown",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "element": {
+     "description": "Human-readable element description used to obtain permission to interact with the element",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Exact target element reference from the page snapshot",
+     "type": "string"
+    },
+    "values": {
+     "description": "Array of values to select in the dropdown. This can be a single value or multiple values.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "element",
+    "ref",
+    "values"
+   ],
+   "type": "object"
+  },
+  "name": "browser_select_option",
+  "output_schema": {}
+ },
+ {
+  "description": "Capture accessibility snapshot of the current page, this is better than screenshot",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "browser_snapshot",
+  "output_schema": {}
+ },
+ {
+  "description": "Type text into editable element",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "element": {
+     "description": "Human-readable element description used to obtain permission to interact with the element",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Exact target element reference from the page snapshot",
+     "type": "string"
+    },
+    "submit": {
+     "description": "Whether to submit entered text (press Enter after)",
+     "type": "boolean"
+    },
+    "text": {
+     "description": "Text to type into the element",
+     "type": "string"
+    }
+   },
+   "required": [
+    "element",
+    "ref",
+    "text",
+    "submit"
+   ],
+   "type": "object"
+  },
+  "name": "browser_type",
+  "output_schema": {}
+ },
+ {
+  "description": "Wait for a specified time in seconds",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "time": {
+     "description": "The time to wait in seconds",
+     "type": "number"
+    }
+   },
+   "required": [
+    "time"
+   ],
+   "type": "object"
+  },
+  "name": "browser_wait",
+  "output_schema": {}
+ }
+]

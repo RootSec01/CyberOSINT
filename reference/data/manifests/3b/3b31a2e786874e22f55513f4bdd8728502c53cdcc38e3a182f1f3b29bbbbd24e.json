@@ -1,0 +1,177 @@
+[
+ {
+  "description": "Add a reaction emoji to a message",
+  "input_schema": {
+   "properties": {
+    "channel_id": {
+     "description": "The ID of the channel containing the message",
+     "type": "string"
+    },
+    "reaction": {
+     "description": "The name of the emoji reaction (without ::)",
+     "type": "string"
+    },
+    "timestamp": {
+     "description": "The timestamp of the message to react to",
+     "type": "string"
+    }
+   },
+   "required": [
+    "channel_id",
+    "timestamp",
+    "reaction"
+   ],
+   "type": "object"
+  },
+  "name": "slack_add_reaction",
+  "output_schema": {}
+ },
+ {
+  "description": "Get recent messages from a channel",
+  "input_schema": {
+   "properties": {
+    "channel_id": {
+     "description": "The ID of the channel",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Number of messages to retrieve (default 10)",
+     "type": "number"
+    }
+   },
+   "required": [
+    "channel_id"
+   ],
+   "type": "object"
+  },
+  "name": "slack_get_channel_history",
+  "output_schema": {}
+ },
+ {
+  "description": "Get all replies in a message thread",
+  "input_schema": {
+   "properties": {
+    "channel_id": {
+     "description": "The ID of the channel containing the thread",
+     "type": "string"
+    },
+    "thread_ts": {
+     "description": "The timestamp of the parent message",
+     "type": "string"
+    }
+   },
+   "required": [
+    "channel_id",
+    "thread_ts"
+   ],
+   "type": "object"
+  },
+  "name": "slack_get_thread_replies",
+  "output_schema": {}
+ },
+ {
+  "description": "Get detailed profile information for a specific user",
+  "input_schema": {
+   "properties": {
+    "user_id": {
+     "description": "The ID of the user",
+     "type": "string"
+    }
+   },
+   "required": [
+    "user_id"
+   ],
+   "type": "object"
+  },
+  "name": "slack_get_user_profile",
+  "output_schema": {}
+ },
+ {
+  "description": "Get a list of all users in the workspace with their basic profile information",
+  "input_schema": {
+   "properties": {
+    "cursor": {
+     "description": "Pagination cursor for next page of results",
+     "type": "string"
+    },
+    "limit": {
+     "default": 100,
+     "description": "Maximum number of users to return (default 100, max 200)",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "slack_get_users",
+  "output_schema": {}
+ },
+ {
+  "description": "List public channels in the workspace with pagination",
+  "input_schema": {
+   "properties": {
+    "cursor": {
+     "description": "Pagination cursor for next page of results",
+     "type": "string"
+    },
+    "limit": {
+     "default": 100,
+     "description": "Maximum number of channels to return (default 100, max 200)",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "slack_list_channels",
+  "output_schema": {}
+ },
+ {
+  "description": "Post a new message to a Slack channel",
+  "input_schema": {
+   "properties": {
+    "channel_id": {
+     "description": "The ID of the channel to post to",
+     "type": "string"
+    },
+    "text": {
+     "description": "The message text to post",
+     "type": "string"
+    }
+   },
+   "required": [
+    "channel_id",
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "slack_post_message",
+  "output_schema": {}
+ },
+ {
+  "description": "Reply to a specific message thread in Slack",
+  "input_schema": {
+   "properties": {
+    "channel_id": {
+     "description": "The ID of the channel containing the thread",
+     "type": "string"
+    },
+    "text": {
+     "description": "The reply text",
+     "type": "string"
+    },
+    "thread_ts": {
+     "description": "The timestamp of the parent message",
+     "type": "string"
+    }
+   },
+   "required": [
+    "channel_id",
+    "thread_ts",
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "slack_reply_to_thread",
+  "output_schema": {}
+ }
+]

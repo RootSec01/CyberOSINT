@@ -1,0 +1,225 @@
+[
+ {
+  "description": "Adds two numbers",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "a": {
+     "description": "First number",
+     "type": "number"
+    },
+    "b": {
+     "description": "Second number",
+     "type": "number"
+    }
+   },
+   "required": [
+    "a",
+    "b"
+   ],
+   "type": "object"
+  },
+  "name": "add",
+  "output_schema": {}
+ },
+ {
+  "description": "Demonstrates how annotations can be used to provide metadata about content",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "includeImage": {
+     "default": false,
+     "description": "Whether to include an example image",
+     "type": "boolean"
+    },
+    "messageType": {
+     "description": "Type of message to demonstrate different annotation patterns",
+     "enum": [
+      "error",
+      "success",
+      "debug"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "messageType"
+   ],
+   "type": "object"
+  },
+  "name": "annotatedMessage",
+  "output_schema": {}
+ },
+ {
+  "description": "Echoes back the input",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "message": {
+     "description": "Message to echo",
+     "type": "string"
+    }
+   },
+   "required": [
+    "message"
+   ],
+   "type": "object"
+  },
+  "name": "echo",
+  "output_schema": {}
+ },
+ {
+  "description": "Returns multiple resource links that reference different types of resources",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "count": {
+     "default": 3,
+     "description": "Number of resource links to return (1-10)",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "getResourceLinks",
+  "output_schema": {}
+ },
+ {
+  "description": "Returns a resource reference that can be used by MCP clients",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "resourceId": {
+     "description": "ID of the resource to reference (1-100)",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "number"
+    }
+   },
+   "required": [
+    "resourceId"
+   ],
+   "type": "object"
+  },
+  "name": "getResourceReference",
+  "output_schema": {}
+ },
+ {
+  "description": "Returns the MCP_TINY_IMAGE",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "getTinyImage",
+  "output_schema": {}
+ },
+ {
+  "description": "Demonstrates a long running operation with progress updates",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "duration": {
+     "default": 10,
+     "description": "Duration of the operation in seconds",
+     "type": "number"
+    },
+    "steps": {
+     "default": 5,
+     "description": "Number of steps in the operation",
+     "type": "number"
+    }
+   },
+   "type": "object"
+  },
+  "name": "longRunningOperation",
+  "output_schema": {}
+ },
+ {
+  "description": "Prints all environment variables, helpful for debugging MCP server configuration",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "printEnv",
+  "output_schema": {}
+ },
+ {
+  "description": "Samples from an LLM using MCP's sampling feature",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "maxTokens": {
+     "default": 100,
+     "description": "Maximum number of tokens to generate",
+     "type": "number"
+    },
+    "prompt": {
+     "description": "The prompt to send to the LLM",
+     "type": "string"
+    }
+   },
+   "required": [
+    "prompt"
+   ],
+   "type": "object"
+  },
+  "name": "sampleLLM",
+  "output_schema": {}
+ },
+ {
+  "description": "Returns structured content along with an output schema for client data validation",
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "location": {
+     "description": "City name or zip code",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "location"
+   ],
+   "type": "object"
+  },
+  "name": "structuredContent",
+  "output_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "conditions": {
+     "description": "Weather conditions description",
+     "type": "string"
+    },
+    "humidity": {
+     "description": "Humidity percentage",
+     "type": "number"
+    },
+    "temperature": {
+     "description": "Temperature in celsius",
+     "type": "number"
+    }
+   },
+   "required": [
+    "temperature",
+    "conditions",
+    "humidity"
+   ],
+   "type": "object"
+  }
+ }
+]
