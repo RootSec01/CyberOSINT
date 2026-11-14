@@ -101,7 +101,10 @@ def main() -> int:
                         help="interpreter that has the lab's requirements installed")
     parser.add_argument("--output", type=Path, default=RESULTS)
     args = parser.parse_args()
-    result = evaluate(args.lab.resolve(), args.python)
+    # Each challenge starts in its own directory, so a relative interpreter path must be pinned
+    # first. abspath keeps a virtualenv's bin/python symlink; resolve() would follow it out.
+    python = os.path.abspath(args.python) if os.sep in args.python else args.python
+    result = evaluate(args.lab.resolve(), python)
     args.output.write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
     for row in result["challenges"]:
         print(f"{row['id']:>2}  {row['outcome']:<13}{row['name']:<42}{', '.join(row.get('findings', []))}")

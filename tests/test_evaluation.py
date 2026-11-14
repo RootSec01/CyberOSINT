@@ -51,3 +51,23 @@ def test_a_challenge_is_started_scanned_and_stopped(tmp_path, monkeypatch):
         assert sock.connect_ex(("127.0.0.1", base + 1)) != 0
     assert dvmcp.scan_challenge(tmp_path, 2, sys.executable) == {
         "started": False, "detail": "server.py not found"}
+
+
+def test_a_relative_interpreter_path_survives_the_change_of_directory(tmp_path, monkeypatch):
+    base = free_port_base()
+    monkeypatch.setattr(dvmcp, "FIRST_PORT", base)
+    lab = tmp_path / "lab"
+    for number in range(1, 16):
+        home = lab / "challenges" / "easy" / f"challenge{number}"
+        home.mkdir(parents=True)
+        (home / "server.py").write_text(
+            CHALLENGE.format(root=str(ROOT), port=base + number, profile="safe"))
+    (tmp_path / "env" / "bin").mkdir(parents=True)
+    (tmp_path / "env" / "bin" / "python").symlink_to(sys.executable)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["dvmcp", "--lab", "lab", "--python", "env/bin/python",
+                                      "--output", str(tmp_path / "results.json")])
+
+    assert dvmcp.main() == 0
+    result = json.loads((tmp_path / "results.json").read_text())
+    assert result["not_scanned"] == 0 and len(result["challenges"]) == 15
