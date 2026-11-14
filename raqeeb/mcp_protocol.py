@@ -149,26 +149,44 @@ def _extract_server_info(result: dict) -> Optional[dict]:
 
 
 def _list_tools(url: str, era: str, timeout: int, auth_token: Optional[str],
-                session: Optional[dict] = None) -> tuple[list, Optional[str]]:
+                session: Optional[dict] = None, listing: Optional[dict] = None) -> tuple[list, Optional[str]]:
+    """Read every page of tools/list. ``listing`` (if given) records whether the
+    read reached the last page, which is what lets an absence count as evidence."""
     tools: list = []
     cursor = None
+    if listing is not None:
+        listing.update(complete=False, pages=0, reason="not attempted")
     for _ in range(_MAX_TOOL_PAGES):
         params: dict = {"_meta": _modern_meta()} if era == "modern" else {}
         if cursor:
             params["cursor"] = cursor
         r = _rpc(url, "tools/list", params, timeout, auth_token, session=session)
         if r["transport_error"]:
+            if listing is not None:
+                listing["reason"] = "transport error"
             return tools, r["transport_error"]
         msg = r["message"] or {}
         if "error" in msg:
+            if listing is not None:
+                listing["reason"] = f"tools/list error {msg['error'].get('code')}"
             return tools, f"tools/list error {msg['error'].get('code')}"
         result = msg.get("result") or {}
         page = result.get("tools")
-        if isinstance(page, list):
-            tools.extend(page)
+        if listing is not None:
+            listing["pages"] += 1
+        if not isinstance(page, list):
+            if listing is not None:
+                listing["reason"] = "tools/list returned no tools array"
+            return tools, None
+        tools.extend(page)
         cursor = result.get("nextCursor")
         if not cursor:
+            if listing is not None:
+                listing.update(complete=True, reason=None)
             break
+    else:
+        if listing is not None:
+            listing["reason"] = f"stopped after {_MAX_TOOL_PAGES} pages with more remaining"
     return tools, None
 
 
@@ -182,7 +200,7 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
 
     Returns evidence:
       is_mcp, protocol_version, verification_method, fallback_reason,
-      auth_required, server_info, tools, errors
+      auth_required, server_info, tools, tool_listing, errors
     """
     out = {
         "url": url,
@@ -193,6 +211,8 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
         "auth_required": False,
         "server_info": None,
         "tools": [],
+        # whether tools/list was read to its last page (absence is evidence only then)
+        "tool_listing": {"complete": False, "pages": 0, "reason": "not attempted"},
         "errors": [],
     }
 
@@ -216,7 +236,7 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
             out["verification_method"] = "server/discover"
             out["protocol_version"] = _extract_version(result) or MODERN_VERSION
             out["server_info"] = _extract_server_info(result)
-            tools, terr = _list_tools(url, "modern", timeout, auth_token)
+            tools, terr = _list_tools(url, "modern", timeout, auth_token, listing=out["tool_listing"])
             out["tools"] = tools
             if terr:
                 out["errors"].append(terr)
@@ -262,7 +282,7 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
             session["Mcp-Session-Id"] = init["session_id"]
         _rpc(url, "notifications/initialized", {}, timeout, auth_token, notify=True,
              session=session)
-        tools, terr = _list_tools(url, "legacy", timeout, auth_token, session)
+        tools, terr = _list_tools(url, "legacy", timeout, auth_token, session, listing=out["tool_listing"])
         _end_session(url, session, timeout, auth_token)
         out["tools"] = tools
         if terr:

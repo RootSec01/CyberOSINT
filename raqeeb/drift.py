@@ -74,6 +74,15 @@ def _snapshot(report: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def snapshot(report: Dict[str, Any]) -> Dict[str, Any]:
+    """Public view of :func:`_snapshot`: what one stored report says is present.
+
+    ``exposure_state`` reads presence through this so drift and the exposure
+    lifecycle can never disagree about what a scan observed.
+    """
+    return _snapshot(report)
+
+
 def _change(kind: str, detail: str, tone: str) -> Dict[str, str]:
     # tone: crit (worse) | warn (notable) | good (improved) | info (neutral)
     return {"kind": kind, "detail": detail, "tone": tone}

@@ -34,7 +34,7 @@ from raqeeb.db import get_db, init_db, check_production_schema
 if DEPLOYMENT.production:
     check_production_schema()  # even import-only ASGI clients must pass readiness
 from raqeeb.models import (
-    User, Run, Asset, Alert, UserSettings, AuditEntry, OwnershipProof,
+    User, Run, Asset, Alert, UserSettings, AuditEntry, OwnershipProof, ExposureState,
 )
 from raqeeb.auth_session import (
     authenticate, create_access_token, get_current_user, require_admin_user,
@@ -57,6 +57,7 @@ from raqeeb import copilot
 from raqeeb import secrets_provider
 from raqeeb import ownership
 from raqeeb import provenance
+from raqeeb import exposure_state
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
 def _env_flag(name: str, default: str = "false") -> bool:
@@ -446,6 +447,9 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
             authorization={"granted_by": user.username, **authorization_ctx})
         if proof.get("is_mcp"):
             proof["provenance"] = provenance.assess(server.get("tools"))
+            # Whether tools/list was read to the end: the exposure lifecycle only
+            # treats a missing tool as closed when it was.
+            proof["tool_listing"] = dict(server.get("tool_listing") or {})
 
         payload = {
             "run_id": server.get("url") or f"{host}:{port}",
@@ -459,7 +463,8 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
         asset.last_risk_level = proof.get("severity")
         asset.last_run_id = str(payload.get("run_id") or "")
         db.commit()
-        _maybe_raise_alert(db, user, asset, payload)
+        lifecycle = exposure_state.reconcile(db, asset, payload)
+        _maybe_raise_alert(db, user, asset, payload, lifecycle=lifecycle)
         _maybe_raise_provenance_alert(db, asset, payload)
         return payload
 
@@ -472,7 +477,8 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
     asset.last_risk_level = (payload.get("risk") or {}).get("level")
     asset.last_run_id = str(payload.get("run_id") or "")
     db.commit()
-    _maybe_raise_alert(db, user, asset, payload)
+    lifecycle = exposure_state.reconcile(db, asset, payload)
+    _maybe_raise_alert(db, user, asset, payload, lifecycle=lifecycle)
     return payload
 
 
@@ -501,12 +507,17 @@ def _dispatch_alert_webhook(alert: Alert) -> None:
 
 
 def _maybe_raise_alert(db: Session, user: User, asset: Asset,
-                       current_payload: Dict[str, Any]) -> "Alert | None":
+                       current_payload: Dict[str, Any],
+                       lifecycle: Dict[str, Any] | None = None) -> "Alert | None":
     """Raise a drift alert when this scan increased exposure vs the previous one.
 
     Escalation-only: an alert fires solely when drift contains a change with a
     'crit' tone (new dangerous tool, new CVE, worse severity/risk, auth dropped).
     Improvements show in drift but never raise a bell.
+
+    ``lifecycle`` is the result of ``exposure_state.reconcile``. It never creates
+    an alert on its own; it only tells an alert that is firing anyway whether the
+    exposure is new or came back after being proven closed.
     """
     rows = (
         db.query(Run)
@@ -530,13 +541,18 @@ def _maybe_raise_alert(db: Session, user: User, asset: Asset,
         return None
 
     severe = any(c["kind"] in ("tool_appeared", "cve_appeared") for c in escalations)
+    returned = list((lifecycle or {}).get("regressed") or [])
+    detail = diff.get("summary")
+    if returned:
+        detail = f"{detail} | returned after remediation: {', '.join(sorted(returned))}"
     alert = Alert(
         user_id=asset.user_id,
         asset_id=asset.id,
         severity="Critical" if severe else "High",
-        kind="drift",
-        title=f"Exposure increased on {asset.label or asset.value}",
-        detail=diff.get("summary"),
+        kind="regression" if returned else "drift",
+        title=(f"Exposure returned on {asset.label or asset.value}" if returned
+               else f"Exposure increased on {asset.label or asset.value}"),
+        detail=detail,
         run_id=str(current_payload.get("run_id") or ""),
     )
     db.add(alert)
@@ -830,6 +846,9 @@ async def api_delete_asset(
     a = db.query(Asset).filter(Asset.id == asset_id).first()
     if not a or (user.role != "admin" and a.user_id != user.id):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
+    # Lifecycle rows have no meaning without their asset (and PostgreSQL would
+    # refuse the delete while they still reference it).
+    db.query(ExposureState).filter(ExposureState.asset_id == a.id).delete(synchronize_session=False)
     db.delete(a)
     db.commit()
     return JSONResponse({"id": asset_id, "deleted": True})
@@ -912,6 +931,39 @@ async def api_asset_drift(
             "at": rows[1].created_at.isoformat() if rows[1].created_at else None,
         },
         **diff,
+    })
+
+
+@app.get("/api/assets/{asset_id}/exposures", response_class=JSONResponse)
+async def api_asset_exposures(
+    asset_id: int,
+    state: str | None = None,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Every exposure seen on this asset, and where each one is in its lifecycle.
+
+    Drift answers "what changed between the last two scans". This answers the
+    standing question: what is open, what was proven closed, by which scan and
+    why, and what came back. Filter with ``?state=exposed`` (open + regressed)
+    or by a single state name.
+    """
+    a = db.query(Asset).filter(Asset.id == asset_id).first()
+    if not a or (user.role != "admin" and a.user_id != user.id):
+        return JSONResponse({"detail": "asset not found"}, status_code=404)
+
+    rows = db.query(ExposureState).filter(ExposureState.asset_id == a.id).all()
+    summary = exposure_state.state_summary(rows)
+    wanted = (state or "").strip().lower()
+    if wanted == "exposed":
+        rows = [r for r in rows if r.state in exposure_state.OPEN_STATES]
+    elif wanted:
+        rows = [r for r in rows if r.state == wanted]
+    rows.sort(key=exposure_state.sort_key)
+    return JSONResponse({
+        "asset_id": a.id,
+        "summary": summary,
+        "exposures": [exposure_state.exposure_dict(r) for r in rows],
     })
 
 
