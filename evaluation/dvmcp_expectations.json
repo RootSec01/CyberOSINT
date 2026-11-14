@@ -1,0 +1,23 @@
+{
+ "lab": "https://github.com/harishsg993010/damn-vulnerable-MCP-server",
+ "commit": "cdc4c6b5b76353203effcb26058e50fa6067d3a6",
+ "written": "2026-11-14, from the challenge titles and one-line descriptions in the lab README, before any challenge server was started or its source read",
+ "method": "Passive: handshake and tools/list only. A challenge is in scope when its weakness should be visible in what the server declares.",
+ "challenges": [
+  {"id": 1, "name": "Basic Prompt Injection", "in_scope": false, "why": "The weakness is how user input is handled at call time."},
+  {"id": 2, "name": "Tool Poisoning", "in_scope": true, "expect_any": ["tool_poisoning", "prompt_injection"], "why": "Hidden instructions sit in tool descriptions."},
+  {"id": 3, "name": "Excessive Permission Scope", "in_scope": true, "expect_any": ["path_traversal", "open_capability"], "why": "An over-broad tool should be visible in its declaration."},
+  {"id": 4, "name": "Rug Pull Attack", "in_scope": false, "why": "The declaration changes only after tools are called, which a passive scan never does."},
+  {"id": 5, "name": "Tool Shadowing", "in_scope": true, "expect_any": ["tool_poisoning", "prompt_injection"], "why": "Shadowing is normally carried by instructions in a description."},
+  {"id": 6, "name": "Indirect Prompt Injection", "in_scope": false, "why": "The payload arrives in data returned by a tool."},
+  {"id": 7, "name": "Token Theft", "in_scope": false, "why": "Tokens are exposed by calling tools, not by listing them."},
+  {"id": 8, "name": "Malicious Code Execution", "in_scope": true, "expect_any": ["rce"], "why": "A code-execution tool should be declared as such."},
+  {"id": 9, "name": "Remote Access Control", "in_scope": true, "expect_any": ["rce"], "why": "Command injection needs a tool that reaches a shell."},
+  {"id": 10, "name": "Multi-Vector Attack", "in_scope": true, "expect_any": ["tool_poisoning", "prompt_injection", "rce"], "why": "At least one of the chained weaknesses should be declared."},
+  {"id": 11, "name": "JWT Claim Forgery", "in_scope": false, "why": "The secret leaks through tool output."},
+  {"id": 12, "name": "Hidden Identity Override", "in_scope": false, "why": "The parameter is undocumented, so it is absent from the declaration by construction."},
+  {"id": 13, "name": "Privilege Escalation via Workflow IDOR", "in_scope": false, "why": "An authorization flaw in server logic."},
+  {"id": 14, "name": "Marketplace Plugin Poisoning", "in_scope": false, "why": "The hidden instruction is in a plugin loaded at run time."},
+  {"id": 15, "name": "Dependency Confusion", "in_scope": false, "why": "The hidden instruction is in a package fetched at run time."}
+ ]
+}

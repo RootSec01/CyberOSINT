@@ -1,0 +1,79 @@
+name: evaluation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "evaluation/**"
+      - "raqeeb/mcp_detectors.py"
+      - "raqeeb/mcp_protocol.py"
+
+concurrency:
+  group: evaluation
+  cancel-in-progress: false
+
+env:
+  LAB_REPOSITORY: harishsg993010/damn-vulnerable-MCP-server
+  LAB_COMMIT: cdc4c6b5b76353203effcb26058e50fa6067d3a6
+
+jobs:
+  # Starts the lab's deliberately vulnerable servers, so it runs with a read-only token.
+  dvmcp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.LAB_REPOSITORY }}
+          ref: ${{ env.LAB_COMMIT }}
+          path: lab-under-test
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: pip install -r requirements.txt
+
+      - name: Install the lab in its own environment
+        run: |
+          python -m venv lab-env
+          lab-env/bin/pip install -r lab-under-test/requirements.txt
+
+      - run: python -m evaluation.dvmcp --lab lab-under-test --python lab-env/bin/python
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dvmcp-results
+          path: evaluation/dvmcp_results.json
+          retention-days: 3
+
+  publish:
+    needs: dvmcp
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dvmcp-results
+          path: evaluation
+
+      - name: Commit the results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evaluation/dvmcp_results.json
+          git diff --cached --quiet && exit 0
+          git commit -m "evaluation: DVMCP results"
+          git pull --rebase
+          git push

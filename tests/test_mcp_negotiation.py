@@ -89,3 +89,12 @@ def test_dead_endpoint_is_not_mcp():
     r = mp.verify_mcp_endpoint("http://127.0.0.1:9109/mcp")  # nothing listening
     assert r["is_mcp"] is False
     assert r["errors"]
+
+
+def test_stateful_server_session_is_carried_paged_and_closed(stateful):
+    from conftest import StatefulServer
+    seen = mp.verify_mcp_endpoint(stateful + "/mcp")
+    assert seen["is_mcp"] and seen["verification_method"] == "initialize"
+    assert [tool["name"] for tool in seen["tools"]] == ["alpha", "beta", "gamma"]
+    assert seen["errors"] == [] and seen["protocol_version"] == "2025-06-18"
+    assert StatefulServer.deleted == ["session-1"]

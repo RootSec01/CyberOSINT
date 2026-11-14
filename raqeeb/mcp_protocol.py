@@ -32,6 +32,7 @@ LEGACY_VERSION = "2025-11-25"
 _CLIENT_INFO = {"name": "raqeeb", "version": "2.0"}
 _JSONRPC_METHOD_NOT_FOUND = -32601
 _DEFAULT_PATHS = ["/mcp", "/sse", "/mcp/sse", "/api/mcp", "/"]
+_MAX_TOOL_PAGES = 5
 
 
 # --------------------------------------------------------------------------
@@ -60,9 +61,8 @@ def _parse_body(resp: requests.Response) -> Optional[dict]:
                 obj = json.loads(payload)
             except ValueError:
                 continue
-            if isinstance(obj, dict) and (
-                "result" in obj or "error" in obj or "jsonrpc" in obj
-            ):
+            # A stream may carry notifications before the answer to our request.
+            if isinstance(obj, dict) and ("result" in obj or "error" in obj):
                 return obj
         return None
     try:
@@ -73,8 +73,12 @@ def _parse_body(resp: requests.Response) -> Optional[dict]:
 
 
 def _rpc(url: str, method: str, params: Optional[dict], timeout: int,
-         auth_token: Optional[str], notify: bool = False) -> dict:
-    """Send one JSON-RPC call. Returns a normalized envelope, never raises."""
+         auth_token: Optional[str], notify: bool = False,
+         session: Optional[dict] = None) -> dict:
+    """Send one JSON-RPC call. Returns a normalized envelope, never raises.
+
+    `session` holds the headers a stateful server expects after initialize.
+    """
     body: dict[str, Any] = {"jsonrpc": "2.0", "method": method}
     if not notify:
         body["id"] = 1
@@ -89,6 +93,7 @@ def _rpc(url: str, method: str, params: Optional[dict], timeout: int,
     }
     if auth_token:
         headers["Authorization"] = f"Bearer {auth_token}"
+    headers.update(session or {})
 
     try:
         resp = requests.post(url, json=body, headers=headers, timeout=timeout)
@@ -100,7 +105,20 @@ def _rpc(url: str, method: str, params: Optional[dict], timeout: int,
         "status": resp.status_code,
         "message": _parse_body(resp),
         "www_authenticate": resp.headers.get("www-authenticate"),
+        "session_id": resp.headers.get("mcp-session-id"),
     }
+
+
+def _end_session(url: str, session: dict, timeout: int, auth_token: Optional[str]) -> None:
+    if "Mcp-Session-Id" not in session:
+        return
+    headers = {"User-Agent": "Raqeeb/2.0", **session}
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+    try:
+        requests.delete(url, headers=headers, timeout=timeout)
+    except requests.RequestException:
+        pass
 
 
 # --------------------------------------------------------------------------
@@ -130,17 +148,28 @@ def _extract_server_info(result: dict) -> Optional[dict]:
     return si if isinstance(si, dict) else None
 
 
-def _list_tools(url: str, era: str, timeout: int,
-                auth_token: Optional[str]) -> tuple[list, Optional[str]]:
-    params = {"_meta": _modern_meta()} if era == "modern" else {}
-    r = _rpc(url, "tools/list", params, timeout, auth_token)
-    if r["transport_error"]:
-        return [], r["transport_error"]
-    msg = r["message"] or {}
-    if "error" in msg:
-        return [], f"tools/list error {msg['error'].get('code')}"
-    tools = ((msg.get("result") or {}).get("tools")) or []
-    return (tools if isinstance(tools, list) else []), None
+def _list_tools(url: str, era: str, timeout: int, auth_token: Optional[str],
+                session: Optional[dict] = None) -> tuple[list, Optional[str]]:
+    tools: list = []
+    cursor = None
+    for _ in range(_MAX_TOOL_PAGES):
+        params: dict = {"_meta": _modern_meta()} if era == "modern" else {}
+        if cursor:
+            params["cursor"] = cursor
+        r = _rpc(url, "tools/list", params, timeout, auth_token, session=session)
+        if r["transport_error"]:
+            return tools, r["transport_error"]
+        msg = r["message"] or {}
+        if "error" in msg:
+            return tools, f"tools/list error {msg['error'].get('code')}"
+        result = msg.get("result") or {}
+        page = result.get("tools")
+        if isinstance(page, list):
+            tools.extend(page)
+        cursor = result.get("nextCursor")
+        if not cursor:
+            break
+    return tools, None
 
 
 # --------------------------------------------------------------------------
@@ -228,9 +257,13 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
         out["verification_method"] = "initialize"
         out["protocol_version"] = _extract_version(result) or LEGACY_VERSION
         out["server_info"] = _extract_server_info(result)
-        # complete the legacy handshake, then list
-        _rpc(url, "notifications/initialized", {}, timeout, auth_token, notify=True)
-        tools, terr = _list_tools(url, "legacy", timeout, auth_token)
+        session = {"MCP-Protocol-Version": out["protocol_version"]}
+        if init.get("session_id"):
+            session["Mcp-Session-Id"] = init["session_id"]
+        _rpc(url, "notifications/initialized", {}, timeout, auth_token, notify=True,
+             session=session)
+        tools, terr = _list_tools(url, "legacy", timeout, auth_token, session)
+        _end_session(url, session, timeout, auth_token)
         out["tools"] = tools
         if terr:
             out["errors"].append(terr)

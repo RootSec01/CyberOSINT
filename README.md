@@ -84,6 +84,16 @@ None of the 287 hosted servers in the field study is a deployment of these 30 pa
 `unknown`. The library applies to self-hosted deployments of published packages, not to bespoke
 hosted services.
 
+## Evaluation on a third-party lab
+
+`evaluation/` scans the 15 challenges of the
+[Damn Vulnerable MCP Server](https://github.com/harishsg993010/damn-vulnerable-MCP-server) at a pinned
+commit, sending only the handshake and `tools/list`. Which challenges a passive scan should catch was
+written down before any of them was started (`evaluation/dvmcp_expectations.json`): six have a
+weakness visible in what the server declares, nine depend on calling tools or on server logic and are
+marked out of scope. The `evaluation` workflow runs the scan and commits
+`evaluation/dvmcp_results.json`, misses included.
+
 ## Evidence levels
 
 | Level | Meaning |
@@ -161,6 +171,7 @@ observatory/   daily field study of public MCP servers, with its data
 reference/     what published MCP server packages declare, release by release
 lab/           loopback MCP server and the lifecycle demo
 benchmark/     labelled declarations and the offline scorer
+evaluation/    scoring against third-party vulnerable servers
 dashboard/     React interface
 tests/         test suite
 ```
