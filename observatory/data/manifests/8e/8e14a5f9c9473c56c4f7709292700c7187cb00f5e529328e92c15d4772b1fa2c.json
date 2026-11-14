@@ -1,0 +1,211 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get verbatim fenced examples from a page, without running them. Filter by programming language and request/response/guide kind. Returns available_languages, source lines and pagination. No example translation, code execution or live request.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "enum": [
+      "request",
+      "response",
+      "guide"
+     ],
+     "type": "string"
+    },
+    "language": {
+     "description": "Exact canonical language from available_languages: curl, javascript, typescript, python, php, go, csharp, java, json, bash, etc.",
+     "maxLength": 40,
+     "minLength": 1,
+     "type": "string"
+    },
+    "limit": {
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "locale": {
+     "description": "Documentation language: English en, español es, 中文 zh. Required; no cross-language fallback.",
+     "enum": [
+      "en",
+      "es",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "offset": {
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Stable page ID from search/list, e.g. api/balance, rental/default-services, email/providers, sdks or index. A matching relative /en/docs/.../ URL also works.",
+     "maxLength": 240,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "page",
+    "locale"
+   ],
+   "type": "object"
+  },
+  "name": "smspva_docs_get_examples",
+  "output_schema": {},
+  "title": "Get exact code examples"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List page IDs, titles and descriptions in one language, optionally filtered by API family. Follow next_offset to browse all pages.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "locale": {
+     "description": "Documentation language: English en, español es, 中文 zh. Required; no cross-language fallback.",
+     "enum": [
+      "en",
+      "es",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "offset": {
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "section": {
+     "description": "Optional API family or general guides filter.",
+     "enum": [
+      "guides",
+      "activation",
+      "rental",
+      "email"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "locale"
+   ],
+   "type": "object"
+  },
+  "name": "smspva_docs_list_pages",
+  "output_schema": {},
+  "title": "Browse documentation pages"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read Markdown for a page in the selected locale, including original parameters, codes and warnings. Follow next_offset until null for the complete page; offsets and max_chars count Unicode code points. No filesystem or external URL access.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "locale": {
+     "description": "Documentation language: English en, español es, 中文 zh. Required; no cross-language fallback.",
+     "enum": [
+      "en",
+      "es",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "max_chars": {
+     "maximum": 20000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "offset": {
+     "maximum": 1000000,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "page": {
+     "description": "Stable page ID from search/list, e.g. api/balance, rental/default-services, email/providers, sdks or index. A matching relative /en/docs/.../ URL also works.",
+     "maxLength": 240,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "page",
+    "locale"
+   ],
+   "type": "object"
+  },
+  "name": "smspva_docs_read_page",
+  "output_schema": {},
+  "title": "Read a documentation page"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find guides, API methods and warnings in one language. Lexical search supports accented Spanish and Chinese words, prioritizes titles and avoids repeated code boilerplate. Returns page IDs, snippets and relative URLs; use read_page for complete context.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "locale": {
+     "description": "Documentation language: English en, español es, 中文 zh. Required; no cross-language fallback.",
+     "enum": [
+      "en",
+      "es",
+      "zh"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "maxLength": 512,
+     "minLength": 1,
+     "type": "string"
+    },
+    "section": {
+     "description": "Optional API family or general guides filter.",
+     "enum": [
+      "guides",
+      "activation",
+      "rental",
+      "email"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "query",
+    "locale"
+   ],
+   "type": "object"
+  },
+  "name": "smspva_docs_search",
+  "output_schema": {},
+  "title": "Search SMSPVA documentation"
+ }
+]

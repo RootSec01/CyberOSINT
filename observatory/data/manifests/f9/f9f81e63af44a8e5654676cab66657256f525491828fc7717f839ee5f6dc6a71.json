@@ -1,0 +1,271 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Estimate what a charge costs in EUR at public chargers in Lithuania, per charging network, at each network's typical (median) ad hoc price incl. VAT. Give either `kwh` (energy to add) or `car_battery_kwh` with `from_pct` and `to_pct`. Without `operator` returns the cheapest networks, the most expensive one and the national typical price. Excludes per-minute or session fees, which `extra_fees: true` flags.",
+  "input_schema": {
+   "properties": {
+    "car_battery_kwh": {
+     "description": "Usable battery capacity, kWh, e.g. 58 for a VW ID.3 Pro.",
+     "maximum": 500,
+     "minimum": 1,
+     "type": "number"
+    },
+    "from_pct": {
+     "description": "State of charge at the start, %. Default 20.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    },
+    "kwh": {
+     "description": "Energy to add, kWh. Alternative to car_battery_kwh.",
+     "maximum": 500,
+     "minimum": 0.1,
+     "type": "number"
+    },
+    "operator": {
+     "description": "Charging network name or slug, to price one network only.",
+     "type": "string"
+    },
+    "power_class": {
+     "description": "Price class: \"ac\" = AC charging (usually up to 22 kW), \"dc\" = DC fast charging under 150 kW, \"hpc\" = high-power DC at 150 kW or more.",
+     "enum": [
+      "ac",
+      "dc",
+      "hpc"
+     ],
+     "type": "string"
+    },
+    "to_pct": {
+     "description": "State of charge at the end, %. Default 80.",
+     "maximum": 100,
+     "minimum": 0,
+     "type": "integer"
+    }
+   },
+   "required": [
+    "power_class"
+   ],
+   "type": "object"
+  },
+  "name": "charging_cost",
+  "output_schema": {},
+  "title": "EV charging cost calculator"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "The cheapest public EV charging in Lithuania for a price class (ac, dc or hpc), in EUR/kWh incl. VAT. Give `city` for the cheapest stations there, or `route` {from, to} for the cheapest stations along a driving route (within 2 km of it). With neither, returns the national ranking of charging networks by price plus the cheapest stations in the country. Each result has a `source_url` to cite.",
+  "input_schema": {
+   "properties": {
+    "city": {
+     "description": "City or town in Lithuania, e.g. \"Kaunas\" (or \"Kaune\").",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Stations to return. Default 5.",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "power_class": {
+     "description": "Price class: \"ac\" = AC charging (usually up to 22 kW), \"dc\" = DC fast charging under 150 kW, \"hpc\" = high-power DC at 150 kW or more.",
+     "enum": [
+      "ac",
+      "dc",
+      "hpc"
+     ],
+     "type": "string"
+    },
+    "route": {
+     "description": "A driving route inside Lithuania. Slower than `city`; rate limited.",
+     "properties": {
+      "from": {
+       "description": "Start: a Lithuanian town or address, e.g. \"Vilnius\".",
+       "type": "string"
+      },
+      "to": {
+       "description": "Destination: a Lithuanian town or address, e.g. \"Klaipėda\".",
+       "type": "string"
+      }
+     },
+     "required": [
+      "from",
+      "to"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "power_class"
+   ],
+   "type": "object"
+  },
+  "name": "cheapest_charging",
+  "output_schema": {},
+  "title": "Cheapest EV charging in Lithuania"
+ },
+ {
+  "annotations": {
+   "readOnlyHint": true
+  },
+  "description": "Hourly WHOLESALE electricity prices for Lithuania (Nord Pool day-ahead, LT bidding zone) for today or tomorrow, in euro cents per kWh EXCLUDING VAT, by Europe/Vilnius hour, with the daily average and the cheapest and dearest hour. Useful for timing home charging on a dynamic tariff. Not a retail or public charging price. Tomorrow's prices are published around 14:00 Vilnius time. Ask resolution \"15min\" for the quarter-hour prices (96 a day since 2025-10-01), which show short dips the hourly average hides.",
+  "input_schema": {
+   "properties": {
+    "date": {
+     "description": "Which day. Default \"today\".",
+     "enum": [
+      "today",
+      "tomorrow"
+     ],
+     "type": "string"
+    },
+    "resolution": {
+     "description": "\"15min\" adds the quarter-hour prices as [HH:MM, ct/kWh] pairs and the cheapest and dearest quarter-hour. Default \"hour\".",
+     "enum": [
+      "hour",
+      "15min"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "electricity_price",
+  "output_schema": {},
+  "title": "Nord Pool electricity price, Lithuania"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find public EV charging stations in Lithuania near a point (lat/lng) or in a city, with current prices in EUR/kWh incl. VAT, max power in kW, connector types and live free charge points. With `near` results are sorted by distance; otherwise cheapest first (in `power_class` when given). Each station has a `source_url` to cite. Coverage: Lithuania only.",
+  "input_schema": {
+   "properties": {
+    "available_only": {
+     "description": "Only stations with at least one charge point reported free right now.",
+     "type": "boolean"
+    },
+    "city": {
+     "description": "City or town in Lithuania, e.g. \"Vilnius\", \"Kaunas\", \"Klaipėda\". Inflected forms like \"Kaune\" work too.",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Maximum stations to return. Default 10.",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "max_price_eur_kwh": {
+     "description": "Maximum price, EUR per kWh incl. VAT (in `power_class` when given).",
+     "maximum": 10,
+     "minimum": 0,
+     "type": "number"
+    },
+    "near": {
+     "description": "Search around this point. Use instead of `city` when you know coordinates.",
+     "properties": {
+      "lat": {
+       "description": "Latitude, WGS84 decimal degrees.",
+       "type": "number"
+      },
+      "lng": {
+       "description": "Longitude, WGS84 decimal degrees.",
+       "type": "number"
+      }
+     },
+     "required": [
+      "lat",
+      "lng"
+     ],
+     "type": "object"
+    },
+    "operator": {
+     "description": "Charging network name or slug, e.g. \"Ignitis ON\", \"Eldrive\".",
+     "type": "string"
+    },
+    "power_class": {
+     "description": "Price class: \"ac\" = AC charging (usually up to 22 kW), \"dc\" = DC fast charging under 150 kW, \"hpc\" = high-power DC at 150 kW or more. Only stations with a price in this class are returned.",
+     "enum": [
+      "ac",
+      "dc",
+      "hpc"
+     ],
+     "type": "string"
+    },
+    "radius_km": {
+     "description": "Search radius around `near`, km. Default 5.",
+     "maximum": 50,
+     "minimum": 0.1,
+     "type": "number"
+    },
+    "standard": {
+     "description": "Connector standard the station must have.",
+     "enum": [
+      "type2",
+      "ccs",
+      "chademo"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "find_stations",
+  "output_schema": {},
+  "title": "Find EV charging stations in Lithuania"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Current prices of one EV charging network (operator) in Lithuania: minimum and typical EUR/kWh incl. VAT for AC, DC (<150 kW) and HPC (≥150 kW), extra per-minute, parking and session fees, and subscription plans where the operator publishes them. Accepts a brand, legal name or slug, e.g. \"Ignitis ON\", \"Eldrive\", \"ignitis-on\".",
+  "input_schema": {
+   "properties": {
+    "operator": {
+     "description": "Charging network brand, legal name or slug, e.g. \"Ignitis ON\", \"Eldrive\", \"ignitis-on\".",
+     "type": "string"
+    }
+   },
+   "required": [
+    "operator"
+   ],
+   "type": "object"
+  },
+  "name": "operator_tariffs",
+  "output_schema": {},
+  "title": "Charging network tariffs"
+ },
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Significant changes of public EV charging prices in Lithuania since a date, per charging network and price class (ac, dc, hpc), newest first: from/to EUR/kWh incl. VAT and the change in %. \"median\" means the network's median station price moved; \"partial\" means many stations were repriced but the median held. History goes back at most 365 days.",
+  "input_schema": {
+   "properties": {
+    "operator": {
+     "description": "Charging network name or slug, to list one network only.",
+     "type": "string"
+    },
+    "since_date": {
+     "description": "Earliest date to include, YYYY-MM-DD (Europe/Vilnius). At most 365 days back.",
+     "format": "date",
+     "type": "string"
+    }
+   },
+   "required": [
+    "since_date"
+   ],
+   "type": "object"
+  },
+  "name": "price_changes",
+  "output_schema": {},
+  "title": "EV charging price changes"
+ }
+]

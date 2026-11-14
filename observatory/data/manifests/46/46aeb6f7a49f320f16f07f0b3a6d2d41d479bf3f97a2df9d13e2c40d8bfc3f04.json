@@ -1,0 +1,162 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the Markdown text of a page on airedteamingservices.com, given its path (for example /guides/).",
+  "input_schema": {
+   "properties": {
+    "path": {
+     "description": "Path starting with /",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "get_page",
+  "output_schema": {},
+  "title": "Read a page as Markdown"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return the form URL and email address a person can use to contact Excession Labs. This tool does not send anything.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "how_to_contact",
+  "output_schema": {},
+  "title": "How to contact Excession Labs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Send a request for a penetration test or an AI application security assessment to Excession Labs on behalf of a person who asked for it. Needs an agent key (POST /agent/auth, then Authorization: Bearer <key>). Excession Labs replies to the person by email to agree scope; testing starts only after a written scope and written authorization from the system owner. Never include passwords, API keys or customer data. Limits: 5 requests a day per key, 3 a day per email address.",
+  "input_schema": {
+   "properties": {
+    "authorized": {
+     "description": "Must be true: the person owns these systems or may arrange a test of them",
+     "type": "boolean"
+    },
+    "company": {
+     "description": "The person's company or organization name",
+     "type": "string"
+    },
+    "email": {
+     "description": "The person's work email; Excession Labs replies here",
+     "type": "string"
+    },
+    "name": {
+     "description": "The person's name",
+     "type": "string"
+    },
+    "notes": {
+     "description": "Other context from the person, up to 2,000 characters. No credentials or customer data.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "person_consent": {
+     "description": "Must be true: the person asked for this request and agreed to be contacted by email",
+     "type": "boolean"
+    },
+    "reason": {
+     "description": "Why the person needs the test",
+     "enum": [
+      "customer_request",
+      "compliance",
+      "launch",
+      "routine",
+      "incident",
+      "other"
+     ],
+     "type": "string"
+    },
+    "targets": {
+     "description": "Systems to test: URLs, API base URLs or short descriptions. No credentials.",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 10,
+     "type": "array"
+    },
+    "test_type": {
+     "description": "Kind of test: web_app, api, saas_multi_tenant, ai_application (LLM app or agent) or other",
+     "enum": [
+      "web_app",
+      "api",
+      "saas_multi_tenant",
+      "ai_application",
+      "other"
+     ],
+     "type": "string"
+    },
+    "timeline": {
+     "description": "When the person needs the result, in their words",
+     "type": "string"
+    },
+    "website": {
+     "description": "Company website",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "email",
+    "test_type",
+    "targets",
+    "person_consent",
+    "authorized"
+   ],
+   "type": "object"
+  },
+  "name": "request_pentest",
+  "output_schema": {},
+  "title": "Request a security test from Excession Labs"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search the guides, service pages and research on airedteamingservices.com. Returns titles, URLs and one-line summaries.",
+  "input_schema": {
+   "properties": {
+    "limit": {
+     "default": 8,
+     "description": "Maximum number of results to return (1 to 20)",
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "Words to search for",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_site",
+  "output_schema": {},
+  "title": "Search airedteamingservices.com"
+ }
+]

@@ -1,0 +1,27 @@
+[
+ {
+  "description": "Generate a natal (birth) chart given birth date, optional time, and location. Returns calculated chart text: planetary positions, plus Rising sign and houses only when a birth time is given.",
+  "input_schema": {
+   "properties": {
+    "birthDate": {
+     "description": "Birth date in YYYY-MM-DD format (e.g., '1992-05-12')",
+     "type": "string"
+    },
+    "birthTime": {
+     "description": "Optional birth time in HH:MM format (24-hour, e.g., '15:30'). If not provided, the time is treated as unknown: planets are shown for a 12:00 local-time reference in the birth location's timezone, and Rising sign and houses are withheld.",
+     "type": "string"
+    },
+    "location": {
+     "description": "Birth location (required). Can be a city name (e.g., 'London, UK') or coordinates object with {name, lat, lon}"
+    }
+   },
+   "required": [
+    "birthDate",
+    "location"
+   ],
+   "type": "object"
+  },
+  "name": "generate_natal_chart",
+  "output_schema": {}
+ }
+]
