@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import text as _sql_text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -34,6 +34,7 @@ from raqeeb.db import get_db, init_db, check_production_schema
 if DEPLOYMENT.production:
     check_production_schema()  # even import-only ASGI clients must pass readiness
 from raqeeb.models import (
+    Scan, Finding,
     User, Run, Asset, Alert, UserSettings, AuditEntry, OwnershipProof,
 )
 from raqeeb.auth_session import (
@@ -57,6 +58,7 @@ from raqeeb import copilot
 from raqeeb import secrets_provider
 from raqeeb import ownership
 from raqeeb import provenance
+from raqeeb import register
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
 def _env_flag(name: str, default: str = "false") -> bool:
@@ -317,20 +319,23 @@ async def api_revoke(
 
 
 def _persist_run(db: Session, user: User, payload: dict,
-                 target_type: str, target_value: str) -> None:
+                 target_type: str, target_value: str) -> Optional[int]:
     """Store a completed scan against its owner. Never breaks the response."""
     try:
-        db.add(Run(
+        run = Run(
             user_id=user.id,
             run_id=str(payload.get("run_id") or ""),
             target_type=target_type,
             target_value=target_value,
             risk_level=((payload.get("risk") or {}).get("level")) or None,
             report_json=json.dumps(payload, default=str),
-        ))
+        )
+        db.add(run)
         db.commit()
+        return run.id
     except Exception:
         db.rollback()
+        return None
 
 
 def _build_scan_payload(combined: Dict[str, Any]) -> Dict[str, Any]:
@@ -399,7 +404,8 @@ def _parse_host_port(value: str, default_port: int) -> tuple[str, int]:
     return raw, default_port
 
 
-def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
+def scan_asset(db: Session, user: User, asset: Asset, *,
+               operator: Optional[str] = None, trigger: str = "manual") -> Dict[str, Any]:
     """Run the correct scan for one asset, persist the run, and update the asset.
 
     Shared by the manual "scan now" endpoint and the background scheduler:
@@ -412,6 +418,7 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
     kind = (asset.kind or "domain").strip().lower()
     value = (asset.value or "").strip()
     now = datetime.datetime.now(datetime.timezone.utc)
+    operator = operator or user.username
 
     if kind == "mcp":
         host, port = _parse_host_port(value, 443)
@@ -427,9 +434,12 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
                 asset.last_scanned_at = now
                 asset.last_risk_level = "Unauthorized"
                 db.commit()
-                return {"kind": "safe_proof", "skipped": True,
-                        "reason": f"target not authorized ({auth.reason})",
-                        "target": f"{host}:{port}"}
+                refused = {"kind": "safe_proof", "skipped": True,
+                           "reason": f"target not authorized ({auth.reason})",
+                           "target": f"{host}:{port}"}
+                refused["scan_reference"] = register.record_scan(
+                    db, asset, refused, operator=operator, trigger=trigger).reference
+                return refused
             authorization_ctx = auth.as_dict()
 
         server = mcp_protocol.verify_host(host, int(port), use_tls=use_tls)
@@ -453,8 +463,11 @@ def scan_asset(db: Session, user: User, asset: Asset) -> Dict[str, Any]:
             "risk": {"level": proof.get("severity")},
             "target": proof.get("target") or f"{host}:{port}",
             "safe_proof": proof,
+            "declarations": register.declarations_digest(server.get("tools")),
         }
-        _persist_run(db, user, payload, target_type="mcp", target_value=value)
+        run_row = _persist_run(db, user, payload, target_type="mcp", target_value=value)
+        payload["scan_reference"] = register.record_scan(
+            db, asset, payload, operator=operator, trigger=trigger, run_row=run_row).reference
         asset.last_scanned_at = now
         asset.last_risk_level = proof.get("severity")
         asset.last_run_id = str(payload.get("run_id") or "")
@@ -842,6 +855,7 @@ def _asset_dict(a: Asset) -> dict:
         "created_at": a.created_at.isoformat() if a.created_at else None,
         "last_scanned_at": a.last_scanned_at.isoformat() if a.last_scanned_at else None,
         "last_risk_level": a.last_risk_level, "last_run_id": a.last_run_id,
+        "last_scan": register.latest_reference(object_session(a), a.id) if object_session(a) else None,
     }
 
 
@@ -861,7 +875,7 @@ async def api_scan_asset_now(
         return JSONResponse({"detail": "asset not found"}, status_code=404)
     owner = db.query(User).filter(User.id == a.user_id).first() or user
     try:
-        payload = scan_asset(db, owner, a)
+        payload = scan_asset(db, owner, a, operator=user.username)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
     return JSONResponse({"asset": _asset_dict(a), "scan": payload})
@@ -1173,15 +1187,130 @@ async def api_platform_copilot(
 
 @app.get("/api/audit", response_class=JSONResponse)
 async def api_get_audit(
+    operator: str = "", action: str = "", decision: str = "", q: str = "",
+    since: str = "", until: str = "", on: str = "",
+    limit: int = 100, offset: int = 0,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
-    """Recent audit entries — admins see all, users see their own actions."""
-    q = db.query(AuditEntry)
+    """Audit entries, newest first. Admins see all, users see their own actions."""
+    try:
+        bounds = register.window(since, until, on)
+    except register.Rejected as error:
+        return _rejected(error)
+    query = db.query(AuditEntry)
     if user.role != "admin":
-        q = q.filter(AuditEntry.operator == user.username)
-    rows = q.order_by(AuditEntry.ts.desc()).limit(100).all()
-    return JSONResponse({"entries": [_audit_dict(e) for e in rows]})
+        query = query.filter(AuditEntry.operator == user.username)
+    for column, value in ((AuditEntry.operator, operator), (AuditEntry.action, action),
+                          (AuditEntry.decision, decision)):
+        if value.strip():
+            query = query.filter(column == value.strip())
+    if q.strip():
+        like = f"%{q.strip()}%"
+        query = query.filter(AuditEntry.detail.ilike(like) | AuditEntry.action.ilike(like))
+    query = register.within(query, AuditEntry.ts, bounds).order_by(AuditEntry.ts.desc(), AuditEntry.id.desc())
+    total, rows = register.page(query, limit, offset)
+    return JSONResponse({"total": total, "entries": [_audit_dict(e) for e in rows]})
+
+
+def _rejected(error: Exception) -> JSONResponse:
+    return JSONResponse({"detail": str(error)}, status_code=422)
+
+
+@app.get("/api/scans", response_class=JSONResponse)
+async def api_list_scans(
+    asset_id: Optional[int] = None, outcome: str = "", operator: str = "",
+    trigger: str = "", verdict: str = "", q: str = "",
+    since: str = "", until: str = "", on: str = "",
+    limit: int = register.PAGE, offset: int = 0,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    try:
+        query = register.scans(db, user, asset_id=asset_id, outcome=outcome, operator=operator,
+                               trigger=trigger, verdict=verdict, text=q,
+                               bounds=register.window(since, until, on))
+    except register.Rejected as error:
+        return _rejected(error)
+    total, rows = register.page(query, limit, offset)
+    return JSONResponse({"total": total, "scans": [register.scan_dict(scan, asset) for scan, asset in rows]})
+
+
+@app.get("/api/scans/{reference}", response_class=JSONResponse)
+async def api_get_scan(
+    reference: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    found = register.scans(db, user).filter(Scan.reference == reference.strip().upper()).first()
+    if not found:
+        return JSONResponse({"detail": "scan not found"}, status_code=404)
+    scan, asset = found
+    stored = db.query(Run).filter(Run.id == scan.run_row).first() if scan.run_row else None
+    report = json.loads(stored.report_json) if stored and stored.report_json else None
+    seen = register.findings(db, user, scan=scan.reference).all()
+    return JSONResponse({**register.scan_dict(scan, asset), "report": report,
+                         "findings": [register.finding_dict(finding, owner) for finding, owner in seen]})
+
+
+@app.get("/api/findings", response_class=JSONResponse)
+async def api_list_findings(
+    asset_id: Optional[int] = None, severity: str = "", status: str = "",
+    evidence: str = "", category: str = "", tool: str = "", changed_by: str = "",
+    scan: str = "", q: str = "", seen: str = "first",
+    since: str = "", until: str = "", on: str = "",
+    limit: int = register.PAGE, offset: int = 0,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    try:
+        query = register.findings(db, user, asset_id=asset_id, severity=severity, status=status,
+                                  evidence=evidence, category=category, tool=tool,
+                                  changed_by=changed_by, scan=scan, text=q, seen=seen,
+                                  bounds=register.window(since, until, on))
+    except register.Rejected as error:
+        return _rejected(error)
+    total, rows = register.page(query, limit, offset)
+    return JSONResponse({"total": total,
+                         "findings": [register.finding_dict(finding, asset) for finding, asset in rows]})
+
+
+def _finding_by_reference(db: Session, user: User, reference: str):
+    return register.findings(db, user).filter(Finding.reference == reference.strip().upper()).first()
+
+
+@app.get("/api/findings/{reference}", response_class=JSONResponse)
+async def api_get_finding(
+    reference: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    found = _finding_by_reference(db, user, reference)
+    if not found:
+        return JSONResponse({"detail": "finding not found"}, status_code=404)
+    return JSONResponse(register.finding_dict(*found))
+
+
+@app.post("/api/findings/{reference}/status", response_class=JSONResponse)
+async def api_set_finding_status(
+    reference: str,
+    status: str = Form(...),
+    note: str = Form(""),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    found = _finding_by_reference(db, user, reference)
+    if not found:
+        return JSONResponse({"detail": "finding not found"}, status_code=404)
+    finding, asset = found
+    before = finding.status
+    try:
+        register.set_status(db, finding, status, note, user.username)
+    except register.Rejected as error:
+        return _rejected(error)
+    _audit(db, "finding_status", user.username,
+           detail=f"finding={finding.reference};from={before};to={finding.status}", decision=finding.status)
+    return JSONResponse(register.finding_dict(finding, asset))
 
 
 @app.get("/api/runs", response_class=JSONResponse)

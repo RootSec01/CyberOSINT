@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from raqeeb.db import Base
@@ -124,3 +124,48 @@ class UserSettings(Base):
     ai_model: Mapped[str | None] = mapped_column(String(64), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow)
+
+
+class Scan(Base):
+    """One scan of one asset, citable by its reference."""
+    __tablename__ = "scans"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reference: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), index=True, nullable=False)
+    run_row: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    operator: Mapped[str] = mapped_column(String(64), index=True)
+    trigger: Mapped[str] = mapped_column(String(16), default="manual")
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, index=True)
+    outcome: Mapped[str] = mapped_column(String(24))
+    severity: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    verdict: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    release: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    tool_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    finding_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    declarations: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class Finding(Base):
+    """One finding on one asset, followed from the scan that first saw it to the scan that last did."""
+    __tablename__ = "findings"
+    __table_args__ = (UniqueConstraint("asset_id", "fingerprint"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reference: Mapped[str] = mapped_column(String(16), index=True, nullable=False)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), index=True, nullable=False)
+    fingerprint: Mapped[str] = mapped_column(String(255), nullable=False)
+    category: Mapped[str] = mapped_column(String(48), default="")
+    title: Mapped[str] = mapped_column(String(200), default="")
+    severity: Mapped[str] = mapped_column(String(16), default="Low", index=True)
+    evidence_level: Mapped[str] = mapped_column(String(16), default="")
+    tool: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)
+    status_by: Mapped[str] = mapped_column(String(64), default="raqeeb")
+    status_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    status_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    first_scan: Mapped[str] = mapped_column(String(64))
+    last_scan: Mapped[str] = mapped_column(String(64))
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    evidence_json: Mapped[str | None] = mapped_column(Text, nullable=True)

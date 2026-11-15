@@ -69,7 +69,7 @@ def run_once() -> Dict[str, Any]:
                 skipped += 1
                 continue
             try:
-                scan_asset(db, owner, asset)
+                scan_asset(db, owner, asset, operator="raqeeb", trigger="scheduled")
                 scanned += 1
             except Exception as exc:  # keep going across assets
                 failed += 1
