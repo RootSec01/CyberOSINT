@@ -173,7 +173,8 @@
     "path_traversal",
     "prompt_injection",
     "rce",
-    "secrets_leakage"
+    "secrets_leakage",
+    "tool_poisoning"
    ]
   },
   {
