@@ -11,7 +11,7 @@
   },
   "detector_code_sha256": {
     "benchmark/runner.py": "bf03e7078c94b0355c6fd4f73ec8bae3616a4486138da434f322dfe9ff03f3d3",
-    "raqeeb/mcp_detectors.py": "5f66fba8a3f4694af23a4e5395e2d513fa0bd82f7487e8e61c5bf48145a397e0",
+    "raqeeb/mcp_detectors.py": "3f9ab9e93f70f2e6c0876401a5cb430cd2ba430e531a826b880dfce5ec3c311e",
     "raqeeb/safe_proof.py": "1095bb50d1f6d65f11fe4b493f112afa9d4f436e478c0a661305d25ca581f7bf",
     "raqeeb/secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
   },
@@ -149,10 +149,10 @@
         "rce"
       ],
       "evidence_levels": {
-        "rce": [
+        "open_capability": [
           "OBSERVED"
         ],
-        "open_capability": [
+        "rce": [
           "OBSERVED"
         ]
       }

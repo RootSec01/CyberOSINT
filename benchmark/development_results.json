@@ -11,7 +11,7 @@
   },
   "detector_code_sha256": {
     "benchmark/runner.py": "bf03e7078c94b0355c6fd4f73ec8bae3616a4486138da434f322dfe9ff03f3d3",
-    "raqeeb/mcp_detectors.py": "5f66fba8a3f4694af23a4e5395e2d513fa0bd82f7487e8e61c5bf48145a397e0",
+    "raqeeb/mcp_detectors.py": "3f9ab9e93f70f2e6c0876401a5cb430cd2ba430e531a826b880dfce5ec3c311e",
     "raqeeb/safe_proof.py": "1095bb50d1f6d65f11fe4b493f112afa9d4f436e478c0a661305d25ca581f7bf",
     "raqeeb/secret_signals.py": "108b85343a5979f0b932ced880d36918c1f8716dbfbfe28a1cd09edd79063818"
   },
@@ -19,13 +19,13 @@
   "cases_scored": 50,
   "cases_excluded_ambiguous": 10,
   "micro": {
-    "tp": 40,
-    "fp": 3,
-    "tn": 256,
-    "fn": 1,
-    "precision": 0.9302325581395349,
-    "recall": 0.975609756097561,
-    "f1": 0.9523809523809524
+    "tp": 37,
+    "fp": 1,
+    "tn": 258,
+    "fn": 4,
+    "precision": 0.9736842105263158,
+    "recall": 0.9024390243902439,
+    "f1": 0.9367088607594938
   },
   "by_category": {
     "rce": {
@@ -74,34 +74,16 @@
       "f1": 1.0
     },
     "tool_poisoning": {
-      "tp": 5,
-      "fp": 2,
-      "tn": 42,
-      "fn": 1,
-      "precision": 0.7142857142857143,
-      "recall": 0.8333333333333334,
-      "f1": 0.7692307692307692
+      "tp": 2,
+      "fp": 0,
+      "tn": 44,
+      "fn": 4,
+      "precision": 1.0,
+      "recall": 0.3333333333333333,
+      "f1": 0.5
     }
   },
   "errors": [
-    {
-      "id": "D-C15",
-      "split": "development",
-      "group": "sensitive",
-      "false_positive": [
-        "tool_poisoning"
-      ],
-      "false_negative": []
-    },
-    {
-      "id": "D-C16",
-      "split": "development",
-      "group": "sensitive",
-      "false_positive": [
-        "tool_poisoning"
-      ],
-      "false_negative": []
-    },
     {
       "id": "D-M01",
       "split": "development",
@@ -113,6 +95,33 @@
     },
     {
       "id": "D-M05",
+      "split": "development",
+      "group": "malicious_metadata",
+      "false_positive": [],
+      "false_negative": [
+        "tool_poisoning"
+      ]
+    },
+    {
+      "id": "D-M08",
+      "split": "development",
+      "group": "malicious_metadata",
+      "false_positive": [],
+      "false_negative": [
+        "tool_poisoning"
+      ]
+    },
+    {
+      "id": "D-M09",
+      "split": "development",
+      "group": "malicious_metadata",
+      "false_positive": [],
+      "false_negative": [
+        "tool_poisoning"
+      ]
+    },
+    {
+      "id": "D-M10",
       "split": "development",
       "group": "malicious_metadata",
       "false_positive": [],
@@ -141,8 +150,7 @@
       "id": "D-A04",
       "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ]
     },
     {
@@ -178,8 +186,7 @@
       "id": "D-A10",
       "reason": "Insufficient declaration evidence for a binary ground truth; excluded from classification metrics, predictions still shown.",
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ]
     }
   ],
@@ -612,11 +619,11 @@
         "secrets_leakage"
       ],
       "evidence_levels": {
-        "secrets_leakage": [
-          "INFERRED"
-        ],
         "open_capability": [
           "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
         ]
       }
     },
@@ -646,14 +653,10 @@
         "secrets_leakage"
       ],
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ],
       "evidence_levels": {
         "secrets_leakage": [
-          "INFERRED"
-        ],
-        "tool_poisoning": [
           "INFERRED"
         ]
       }
@@ -669,18 +672,14 @@
       ],
       "predicted": [
         "open_capability",
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ],
       "evidence_levels": {
-        "secrets_leakage": [
-          "INFERRED"
-        ],
-        "tool_poisoning": [
-          "INFERRED"
-        ],
         "open_capability": [
           "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
         ]
       }
     },
@@ -786,14 +785,10 @@
       "scored": false,
       "expected": null,
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ],
       "evidence_levels": {
         "secrets_leakage": [
-          "INFERRED"
-        ],
-        "tool_poisoning": [
           "INFERRED"
         ]
       }
@@ -862,14 +857,10 @@
       "scored": false,
       "expected": null,
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ],
       "evidence_levels": {
         "secrets_leakage": [
-          "INFERRED"
-        ],
-        "tool_poisoning": [
           "INFERRED"
         ]
       }
@@ -887,11 +878,11 @@
         "secrets_leakage"
       ],
       "evidence_levels": {
-        "secrets_leakage": [
-          "INFERRED"
-        ],
         "prompt_injection": [
           "OBSERVED"
+        ],
+        "secrets_leakage": [
+          "INFERRED"
         ]
       }
     },
@@ -1006,14 +997,8 @@
       "expected": [
         "tool_poisoning"
       ],
-      "predicted": [
-        "tool_poisoning"
-      ],
-      "evidence_levels": {
-        "tool_poisoning": [
-          "INFERRED"
-        ]
-      }
+      "predicted": [],
+      "evidence_levels": {}
     },
     {
       "id": "D-M09",
@@ -1025,15 +1010,11 @@
         "tool_poisoning"
       ],
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ],
       "evidence_levels": {
         "secrets_leakage": [
           "OBSERVED"
-        ],
-        "tool_poisoning": [
-          "INFERRED"
         ]
       }
     },
@@ -1047,15 +1028,11 @@
         "tool_poisoning"
       ],
       "predicted": [
-        "secrets_leakage",
-        "tool_poisoning"
+        "secrets_leakage"
       ],
       "evidence_levels": {
         "secrets_leakage": [
           "OBSERVED"
-        ],
-        "tool_poisoning": [
-          "INFERRED"
         ]
       }
     }

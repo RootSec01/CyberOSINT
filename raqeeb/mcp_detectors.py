@@ -29,6 +29,7 @@ prompt injection) and the OWASP MCP Top 10 where a category fits:
   secrets_leakage   "Secrets / Credential Exposure"                  (T1552 / MCP01)
   prompt_injection  "Prompt-Injection Markers in Declaration"        (AML.T0051.001 / MCP06)
   tool_poisoning    "Deceptive or Hidden Tool Declaration"           (T1036 / MCP03)
+                    "Tool Description Directs the Use of Other Tools" (AML.T0051.001 / MCP03)
 """
 
 from __future__ import annotations
@@ -39,6 +40,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 from raqeeb.secret_signals import contains_secret_shape
+from raqeeb.tool_directives import Directive, find_directive
 
 SEVERITY_RANK = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1, "None": 0}
 EVIDENCE_LEVELS = ("OBSERVED", "INFERRED", "DEMONSTRATED", "VERIFIED")
@@ -72,18 +74,7 @@ _HIDDEN_CHARS_RE = re.compile(r"[​‌‍﻿\U000e0000-\U000e007f]")
 _EXEC_NAME_TOKENS = {"shell", "command", "cmd", "exec", "execute", "terminal",
                      "powershell", "bash", "sh", "system", "eval", "spawn",
                      "subprocess", "run"}
-_DANGER_VERBS = re.compile(
-    r"\b(shell|command|execute|exec|eval|spawn|subprocess|rm\s|delete|drop\s+table|"
-    r"credential|secret|token|api[_\s-]?key|password|\.env|private\s+key)\b", re.I)
-_BENIGN_FIRST = {"get", "list", "show", "read", "status", "health", "ping", "info",
-                 "help", "describe", "search", "lookup", "weather", "time", "echo",
-                 "hello", "fetch", "summary"}
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
-
-
-def _first_token(name: str) -> str:
-    m = re.match(r"[a-z0-9]+", str(name).lower())
-    return m.group(0) if m else ""
 
 
 def _tool_text(tool: Dict[str, Any]) -> str:
@@ -254,9 +245,6 @@ def _detect_tool_poisoning(tool, flags) -> Optional[dict]:
         facts.append("contains hidden zero-width / unicode-tag characters"); hidden = True
     if _HTML_COMMENT_RE.search(desc):
         facts.append("hides content inside an HTML comment"); hidden = True
-    mismatch = _first_token(name) in _BENIGN_FIRST and bool(_DANGER_VERBS.search(desc))
-    if mismatch:
-        facts.append("benign-looking name but description grants a dangerous capability")
     if not facts:
         return None
     return _finding(
@@ -266,11 +254,34 @@ def _detect_tool_poisoning(tool, flags) -> Optional[dict]:
         evidence_level="OBSERVED" if hidden else "INFERRED",
         confidence=0.80 if hidden else 0.65,
         observed_facts=[f"tool '{name}' " + r for r in facts],
-        inference="The declaration is hidden or contradicts the tool's name, a "
-                  "hallmark of tool poisoning / rug-pull.",
+        inference="Part of the declaration is hidden from a human reader, which a "
+                  "legitimate tool has no reason to do.",
         tool=name, tid="T1036", owasp="MCP03:2025",
-        rec="Reject tools whose metadata is hidden or contradicts their name; require "
-            "a reviewed, signed tool manifest before an agent may load them.")
+        rec="Reject tools whose metadata hides content; require a reviewed tool "
+            "manifest before an agent may load them.")
+
+
+def _detect_cross_tool_directive(tool, tool_names) -> Optional[dict]:
+    directive: Optional[Directive] = find_directive(tool, tool_names)
+    if directive is None:
+        return None
+    name = str(tool.get("name", ""))
+    facts = [f"description of '{name}' {directive.kind}"]
+    if directive.other_tool:
+        facts.append(f"tool it refers to: '{directive.other_tool}'")
+    facts.append(f"sentence: {directive.sentence}")
+    return _finding(
+        "cross_tool_directive", "tool_poisoning", "High",
+        "Tool Description Directs the Use of Other Tools",
+        finding_type="cross_tool_directive",
+        evidence_level="INFERRED", confidence=0.80,
+        observed_facts=facts,
+        inference="A description should say what its own tool does. Text that tells the "
+                  "agent how to use a different tool is the structure tool-poisoning "
+                  "attacks rely on. Whether this instruction is malicious was not determined.",
+        tool=name, tid="AML.T0051.001", owasp="MCP03:2025",
+        rec="Review the description and remove instructions that concern other tools; "
+            "compare it with the publisher's release if the server is a published package.")
 
 
 # --- orchestration ----------------------------------------------------------
@@ -304,6 +315,7 @@ def run_detectors(server: Dict[str, Any]) -> List[Dict[str, Any]]:
                 rec="Treat server-advertised metadata as untrusted input to any agent."))
             break
 
+    tool_names = [str(t.get("name") or "") for t in tools if isinstance(t, dict)]
     occurrence_counts: Dict[str, int] = {}
     for tool in tools:
         # Identity includes declaration content; list reordering does not change IDs.
@@ -322,6 +334,10 @@ def run_detectors(server: Dict[str, Any]) -> List[Dict[str, Any]]:
             if det:
                 det["id"] = f"{det['category']}:{digest}:{occurrence}"
                 findings.append(det)
+        directive = _detect_cross_tool_directive(tool, tool_names)
+        if directive:
+            directive["id"] = f"{directive['finding_type']}:{digest}:{occurrence}"
+            findings.append(directive)
 
     # Server-level finding: any dangerous capability listed with no credential presented.
     if unauth:

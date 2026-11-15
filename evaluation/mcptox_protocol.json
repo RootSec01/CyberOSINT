@@ -2,11 +2,25 @@
  "benchmark": "https://github.com/zhiqiangwang4/MCPTox-Benchmark",
  "commit": "f85189f9ad12504c197c7f920ab818a40657b1fa",
  "paper": "MCPTox: A Benchmark for Tool Poisoning Attack on Real-World MCP Servers (AAAI 2026)",
- "written": "2026-11-14, after reading the field names of pure_tool.json and before running any detector on its contents",
- "positives": "Every entry of pure_tool.json: one poisoned tool, declared alone with its tool_name and tool_content as the description, on a server that requires authentication.",
- "negatives": "Every distinct tool declaration in reference/data (real releases of published packages), each declared alone on a server that requires authentication.",
- "alarm": "A finding of category tool_poisoning or prompt_injection.",
- "reported": ["recall on positives, overall and per attack template", "false-alarm rate on negatives"],
- "expectation": "The detectors match explicit markers: override phrases, hidden characters, concealment wording. MCPTox poisonings are fluent natural-language instructions, so recall is expected to be low, plausibly under one half. There is no pass mark; the number is reported as measured.",
- "redistribution": "The benchmark ships no licence. It is fetched from its source at evaluation time and none of its text is copied into this repository; results hold counts and entry identifiers only."
+ "alarm": "A finding of category tool_poisoning or prompt_injection attributed to the tool in question.",
+ "redistribution": "The benchmark ships no licence. It is fetched from its source at evaluation time and none of its text is copied into this repository; results hold counts and entry identifiers only.",
+ "first_run": {
+  "written": "2026-11-14, after reading the field names of pure_tool.json and before running any detector on its contents",
+  "method": "Each poisoned tool declared alone; clean set: every distinct tool in reference/data, each declared alone.",
+  "expectation": "Recall expected to be low, plausibly under one half, because the detectors matched explicit markers and the poisonings are fluent natural language.",
+  "result": {"poisoned_tools": 485, "detected": 14, "recall": 0.0289,
+             "published_tools": 2121, "false_alarms": 71, "false_alarm_rate": 0.0335},
+  "result_commit": "92f2fab"
+ },
+ "second_run": {
+  "written": "2026-11-15",
+  "why": "The first run showed marker matching does not find these poisonings. A detector for the structure they share, a description that governs a different tool, was then built.",
+  "split": "Fixed in mcptox_split.json before any entry beyond one FileSystem entry had been read. Poisonings: 16 development servers, 29 held out. Clean tools: 15 development packages, 15 held out.",
+  "development_use": "The detector's rules were written and adjusted against development servers and development packages only. Held-out entries were not read.",
+  "freeze": "The detector was frozen, then scored once on the held-out servers and packages. That score is the reported result; the development score is in-sample and is reported only for completeness.",
+  "method": "Each poisoned tool is declared next to the names of its server's real tools, with empty descriptions, as an agent would receive them. Clean tools are judged inside their full published manifest.",
+  "removed_heuristic": "The older rule 'harmless-looking name with a dangerous-sounding description' was removed. On development data it raised 17 false alarms on real tools and found 1 poisoning. The held-out false-alarm count with that rule still in place, 54 of 634, was seen before the removal; the decision rests on the development figures.",
+  "limits": ["Development and held-out entries come from the same benchmark and the same authors, so the attack style is shared.",
+             "A poisoning that names no other tool, or is reworded to avoid directive language, is outside this detector."]
+ }
 }

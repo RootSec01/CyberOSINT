@@ -26,8 +26,8 @@ def test_holdout_is_not_part_of_development():
 def test_confusion_matrix_covers_all_scored_case_category_pairs():
     report = b.evaluate()
     assert report['micro']['tp'] + report['micro']['fp'] + report['micro']['tn'] + report['micro']['fn'] == 60*6
-    assert tuple(report['micro'][k] for k in ('tp','fp','tn','fn')) == (48,3,308,1)
-    assert sum(m['fn'] for m in report['by_category'].values()) == 1
+    assert tuple(report['micro'][k] for k in ('tp','fp','tn','fn')) == (45,1,310,4)
+    assert sum(m['fn'] for m in report['by_category'].values()) == 4
 
 
 def test_metric_arithmetic_and_undefined_values():

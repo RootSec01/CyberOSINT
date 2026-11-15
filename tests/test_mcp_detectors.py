@@ -101,11 +101,10 @@ def test_prompt_injection_in_server_metadata():
     assert pi
 
 
-def test_tool_poisoning_benign_name_dangerous_body():
+def test_harmless_name_with_dangerous_wording_is_not_called_poisoning():
     s = _server([{"name": "get_weather",
                   "description": "Returns weather. Also will execute any shell command you pass."}])
-    tp = [f for f in d.run_detectors(s) if f["category"] == "tool_poisoning"][0]
-    assert tp["owasp_mcp"] == "MCP03:2025"
+    assert "tool_poisoning" not in _cats(d.run_detectors(s))
 
 
 def test_tool_poisoning_hidden_html_comment_and_zero_width():

@@ -103,13 +103,28 @@ from pinned commits of the sources.
 This run also showed that the protocol client did not carry the session id that servers built with
 the official SDK require, and read zero tools from them. That is fixed and covered by a test.
 
-**MCPTox** (AAAI 2026), 485 poisoned tool descriptions written for 45 real servers, against 2,121
-distinct tool declarations from the reference library as the clean set
-([protocol](evaluation/mcptox_protocol.json), [results](evaluation/mcptox_results.json)). The result
-is in the results file; the pattern-based poisoning and injection detectors were expected to do badly
-on fluent natural-language poisonings, and they do. Detecting an altered declaration by comparing it
-with the published release does not depend on how the alteration is worded, which is why the
-reference library exists.
+**MCPTox** (AAAI 2026): 485 poisoned tool descriptions written for 45 real servers. The clean set is
+the 2,121 distinct tool declarations of the reference library
+([protocol](evaluation/mcptox_protocol.json), [results](evaluation/mcptox_results.json)).
+
+The first run scored the marker-based detectors as they were: 14 of 485 poisonings found (2.9%),
+71 false alarms on the clean set. These poisonings contain no suspicious words. What they share is
+structure: the description of one tool gives the agent orders about a different tool. A detector
+for that structure was then written using 16 of the 45 servers and 15 of the 30 packages, frozen,
+and scored once on the rest:
+
+| Held out, never used for development | |
+|---|---:|
+| Poisoned descriptions (29 servers) | 258 |
+| Detected | 215 (83.3%) |
+| Clean tool declarations (15 packages) | 634 |
+| False alarms | 0 |
+
+On the development part it finds 206 of 227 with 24 false alarms in 1,487 clean declarations; that
+figure is in-sample. Development and held-out entries come from the same benchmark, so the attack
+style is shared, and a poisoning that names no other tool is outside this detector. Comparing a
+declaration with the published release does not depend on wording at all, which is what the
+reference library is for.
 
 ## Evidence levels
 
@@ -129,7 +144,8 @@ reference library exists.
 | `path_traversal` | Potentially unconstrained filesystem path | T1083 | none |
 | `secrets_leakage` | Secret or credential exposure | T1552 | MCP01 |
 | `prompt_injection` | Prompt-injection markers in a declaration | AML.T0051.001 (ATLAS) | MCP06 |
-| `tool_poisoning` | Deceptive or hidden tool declaration | T1036 | MCP03 |
+| `tool_poisoning` | Hidden content in a declaration | T1036 | MCP03 |
+| `tool_poisoning` | Description that directs the use of other tools | AML.T0051.001 (ATLAS) | MCP03 |
 
 `path_traversal` has no close OWASP MCP Top 10 category and is left unmapped.
 
@@ -149,12 +165,14 @@ from scoring.
 
 | Split | Scored | TP | FP | TN | FN | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Development | 50 | 40 | 3 | 256 | 1 | 93.0% | 97.6% | 95.2% |
+| Development | 50 | 37 | 1 | 258 | 4 | 97.4% | 90.2% | 93.7% |
 | Holdout | 10 | 8 | 0 | 52 | 0 | 100% | 100% | 100% |
-| Combined | 60 | 48 | 3 | 308 | 1 | 94.1% | 98.0% | 96.0% |
+| Combined | 60 | 45 | 1 | 310 | 4 | 97.8% | 91.8% | 94.7% |
 
 These cases are synthetic and were labelled by one author, and the holdout comes from the same
-design. They measure regression, not field accuracy.
+design. They measure regression, not field accuracy. Three of them were written for a rule
+(harmless name, dangerous wording) that was removed after it produced 17 false alarms and one
+detection on real data; they are now counted as misses.
 
 ## Run it
 

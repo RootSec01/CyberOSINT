@@ -1,0 +1,43 @@
+{
+ "poisoned": {
+  "rule": "Servers ordered by sha256('raqeeb-mcptox-split:' + server_name); the first 15 are development. FileSystem is also development because one of its entries was read while inspecting the file format.",
+  "development_servers": [
+   "12306-mcp",
+   "AdFin",
+   "Apify",
+   "BaiduMap",
+   "Commander",
+   "Email",
+   "EverArt",
+   "Everything",
+   "FileSystem",
+   "Flomo",
+   "Github",
+   "HyperBrowser",
+   "KeywordsPeopleUse",
+   "OP.GG",
+   "Prisma",
+   "Sequential Thinking"
+  ]
+ },
+ "clean": {
+  "rule": "Packages ordered by sha256('raqeeb-clean-split:' + package); the first 15 are development.",
+  "development_packages": [
+   "@azure/mcp",
+   "@browsermcp/mcp",
+   "@elastic/mcp-server-elasticsearch",
+   "@heroku/mcp-server",
+   "@modelcontextprotocol/server-brave-search",
+   "@modelcontextprotocol/server-everart",
+   "@modelcontextprotocol/server-everything",
+   "@modelcontextprotocol/server-memory",
+   "@sentry/mcp-server",
+   "chrome-devtools-mcp",
+   "exa-mcp-server",
+   "figma-developer-mcp",
+   "firecrawl-mcp",
+   "mongodb-mcp-server",
+   "tavily-mcp"
+  ]
+ }
+}
