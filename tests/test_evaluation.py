@@ -1,7 +1,10 @@
 import json
+import os
 import socket
 import sys
 from pathlib import Path
+
+import pytest
 
 from evaluation import dvmcp
 
@@ -62,10 +65,19 @@ def test_a_relative_interpreter_path_survives_the_change_of_directory(tmp_path, 
         home.mkdir(parents=True)
         (home / "server.py").write_text(
             CHALLENGE.format(root=str(ROOT), port=base + number, profile="safe"))
-    (tmp_path / "env" / "bin").mkdir(parents=True)
-    (tmp_path / "env" / "bin" / "python").symlink_to(sys.executable)
+    if os.name == "nt":
+        # A virtualenv's Scripts\python.exe is a launcher that only runs beside its pyvenv.cfg,
+        # so reach the running interpreter through a relative path written with "/" instead.
+        try:
+            relative = Path(os.path.relpath(sys.executable, tmp_path)).as_posix()
+        except ValueError:
+            pytest.skip("the interpreter is on another drive")
+    else:
+        relative = "env/bin/python"
+        (tmp_path / "env" / "bin").mkdir(parents=True)
+        (tmp_path / relative).symlink_to(sys.executable)
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(sys, "argv", ["dvmcp", "--lab", "lab", "--python", "env/bin/python",
+    monkeypatch.setattr(sys, "argv", ["dvmcp", "--lab", "lab", "--python", relative,
                                       "--output", str(tmp_path / "results.json")])
 
     assert dvmcp.main() == 0
