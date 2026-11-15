@@ -1,4 +1,5 @@
 import json
+import tempfile
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -65,3 +66,22 @@ def stateful():
     server = HTTPServer(("127.0.0.1", 0), StatefulServer)
     yield serve(server)
     server.shutdown()
+
+
+@pytest.fixture
+def console():
+    from fastapi.testclient import TestClient
+    from sqlalchemy import create_engine
+    from raqeeb import db
+    from raqeeb import models as m
+    from raqeeb.security import hash_password
+    engine = create_engine(f"sqlite:///{tempfile.mkdtemp()}/cases.db",
+                           connect_args={"check_same_thread": False}, future=True)
+    db.engine = engine
+    db.SessionLocal.configure(bind=engine)
+    db.init_db()
+    with db.session_scope() as session:
+        session.add_all([m.User(username=name, password_hash=hash_password("password123"))
+                         for name in ("rami", "outsider")])
+    from raqeeb import main
+    return TestClient(main.app)

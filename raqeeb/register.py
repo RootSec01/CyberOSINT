@@ -8,6 +8,7 @@ from typing import Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Query, Session
 
+from raqeeb import team
 from raqeeb.declarations import tools_digest
 from raqeeb.models import Asset, Finding, Scan, User
 
@@ -184,14 +185,14 @@ def set_status(db: Session, finding: Finding, status: str, note: str, by: str) -
     return finding
 
 
-def _visible(query: Query, user: User) -> Query:
-    return query if user.role == "admin" else query.filter(Asset.user_id == user.id)
+def _visible(db: Session, query: Query, user: User) -> Query:
+    return query if user.role == "admin" else query.filter(Asset.user_id.in_(team.people(db, user)))
 
 
 def scans(db: Session, user: User, *, asset_id: Optional[int] = None, outcome: str = "", operator: str = "",
           trigger: str = "", verdict: str = "", text: str = "",
           bounds: tuple[Optional[datetime], Optional[datetime]] = (None, None)) -> Query:
-    query = _visible(db.query(Scan, Asset).join(Asset, Asset.id == Scan.asset_id), user)
+    query = _visible(db, db.query(Scan, Asset).join(Asset, Asset.id == Scan.asset_id), user)
     if asset_id is not None:
         query = query.filter(Scan.asset_id == asset_id)
     for column, value in ((Scan.outcome, outcome), (Scan.operator, operator),
@@ -211,7 +212,7 @@ def findings(db: Session, user: User, *, asset_id: Optional[int] = None, severit
              bounds: tuple[Optional[datetime], Optional[datetime]] = (None, None)) -> Query:
     if seen not in ("first", "last", "status"):
         raise Rejected("seen must be first, last or status")
-    query = _visible(db.query(Finding, Asset).join(Asset, Asset.id == Finding.asset_id), user)
+    query = _visible(db, db.query(Finding, Asset).join(Asset, Asset.id == Finding.asset_id), user)
     if asset_id is not None:
         query = query.filter(Finding.asset_id == asset_id)
     for column, value in ((Finding.severity, severity), (Finding.status, status.lower()),
@@ -227,6 +228,11 @@ def findings(db: Session, user: User, *, asset_id: Optional[int] = None, severit
                                  Finding.category.ilike(like), Asset.label.ilike(like), Asset.value.ilike(like)))
     moment = {"first": Finding.first_seen_at, "last": Finding.last_seen_at, "status": Finding.status_at}[seen]
     return within(query, moment, bounds).order_by(Finding.last_seen_at.desc(), Finding.id.desc())
+
+
+def forget_asset(db: Session, asset_id: int) -> None:
+    db.query(Finding).filter(Finding.asset_id == asset_id).delete(synchronize_session=False)
+    db.query(Scan).filter(Scan.asset_id == asset_id).delete(synchronize_session=False)
 
 
 def latest_reference(db: Session, asset_id: int) -> Optional[str]:

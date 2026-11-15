@@ -169,3 +169,77 @@ class Finding(Base):
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     evidence_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class Member(Base):
+    """A person's place in a team: whose team, which role, and the name shown on their work."""
+    __tablename__ = "members"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True, nullable=False)
+    team_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
+    role: Mapped[str] = mapped_column(String(16), default="analyst")
+    display_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    title: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    removed: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class CaseRule(Base):
+    """A team's choice to switch one automatic case rule off."""
+    __tablename__ = "case_rules"
+    __table_args__ = (UniqueConstraint("team_id", "rule"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    team_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
+    rule: Mapped[str] = mapped_column(String(32), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    changed_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class Case(Base):
+    """Something that needs a person's decision, with who opened it, why, and how it ended."""
+    __tablename__ = "cases"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    reference: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), index=True, nullable=False)
+    rule: Mapped[str] = mapped_column(String(32), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    reason: Mapped[str] = mapped_column(Text)
+    evidence_key: Mapped[str] = mapped_column(Text, default="")
+    severity: Mapped[str] = mapped_column(String(16), index=True)
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)
+    present: Mapped[bool] = mapped_column(Boolean, default=True)
+    opened_by: Mapped[str] = mapped_column(String(64), index=True)
+    opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, index=True)
+    scan: Mapped[str] = mapped_column(String(64))
+    last_scan: Mapped[str] = mapped_column(String(64))
+    owner_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True, nullable=True)
+    closed_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    closure_reason: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    closure_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class CaseFinding(Base):
+    __tablename__ = "case_findings"
+    __table_args__ = (UniqueConstraint("case_id", "finding_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True, nullable=False)
+    finding_id: Mapped[int] = mapped_column(ForeignKey("findings.id"), index=True, nullable=False)
+
+
+class CaseEvent(Base):
+    """One line of a case's timeline. Lines are added, never edited."""
+    __tablename__ = "case_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    case_id: Mapped[int] = mapped_column(ForeignKey("cases.id"), index=True, nullable=False)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+    actor: Mapped[str] = mapped_column(String(64))
+    kind: Mapped[str] = mapped_column(String(16))
+    text: Mapped[str] = mapped_column(Text)

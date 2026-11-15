@@ -34,7 +34,7 @@ from raqeeb.db import get_db, init_db, check_production_schema
 if DEPLOYMENT.production:
     check_production_schema()  # even import-only ASGI clients must pass readiness
 from raqeeb.models import (
-    Scan, Finding,
+    Scan, Finding, Case,
     User, Run, Asset, Alert, UserSettings, AuditEntry, OwnershipProof,
 )
 from raqeeb.auth_session import (
@@ -59,6 +59,8 @@ from raqeeb import secrets_provider
 from raqeeb import ownership
 from raqeeb import provenance
 from raqeeb import register
+from raqeeb import cases
+from raqeeb import team
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
 def _env_flag(name: str, default: str = "false") -> bool:
@@ -466,8 +468,9 @@ def scan_asset(db: Session, user: User, asset: Asset, *,
             "declarations": register.declarations_digest(server.get("tools")),
         }
         run_row = _persist_run(db, user, payload, target_type="mcp", target_value=value)
-        payload["scan_reference"] = register.record_scan(
-            db, asset, payload, operator=operator, trigger=trigger, run_row=run_row).reference
+        scan = register.record_scan(db, asset, payload, operator=operator, trigger=trigger, run_row=run_row)
+        payload["scan_reference"] = scan.reference
+        payload["cases"] = [case.reference for case in cases.review(db, asset, scan, payload)]
         asset.last_scanned_at = now
         asset.last_risk_level = proof.get("severity")
         asset.last_run_id = str(payload.get("run_id") or "")
@@ -790,10 +793,10 @@ async def api_list_assets(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
-    """List monitored targets — the caller's own, or all for an admin."""
+    """List monitored targets: the caller's team's, or all for an admin."""
     q = db.query(Asset)
     if user.role != "admin":
-        q = q.filter(Asset.user_id == user.id)
+        q = q.filter(Asset.user_id.in_(team.people(db, user)))
     rows = q.order_by(Asset.created_at.desc()).all()
     return JSONResponse([_asset_dict(a) for a in rows])
 
@@ -806,6 +809,8 @@ async def api_create_asset(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
     value = value.strip()
     if not value:
         return JSONResponse({"detail": "value is required"}, status_code=400)
@@ -827,8 +832,10 @@ async def api_update_asset(
     db: Session = Depends(get_db),
 ) -> JSONResponse:
     a = db.query(Asset).filter(Asset.id == asset_id).first()
-    if not a or (user.role != "admin" and a.user_id != user.id):
+    if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
     a.monitoring = monitoring
     db.commit()
     return JSONResponse(_asset_dict(a))
@@ -841,8 +848,12 @@ async def api_delete_asset(
     db: Session = Depends(get_db),
 ) -> JSONResponse:
     a = db.query(Asset).filter(Asset.id == asset_id).first()
-    if not a or (user.role != "admin" and a.user_id != user.id):
+    if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
+    cases.forget_asset(db, a.id)
+    register.forget_asset(db, a.id)
     db.delete(a)
     db.commit()
     return JSONResponse({"id": asset_id, "deleted": True})
@@ -871,8 +882,10 @@ async def api_scan_asset_now(
     another user's asset without stealing its ownership).
     """
     a = db.query(Asset).filter(Asset.id == asset_id).first()
-    if not a or (user.role != "admin" and a.user_id != user.id):
+    if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
     owner = db.query(User).filter(User.id == a.user_id).first() or user
     try:
         payload = scan_asset(db, owner, a, operator=user.username)
@@ -889,7 +902,7 @@ async def api_asset_drift(
 ) -> JSONResponse:
     """What changed between this asset's two most recent scans."""
     a = db.query(Asset).filter(Asset.id == asset_id).first()
-    if not a or (user.role != "admin" and a.user_id != user.id):
+    if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
 
     rows = (
@@ -956,7 +969,7 @@ async def api_ack_alert(
 ) -> JSONResponse:
     """Mark one alert acknowledged (read)."""
     a = db.query(Alert).filter(Alert.id == alert_id).first()
-    if not a or (user.role != "admin" and a.user_id != user.id):
+    if not team.sees(db, user, a):
         return JSONResponse({"detail": "alert not found"}, status_code=404)
     a.acknowledged = True
     db.commit()
@@ -1057,7 +1070,7 @@ async def api_asset_copilot(
     """Grounded AI Copilot: explains an asset's posture from its own evidence,
     under the user's chosen privacy mode."""
     a = db.query(Asset).filter(Asset.id == asset_id).first()
-    if not a or (user.role != "admin" and a.user_id != user.id):
+    if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
     settings = _get_or_create_settings(db, user)
     context = _copilot_context(db, a)
@@ -1217,6 +1230,18 @@ def _rejected(error: Exception) -> JSONResponse:
     return JSONResponse({"detail": str(error)}, status_code=422)
 
 
+def _forbidden(db: Session, user: User, action: str) -> Optional[JSONResponse]:
+    if team.allows(db, user, action):
+        return None
+    return JSONResponse({"detail": f"the {team.role_of(db, user)} role cannot {team.DOES[action]}"},
+                        status_code=403)
+
+
+def _findings_out(db: Session, rows: list) -> list:
+    held = cases.references(db, [finding.id for finding, _ in rows])
+    return [{**register.finding_dict(finding, asset), "case": held.get(finding.id)} for finding, asset in rows]
+
+
 @app.get("/api/scans", response_class=JSONResponse)
 async def api_list_scans(
     asset_id: Optional[int] = None, outcome: str = "", operator: str = "",
@@ -1250,7 +1275,7 @@ async def api_get_scan(
     report = json.loads(stored.report_json) if stored and stored.report_json else None
     seen = register.findings(db, user, scan=scan.reference).all()
     return JSONResponse({**register.scan_dict(scan, asset), "report": report,
-                         "findings": [register.finding_dict(finding, owner) for finding, owner in seen]})
+                         "findings": _findings_out(db, seen)})
 
 
 @app.get("/api/findings", response_class=JSONResponse)
@@ -1271,8 +1296,7 @@ async def api_list_findings(
     except register.Rejected as error:
         return _rejected(error)
     total, rows = register.page(query, limit, offset)
-    return JSONResponse({"total": total,
-                         "findings": [register.finding_dict(finding, asset) for finding, asset in rows]})
+    return JSONResponse({"total": total, "findings": _findings_out(db, rows)})
 
 
 def _finding_by_reference(db: Session, user: User, reference: str):
@@ -1288,7 +1312,7 @@ async def api_get_finding(
     found = _finding_by_reference(db, user, reference)
     if not found:
         return JSONResponse({"detail": "finding not found"}, status_code=404)
-    return JSONResponse(register.finding_dict(*found))
+    return JSONResponse(_findings_out(db, [found])[0])
 
 
 @app.post("/api/findings/{reference}/status", response_class=JSONResponse)
@@ -1302,6 +1326,8 @@ async def api_set_finding_status(
     found = _finding_by_reference(db, user, reference)
     if not found:
         return JSONResponse({"detail": "finding not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
     finding, asset = found
     before = finding.status
     try:
@@ -1310,7 +1336,250 @@ async def api_set_finding_status(
         return _rejected(error)
     _audit(db, "finding_status", user.username,
            detail=f"finding={finding.reference};from={before};to={finding.status}", decision=finding.status)
-    return JSONResponse(register.finding_dict(finding, asset))
+    return JSONResponse(_findings_out(db, [(finding, asset)])[0])
+
+
+@app.get("/api/cases", response_class=JSONResponse)
+async def api_list_cases(
+    asset_id: Optional[int] = None, status: str = "", severity: str = "", rule: str = "",
+    owner: str = "", opened_by: str = "", closure: str = "", q: str = "", seen: str = "opened",
+    since: str = "", until: str = "", on: str = "",
+    limit: int = register.PAGE, offset: int = 0,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    try:
+        query = cases.cases(db, user, asset_id=asset_id, status=status, severity=severity, rule=rule,
+                            owner=owner, opened_by=opened_by, closure=closure, text=q, seen=seen,
+                            bounds=register.window(since, until, on))
+    except register.Rejected as error:
+        return _rejected(error)
+    total, rows = register.page(query, limit, offset)
+    return JSONResponse({"total": total, "cases": [cases.case_dict(db, case, asset) for case, asset in rows]})
+
+
+def _case_by_reference(db: Session, user: User, reference: str):
+    return cases.cases(db, user).filter(Case.reference == reference.strip().upper()).first()
+
+
+@app.get("/api/cases/{reference}", response_class=JSONResponse)
+async def api_get_case(
+    reference: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    found = _case_by_reference(db, user, reference)
+    if not found:
+        return JSONResponse({"detail": "case not found"}, status_code=404)
+    return JSONResponse(cases.case_dict(db, *found, full=True))
+
+
+@app.post("/api/cases", response_class=JSONResponse)
+async def api_open_case(
+    finding: str = Form(...),
+    note: str = Form(...),
+    title: str = Form(""),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    found = _finding_by_reference(db, user, finding)
+    if not found:
+        return JSONResponse({"detail": "finding not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
+    try:
+        case = cases.open_by_hand(db, user, found[0], found[1], title, note)
+    except register.Rejected as error:
+        return _rejected(error)
+    _audit(db, "case_opened", user.username, detail=f"case={case.reference};finding={found[0].reference}",
+           decision="manual")
+    return JSONResponse(cases.case_dict(db, case, found[1], full=True), status_code=201)
+
+
+def _change_case(db: Session, user: User, reference: str, action: str, change) -> JSONResponse:
+    found = _case_by_reference(db, user, reference)
+    if not found:
+        return JSONResponse({"detail": "case not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
+    case, asset = found
+    try:
+        change(case)
+    except register.Rejected as error:
+        return _rejected(error)
+    _audit(db, f"case_{action}", user.username, detail=f"case={case.reference}", decision=case.status)
+    return JSONResponse(cases.case_dict(db, case, asset, full=True))
+
+
+@app.post("/api/cases/{reference}/assign", response_class=JSONResponse)
+async def api_assign_case(
+    reference: str, owner: str = Form(""),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return _change_case(db, user, reference, "assigned", lambda case: cases.assign(db, case, user, owner))
+
+
+@app.post("/api/cases/{reference}/status", response_class=JSONResponse)
+async def api_set_case_status(
+    reference: str, status: str = Form(...),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return _change_case(db, user, reference, "status", lambda case: cases.set_status(db, case, user, status))
+
+
+@app.post("/api/cases/{reference}/close", response_class=JSONResponse)
+async def api_close_case(
+    reference: str, reason: str = Form(...), note: str = Form(""),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return _change_case(db, user, reference, "closed", lambda case: cases.close(db, case, user, reason, note))
+
+
+@app.post("/api/cases/{reference}/reopen", response_class=JSONResponse)
+async def api_reopen_case(
+    reference: str, note: str = Form(""),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return _change_case(db, user, reference, "reopened", lambda case: cases.reopen(db, case, user, note))
+
+
+@app.post("/api/cases/{reference}/notes", response_class=JSONResponse)
+async def api_add_case_note(
+    reference: str, text: str = Form(...),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return _change_case(db, user, reference, "note", lambda case: cases.add_note(db, case, user, text))
+
+
+@app.get("/api/case-rules", response_class=JSONResponse)
+async def api_case_rules(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse({"rules": cases.rules_for(db, user), "closure_reasons": list(cases.CLOSURES)})
+
+
+@app.put("/api/case-rules/{rule}", response_class=JSONResponse)
+async def api_set_case_rule(
+    rule: str, enabled: bool = Form(...),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    if (refusal := _forbidden(db, user, team.MANAGE)):
+        return refusal
+    try:
+        cases.set_rule(db, user, rule, enabled)
+    except register.Rejected as error:
+        return _rejected(error)
+    _audit(db, "case_rule", user.username, detail=f"rule={rule};enabled={enabled}",
+           decision="on" if enabled else "off")
+    return JSONResponse({"rules": cases.rules_for(db, user)})
+
+
+def _profile_out(db: Session, user: User) -> dict:
+    role = team.role_of(db, user)
+    return {**team.member_dict(db, user, team.membership(db, user)),
+            "can": [action for action in (team.READ, team.WORK, team.MANAGE) if team.allows(db, user, action)],
+            "role": role}
+
+
+@app.get("/api/profile", response_class=JSONResponse)
+async def api_get_profile(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse(_profile_out(db, user))
+
+
+@app.put("/api/profile", response_class=JSONResponse)
+async def api_put_profile(
+    display_name: str = Form(""), email: str = Form(""), title: str = Form(""),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    try:
+        team.update_profile(db, user, display_name=display_name, email=email, title=title)
+    except team.Refused as error:
+        return _rejected(error)
+    return JSONResponse(_profile_out(db, user))
+
+
+@app.get("/api/members", response_class=JSONResponse)
+async def api_list_members(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse({"members": team.roster(db, user), "roles": list(team.ASSIGNABLE)})
+
+
+@app.post("/api/members", response_class=JSONResponse)
+async def api_add_member(
+    username: str = Form(...), password: str = Form(...), role: str = Form(team.ANALYST),
+    display_name: str = Form(""), email: str = Form(""),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    if (refusal := _forbidden(db, user, team.MANAGE)):
+        return refusal
+    try:
+        row = team.add(db, user, username=username, password=password, role=role,
+                       display_name=display_name, email=email)
+    except team.Refused as error:
+        return _rejected(error)
+    _audit(db, "member_added", user.username, detail=f"member={username.strip().lower()};role={row.role}",
+           decision=row.role)
+    return JSONResponse({"members": team.roster(db, user)}, status_code=201)
+
+
+def _change_member(db: Session, user: User, member_id: int, action: str, change) -> JSONResponse:
+    if (refusal := _forbidden(db, user, team.MANAGE)):
+        return refusal
+    try:
+        row = change()
+    except LookupError:
+        return JSONResponse({"detail": "member not found"}, status_code=404)
+    except team.Refused as error:
+        return _rejected(error)
+    _audit(db, f"member_{action}", user.username, detail=f"member_id={member_id};role={row.role}",
+           decision=row.role)
+    return JSONResponse({"members": team.roster(db, user)})
+
+
+@app.patch("/api/members/{member_id}", response_class=JSONResponse)
+async def api_change_member_role(
+    member_id: int, role: str = Form(...),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return _change_member(db, user, member_id, "role", lambda: team.change_role(db, user, member_id, role))
+
+
+@app.delete("/api/members/{member_id}", response_class=JSONResponse)
+async def api_remove_member(
+    member_id: int,
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    def remove():
+        row = team.remove(db, user, member_id)
+        cases.release_from(db, member_id)
+        return row
+    return _change_member(db, user, member_id, "removed", remove)
+
+
+@app.get("/api/search", response_class=JSONResponse)
+async def api_search(
+    q: str, limit: int = 8,
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    """One box for a server name, an endpoint, or any SCN-, FND- or CASE- reference."""
+    text = q.strip()
+    if len(text) < 2:
+        return _rejected(ValueError("search needs at least 2 characters"))
+    limit = max(1, min(limit, 25))
+    like = f"%{text}%"
+    servers = db.query(Asset).filter(Asset.label.ilike(like) | Asset.value.ilike(like))
+    if user.role != "admin":
+        servers = servers.filter(Asset.user_id.in_(team.people(db, user)))
+    return JSONResponse({
+        "servers": [_asset_dict(asset) for asset in servers.order_by(Asset.id.desc()).limit(limit)],
+        "scans": [register.scan_dict(scan, asset)
+                  for scan, asset in register.scans(db, user, text=text).limit(limit)],
+        "findings": _findings_out(db, register.findings(db, user, text=text).limit(limit).all()),
+        "cases": [cases.case_dict(db, case, asset) for case, asset in cases.cases(db, user, text=text).limit(limit)],
+    })
 
 
 @app.get("/api/runs", response_class=JSONResponse)
