@@ -1,0 +1,18 @@
+# Keep text files LF in every working tree.
+#
+# The benchmark publishes SHA-256 hashes of the corpus and the detector
+# sources. A Windows checkout with core.autocrlf=true would rewrite them with
+# CRLF and make those hashes unreproducible, so line endings are pinned here
+# rather than left to each contributor's git configuration.
+#
+# Existing clones: run `git add --renormalize .` once after pulling this file.
+* text=auto eol=lf
+
+# Binary assets must never be touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.gz binary
+*.zip binary
+*.db binary
