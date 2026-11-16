@@ -15,7 +15,9 @@
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-6E7781"></a>
 </p>
 
-![Evidence graph for an exposed lab MCP server](docs/images/evidence-graph.jpg)
+![Scan map of a lab server whose read_file tool differs from the published release](docs/images/scan-map.png)
+
+![The altered tool beside the published text, with the hidden character shown](docs/images/tool-comparison.png)
 
 AI agents reach real systems through the Model Context Protocol. An MCP server lists the tools an
 agent may call: run a command, query a database, read a file. Port and CVE scanners can tell you the
@@ -28,7 +30,7 @@ Raqeeb is entered in SAIF 2026 under the name CyberOSINT.
 
 1. **Discover** MCP servers tied to an organization from Shodan, Censys and Certificate Transparency.
 2. **Negotiate** the real protocol (`server/discover`, falling back to `initialize`) and read `tools/list`.
-3. **Classify** each declared tool by capability and run six passive detectors over the declarations.
+3. **Classify** each declared tool by capability and run passive detectors over the declarations.
 4. **Grade** every statement by how it was established (see evidence levels).
 5. **Monitor** each server: typed drift between scans, a manifest fingerprint, alerts on escalation only.
 

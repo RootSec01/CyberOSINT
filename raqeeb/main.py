@@ -60,6 +60,7 @@ from raqeeb import ownership
 from raqeeb import provenance
 from raqeeb import register
 from raqeeb import cases
+from raqeeb import inventory
 from raqeeb import team
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
@@ -468,7 +469,8 @@ def scan_asset(db: Session, user: User, asset: Asset, *,
             "declarations": register.declarations_digest(server.get("tools")),
         }
         run_row = _persist_run(db, user, payload, target_type="mcp", target_value=value)
-        scan = register.record_scan(db, asset, payload, operator=operator, trigger=trigger, run_row=run_row)
+        scan = register.record_scan(db, asset, payload, operator=operator, trigger=trigger,
+                                    run_row=run_row, tools=server.get("tools"))
         payload["scan_reference"] = scan.reference
         payload["cases"] = [case.reference for case in cases.review(db, asset, scan, payload)]
         asset.last_scanned_at = now
@@ -1557,6 +1559,38 @@ async def api_remove_member(
         cases.release_from(db, member_id)
         return row
     return _change_member(db, user, member_id, "removed", remove)
+
+
+@app.get("/api/inventory", response_class=JSONResponse)
+async def api_inventory(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse({"servers": inventory.inventory(db, user)})
+
+
+@app.get("/api/assets/{asset_id}/detail", response_class=JSONResponse)
+async def api_asset_detail(
+    asset_id: int,
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    a = db.query(Asset).filter(Asset.id == asset_id).first()
+    if not team.sees(db, user, a):
+        return JSONResponse({"detail": "asset not found"}, status_code=404)
+    return JSONResponse(inventory.detail(db, user, a))
+
+
+@app.get("/api/changes", response_class=JSONResponse)
+async def api_changes(
+    asset_id: Optional[int] = None, kind: str = "", q: str = "",
+    since: str = "", until: str = "", on: str = "",
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    try:
+        found = inventory.changes(db, user, asset_id=asset_id, kind=kind, text=q,
+                                  bounds=register.window(since, until, on))
+    except register.Rejected as error:
+        return _rejected(error)
+    return JSONResponse({"total": len(found), "changes": found})
 
 
 @app.get("/api/search", response_class=JSONResponse)

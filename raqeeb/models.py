@@ -243,3 +243,12 @@ class CaseEvent(Base):
     actor: Mapped[str] = mapped_column(String(64))
     kind: Mapped[str] = mapped_column(String(16))
     text: Mapped[str] = mapped_column(Text)
+
+
+class Declaration(Base):
+    """The tool list a scan read, stored once per distinct content."""
+    __tablename__ = "declarations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    digest: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    tools_json: Mapped[str] = mapped_column(Text, nullable=False)

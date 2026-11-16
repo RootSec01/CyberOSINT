@@ -34,5 +34,4 @@ jobs:
           cache-dependency-path: dashboard/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: node test_demo_ui.js
-      - run: node test_evidence_ui.js
+      - run: node test_ui.js

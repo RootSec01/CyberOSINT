@@ -1,45 +1,45 @@
-import { Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar.jsx";
-import Overview from "./pages/Overview.jsx";
-import Scan from "./pages/Scan.jsx";
-import ShadowAI from "./pages/ShadowAI.jsx";
-import Authorization from "./pages/Authorization.jsx";
-import SafeProof from "./pages/SafeProof.jsx";
-import Assets from "./pages/Assets.jsx";
-import { IntelProvider } from "./lib/intelStore.jsx";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/AuthContext.jsx";
-import LoginOverlay from "./components/LoginOverlay.jsx";
+import { TeamProvider } from "./lib/Team.jsx";
+import Login from "./components/Login.jsx";
+import Shell from "./components/Shell.jsx";
+import Inventory from "./pages/Inventory.jsx";
+import Server from "./pages/Server.jsx";
+import Findings from "./pages/Findings.jsx";
+import Cases from "./pages/Cases.jsx";
+import CaseDetail from "./pages/CaseDetail.jsx";
+import Changes from "./pages/Changes.jsx";
+import Activity from "./pages/Activity.jsx";
+import Settings from "./pages/Settings.jsx";
 
-function Shell() {
+function Console() {
   const { authed } = useAuth();
-  if (!authed) {
-    return <LoginOverlay />;
-  }
+  if (!authed) return <Login />;
   return (
-    <IntelProvider>
-      <div className="h-full flex bg-ink-900">
-        <Sidebar />
-        <main className="flex-1 flex min-w-0">
-          <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/scan" element={<Scan />} />
-            <Route path="/assets" element={<Assets />} />
-            <Route path="/shadow-ai" element={<ShadowAI />} />
-            <Route path="/safe-proof" element={<SafeProof />} />
-            <Route path="/authorization" element={<Authorization />} />
-          </Routes>
-        </main>
-      </div>
-    </IntelProvider>
+    <TeamProvider>
+      <Shell>
+        <Routes>
+          <Route path="/" element={<Inventory />} />
+          <Route path="/servers/:id" element={<Server />} />
+          <Route path="/servers/:id/:tab" element={<Server />} />
+          <Route path="/findings" element={<Findings />} />
+          <Route path="/cases" element={<Cases />} />
+          <Route path="/cases/:reference" element={<CaseDetail />} />
+          <Route path="/changes" element={<Changes />} />
+          <Route path="/activity" element={<Activity />} />
+          <Route path="/settings" element={<Navigate to="/settings/profile" replace />} />
+          <Route path="/settings/:section" element={<Settings />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Shell>
+    </TeamProvider>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <AuthProvider>
-      <Shell />
+      <Console />
     </AuthProvider>
   );
 }
-
-export default App;

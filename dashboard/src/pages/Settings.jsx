@@ -1,0 +1,198 @@
+import { useEffect, useState } from "react";
+import { NavLink, useParams } from "react-router-dom";
+import { api } from "../lib/api.js";
+import { applyTheme, storedTheme } from "../lib/theme.js";
+import { useTeam } from "../lib/Team.jsx";
+import { Problem, Segment, Severity, useAction, useLoad } from "../components/ui.jsx";
+
+const SECTIONS = [["profile", "Profile"], ["members", "Members"], ["rules", "Case rules"], ["scope", "Scope"], ["assistant", "Assistant"], ["appearance", "Appearance"]];
+const ROLE_NOTES = [["owner", "Everything, including admins"], ["admin", "Manage members and rules; work findings and cases"],
+  ["analyst", "Add servers, run scans, work findings and cases"], ["viewer", "Read only"]];
+const ROLES = [{ id: "admin", label: "Admin" }, { id: "analyst", label: "Analyst" }, { id: "viewer", label: "Viewer" }];
+
+function Profile() {
+  const { me, reload } = useTeam();
+  const [form, setForm] = useState(null);
+  const [saved, setSaved] = useState(false);
+  const action = useAction();
+  useEffect(() => { if (me && !form) setForm({ display_name: me.display_name || "", email: me.email || "", title: me.title || "" }); }, [me, form]);
+  if (!form) return null;
+  const set = (key) => (event) => { setSaved(false); setForm({ ...form, [key]: event.target.value }); };
+  const save = async (event) => {
+    event.preventDefault();
+    if (await action.run(() => api.put("/api/profile", form))) { setSaved(true); reload(); }
+  };
+  return (
+    <form className="card" onSubmit={save}>
+      <h2>Profile</h2>
+      <label className="formrow"><span>Display name</span><input className="input" value={form.display_name} onChange={set("display_name")} /></label>
+      <label className="formrow"><span>Email</span><input className="input" type="email" value={form.email} onChange={set("email")} /></label>
+      <label className="formrow"><span>Job title</span><input className="input" value={form.title} onChange={set("title")} /></label>
+      <div className="formrow"><span>Username</span><span className="mono">{me.username}</span></div>
+      <div className="formrow"><span>Role</span><strong style={{ textTransform: "capitalize" }}>{me.role}</strong></div>
+      <div className="row"><button className="btn primary" type="submit" disabled={action.busy}>Save</button>{saved && <span className="note">Saved.</span>}</div>
+      <Problem error={action.error} />
+      <p className="note">The display name is shown on every case action and note you make.</p>
+    </form>
+  );
+}
+
+function Members() {
+  const { me, members, can, reload } = useTeam();
+  const manage = can("manage");
+  const [form, setForm] = useState({ username: "", display_name: "", email: "", password: "", role: "analyst" });
+  const action = useAction();
+  const set = (key) => (event) => setForm({ ...form, [key]: event.target.value });
+  const ready = form.username.trim().length >= 2 && form.password.length >= 8;
+  const add = async (event) => {
+    event.preventDefault();
+    if (await action.run(() => api.post("/api/members", form))) { setForm({ username: "", display_name: "", email: "", password: "", role: "analyst" }); reload(); }
+  };
+  const change = async (work) => { if (await action.run(work)) reload(); };
+  const ownerOnly = (member) => member.role === "admin" && me.role !== "owner";
+
+  return (
+    <>
+      <section className="card">
+        <div className="row"><h2 className="grow">Members</h2><span className="note">{members.length} in this team</span></div>
+        {members.map((m) => (
+          <div key={m.id} className="row" style={{ borderTop: "1px solid var(--line2)", paddingTop: 12 }}>
+            <span className="stack grow" style={{ gap: 0, flexBasis: 200 }}><strong>{m.display_name}</strong><span className="mono small muted">{m.username}{m.email ? ` · ${m.email}` : ""}</span></span>
+            {!m.active && <span className="note">Removed</span>}
+            {m.role === "owner" || !manage || !m.active || ownerOnly(m)
+              ? <strong style={{ textTransform: "capitalize" }}>{m.role}</strong>
+              : <>
+                <Segment label={`Role of ${m.display_name}`} value={m.role} options={me.role === "owner" ? ROLES : ROLES.slice(1)}
+                  onChange={(role) => change(() => api.patch(`/api/members/${m.id}`, { role }))} />
+                <button type="button" className="btn danger" disabled={action.busy}
+                  onClick={() => window.confirm(`Remove ${m.display_name}? Their cases become unassigned.`) && change(() => api.del(`/api/members/${m.id}`))}>Remove</button>
+              </>}
+          </div>
+        ))}
+        <Problem error={action.error} />
+      </section>
+      {manage && (
+        <form className="card" onSubmit={add}>
+          <h2>Add a member</h2>
+          <div className="row">
+            <input className="input grow" aria-label="Username" placeholder="Username" autoComplete="off" value={form.username} onChange={set("username")} />
+            <input className="input grow" aria-label="Full name" placeholder="Full name" value={form.display_name} onChange={set("display_name")} />
+            <input className="input grow" aria-label="Email" type="email" placeholder="Email (optional)" value={form.email} onChange={set("email")} />
+          </div>
+          <div className="row">
+            <input className="input" aria-label="First password" type="password" autoComplete="new-password" placeholder="First password (8+ characters)" style={{ minWidth: 260 }} value={form.password} onChange={set("password")} />
+            <Segment label="Role" value={form.role} options={me.role === "owner" ? ROLES : ROLES.slice(1)} onChange={(role) => setForm({ ...form, role })} />
+            <button className="btn primary" type="submit" disabled={!ready || action.busy}>Add member</button>
+          </div>
+          <p className="note">You create the account and hand over the first password. No email is sent.</p>
+        </form>
+      )}
+      <section className="card">
+        <h2>What each role can do</h2>
+        {ROLE_NOTES.map(([role, text]) => <div key={role} className="formrow"><strong style={{ textTransform: "capitalize" }}>{role}</strong><span className="muted">{text}</span></div>)}
+      </section>
+    </>
+  );
+}
+
+function Rules() {
+  const { can } = useTeam();
+  const { data, reload } = useLoad(() => api.get("/api/case-rules"), []);
+  const action = useAction();
+  const toggle = async (rule) => { if (await action.run(() => api.put(`/api/case-rules/${rule.rule}`, { enabled: String(!rule.enabled) }))) reload(); };
+  return (
+    <section className="card">
+      <h2>When Raqeeb opens a case by itself</h2>
+      {(data ? data.rules : []).map((rule) => (
+        <div key={rule.rule} className="row" style={{ borderTop: "1px solid var(--line2)", paddingTop: 12 }}>
+          <span className="stack grow" style={{ gap: 2, flexBasis: 320 }}><strong>{rule.title}</strong><span className="muted">{rule.text}</span></span>
+          <Severity level={rule.severity} />
+          <button type="button" aria-pressed={rule.enabled} className={`pill${rule.enabled ? " on" : ""}`} disabled={!can("manage") || action.busy} onClick={() => toggle(rule)}>{rule.enabled ? "On" : "Off"}</button>
+        </div>
+      ))}
+      <Problem error={action.error} />
+      <p className="note">A case opened by a rule names the rule, the scan and the evidence. Switching a rule off stops new cases; open ones stay. Any finding can be turned into a case by hand.</p>
+    </section>
+  );
+}
+
+function Scope() {
+  const { data, error } = useLoad(() => api.get("/api/scope"), []);
+  const standing = data ? data.standing_scope || [] : [];
+  const grants = data ? data.active_grants || [] : [];
+  return (
+    <section className="card">
+      <h2>Authorized scope</h2>
+      <Problem error={error} />
+      <div className="formrow"><span>Loopback</span><span className="muted">Lab servers on 127.0.0.1 are always in scope.</span></div>
+      <div className="formrow"><span>Standing ranges</span><span className="mono">{standing.length ? standing.join(", ") : "None configured"}</span></div>
+      <div className="formrow"><span>Temporary grants</span><span className="mono">{grants.length ? grants.map((g) => g.ip).join(", ") : "None active"}</span></div>
+      {data && data.unrestricted && <p className="error">Unrestricted scanning is switched on in the server environment.</p>}
+      <p className="note">Raqeeb refuses any target outside this scope. Standing ranges are set in the server environment (AUTHORIZED_CIDRS).</p>
+    </section>
+  );
+}
+
+const MODES = [["offline", "Offline", "A fixed briefing is built from the evidence. Nothing leaves the platform."],
+  ["redacted", "Redacted", "Identifiers and secrets are stripped, then the question goes to the chosen provider."],
+  ["local", "Local model", "Sent as is to a model inside your own network."]];
+
+function Assistant() {
+  const { data, reload } = useLoad(() => api.get("/api/settings"), []);
+  const [form, setForm] = useState(null);
+  const action = useAction();
+  useEffect(() => { if (data) setForm({ ai_base_url: data.ai_base_url || "", ai_model: data.ai_model || "" }); }, [data]);
+  if (!data || !form) return null;
+  const save = async (patch) => { if (await action.run(() => api.put("/api/settings", patch))) reload(); };
+  return (
+    <>
+      <section className="card">
+        <h2>Assistant privacy mode</h2>
+        {MODES.map(([id, label, text]) => (
+          <button key={id} type="button" className="btn" aria-pressed={data.ai_mode === id} disabled={action.busy} onClick={() => save({ ai_mode: id })}
+            style={{ height: "auto", minHeight: 56, padding: "8px 12px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 16px", textAlign: "left", whiteSpace: "normal",
+              borderColor: data.ai_mode === id ? "var(--brand)" : undefined, background: data.ai_mode === id ? "var(--sel)" : undefined }}>
+            <strong style={{ flex: "0 0 120px" }}>{label}</strong><span className="muted" style={{ flex: "1 1 320px" }}>{text}</span>
+            {data.ai_mode === id && <span className="small" style={{ color: "var(--brand)", fontWeight: 600 }}>Selected</span>}
+          </button>
+        ))}
+        <p className="note">The assistant only explains evidence a scan already recorded. Verdicts, findings and cases never depend on it, and every question is written to Activity.</p>
+      </section>
+      <form className="card" onSubmit={(event) => { event.preventDefault(); save(form); }}>
+        <h2>Local model endpoint</h2>
+        <label className="formrow"><span>Endpoint</span><input className="input mono" placeholder="Base URL of an OpenAI-compatible endpoint" value={form.ai_base_url} onChange={(event) => setForm({ ...form, ai_base_url: event.target.value })} /></label>
+        <label className="formrow"><span>Model name</span><input className="input mono" placeholder="As named by your provider" value={form.ai_model} onChange={(event) => setForm({ ...form, ai_model: event.target.value })} /></label>
+        <div className="row"><button className="btn primary" type="submit" disabled={action.busy}>Save</button></div>
+        <Problem error={action.error} />
+        <p className="note">Keys are read from the server environment and are never shown or stored here.</p>
+      </form>
+    </>
+  );
+}
+
+function Appearance() {
+  const [theme, setTheme] = useState(storedTheme());
+  return (
+    <section className="card">
+      <h2>Appearance</h2>
+      <Segment label="Theme" value={theme} options={[{ id: "dark", label: "Dark" }, { id: "light", label: "Light" }]}
+        onChange={(next) => { applyTheme(next); setTheme(next); }} />
+    </section>
+  );
+}
+
+const VIEWS = { profile: Profile, members: Members, rules: Rules, scope: Scope, assistant: Assistant, appearance: Appearance };
+
+export default function Settings() {
+  const { section } = useParams();
+  const View = VIEWS[section] || Profile;
+  return (
+    <div className="settings">
+      <nav aria-label="Settings">
+        <h1 style={{ marginBottom: 12 }}>Settings</h1>
+        {SECTIONS.map(([id, label]) => <NavLink key={id} to={`/settings/${id}`} className={({ isActive }) => (isActive ? "active" : "")}>{label}</NavLink>)}
+      </nav>
+      <div><View /></div>
+    </div>
+  );
+}

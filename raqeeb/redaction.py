@@ -96,6 +96,22 @@ def redact(obj: Any) -> Any:
     return obj
 
 
+_SECRETS_ONLY = _PATTERNS[:8]
+
+
+def redact_secrets(obj: Any) -> Any:
+    """Remove credentials and keys only, leaving hosts, addresses and names readable."""
+    if isinstance(obj, str):
+        for pattern, replacement in _SECRETS_ONLY:
+            obj = pattern.sub(replacement, obj)
+        return obj
+    if isinstance(obj, dict):
+        return {k: redact_secrets(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [redact_secrets(v) for v in obj]
+    return obj
+
+
 def redact_context(context: dict) -> dict:
     """Return a redacted deep copy of a copilot context (original untouched)."""
     return redact(copy.deepcopy(context))

@@ -8,9 +8,9 @@ from typing import Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Query, Session
 
-from raqeeb import team
+from raqeeb import redaction, team
 from raqeeb.declarations import tools_digest
-from raqeeb.models import Asset, Finding, Scan, User
+from raqeeb.models import Asset, Declaration, Finding, Scan, User
 
 READ = "read"
 AUTH_REQUIRED = "auth_required"
@@ -138,8 +138,19 @@ def _follow_findings(db: Session, scan: Scan, detected: list[dict]) -> None:
         row.reference = f"FND-{row.id:06d}"
 
 
+def _keep_declarations(db: Session, digest: Optional[str], tools: Optional[list]) -> None:
+    if not digest or not tools or db.query(Declaration.id).filter(Declaration.digest == digest).first():
+        return
+    db.add(Declaration(digest=digest, tools_json=json.dumps(redaction.redact_secrets(tools), default=str)))
+
+
+def declared_tools(db: Session, digest: Optional[str]) -> Optional[list]:
+    row = db.query(Declaration).filter(Declaration.digest == digest).first() if digest else None
+    return json.loads(row.tools_json) if row else None
+
+
 def record_scan(db: Session, asset: Asset, payload: dict, *, operator: str, trigger: str,
-                run_row: Optional[int] = None) -> Scan:
+                run_row: Optional[int] = None, tools: Optional[list] = None) -> Scan:
     """Give one scan its reference and bring the asset's findings up to date with it."""
     proof = payload.get("safe_proof") or {}
     provenance = proof.get("provenance") or {}
@@ -153,6 +164,7 @@ def record_scan(db: Session, asset: Asset, payload: dict, *, operator: str, trig
         scan.tool_count = proof.get("tool_count")
         scan.finding_count = len(detected)
         scan.declarations = payload.get("declarations")
+        _keep_declarations(db, scan.declarations, tools)
         scan.verdict = provenance.get("verdict")
         if provenance.get("package"):
             scan.release = f"{provenance['package']}@{(provenance.get('versions') or ['?'])[-1]}"

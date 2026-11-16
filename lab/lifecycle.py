@@ -142,7 +142,7 @@ def run_lifecycle(*, serve: bool = False, port: int = 8000) -> dict:
                 raise RuntimeError('Run npm run build in dashboard before --serve')
             import uvicorn
             print(f'Demo UI: http://127.0.0.1:{port}/  username demo_operator  password demo-local-only-12345',flush=True)
-            print(f'Asset ID: {asset_id}. Open /assets → Changes; inspect the alert bell and unread count.',flush=True)
+            print(f'Open /servers/{asset_id}, then the Changes and Cases pages.',flush=True)
             uvicorn.run(main.app,host='127.0.0.1',port=port,log_level='warning')
         return summary
 
