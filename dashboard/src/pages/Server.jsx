@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, NavLink, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { api } from "../lib/api.js";
+import { api, download } from "../lib/api.js";
 import { compareTexts, hiddenCharacters } from "../lib/diff.js";
 import { CASE_STATUS, OUTCOMES, describeChange, plural, provenanceLine, shortRelease, when, worst } from "../lib/format.js";
 import { useTeam } from "../lib/Team.jsx";
@@ -213,12 +213,14 @@ function Tools({ page }) {
 }
 
 function Scans({ page }) {
+  const action = useAction();
+  const evidence = (reference) => action.run(() => download(`/api/scans/${reference}/evidence`, `${reference}.evidence.json`));
   return (
     <main className="page">
       <h2>Scan history</h2>
       <div className="panel scroll">
-        <table className="grid" style={{ minWidth: 980 }}>
-          <thead><tr><th>Scan</th><th>Time</th><th>Run by</th><th>Trigger</th><th>Outcome</th><th>Provenance</th><th className="num">Tools</th><th className="num">Findings</th><th>Declarations</th></tr></thead>
+        <table className="grid" style={{ minWidth: 1100 }}>
+          <thead><tr><th>Scan</th><th>Time</th><th>Run by</th><th>Trigger</th><th>Outcome</th><th>Provenance</th><th className="num">Tools</th><th className="num">Findings</th><th>Declarations</th><th>Signed evidence</th></tr></thead>
           <tbody>
             {page.scans.map((s) => (
               <tr key={s.reference}><td className="ref">{s.reference}</td><td className="mono">{when(s.started_at)}</td>
@@ -226,13 +228,15 @@ function Scans({ page }) {
                 <td>{OUTCOMES[s.outcome] || s.outcome}</td>
                 <td>{s.outcome === "read" ? <><VerdictWord verdict={s.verdict} /> <span className="mono small muted">{shortRelease(s.release)}</span></> : "—"}</td>
                 <td className="num mono">{s.tool_count ?? "—"}</td><td className="num mono">{s.finding_count ?? "—"}</td>
-                <td className="mono muted">{(s.declarations || "—").slice(0, 12)}</td></tr>
+                <td className="mono muted">{(s.declarations || "—").slice(0, 12)}</td>
+                <td><button type="button" className="link" disabled={action.busy} onClick={() => evidence(s.reference)}>Download</button></td></tr>
             ))}
           </tbody>
         </table>
         {!page.scans.length && <Empty title="No scans yet">Run a scan to start this server's history.</Empty>}
       </div>
-      <p className="note">Each scan keeps its own reference and the fingerprint of the declarations it read.</p>
+      <Problem error={action.error} />
+      <p className="note">Each scan keeps its own reference and the fingerprint of the declarations it read. Signed evidence can be checked without Raqeeb: see Settings, Evidence.</p>
     </main>
   );
 }

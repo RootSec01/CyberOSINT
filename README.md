@@ -41,19 +41,50 @@ declares. The sample was drawn once, with a fixed seed, from the official MCP Re
 (62,855 records read; 35,077 credential-free remote endpoints on 26,445 hosts; 500 sampled, one per
 host).
 
-First full snapshot, 14 November 2026:
+Latest snapshot, 16 November 2026 (third daily run from GitHub Actions):
 
 | Outcome | Endpoints |
 |---|---:|
-| Listed its tools with no credentials | 297 |
+| Listed its tools with no credentials | 302 |
 | Asked for authentication | 149 |
-| Listed in the registry but not answering as MCP | 32 |
-| Unreachable | 21 |
+| Listed in the registry but not answering as MCP (13 with a server error) | 32 |
+| Unreachable | 16 |
 | Resolved to a non-public address, not contacted | 1 |
 
-A second run from a different network 73 minutes later reached 303 servers, and all 297 seen from
-both places returned identical tool declarations. Method, data layout and opt-out are described in
-[observatory/README.md](observatory/README.md). Every run is a commit in this repository.
+On 14 November a second run from a different network 73 minutes after the first reached 303
+servers, and all 297 seen from both places returned identical tool declarations.
+
+How often the declarations change, counting only servers that listed tools in both runs:
+
+| | Changed | Share |
+|---|---:|---:|
+| 14 to 15 November | 9 of 302 | 3.0% |
+| 15 to 16 November | 13 of 301 | 4.3% |
+| At least once in the two days | 19 of 301 | 6.3% |
+
+Redefining existing tools is the common change (7 and 10 servers); adding tools is next (3 and 6);
+one server removed tools.
+
+The rules were also run over what the 302 servers declare (3,302 tools). These are counts of what
+the rules match, not confirmed weaknesses, and no server is named:
+
+| Rule | Servers | Tools |
+|---|---:|---:|
+| Tools classified as sensitive, listed with no credentials | 205 (67.9%) | |
+| Tool classified as handling credentials | 136 (45.0%) | 448 |
+| Description directs the use of other tools | 21 (7.0%) | 39 |
+| Filesystem path argument with no constraint | 11 (3.6%) | 15 |
+| Model-directed instruction text in a declaration | 10 (3.3%) | 11 |
+| Command execution tool | 5 (1.7%) | 5 |
+
+The third row matters for the MCPTox result below. Read by hand, most of the 39 descriptions are
+ordinary guidance such as "call this before product_update". The structural rule cannot tell a
+publisher's own workflow hint from an injected order, so on live servers it raises an alarm on
+about 1.2% of tools, against none on the 634 held-out package declarations.
+
+`python3 -m observatory analysis` reproduces every figure in this section
+([observatory/analysis.json](observatory/analysis.json)). Method, data layout and opt-out are
+described in [observatory/README.md](observatory/README.md). Every run is a commit in this repository.
 
 ## Reference library
 
@@ -124,7 +155,9 @@ and scored once on the rest:
 
 On the development part it finds 206 of 227 with 24 false alarms in 1,487 clean declarations; that
 figure is in-sample. Development and held-out entries come from the same benchmark, so the attack
-style is shared, and a poisoning that names no other tool is outside this detector. Comparing a
+style is shared, and a poisoning that names no other tool is outside this detector. On 302 live
+registry servers the same rule matches 39 of 3,302 tools, mostly legitimate workflow hints (see
+Field study), so its alarms need a person's review. Comparing a
 declaration with the published release does not depend on wording at all, which is what the
 reference library is for.
 
@@ -184,8 +217,29 @@ pip install -r requirements.txt
 python3 -m pytest -q
 
 cd dashboard && npm install && npm run build && cd ..
-python3 -m lab.lifecycle --serve --port 8000        # http://127.0.0.1:8000
+python3 -m lab.tampering --serve --port 8000        # http://127.0.0.1:8000
 ```
+
+`lab.tampering --serve` keeps four loopback servers and the console running: the published
+filesystem server, the same release with one altered description, an open lab server and one
+that asks for a credential. `lab.lifecycle --serve` shows one server changing across three scans.
+
+## Evidence that can be checked elsewhere
+
+Every scan has a reference (`SCN-…`) and can be exported as a signed file from its server's
+Scans tab or from a case. The file holds the scan record, the declarations that were read, the
+provenance verdict and the findings, signed with the installation's Ed25519 key.
+
+```bash
+python3 -m raqeeb.evidence key                                   # this installation's key id
+python3 -m raqeeb.evidence verify SCN-20261116-0002.evidence.json --key <key id>
+python3 -m raqeeb.manage verify-audit                            # the audit log's hash chain
+```
+
+`verify` needs only this file and the `cryptography` package. A valid signature shows the file
+was not changed after signing; that it came from a given installation holds only when the key
+id matches the one that installation publishes. The audit chain shows that an entry was edited
+or removed. It does not stop someone with database access from rebuilding the chain.
 
 To run the API on its own: copy `.env.example` to `.env`, then `uvicorn raqeeb.main:app`.
 

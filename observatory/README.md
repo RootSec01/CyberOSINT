@@ -30,6 +30,7 @@ and a change shows up as a new digest in the next run.
     python3 -m observatory sample
     python3 -m observatory snapshot --vantage kali
     python3 -m observatory status
+    python3 -m observatory analysis        # change rates and rule matches across the GitHub runs
 
 ## Opting out
 

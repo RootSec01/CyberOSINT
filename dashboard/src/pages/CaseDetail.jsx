@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { api } from "../lib/api.js";
+import { api, download } from "../lib/api.js";
 import { CASE_STATUS, CLOSURES, when } from "../lib/format.js";
 import { useTeam } from "../lib/Team.jsx";
 import { Pills, Problem, Severity, Status, useAction, useLoad } from "../components/ui.jsx";
@@ -51,6 +51,11 @@ export default function CaseDetail() {
           <Link className="btn" style={{ display: "flex", alignItems: "center" }} to={`/servers/${item.asset_id}`}>Open server</Link>
         </div>
       )}
+      <div className="row">
+        <button type="button" className="btn" disabled={action.busy}
+          onClick={() => action.run(() => download(`/api/scans/${item.last_scan}/evidence`, `${item.last_scan}.evidence.json`))}>Download signed evidence</button>
+        <span className="note">The record, declarations and findings of {item.last_scan}, signed by this installation.</span>
+      </div>
       <Problem error={action.error} />
 
       {closing && !closed && (

@@ -73,6 +73,17 @@ def cmd_deactivate(args) -> None:
     print("user deactivated")
 
 
+def cmd_verify_audit(args) -> None:
+    from raqeeb import seals
+    with session_scope() as db:
+        result = seals.check(db)
+    if result["intact"]:
+        print(f"audit chain intact: {result['sealed']} sealed entries, {result['unsealed']} written before sealing")
+        return
+    print(f"audit chain BROKEN at entry {result['broken_at']}: {result['reason']}")
+    sys.exit(1)
+
+
 def cmd_list_users(args) -> None:
     init_db()
     with session_scope() as s:
@@ -106,6 +117,7 @@ def main() -> None:
     p.set_defaults(func=cmd_deactivate)
 
     sub.add_parser("list-users").set_defaults(func=cmd_list_users)
+    sub.add_parser("verify-audit").set_defaults(func=cmd_verify_audit)
 
     args = ap.parse_args()
     args.func(args)

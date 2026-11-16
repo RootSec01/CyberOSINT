@@ -54,6 +54,25 @@ export const api = {
   del: (path) => request("DELETE", path),
 };
 
+export async function download(path, filename) {
+  const response = await fetch(path, { headers: { Authorization: `Bearer ${getToken()}` } });
+  if (!response.ok) throw new Error(`Download failed (${response.status})`);
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(await response.blob());
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+}
+
+export async function sendFile(path, file) {
+  const response = await fetch(path, { method: "POST", headers: { Authorization: `Bearer ${getToken()}` }, body: await file.text() });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error((data && data.detail) || `Request failed (${response.status})`);
+  return data;
+}
+
 export async function login(username, password) {
   setToken("");
   let data;

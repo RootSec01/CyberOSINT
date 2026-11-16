@@ -37,17 +37,7 @@ for port in discovered_ports:
             notes="verification only; no exploit payloads"
         )
 
-# 2) Correlate results with local threat intelligence feeds
-ti_hits = correlate_with_threat_feeds(
-    indicator=target,
-    ports=discovered_ports,
-    include_public_feeds=True,
-    include_darkweb_simulated=False,
-)
-for hit in ti_hits:
-    store_threat_intel_hit(hit)
-
-# 3) Perform lab-safe connectivity checks (only against authorised ranges)
+# 2) Perform lab-safe connectivity checks (only against authorised ranges)
 if ip_is_in_authorized_lab_range(target):
     icmp_result = safe_ping(target, max_probes=3)
     tcp_results = safe_tcp_connect_scan(
@@ -67,12 +57,11 @@ if ip_is_in_authorized_lab_range(target):
         tls_metadata=tls_metadata,
     )
 
-# 4) Build final report for blue-team / instructor review
+# 3) Build final report for blue-team / instructor review
 build_osint_attack_surface_report(
     target=target,
     discovered_ports=discovered_ports,
     correlated_cves=cve_candidates,
-    threat_intel_hits=ti_hits,
     lab_verification_logs=[icmp_result, tcp_results, tls_metadata],
     include_remediation_guidance=True,
 )

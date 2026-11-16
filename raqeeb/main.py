@@ -60,6 +60,8 @@ from raqeeb import ownership
 from raqeeb import provenance
 from raqeeb import register
 from raqeeb import cases
+from raqeeb import evidence
+from raqeeb import seals
 from raqeeb import inventory
 from raqeeb import team
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
@@ -355,7 +357,6 @@ def _build_scan_payload(combined: Dict[str, Any]) -> Dict[str, Any]:
     vulns = corr.get("vulnerabilities") or []
     scored_vulns = score_findings(vulns)
     top_vulns = scored_vulns[:15]
-    threat_intel = meta.get("threat_intel") or {}
 
     return {
         "run_id": meta.get("run_id"),
@@ -371,10 +372,6 @@ def _build_scan_payload(combined: Dict[str, Any]) -> Dict[str, Any]:
         "services": corr.get("open_ports") or [],
         "vulnerabilities": top_vulns,
         "vulnerability_count": len(vulns),
-        "threat_intel": {
-            "public_feeds": threat_intel.get("public_feeds") or [],
-            "darkweb": threat_intel.get("darkweb") or [],
-        },
         "ai": {
             "severity": ai.get("severity"),
             "strategy": ai.get("strategy"),
@@ -982,9 +979,7 @@ def _audit(db: Session, action: str, operator: str,
            detail: str = "", decision: str | None = None) -> None:
     """Write a structured audit row. Best-effort; never logs sensitive data."""
     try:
-        db.add(AuditEntry(action=action, operator=operator,
-                          detail=detail, decision=decision))
-        db.commit()
+        seals.record(db, action=action, operator=operator, detail=detail, decision=decision)
     except Exception:
         db.rollback()
 
@@ -1278,6 +1273,51 @@ async def api_get_scan(
     seen = register.findings(db, user, scan=scan.reference).all()
     return JSONResponse({**register.scan_dict(scan, asset), "report": report,
                          "findings": _findings_out(db, seen)})
+
+
+@app.get("/api/scans/{reference}/evidence")
+async def api_scan_evidence(
+    reference: str,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """The scan's record, declarations and findings, signed so they can be checked elsewhere."""
+    found = register.scans(db, user).filter(Scan.reference == reference.strip().upper()).first()
+    if not found:
+        return JSONResponse({"detail": "scan not found"}, status_code=404)
+    scan, asset = found
+    bundle = evidence.for_scan(db, scan, asset)
+    _audit(db, "evidence_exported", user.username,
+           detail=f"scan={scan.reference};key={bundle['issuer']['key_id']}", decision="signed")
+    return JSONResponse(bundle, headers={
+        "Content-Disposition": f'attachment; filename="{scan.reference}.evidence.json"'})
+
+
+@app.get("/api/evidence/key", response_class=JSONResponse)
+async def api_evidence_key(user: User = Depends(get_current_user)) -> JSONResponse:
+    return JSONResponse(evidence.issuer())
+
+
+@app.post("/api/evidence/verify", response_class=JSONResponse)
+async def api_verify_evidence(
+    request: Request,
+    user: User = Depends(get_current_user),
+) -> JSONResponse:
+    try:
+        bundle = json.loads(await request.body())
+    except ValueError:
+        return _rejected(ValueError("that file is not JSON"))
+    intact, reason = evidence.verify(bundle)
+    own = isinstance(bundle, dict) and (bundle.get("issuer") or {}).get("key_id") == evidence.issuer()["key_id"]
+    return JSONResponse({"valid": intact, "reason": reason, "signed_here": bool(intact and own),
+                         "scan": (bundle.get("scan") or {}).get("reference") if isinstance(bundle, dict) else None})
+
+
+@app.get("/api/audit/integrity", response_class=JSONResponse)
+async def api_audit_integrity(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse(seals.check(db))
 
 
 @app.get("/api/findings", response_class=JSONResponse)

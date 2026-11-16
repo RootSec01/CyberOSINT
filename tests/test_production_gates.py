@@ -76,21 +76,16 @@ def test_schema_check_accepts_existing_schema(tmp_path, monkeypatch):
     eng.dispose()
 
 
-def test_simulated_feeds_only_demo(tmp_path, monkeypatch):
-    from raqeeb import threat_feeds
+def test_demo_addresses_are_used_only_in_demo(tmp_path, monkeypatch):
     from raqeeb import pipeline
     monkeypatch.setenv("APP_ENV", "development")
-    assert threat_feeds.load_threat_intel_for_target("8.8.8.8", None, str(PACKAGE_DIR)) == {
-        "public_feeds": [], "darkweb": []}
-    assert pipeline._match_threat_intel("8.8.8.8", None, None) == {
-        "public_feeds": [], "darkweb": []}
     monkeypatch.setattr(pipeline, "RUNS_ROOT", tmp_path)
     monkeypatch.setattr(pipeline, "_ip_from_shodan_search", lambda *_: None)
     monkeypatch.setattr(pipeline, "ingest_ip_shodan", lambda *_: None)
     monkeypatch.setattr(pipeline, "save_censys", lambda *_: None)
     actual = pipeline.run_ingestion("asn", "AS15169")
     assert actual["resolved_ip"] is None and not actual["simulation_used"]
-    assert not actual["threat_intel"]["public_feeds"]
+    assert "threat_intel" not in actual
     monkeypatch.setenv("APP_ENV", "demo")
     demo = pipeline.run_ingestion("asn", "AS15169")
     assert demo["resolved_ip"] == "8.8.8.8" and demo["simulation_used"]

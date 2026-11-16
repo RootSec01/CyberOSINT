@@ -1,0 +1,104 @@
+{
+ "vantage": "github",
+ "runs": [
+  "2026-11-14T11:10:11Z",
+  "2026-11-15T11:14:35Z",
+  "2026-11-16T11:45:24Z"
+ ],
+ "latest": {
+  "endpoints": 500,
+  "auth_required": 149,
+  "not_mcp": 32,
+  "ok": 302,
+  "refused": 1,
+  "unreachable": 16,
+  "not_mcp_server_error": 13,
+  "not_mcp_other": 19
+ },
+ "day_to_day": [
+  {
+   "from": "2026-11-14T11:10:11Z",
+   "to": "2026-11-15T11:14:35Z",
+   "comparable": 302,
+   "changed": 9,
+   "share": 0.0298,
+   "servers_adding_tools": 3,
+   "servers_removing_tools": 0,
+   "servers_redefining_tools": 7,
+   "tools_added": 11,
+   "tools_removed": 0,
+   "tools_redefined": 23
+  },
+  {
+   "from": "2026-11-15T11:14:35Z",
+   "to": "2026-11-16T11:45:24Z",
+   "comparable": 301,
+   "changed": 13,
+   "share": 0.0432,
+   "servers_adding_tools": 6,
+   "servers_removing_tools": 1,
+   "servers_redefining_tools": 10,
+   "tools_added": 7,
+   "tools_removed": 10,
+   "tools_redefined": 56
+  }
+ ],
+ "period": {
+  "from": "2026-11-14T11:10:11Z",
+  "to": "2026-11-16T11:45:24Z",
+  "runs": 3,
+  "listed_tools_in_every_run": 301,
+  "changed_at_least_once": 19,
+  "share": 0.0631
+ },
+ "declarations": {
+  "run": "2026-11-16T11:45:24Z",
+  "servers": 302,
+  "tools": 3302,
+  "rules": [
+   {
+    "category": "open_capability",
+    "finding": "Unauthenticated Sensitive Capability Exposure",
+    "servers": 205,
+    "share_of_servers": 0.6788,
+    "tools": 0
+   },
+   {
+    "category": "secrets_leakage",
+    "finding": "Secrets / Credential Exposure",
+    "servers": 136,
+    "share_of_servers": 0.4503,
+    "tools": 448
+   },
+   {
+    "category": "tool_poisoning",
+    "finding": "Tool Description Directs the Use of Other Tools",
+    "servers": 21,
+    "share_of_servers": 0.0695,
+    "tools": 39
+   },
+   {
+    "category": "path_traversal",
+    "finding": "Potential Unconstrained Filesystem Path",
+    "servers": 11,
+    "share_of_servers": 0.0364,
+    "tools": 15
+   },
+   {
+    "category": "prompt_injection",
+    "finding": "Prompt-Injection Markers in Declaration",
+    "servers": 10,
+    "share_of_servers": 0.0331,
+    "tools": 11
+   },
+   {
+    "category": "rce",
+    "finding": "Exposed Command-Execution Capability",
+    "servers": 5,
+    "share_of_servers": 0.0166,
+    "tools": 5
+   }
+  ],
+  "note": "Counts of what the rules match in public declarations. They are not confirmed weaknesses."
+ }
+}

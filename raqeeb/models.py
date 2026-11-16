@@ -252,3 +252,13 @@ class Declaration(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     digest: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     tools_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class AuditSeal(Base):
+    """One link of the audit log's hash chain."""
+    __tablename__ = "audit_seals"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    entry_id: Mapped[int] = mapped_column(Integer, unique=True, index=True, nullable=False)
+    previous: Mapped[str] = mapped_column(String(64), nullable=False)
+    digest: Mapped[str] = mapped_column(String(64), nullable=False)

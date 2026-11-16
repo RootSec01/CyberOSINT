@@ -5,4 +5,3 @@ PROJECT_ROOT = PACKAGE_DIR.parent
 
 EVIDENCE_DIR = PROJECT_ROOT / "evidence"
 DASHBOARD_DIST = PROJECT_ROOT / "dashboard" / "dist"
-DATASETS_DIR = PACKAGE_DIR / "datasets"

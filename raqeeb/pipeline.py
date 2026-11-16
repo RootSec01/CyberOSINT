@@ -3,7 +3,6 @@
 # - Normalises the target (IP / domain / CIDR / ASN / org)
 # - Pulls OSINT from Shodan / Censys (read-only APIs)
 # - Generates Google-dork style queries (no scraping)
-# - Matches local threat-intel feeds
 # - Saves raw artifacts under evidence/runs/<run_id>/
 #
 # Entry point used by main.py:
@@ -21,7 +20,7 @@ import requests
 from shodan import Shodan
 from dotenv import load_dotenv
 from raqeeb.deployment_config import demo_enabled
-from raqeeb.paths import DATASETS_DIR, EVIDENCE_DIR
+from raqeeb.paths import EVIDENCE_DIR
 
 load_dotenv()
 
@@ -164,66 +163,6 @@ def save_google_dorks(target: str, out_dir: Path) -> str:
     return "dorks.json"
 
 
-# ------------------------ Threat-intel correlation ----------------------
-
-def _load_feed(path: Path) -> List[Dict[str, Any]]:
-    data = _load_json(path)
-    if isinstance(data, list):
-        return data
-    return []
-
-
-def _match_indicator(
-    indicator: str,
-    ip: Optional[str],
-    domain: Optional[str],
-    org: Optional[str],
-) -> bool:
-    ind_norm = (indicator or "").lower()
-    if ip and ip == indicator:
-        return True
-    if domain and domain.lower() in ind_norm:
-        return True
-    if org and org.lower() in ind_norm:
-        return True
-    return False
-
-
-def _match_threat_intel(
-    ip: Optional[str],
-    domain: Optional[str],
-    org_or_target: Optional[str],
-) -> Dict[str, List[Dict[str, Any]]]:
-    public_hits: List[Dict[str, Any]] = []
-    dark_hits: List[Dict[str, Any]] = []
-
-    feeds_dir = DATASETS_DIR
-    public_feed = feeds_dir / "public_feed.json"
-    dark_feed = feeds_dir / "darkweb_simulated.json"
-
-    public_entries = _load_feed(public_feed) if demo_enabled() else []
-    dark_entries = _load_feed(dark_feed) if demo_enabled() else []
-
-    for entry in public_entries:
-        ind = entry.get("indicator") or entry.get("ip") or entry.get("domain")
-        if not ind:
-            continue
-        if _match_indicator(str(ind), ip, domain, org_or_target):
-            public_hits.append(entry)
-
-    for entry in dark_entries:
-        ind = entry.get("indicator") or entry.get("ip") or entry.get("domain")
-        if not ind:
-            continue
-        if _match_indicator(str(ind), ip, domain, org_or_target):
-            dark_hits.append(entry)
-
-    return {
-        "public_feeds": public_hits,
-        "darkweb": dark_hits,
-    }
-
-
 # ------------------------------ Ingestion -------------------------------
 
 def _resolve_for_cidr(cidr: str) -> Optional[str]:
@@ -269,7 +208,6 @@ def run_ingestion(target_type: str, target_value: str) -> Dict[str, Any]:
     sources: List[str] = []
     resolved_ip: Optional[str] = None
     resolved_domain: Optional[str] = None
-    org_hint: Optional[str] = None
     provenance: Dict[str, str] = {}
     simulation_used = False
 
@@ -330,7 +268,6 @@ def run_ingestion(target_type: str, target_value: str) -> Dict[str, Any]:
                     provenance["resolved_ip"] = "demo fallback (not a verified ASN asset)"
 
             resolved_ip = rep_ip
-            org_hint = asn
 
             if rep_ip:
                 art = ingest_ip_shodan(rep_ip, out_dir)
@@ -343,7 +280,6 @@ def run_ingestion(target_type: str, target_value: str) -> Dict[str, Any]:
                     sources.append("censys")
 
         elif target_type in ("org", "organization"):
-            org_hint = target_value
             rep_ip = _ip_from_shodan_search(f'org:"{target_value}"')
 
             # Fallback if Shodan search did not return anything
@@ -368,15 +304,6 @@ def run_ingestion(target_type: str, target_value: str) -> Dict[str, Any]:
             artifacts.append(save_google_dorks(target_value, out_dir))
             sources.append("google_dorks")
 
-        # Threat intel (local feeds)
-        ti = _match_threat_intel(resolved_ip, resolved_domain, org_hint or target_value)
-        if ti["public_feeds"] or ti["darkweb"]:
-            _save(out_dir, "threat_feeds.json", ti)
-            artifacts.append("threat_feeds.json")
-            sources.append("demo_sample_feeds")
-            provenance["demo_sample_feeds"] = "bundled simulated data"
-            simulation_used = True
-
     except Exception as e:
         with (out_dir / "errors.log").open("a", encoding="utf-8") as f:
             f.write(f"[{_ts()}] ingestion error: {e}\n")
@@ -396,10 +323,6 @@ def run_ingestion(target_type: str, target_value: str) -> Dict[str, Any]:
         "created_at": ts,
         "resolved_ip": resolved_ip,
         "resolved_domain": resolved_domain,
-        "threat_intel": _load_json(out_dir / "threat_feeds.json") or {
-            "public_feeds": [],
-            "darkweb": [],
-        },
         "artifacts": artifacts,
         "sources": list(dict.fromkeys(sources)),
         "source_provenance": provenance,

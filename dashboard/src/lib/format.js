@@ -78,6 +78,7 @@ export const ACTIONS = {
   member_role: "Member role changed",
   member_removed: "Member removed",
   privacy_settings_update: "Assistant settings changed",
+  evidence_exported: "Signed evidence exported",
   copilot_query: "Assistant asked",
 };
 

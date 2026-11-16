@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
-import { api } from "../lib/api.js";
+import { api, sendFile } from "../lib/api.js";
 import { applyTheme, storedTheme } from "../lib/theme.js";
 import { useTeam } from "../lib/Team.jsx";
 import { Problem, Segment, Severity, useAction, useLoad } from "../components/ui.jsx";
 
-const SECTIONS = [["profile", "Profile"], ["members", "Members"], ["rules", "Case rules"], ["scope", "Scope"], ["assistant", "Assistant"], ["appearance", "Appearance"]];
+const SECTIONS = [["profile", "Profile"], ["members", "Members"], ["rules", "Case rules"], ["scope", "Scope"], ["evidence", "Evidence"], ["assistant", "Assistant"], ["appearance", "Appearance"]];
 const ROLE_NOTES = [["owner", "Everything, including admins"], ["admin", "Manage members and rules; work findings and cases"],
   ["analyst", "Add servers, run scans, work findings and cases"], ["viewer", "Read only"]];
 const ROLES = [{ id: "admin", label: "Admin" }, { id: "analyst", label: "Analyst" }, { id: "viewer", label: "Viewer" }];
@@ -133,6 +133,55 @@ function Scope() {
   );
 }
 
+function Evidence() {
+  const key = useLoad(() => api.get("/api/evidence/key"), []);
+  const chain = useLoad(() => api.get("/api/audit/integrity"), []);
+  const [checked, setChecked] = useState(null);
+  const action = useAction();
+  const check = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    setChecked(null);
+    const result = await action.run(() => sendFile("/api/evidence/verify", file));
+    if (result) setChecked({ ...result, name: file.name });
+    event.target.value = "";
+  };
+  return (
+    <>
+      <section className="card">
+        <h2>Signing key</h2>
+        <div className="formrow"><span>Key id</span><span className="mono">{key.data ? key.data.key_id : "—"}</span></div>
+        <div className="formrow"><span>Public key</span><span className="mono wrap-any">{key.data ? key.data.public_key : "—"}</span></div>
+        <div className="formrow"><span>Algorithm</span><span>{key.data ? key.data.algorithm : "—"}</span></div>
+        <p className="note">Every evidence file from this installation is signed with this key. Publish the key id where the people who receive your evidence can find it.</p>
+        <p className="note mono">python3 -m raqeeb.evidence verify SCN-….evidence.json --key {key.data ? key.data.key_id : "KEY_ID"}</p>
+      </section>
+      <section className="card">
+        <h2>Check an evidence file</h2>
+        <label className="row"><span className="btn" style={{ display: "flex", alignItems: "center" }}>Choose a file</span>
+          <input type="file" accept="application/json,.json" style={{ position: "absolute", left: -9999 }} onChange={check} /></label>
+        {checked && (
+          <div className="stack tight">
+            <strong className={checked.valid ? "tone-ok" : "tone-bad"}>{checked.valid ? "Valid" : "Not valid"} · {checked.scan || checked.name}</strong>
+            <span>{checked.reason}</span>
+            <span className="muted">{checked.valid ? (checked.signed_here ? "Signed by this installation's key." : "Signed by a different key than this installation's.") : ""}</span>
+          </div>
+        )}
+        <Problem error={action.error} />
+      </section>
+      <section className="card">
+        <h2>Audit log integrity</h2>
+        {chain.data && (
+          <strong className={chain.data.intact ? "tone-ok" : "tone-bad"}>
+            {chain.data.intact ? `Intact: ${chain.data.sealed} sealed entries` : `Broken at entry ${chain.data.broken_at}: ${chain.data.reason}`}
+          </strong>
+        )}
+        <p className="note">Each audit entry is sealed with a hash that covers the entry before it. The chain shows that an entry was edited or removed; it does not stop someone with database access from rebuilding the whole chain.</p>
+      </section>
+    </>
+  );
+}
+
 const MODES = [["offline", "Offline", "A fixed briefing is built from the evidence. Nothing leaves the platform."],
   ["redacted", "Redacted", "Identifiers and secrets are stripped, then the question goes to the chosen provider."],
   ["local", "Local model", "Sent as is to a model inside your own network."]];
@@ -181,7 +230,7 @@ function Appearance() {
   );
 }
 
-const VIEWS = { profile: Profile, members: Members, rules: Rules, scope: Scope, assistant: Assistant, appearance: Appearance };
+const VIEWS = { profile: Profile, members: Members, rules: Rules, scope: Scope, evidence: Evidence, assistant: Assistant, appearance: Appearance };
 
 export default function Settings() {
   const { section } = useParams();

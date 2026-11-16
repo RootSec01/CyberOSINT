@@ -96,6 +96,20 @@ def cmd_status(archive: Archive, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_analysis(archive: Archive, args: argparse.Namespace) -> int:
+    from . import analysis
+    from raqeeb.declarations import write_json
+    try:
+        result = analysis.analyse(archive, args.vantage)
+    except ValueError as error:
+        print(error)
+        return 1
+    if args.output:
+        write_json(args.output, result)
+    print(analysis.summary(result))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="observatory", description="Record what public MCP servers declare over time.")
     parser.add_argument("--data", type=Path, default=DATA_DIR, help=argparse.SUPPRESS)
@@ -114,6 +128,11 @@ def main(argv: list[str] | None = None) -> int:
 
     status = commands.add_parser("status", help="summarise the latest run")
     status.set_defaults(run=cmd_status)
+
+    figures = commands.add_parser("analysis", help="aggregate figures across the runs from one vantage")
+    figures.add_argument("--vantage", default="github")
+    figures.add_argument("--output", type=Path, help="write the figures as JSON here")
+    figures.set_defaults(run=cmd_analysis)
 
     args = parser.parse_args(argv)
     return args.run(Archive(args.data), args)

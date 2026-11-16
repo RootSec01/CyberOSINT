@@ -1,5 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import json
+
 import pytest
 from conftest import StatefulServer, serve
 
@@ -163,3 +165,41 @@ def test_snapshots_share_unchanged_manifests_and_surface_redeployments(lab, tmp_
     assert change.removed == ["get_status"] and change.redefined == []
     assert main(["--data", str(tmp_path), "status"]) == 0
     assert "1 of 1 comparable endpoints changed" in capsys.readouterr().out
+
+
+def test_analysis_counts_changes_per_day_and_over_the_period(tmp_path, capsys):
+    from observatory import analysis
+
+    archive = Archive(tmp_path)
+    tool = lambda name, text: {"name": name, "description": text, "inputSchema": {"type": "object", "properties": {}}}
+    steady = archive.save_manifest([tool("get_status", "Report service status")])
+    before = archive.save_manifest([tool("lookup", "Look a record up")])
+    after = archive.save_manifest([tool("lookup", "Look a record up by id"),
+                                   tool("run_shell_command", "Execute an arbitrary shell command on the host")])
+    seen = lambda key, manifest: {"id": key, "url": f"https://{key}.example/mcp", "outcome": "ok",
+                                  "http_status": 200, "manifest": manifest}
+    down = lambda key, status: {"id": key, "url": f"https://{key}.example/mcp", "outcome": "not_mcp",
+                                "http_status": status, "manifest": None}
+    days = [[seen("a", steady), seen("b", before), down("c", 404)],
+            [seen("a", steady), seen("b", before), down("c", 502)],
+            [seen("a", steady), seen("b", after), down("c", 502), seen("d", steady)]]
+    for day, observations in enumerate(days, start=13):
+        archive.save_run({"started_at": f"2026-11-{day}T00:00:00Z", "vantage": "ci", "observations": observations})
+    archive.save_run({"started_at": "2026-11-15T06:00:00Z", "vantage": "elsewhere", "observations": [seen("b", before)]})
+
+    result = analysis.analyse(archive, "ci")
+    assert [(s["comparable"], s["changed"]) for s in result["day_to_day"]] == [(2, 0), (2, 1)]
+    last = result["day_to_day"][-1]
+    assert (last["share"], last["servers_adding_tools"], last["servers_redefining_tools"]) == (0.5, 1, 1)
+    assert (last["tools_added"], last["tools_removed"], last["tools_redefined"]) == (1, 0, 1)
+    assert result["period"] == {"from": "2026-11-13T00:00:00Z", "to": "2026-11-15T00:00:00Z", "runs": 3,
+                                "listed_tools_in_every_run": 2, "changed_at_least_once": 1, "share": 0.5}
+    assert (result["latest"]["ok"], result["latest"]["not_mcp_server_error"], result["latest"]["not_mcp_other"]) == (3, 1, 0)
+    declared = result["declarations"]
+    assert (declared["servers"], declared["tools"]) == (3, 4)
+    assert {rule["category"]: rule["servers"] for rule in declared["rules"]}["rce"] == 1
+
+    assert main(["--data", str(tmp_path), "analysis", "--vantage", "ci", "--output", str(tmp_path / "figures.json")]) == 0
+    assert "whole period: 1 of 2 changed at least once (50.0%)" in capsys.readouterr().out
+    assert json.loads((tmp_path / "figures.json").read_text())["vantage"] == "ci"
+    assert main(["--data", str(tmp_path), "analysis", "--vantage", "nowhere"]) == 1

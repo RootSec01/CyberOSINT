@@ -2,6 +2,7 @@
 
 Both servers are scanned for the first time, so there is no earlier scan to compare with.
 Run: python3 -m lab.tampering [--output lab/tampering_result.json]
+     python3 -m lab.tampering --serve [--port 8000]    keeps the servers and the console running
 """
 from __future__ import annotations
 
@@ -26,7 +27,7 @@ def _altered(tools: list) -> tuple[list, str]:
     return changed, target["name"]
 
 
-def run_demo() -> dict:
+def run_demo(*, serve: bool = False, port: int = 8000) -> dict:
     with tempfile.TemporaryDirectory(prefix="raqeeb-demo-") as scratch:
         _safe_environment(scratch)
         from fastapi.testclient import TestClient
@@ -51,24 +52,27 @@ def run_demo() -> dict:
         assert login.status_code == 200, login.text
         headers = {"Authorization": f"Bearer {login.json()['token']}"}
 
-        def first_scan(label: str, tools: list) -> dict:
-            port = _free_port()
+        def listen(label: str, **served) -> tuple:
+            listener = lab_server.make_server("legacy", _free_port(), **served)
             created = client.post("/api/assets", headers=headers, data={
-                "kind": "mcp", "value": f"127.0.0.1:{port}", "label": label})
+                "kind": "mcp", "value": f"127.0.0.1:{listener.server_address[1]}", "label": label})
             assert created.status_code == 201, created.text
-            asset_id = created.json()["id"]
-            server = lab_server.make_server("legacy", port, tools=tools)
-            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker = threading.Thread(target=listener.serve_forever, daemon=True)
             worker.start()
+            return created.json()["id"], listener, worker
+
+        def first_scan(label: str, tools: list) -> dict:
+            asset_id, server, worker = listen(label, tools=tools)
             try:
                 scanned = client.post(f"/api/assets/{asset_id}/scan", headers=headers)
                 assert scanned.status_code == 200, scanned.text
                 proof = scanned.json()["scan"]["safe_proof"]
                 drift = client.get(f"/api/assets/{asset_id}/drift", headers=headers).json()
             finally:
-                server.shutdown()
-                server.server_close()
-                worker.join(timeout=3)
+                if not serve:
+                    server.shutdown()
+                    server.server_close()
+                    worker.join(timeout=3)
             verdict = proof["provenance"]
             return {"server": label, "tools": proof["tool_count"], "severity": proof["severity"],
                     "earlier_scan_to_compare": drift["available"],
@@ -86,6 +90,19 @@ def run_demo() -> dict:
         assert tampered["redefined"] == [altered_tool]
         assert [alert["kind"] for alert in alerts] == ["provenance"]
 
+        if serve:
+            from raqeeb.paths import DASHBOARD_DIST
+            if not (DASHBOARD_DIST / "index.html").exists():
+                raise RuntimeError("Run npm run build in dashboard before --serve")
+            for label, served in (("lab-legacy", {}), ("guarded", {"auth_token": "lab-only"})):
+                asset_id, _, _ = listen(label, **served)
+                client.post(f"/api/assets/{asset_id}/scan", headers=headers)
+            import uvicorn
+            print(f"Console: http://127.0.0.1:{port}/  username demo_operator  password demo-local-only-12345",
+                  flush=True)
+            print("Open as-shipped, then altered: same package and version, both on their first scan.", flush=True)
+            uvicorn.run(main.app, host="127.0.0.1", port=port, log_level="warning")
+
         return {"mode": "isolated_loopback_demo", "package": PACKAGE, "release": version,
                 "servers": [as_shipped, tampered],
                 "alerts": [{"kind": a["kind"], "severity": a["severity"], "title": a["title"],
@@ -97,10 +114,14 @@ def run_demo() -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="write the result JSON here")
+    parser.add_argument("--serve", action="store_true", help="keep the lab servers and the console running")
+    parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
     if os.getenv("APP_ENV", "development").strip().lower() == "production":
         parser.error("APP_ENV=production is not permitted for the demo")
-    text = json.dumps(run_demo(), indent=2, ensure_ascii=False)
+    if args.serve and args.output:
+        parser.error("--serve and --output cannot be combined")
+    text = json.dumps(run_demo(serve=args.serve, port=args.port), indent=2, ensure_ascii=False)
     if args.output:
         args.output.write_text(text + "\n", encoding="utf-8")
     print(text)
