@@ -55,8 +55,8 @@ class Lab:
         assert created.status_code == 201, created.text
         self.asset = created.json()["id"]
 
-    def scan(self, tools):
-        self.server.RequestHandlerClass = lab_server._make_handler("legacy", None, "dangerous", tools)
+    def scan(self, tools, **paging):
+        self.server.RequestHandlerClass = lab_server._make_handler("legacy", None, "dangerous", tools, **paging)
         answer = self.client.post(f"/api/assets/{self.asset}/scan", headers=self.headers)
         assert answer.status_code == 200, answer.text
         return answer.json()
@@ -132,6 +132,39 @@ def test_a_finding_resolves_when_a_scan_no_longer_sees_it_and_reopens_if_it_retu
     reopened = listed(lab.client, lab.headers, f"/api/findings/{shell['reference']}")
     assert (reopened["status"], reopened["status_note"]) == ("open", f"Seen again in {back}")
     assert reopened["first_scan"] == shell["first_scan"]
+
+
+def test_a_listing_that_fails_part_way_resolves_nothing(lab):
+    lab.scan([SHELL, STATUS, READER])
+    reader = listed(lab.client, lab.headers, "/api/findings", tool="read_file")["findings"][0]
+
+    # the server lists one tool per page and fails on the second page: read_file was never read
+    partial = lab.scan([SHELL, STATUS, READER], page_size=1, broken_page=1)
+    assert partial["scan"]["safe_proof"]["tool_count"] == 1
+    kept = listed(lab.client, lab.headers, f"/api/findings/{reader['reference']}")
+    assert kept["status"] == "open"
+    assert kept["last_scan"] == reader["last_scan"]
+
+
+def test_a_listing_cut_at_the_page_limit_resolves_nothing(lab):
+    from raqeeb import mcp_protocol
+    many = [SHELL] + [tool(f"status_{n}", "Report service status") for n in range(mcp_protocol._MAX_TOOL_PAGES)] + [READER]
+    lab.scan(many)
+    reader = listed(lab.client, lab.headers, "/api/findings", tool="read_file")["findings"][0]
+
+    # one tool per page: the client stops at its page limit with read_file still unread
+    lab.scan(many, page_size=1)
+    kept = listed(lab.client, lab.headers, f"/api/findings/{reader['reference']}")
+    assert kept["status"] == "open"
+
+
+def test_a_complete_paged_listing_still_resolves_what_it_no_longer_declares(lab):
+    lab.scan([SHELL, STATUS, READER])
+    reader = listed(lab.client, lab.headers, "/api/findings", tool="read_file")["findings"][0]
+
+    gone = lab.scan([SHELL, STATUS], page_size=1)["scan"]["scan_reference"]
+    resolved = listed(lab.client, lab.headers, f"/api/findings/{reader['reference']}")
+    assert (resolved["status"], resolved["status_note"]) == ("resolved", f"Not declared in {gone}")
 
 
 def test_people_change_status_with_a_reason_and_cannot_resolve_by_hand(lab):

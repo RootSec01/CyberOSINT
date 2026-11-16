@@ -464,6 +464,7 @@ def scan_asset(db: Session, user: User, asset: Asset, *,
             "target": proof.get("target") or f"{host}:{port}",
             "safe_proof": proof,
             "declarations": register.declarations_digest(server.get("tools")),
+            "tools_complete": bool(server.get("tools_complete")),
         }
         run_row = _persist_run(db, user, payload, target_type="mcp", target_value=value)
         scan = register.record_scan(db, asset, payload, operator=operator, trigger=trigger,
