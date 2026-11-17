@@ -4,8 +4,10 @@ import { api, sendFile } from "../lib/api.js";
 import { applyTheme, storedTheme } from "../lib/theme.js";
 import { useTeam } from "../lib/Team.jsx";
 import { Problem, Segment, Severity, useAction, useLoad } from "../components/ui.jsx";
+import ScheduleSelect from "../components/Schedule.jsx";
+import { when } from "../lib/format.js";
 
-const SECTIONS = [["profile", "Profile"], ["members", "Members"], ["rules", "Case rules"], ["scope", "Scope"], ["evidence", "Evidence"], ["assistant", "Assistant"], ["appearance", "Appearance"]];
+const SECTIONS = [["profile", "Profile"], ["members", "Members"], ["rules", "Case rules"], ["monitoring", "Monitoring"], ["scope", "Scope"], ["evidence", "Evidence"], ["assistant", "Assistant"], ["appearance", "Appearance"]];
 const ROLE_NOTES = [["owner", "Everything, including admins"], ["admin", "Manage members and rules; work findings and cases"],
   ["analyst", "Add servers, run scans, work findings and cases"], ["viewer", "Read only"]];
 const ROLES = [{ id: "admin", label: "Admin" }, { id: "analyst", label: "Analyst" }, { id: "viewer", label: "Viewer" }];
@@ -106,6 +108,40 @@ function Rules() {
         </div>
       ))}
       <Problem error={action.error} />
+    </section>
+  );
+}
+
+function Monitoring() {
+  const { data, error, reload } = useLoad(() => api.get("/api/monitoring"), []);
+  const { can } = useTeam();
+  return (
+    <section className="card">
+      <h2 title="A scheduled scan runs as Raqeeb and raises an alert when the tool list changes, deviates from the release or stops answering.">Scheduled scans and alerts</h2>
+      <Problem error={error} />
+      {data && (
+        <>
+          <div className="formrow"><span>Scheduler</span>
+            <span className={data.enabled ? "tone-ok" : "tone-high"}
+              title={data.enabled ? undefined : "Set SCHEDULER_ENABLED=true in .env and restart the server."}>{data.enabled ? "Running" : "Off on this installation"}</span></div>
+          <div className="formrow"><span>Alert webhook</span>
+            <span className="muted" title="ALERT_WEBHOOK_URL in .env receives every alert as JSON.">{data.webhook ? "Configured" : "Not configured"}</span></div>
+          <table className="grid" style={{ marginTop: 8 }}>
+            <thead><tr><th>Server</th><th>Schedule</th><th>Last scan</th><th>Next scan</th></tr></thead>
+            <tbody>
+              {data.plans.map((p) => (
+                <tr key={p.asset_id}>
+                  <td style={{ fontWeight: 600 }}>{p.asset}</td>
+                  <td><ScheduleSelect assetId={p.asset_id} value={p.every_minutes} onSaved={reload} disabled={!can("work")} /></td>
+                  <td className="mono">{when(p.last_scan)}</td>
+                  <td className="mono">{p.next_scan ? when(p.next_scan) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!data.plans.length && <span className="muted">No servers yet.</span>}
+        </>
+      )}
     </section>
   );
 }
@@ -219,7 +255,7 @@ function Appearance() {
   );
 }
 
-const VIEWS = { profile: Profile, members: Members, rules: Rules, scope: Scope, evidence: Evidence, assistant: Assistant, appearance: Appearance };
+const VIEWS = { profile: Profile, members: Members, rules: Rules, monitoring: Monitoring, scope: Scope, evidence: Evidence, assistant: Assistant, appearance: Appearance };
 
 export default function Settings() {
   const { section } = useParams();

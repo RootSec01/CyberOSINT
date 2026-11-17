@@ -260,6 +260,17 @@ composed offline from stored rows. Four roles scope what a member can do:
 | Analyst | Add servers, run scans, work findings and cases |
 | Viewer | Read only |
 
+Each server can be rescanned on its own schedule (Settings, Monitoring, or the server page).
+Scheduled scans run as `raqeeb` when `SCHEDULER_ENABLED=true` is set in `.env`. A scan raises an
+alert when tools are added or redefined, when the server deviates from its published release,
+when exposure rises, or when a server that answered stops answering; alerts appear in the top bar
+and are posted to `ALERT_WEBHOOK_URL` when set. Every case and server has a downloadable
+investigation report (summary, method, differences, findings, timeline, scans and evidence
+integrity) that prints to PDF from the browser.
+
+The served demo (`python3 -m lab.tampering --serve`) adds a team, more servers copied from
+published releases, and two changes that happen while it runs, so alerts arrive live.
+
 Scanning is limited to an authorized scope: loopback is always allowed, standing ranges
 come from `AUTHORIZED_CIDRS` in the server environment, and temporary grants are issued
 through `/api/authorize`. Raqeeb refuses any target outside this scope.

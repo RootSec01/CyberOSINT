@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { compareTexts, hiddenCharacters } from "./src/lib/diff.js";
 import { describeChange, plural, verdictOf, windowParams } from "./src/lib/format.js";
-import { LAST_STAGE, buildScanMap } from "./src/lib/scanMap.js";
+import { LAST_STAGE, buildScanMap, crossings } from "./src/lib/scanMap.js";
 
 let checks = 0;
 const check = (run) => { run(); checks += 1; };
@@ -59,6 +59,7 @@ check(() => assert.ok(map.nodes.every((n) => n.y >= 72 && n.y + 76 <= map.height
 const exits = map.edges.filter((e) => e.from === "list" && e.to !== "release").map((e) => e.d.split(" ")[1]);
 check(() => assert.equal(new Set(exits).size, exits.length));
 check(() => assert.ok(map.edges.find((e) => e.from === "list" && e.to === "release").d.includes("L")));
+check(() => assert.equal(crossings(map), 0));
 const unknown = buildScanMap({ ...page, provenance: { verdict: "unknown" } });
 check(() => assert.equal(unknown.nodes.some((n) => n.id === "release"), false));
 check(() => assert.equal(unknown.initial, "auth"));

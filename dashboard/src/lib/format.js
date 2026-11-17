@@ -52,11 +52,15 @@ export const FINDING_STATUS = {
 export const CASE_STATUS = { open: "Open", investigating: "Investigating", closed: "Closed" };
 
 export const CLOSURES = {
-  fixed: "Fixed at source",
-  risk_accepted: "Risk accepted",
+  fixed: "True positive, fixed at source",
+  mitigated: "True positive, mitigated",
+  benign_positive: "Benign positive, expected behaviour",
   false_positive: "False positive",
+  risk_accepted: "Risk accepted",
   duplicate: "Duplicate",
+  inconclusive: "Undetermined, not enough evidence",
   out_of_scope: "Out of scope",
+  other: "Other",
 };
 
 export const RULES = {

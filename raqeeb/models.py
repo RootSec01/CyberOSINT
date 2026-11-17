@@ -262,3 +262,14 @@ class AuditSeal(Base):
     entry_id: Mapped[int] = mapped_column(Integer, unique=True, index=True, nullable=False)
     previous: Mapped[str] = mapped_column(String(64), nullable=False)
     digest: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class Schedule(Base):
+    """How often a server is rescanned without anyone pressing Scan."""
+    __tablename__ = "schedules"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), unique=True, index=True, nullable=False)
+    every_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    set_by: Mapped[str] = mapped_column(String(64))
+    set_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

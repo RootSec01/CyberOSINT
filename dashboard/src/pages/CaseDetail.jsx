@@ -52,9 +52,12 @@ export default function CaseDetail() {
         </div>
       )}
       <div className="row">
+        <button type="button" className="btn primary" disabled={action.busy}
+          title="Summary, method, differences, findings, timeline, scans and evidence integrity in one file you can print or save as PDF."
+          onClick={() => action.run(() => download(`/api/cases/${item.reference}/report`, `${item.reference}-report.html`))}>Download report</button>
         <button type="button" className="btn" disabled={action.busy}
+          title={`The record, declarations and findings of ${item.last_scan}, signed by this installation.`}
           onClick={() => action.run(() => download(`/api/scans/${item.last_scan}/evidence`, `${item.last_scan}.evidence.json`))}>Download signed evidence</button>
-        <span className="note">The record, declarations and findings of {item.last_scan}, signed by this installation.</span>
       </div>
       <Problem error={action.error} />
 

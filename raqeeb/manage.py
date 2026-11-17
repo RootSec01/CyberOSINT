@@ -14,9 +14,13 @@ import argparse
 import getpass
 import sys
 
-from raqeeb.db import init_db, session_scope
-from raqeeb.models import User
-from raqeeb.security import hash_password
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from raqeeb.db import DATABASE_URL, init_db, session_scope  # noqa: E402
+from raqeeb.models import User  # noqa: E402
+from raqeeb.security import hash_password  # noqa: E402
 
 
 def _prompt_password() -> str:
@@ -88,6 +92,7 @@ def cmd_list_users(args) -> None:
     init_db()
     with session_scope() as s:
         users = s.query(User).order_by(User.id).all()
+        print(f"database: {DATABASE_URL}")
         if not users:
             print("(no users yet — create one with create-user)")
             return

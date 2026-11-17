@@ -21,6 +21,10 @@ def test_overview_counts_follow_the_estate(console, lab):
     assert seen["cases"]["open"] == 1 and seen["cases"]["unassigned"] == 1
     assert seen["risky"][0]["label"] == "files"
     assert seen["last_scan"] is not None
+    assert seen["provenance"]["unknown"] == 1 and seen["provenance"]["not_read"] == 0
+    assert sum(day["manual"] for day in seen["trend"]) == 1 and len(seen["trend"]) == 14
+    assert seen["categories"] and seen["integrity"]["intact"] and seen["integrity"]["key_id"]
+    assert seen["field"]["ok"] == 302 and seen["field"]["tools"] == 3302
     reference = seen["cases"]["latest"][0]["reference"]
     assert post(console, headers, f"/api/cases/{reference}/close", reason="fixed", note=REASON).status_code == 200
     assert get(console, headers, "/api/overview")["cases"]["open"] == 0

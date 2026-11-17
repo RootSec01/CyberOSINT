@@ -11,11 +11,12 @@ from __future__ import annotations
 
 import os
 from contextlib import contextmanager
+from pathlib import Path
 
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./raqeeb.db")
+DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip() or f"sqlite:///{Path(__file__).resolve().parent.parent / 'raqeeb.db'}"
 
 # SQLite needs this to be usable from FastAPI's threadpool; Postgres does not.
 _connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}

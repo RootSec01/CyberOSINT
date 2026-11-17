@@ -94,13 +94,20 @@ def run_demo(*, serve: bool = False, port: int = 8000) -> dict:
             from raqeeb.paths import DASHBOARD_DIST
             if not (DASHBOARD_DIST / "index.html").exists():
                 raise RuntimeError("Run npm run build in dashboard before --serve")
+            from lab import estate
             for label, served in (("lab-legacy", {}), ("guarded", {"auth_token": "lab-only"})):
                 asset_id, _, _ = listen(label, **served)
                 client.post(f"/api/assets/{asset_id}/scan", headers=headers)
+            for asset in client.get("/api/assets", headers=headers).json():
+                client.put(f"/api/assets/{asset['id']}/schedule", headers=headers, data={"every_minutes": 15})
+            coming = estate.stage(client, headers, listen, library)
+            os.environ.update(SCHEDULER_ENABLED="true", SCHEDULER_TICK_SECONDS="15")
             import uvicorn
             print(f"Console: http://127.0.0.1:{port}/  username demo_operator  password demo-local-only-12345",
                   flush=True)
             print("Open as-shipped, then altered: same package and version, both on their first scan.", flush=True)
+            for line in coming:
+                print(f"Live: {line}; the scheduler picks it up and raises an alert.", flush=True)
             uvicorn.run(main.app, host="127.0.0.1", port=port, log_level="warning")
 
         return {"mode": "isolated_loopback_demo", "package": PACKAGE, "release": version,

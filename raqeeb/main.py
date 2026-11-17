@@ -64,6 +64,8 @@ from raqeeb import evidence
 from raqeeb import seals
 from raqeeb import inventory
 from raqeeb import overview
+from raqeeb import monitoring
+from raqeeb import report
 from raqeeb import team
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
@@ -477,6 +479,7 @@ def scan_asset(db: Session, user: User, asset: Asset, *,
         db.commit()
         _maybe_raise_alert(db, user, asset, payload)
         _maybe_raise_provenance_alert(db, asset, payload)
+        monitoring.after_scan(db, asset, scan, _dispatch_alert_webhook)
         return payload
 
     # OSINT surface pipeline for domain / ip / cidr / asn / org
@@ -497,7 +500,7 @@ def _alert_dict(a: Alert) -> dict:
         "id": a.id, "asset_id": a.asset_id, "severity": a.severity,
         "kind": a.kind, "title": a.title, "detail": a.detail,
         "run_id": a.run_id, "acknowledged": a.acknowledged,
-        "created_at": a.created_at.isoformat() if a.created_at else None,
+        "created_at": register._stamp(a.created_at),
     }
 
 
@@ -948,17 +951,32 @@ async def api_list_alerts(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
-    """List the caller's alerts (newest first) plus an unread count."""
-    q = db.query(Alert).filter(Alert.user_id == user.id)
+    """The team's alerts, newest first, with an unread count."""
+    people = team.people(db, user)
+    q = db.query(Alert).filter(Alert.user_id.in_(people))
     if unacknowledged:
         q = q.filter(Alert.acknowledged == False)  # noqa: E712
-    rows = q.order_by(Alert.created_at.desc()).limit(100).all()
+    rows = q.order_by(Alert.created_at.desc(), Alert.id.desc()).limit(100).all()
     unread = (
         db.query(Alert)
-        .filter(Alert.user_id == user.id, Alert.acknowledged == False)  # noqa: E712
+        .filter(Alert.user_id.in_(people), Alert.acknowledged == False)  # noqa: E712
         .count()
     )
-    return JSONResponse({"unread": unread, "alerts": [_alert_dict(a) for a in rows]})
+    labels = {a.id: a.label or a.value for a in db.query(Asset).filter(Asset.user_id.in_(people))}
+    return JSONResponse({"unread": unread,
+                         "alerts": [{**_alert_dict(a), "asset": labels.get(a.asset_id)} for a in rows]})
+
+
+@app.post("/api/alerts/ack-all", response_class=JSONResponse)
+async def api_ack_all_alerts(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    marked = (db.query(Alert)
+              .filter(Alert.user_id.in_(team.people(db, user)), Alert.acknowledged == False)  # noqa: E712
+              .update({Alert.acknowledged: True}, synchronize_session=False))
+    db.commit()
+    return JSONResponse({"acknowledged": marked})
 
 
 @app.post("/api/alerts/{alert_id}/ack", response_class=JSONResponse)
@@ -1609,6 +1627,63 @@ async def api_inventory(
     return JSONResponse({"servers": inventory.inventory(db, user)})
 
 
+@app.get("/api/monitoring", response_class=JSONResponse)
+async def api_monitoring(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse(monitoring.status(db, user))
+
+
+@app.put("/api/assets/{asset_id}/schedule", response_class=JSONResponse)
+async def api_set_schedule(
+    asset_id: int,
+    every_minutes: int = Form(...),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    asset = db.query(Asset).filter(Asset.id == asset_id).first()
+    if not team.sees(db, user, asset):
+        return JSONResponse({"detail": "asset not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
+    try:
+        monitoring.set_every(db, asset, user, every_minutes)
+    except register.Rejected as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+    _audit(db, "schedule_set", user.username, detail=f"asset={asset.id};every={every_minutes}m",
+           decision="on" if every_minutes else "off")
+    return JSONResponse(monitoring.plan(db, asset))
+
+
+def _report(html_text: str, name: str) -> HTMLResponse:
+    return HTMLResponse(html_text, headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+
+@app.get("/api/cases/{reference}/report")
+async def api_case_report(
+    reference: str,
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> HTMLResponse:
+    found = _case_by_reference(db, user, reference)
+    if not found:
+        return JSONResponse({"detail": "case not found"}, status_code=404)
+    case, asset = found
+    _audit(db, "report_exported", user.username, detail=f"case={case.reference}", decision="written")
+    return _report(report.for_case(db, user, case, asset), f"{case.reference}-report.html")
+
+
+@app.get("/api/assets/{asset_id}/report")
+async def api_server_report(
+    asset_id: int,
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> HTMLResponse:
+    asset = db.query(Asset).filter(Asset.id == asset_id).first()
+    if not team.sees(db, user, asset) or asset.kind != "mcp":
+        return JSONResponse({"detail": "asset not found"}, status_code=404)
+    _audit(db, "report_exported", user.username, detail=f"asset={asset.id}", decision="written")
+    name = "".join(c if c.isalnum() or c in "-_." else "-" for c in (asset.label or asset.value))
+    return _report(report.for_server(db, user, asset), f"{name}-report.html")
+
+
 @app.get("/api/overview", response_class=JSONResponse)
 async def api_overview(
     user: User = Depends(get_current_user), db: Session = Depends(get_db),
@@ -1634,7 +1709,7 @@ async def api_asset_detail(
     a = db.query(Asset).filter(Asset.id == asset_id).first()
     if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
-    return JSONResponse(inventory.detail(db, user, a))
+    return JSONResponse({**inventory.detail(db, user, a), "schedule": monitoring.plan(db, a)})
 
 
 @app.get("/api/changes", response_class=JSONResponse)

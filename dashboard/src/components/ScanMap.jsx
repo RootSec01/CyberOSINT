@@ -7,6 +7,18 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
   const [stage, setStage] = useState(LAST_STAGE);
   const [picked, setPicked] = useState(map.initial);
   const timer = useRef(null);
+  const evidence = useRef(null);
+
+  const pick = (id) => {
+    setPicked(id);
+    const card = evidence.current;
+    if (!card) return;
+    card.classList.remove("flash");
+    requestAnimationFrame(() => {
+      card.classList.add("flash");
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  };
 
   const replay = () => {
     clearInterval(timer.current);
@@ -36,7 +48,7 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
         <span className="row small muted"><i style={{ width: 20, height: 12, border: "1px dashed var(--muted)", borderRadius: 3 }} />Inferred, not executed</span>
         <button type="button" className="btn" onClick={replay}>Replay scan</button>
       </div>
-      <div className="panel scroll" title="Select a node to read its evidence. No tool was called during this scan.">
+      <div className="panel scroll">
         <div className="map" style={{ height: map.height }}>
           {COLUMNS.map((column) => <span key={column.title} className="column" style={{ left: column.x }}>{column.title}</span>)}
           <svg aria-hidden="true" width={MAP_WIDTH} height={map.height}>
@@ -46,7 +58,7 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
             ))}
           </svg>
           {map.nodes.map((n) => (
-            <button key={n.id} type="button" onClick={() => setPicked(n.id)} aria-pressed={n.id === node.id}
+            <button key={n.id} type="button" onClick={() => pick(n.id)} aria-pressed={n.id === node.id}
               className={`node border-${n.tone}${n.dashed ? " dashed" : ""}${n.id === node.id ? " picked" : ""}`}
               style={{ left: n.x, top: n.y, opacity: n.stage <= stage ? 1 : 0, transform: `translateX(${n.stage <= stage ? 0 : 8}px)` }}>
               <span className="top"><span style={{ color: "var(--brand)" }}>{n.code}</span><span className={`tone-${n.tone === "line" ? "muted" : n.tone}`}>{n.tier}</span></span>
@@ -56,7 +68,7 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
           ))}
         </div>
       </div>
-      <section className="card" aria-label="Evidence for the selected node">
+      <section ref={evidence} className="card evidence" aria-label="Evidence for the selected node">
         <div className="row">
           <h3 className="grow" style={{ fontSize: 16 }}>{node.title}</h3>
           <span className="ref">{node.code}</span>

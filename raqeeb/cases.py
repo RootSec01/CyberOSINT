@@ -15,7 +15,8 @@ from raqeeb.register import Rejected
 DEVIATION, COMMAND_EXECUTION, MANUAL = "deviation", "command_execution", "manual"
 OPEN, INVESTIGATING, CLOSED = "open", "investigating", "closed"
 FIXED = "fixed"
-CLOSURES = (FIXED, "risk_accepted", "false_positive", "duplicate", "out_of_scope")
+CLOSURES = (FIXED, "mitigated", "benign_positive", "false_positive", "risk_accepted",
+            "duplicate", "inconclusive", "out_of_scope", "other")
 MIN_NOTE = 10
 
 

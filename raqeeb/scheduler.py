@@ -1,9 +1,9 @@
 """Background monitoring scheduler.
 
-Every asset flagged ``monitoring=True`` is re-scanned on a fixed interval so the
-platform behaves like continuous EASM rather than one-shot scanning. A single
-daemon thread wakes every ``SCAN_INTERVAL_MINUTES`` (default 60), runs one pass
-over all monitored assets, and updates each asset's last-scan status.
+Every monitored MCP server is rescanned on its own interval (Settings or the
+server page; ``SCAN_INTERVAL_MINUTES`` when none was chosen). A single daemon
+thread wakes every ``SCHEDULER_TICK_SECONDS`` (default 30) and scans the
+servers whose interval has passed.
 
 Design choices (deliberately conservative):
   * A plain ``threading.Thread(daemon=True)`` — zero new dependencies. The
@@ -17,7 +17,8 @@ Design choices (deliberately conservative):
 
 Env:
     SCHEDULER_ENABLED     "true" to run the loop (default: off)
-    SCAN_INTERVAL_MINUTES minutes between passes (default 60, floor 1)
+    SCAN_INTERVAL_MINUTES default interval for a monitored server (default 60)
+    SCHEDULER_TICK_SECONDS how often the loop looks for due servers (default 30)
 """
 
 from __future__ import annotations
@@ -36,14 +37,6 @@ _stop = threading.Event()
 
 def _enabled() -> bool:
     return os.getenv("SCHEDULER_ENABLED", "false").strip().lower() == "true"
-
-
-def _interval_seconds() -> int:
-    try:
-        minutes = int(os.getenv("SCAN_INTERVAL_MINUTES", "60"))
-    except ValueError:
-        minutes = 60
-    return max(60, minutes * 60)  # never tighter than one minute
 
 
 def run_once() -> Dict[str, Any]:
@@ -88,11 +81,43 @@ def run_once() -> Dict[str, Any]:
     return summary
 
 
+def _tick_seconds() -> int:
+    try:
+        return max(5, int(os.getenv("SCHEDULER_TICK_SECONDS", "30")))
+    except ValueError:
+        return 30
+
+
+def run_due() -> Dict[str, Any]:
+    """Scan every server whose own interval has passed since its last scan."""
+    from raqeeb import monitoring
+    from raqeeb.db import SessionLocal
+    from raqeeb.main import scan_asset
+    from raqeeb.models import User
+
+    scanned = failed = 0
+    db = SessionLocal()
+    try:
+        for asset in monitoring.due(db):
+            owner = db.query(User).filter(User.id == asset.user_id).first()
+            if not owner or not owner.is_active:
+                continue
+            try:
+                scan_asset(db, owner, asset, operator="raqeeb", trigger="scheduled")
+                scanned += 1
+            except Exception as exc:
+                db.rollback()
+                failed += 1
+                log.warning("scheduled scan failed for asset %s: %s", asset.id, exc)
+    finally:
+        db.close()
+    return {"scanned": scanned, "failed": failed, "at": datetime.now(timezone.utc).isoformat()}
+
+
 def _loop() -> None:
-    # Wait one interval before the first pass (don't hammer at boot).
-    while not _stop.wait(_interval_seconds()):
+    while not _stop.wait(_tick_seconds()):
         try:
-            run_once()
+            run_due()
         except Exception as exc:  # a bad pass must never kill the loop
             log.error("scheduler loop error: %s", exc)
 
@@ -111,7 +136,7 @@ def start_if_enabled() -> bool:
     _thread = threading.Thread(
         target=_loop, name="raqeeb-scheduler", daemon=True)
     _thread.start()
-    log.info("scheduler started (interval=%ss)", _interval_seconds())
+    log.info("scheduler started (tick=%ss)", _tick_seconds())
     return True
 
 

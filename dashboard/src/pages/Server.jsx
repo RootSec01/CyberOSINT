@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, NavLink, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, download } from "../lib/api.js";
+import ScheduleSelect from "../components/Schedule.jsx";
 import { compareTexts, hiddenCharacters } from "../lib/diff.js";
 import { CASE_STATUS, OUTCOMES, describeChange, plural, provenanceLine, shortRelease, when, worst } from "../lib/format.js";
 import { useTeam } from "../lib/Team.jsx";
@@ -218,7 +219,7 @@ function Scans({ page }) {
       <h2>Scan history</h2>
       <div className="panel scroll">
         <table className="grid" style={{ minWidth: 1100 }}>
-          <thead><tr><th>Scan</th><th>Time</th><th>Run by</th><th>Trigger</th><th>Outcome</th><th>Provenance</th><th className="num">Tools</th><th className="num">Findings</th><th>Declarations</th><th>Signed evidence</th></tr></thead>
+          <thead><tr><th>Scan</th><th>Time</th><th>Run by</th><th>Trigger</th><th>Outcome</th><th>Provenance</th><th className="num">Tools</th><th className="num">Findings</th><th>Declarations</th><th title="Signed evidence can be checked without Raqeeb: see Settings, Evidence.">Signed evidence</th></tr></thead>
           <tbody>
             {page.scans.map((s) => (
               <tr key={s.reference}><td className="ref">{s.reference}</td><td className="mono">{when(s.started_at)}</td>
@@ -234,7 +235,6 @@ function Scans({ page }) {
         {!page.scans.length && <Empty title="No scans yet">Run a scan to start this server's history.</Empty>}
       </div>
       <Problem error={action.error} />
-      <p className="note">Each scan keeps its own reference and the fingerprint of the declarations it read. Signed evidence can be checked without Raqeeb: see Settings, Evidence.</p>
     </main>
   );
 }
@@ -271,14 +271,18 @@ export default function Server() {
       <section className="subhead" aria-label="Server">
         <div>
           <div className="small muted"><Link to="/inventory">Inventory</Link> / {page.label}</div>
-          <div className="row">
+          <div className="row server-head">
             <h1>{page.label}</h1>
-            <span className="mono muted">{page.endpoint}</span>
+            <span className="mono muted endpoint">{page.endpoint}</span>
             <Verdict scan={page.scan} badge />
             <span className="mono small muted">{read && page.read_scan.release ? `against ${page.read_scan.release}` : ""}</span>
             <span className="grow" />
             <span className="small muted">{page.scan ? `Scanned ${when(page.scan.started_at)}` : "Never scanned"}</span>
             {page.scan && <span className="ref small">{page.scan.reference}</span>}
+            <ScheduleSelect assetId={page.id} value={page.schedule.every_minutes} onSaved={reload} disabled={!can("work")} />
+            <button type="button" className="btn" disabled={action.busy || !read}
+              title="An investigation report of this server: verdict, differences, findings, scans and evidence."
+              onClick={() => action.run(() => download(`/api/assets/${page.id}/report`, `${page.label}-report.html`))}>Report</button>
             {can("work") && <button type="button" className="btn danger" disabled={action.busy} onClick={remove}>Remove</button>}
             {can("work") && <button type="button" className="btn primary" disabled={action.busy} onClick={scan}>{action.busy ? "Scanning…" : "Scan"}</button>}
           </div>
@@ -289,6 +293,7 @@ export default function Server() {
             <div><dt>Tools</dt><dd className="mono">{read ? page.tools.length : "—"}</dd></div>
             <div><dt>Flagged</dt><dd className="mono">{read ? page.flagged_tools : "—"}</dd></div>
             <div><dt>Open cases</dt><dd className="mono">{page.open_cases}</dd></div>
+            <div><dt>Next scan</dt><dd className="mono">{page.schedule.next_scan ? when(page.schedule.next_scan) : "Not scheduled"}</dd></div>
           </dl>
           <div className="tabs">
             {tabs.map(([key, label, count]) => (
