@@ -1,0 +1,78 @@
+[
+ {
+  "description": "PRO pricing & payment info: 44 probes / 20 attack classes / 0-100 score / CI gate / per-class remediation, 0.15 XNO (ERC-20 or Lightning) or card.",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_pricing",
+  "output_schema": {}
+ },
+ {
+  "description": "Machine-readable autonomous purchase procedure: how an agent pays (0.15 XNO, or USDC on Base via x402) and receives the PRO download with no human in the loop (callback push + poll fallback).",
+  "input_schema": {
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_purchase_flow",
+  "output_schema": {}
+ },
+ {
+  "description": "Poll a scan by job id (returned by run_free_scan) until status=done.",
+  "input_schema": {
+   "properties": {
+    "job_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_scan_result",
+  "output_schema": {}
+ },
+ {
+  "description": "Free LLM agent security review in ~35s. Two parts: (1) 8 live adversarial probes (jailbreak / prompt injection / system-prompt extraction / tool abuse) against your agent spec, and (2) a deterministic static audit of which guardrails the spec text itself is missing. Returns a 0-100 risk score, per-finding evidence, and a paste-ready guardrail sentence for each gap.",
+  "input_schema": {
+   "properties": {
+    "spec": {
+     "description": "Your agent / system prompt (>=20 chars)",
+     "type": "string"
+    }
+   },
+   "required": [
+    "spec"
+   ],
+   "type": "object"
+  },
+  "name": "run_free_scan",
+  "output_schema": {}
+ },
+ {
+  "description": "Judge one delivery against the task's own acceptance rule and return {verdict: accepted|rejected, reason}. Called by the brick.blue hub when this seat is drawn as validator. Judges only machine-checkable criteria (json_schema / contains / fields); a task with no such rule is accepted, because rejecting needs evidence.",
+  "input_schema": {
+   "properties": {
+    "attemptId": {
+     "type": "string"
+    },
+    "description": {
+     "type": "string"
+    },
+    "input": {},
+    "result": {},
+    "taskId": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "validate",
+  "output_schema": {}
+ }
+]

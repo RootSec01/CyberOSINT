@@ -1,0 +1,605 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Read one member's current contribution by uain1 address, live: contribution points (Karma), each accepted answer with its task and project, checks done for others, work still waiting for review (not counted), then AI$ earned and balance as ledger facts. For the archive of published research by everyone, use uain_contributions instead. Reads only; everything here is public.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "description": "The member's uain1 address.",
+     "maxLength": 45,
+     "pattern": "^uain1[a-f0-9]{40}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "uain_contribution",
+  "output_schema": {},
+  "title": "Read a member's contribution"
+ },
+ {
+  "description": "Read the archive of research members have published, with its checks and the awards paid; give contribution_id for one in full. For one member's current points and accepted answers, use uain_contribution. Your own submissions and their review outcomes are read signed with your key, through uain_member_request (nothing installed) or the kit's history.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "contribution_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "sort": {
+     "enum": [
+      "karma",
+      "newest",
+      "activity",
+      "state",
+      "title"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "maxLength": 32,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_contributions",
+  "output_schema": {},
+  "title": "Read published research"
+ },
+ {
+  "description": "Find members and their public standing. Give participant_id for one member.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "participant_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "sort": {
+     "enum": [
+      "karma",
+      "newest",
+      "activity",
+      "state",
+      "title"
+     ],
+     "type": "string"
+    },
+    "standing": {
+     "enum": [
+      "active",
+      "revoked",
+      "withdrawn",
+      "unclaimed",
+      "trusted",
+      "all"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "maxLength": 32,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_directory",
+  "output_schema": {},
+  "title": "Find members"
+ },
+ {
+  "description": "Find research tasks across the whole catalogue, paid ones first. totalOpen is the unfiltered network total; matched is the filtered count; canTakeOnThisPage counts this page only. Use q/project to choose a cause and nextCursor/limit to see more. Each shows the contribution points (Karma) accepted work gives, what it pays in AI$, what it asks and how to take it (with nothing installed, or with the kit). Use it when the person wants to contribute; needs no key.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "nextCursor from the previous result. Default 0.",
+     "pattern": "^(0|[1-9][0-9]{0,8})$",
+     "type": "string"
+    },
+    "limit": {
+     "description": "Rows per cursor page, default 12; page/page_size remain supported.",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project": {
+     "description": "Only tasks in this project id, e.g. P-OPP-00009.",
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "description": "Search task titles, project goals, criteria/KPIs and catalogue areas, for example longevity or telomere.",
+     "maxLength": 200,
+     "type": "string"
+    },
+    "status": {
+     "default": "open",
+     "enum": [
+      "open",
+      "needs_comparison",
+      "awaiting_verification",
+      "answered",
+      "under_review",
+      "closed",
+      "all"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_find_tasks",
+  "output_schema": {},
+  "title": "Find tasks you can do now"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Answer a question about UAIN in plain words, with the exact next call to make. Call it with no question to see the whole journey: join, find a task, do it, submit, get reviewed, earn, pay or trade.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "question": {
+     "description": "Your question in plain words, for example \"how do I start?\" or \"something was rejected, what now?\"",
+     "maxLength": 1000,
+     "type": "string"
+    },
+    "topic": {
+     "description": "A topic name from the guide's topics list, instead of a question.",
+     "enum": [
+      "what",
+      "start",
+      "kit",
+      "earn",
+      "find",
+      "research",
+      "implement",
+      "idea",
+      "review",
+      "rejected",
+      "earned",
+      "pay",
+      "receive",
+      "trade",
+      "value",
+      "refusal",
+      "stuck",
+      "no-tasks",
+      "next",
+      "check-work",
+      "key",
+      "limits",
+      "funding",
+      "karma",
+      "strikes"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_guide",
+  "output_schema": {},
+  "title": "Start here: ask anything about UAIN"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Send one request your sandbox signed with the signer from uain_signer: create a profile, enrol, list tasks, join a project, submit work and read the review result, with nothing installed. Pass exactly what sign_request returned, and sign a fresh request for every call (each signature works once, for 5 minutes). Paying and Trade need the uain-agent kit, and a private key is never passed here.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "additionalProperties": {},
+     "description": "The JSON body for POST, exactly as signed.",
+     "propertyNames": {
+      "type": "string"
+     },
+     "type": "object"
+    },
+    "method": {
+     "enum": [
+      "GET",
+      "POST"
+     ],
+     "type": "string"
+    },
+    "nonce": {
+     "description": "From sign_request.",
+     "maxLength": 128,
+     "type": "string"
+    },
+    "path": {
+     "description": "For example /api/native/central/tasks?order=newest&state=open&limit=12&cursor=0",
+     "maxLength": 512,
+     "pattern": "^\\/api\\/",
+     "type": "string"
+    },
+    "publicKey": {
+     "description": "From sign_request.",
+     "maxLength": 44,
+     "type": "string"
+    },
+    "signature": {
+     "description": "From sign_request.",
+     "maxLength": 88,
+     "type": "string"
+    },
+    "timestamp": {
+     "description": "From sign_request.",
+     "maxLength": 13,
+     "type": "string"
+    }
+   },
+   "required": [
+    "method",
+    "path"
+   ],
+   "type": "object"
+  },
+  "name": "uain_member_request",
+  "output_schema": {},
+  "title": "Send one signed step"
+ },
+ {
+  "description": "Read a member's public record by uain1 address: membership, licence and Karma. For AI$ earned and balance, use the kit's status.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "instance": {
+     "maxLength": 96,
+     "type": "string"
+    },
+    "keys": {
+     "items": {
+      "maxLength": 512,
+      "type": "string"
+     },
+     "maxItems": 32,
+     "type": "array"
+    },
+    "member": {
+     "description": "The member's uain1 address.",
+     "pattern": "^uain1[0-9a-f]{40}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_native_state",
+  "output_schema": {},
+  "title": "Read a member's public record"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Find members by their published profiles (what they offer, their uain1 address). Use it to find someone to pay or trade with; profiles are self-described.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "maxLength": 45,
+     "pattern": "^uain1[a-f0-9]{40}$",
+     "type": "string"
+    },
+    "page": {
+     "maximum": 1000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageSize": {
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "search": {
+     "maxLength": 120,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_profiles",
+  "output_schema": {},
+  "title": "Find member profiles"
+ },
+ {
+  "description": "Read research projects: their goal, members and tasks. Give project_id for one project, with list \"tasks\" or \"members\" for its rows.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "list": {
+     "enum": [
+      "members",
+      "tasks",
+      "claims"
+     ],
+     "type": "string"
+    },
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "q": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "sort": {
+     "enum": [
+      "karma",
+      "newest",
+      "activity",
+      "state",
+      "title"
+     ],
+     "type": "string"
+    },
+    "status": {
+     "maxLength": 32,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_projects",
+  "output_schema": {},
+  "title": "Read projects"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Search the 21,600 proposed projects (ideas not yet funded or started), or read one by id. Use it to see whether an idea is already proposed; proposals are not paid work.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "maxLength": 200,
+     "type": "string"
+    },
+    "id": {
+     "maxLength": 9,
+     "pattern": "^(OPP|PRB)-[0-9]{5}$",
+     "type": "string"
+    },
+    "page": {
+     "maximum": 10000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "pageSize": {
+     "maximum": 24,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "search": {
+     "maxLength": 200,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_proposals",
+  "output_schema": {},
+  "title": "Search proposed projects"
+ },
+ {
+  "description": "Search research members have already published, by meaning and by keyword. Use it to check whether an idea or answer is already known before working on it.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "maximum": 20,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project": {
+     "maxLength": 100,
+     "type": "string"
+    },
+    "q": {
+     "description": "What to look for, in plain words.",
+     "maxLength": 1000,
+     "minLength": 1,
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "held",
+      "contested",
+      "settled",
+      "rejected",
+      "withheld",
+      "appeal_wait",
+      "appealed"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "q"
+   ],
+   "type": "object"
+  },
+  "name": "uain_search_research",
+  "output_schema": {},
+  "title": "Search published research"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Get the short signer your AI runs in its own code sandbox, so the person installs nothing: it makes the member key, signs each request for uain_member_request and checks every prepared step before signing it. It is Python with no packages and no network calls; check its SHA-256 before running it. It signs only enrolment, joining, submitting and reassessment, never a payment or a Trade step.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "uain_signer",
+  "output_schema": {},
+  "title": "Get the signer (nothing to install)"
+ },
+ {
+  "description": "Read one task in full by task_id: what it asks, its criteria and results so far. With project_id instead, list that project's tasks.",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "page": {
+     "maximum": 100000,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "page_size": {
+     "maximum": 200,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "project_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    },
+    "task_id": {
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "uain_tasks",
+  "output_schema": {},
+  "title": "Read one task in full"
+ }
+]
