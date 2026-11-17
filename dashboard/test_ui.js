@@ -56,6 +56,9 @@ check(() => assert.ok(map.edges.filter((e) => e.dashed).every((e) => e.to.starts
 check(() => assert.ok(map.nodes.filter((n) => n.dashed).every((n) => n.tier === "INFERRED" && n.stage === LAST_STAGE)));
 check(() => assert.ok(map.edges.every((e) => typeof e.d === "string" && e.d.startsWith("M"))));
 check(() => assert.ok(map.nodes.every((n) => n.y >= 72 && n.y + 76 <= map.height)));
+const exits = map.edges.filter((e) => e.from === "list" && e.to !== "release").map((e) => e.d.split(" ")[1]);
+check(() => assert.equal(new Set(exits).size, exits.length));
+check(() => assert.ok(map.edges.find((e) => e.from === "list" && e.to === "release").d.includes("L")));
 const unknown = buildScanMap({ ...page, provenance: { verdict: "unknown" } });
 check(() => assert.equal(unknown.nodes.some((n) => n.id === "release"), false));
 check(() => assert.equal(unknown.initial, "auth"));

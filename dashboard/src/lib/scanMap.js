@@ -2,14 +2,14 @@ import { SEVERITY_RANK, VERDICTS, plural, provenanceLine, shortRelease, worst } 
 
 export const COLUMNS = [
   { title: "TARGET", x: 24 },
-  { title: "SERVER", x: 274 },
-  { title: "ACCESS AND PROVENANCE", x: 524 },
-  { title: "TOOLS", x: 824 },
-  { title: "POTENTIAL IMPACT", x: 1124 },
+  { title: "SERVER", x: 288 },
+  { title: "ACCESS AND PROVENANCE", x: 552 },
+  { title: "TOOLS", x: 876 },
+  { title: "POTENTIAL IMPACT", x: 1256 },
 ];
 export const NODE_WIDTH = 220;
 export const NODE_HEIGHT = 76;
-export const MAP_WIDTH = 1368;
+export const MAP_WIDTH = 1500;
 export const LAST_STAGE = 6;
 const ROW = 96;
 const TOP = 72;
@@ -133,19 +133,32 @@ export function buildScanMap(page) {
   });
 
   const at = Object.fromEntries(nodes.map((node) => [node.id, node]));
+  const lateral = edges.filter((edge) => at[edge.from].x !== at[edge.to].x);
+  const spread = (key, farEnd) => {
+    const groups = {};
+    lateral.forEach((edge) => (groups[edge[key]] = groups[edge[key]] || []).push(edge));
+    Object.values(groups).forEach((list) => list
+      .sort((a, b) => at[farEnd(a)].y - at[farEnd(b)].y || at[farEnd(a)].x - at[farEnd(b)].x)
+      .forEach((edge, index) => { edge[`${key}Port`] = (index + 1) / (list.length + 1); }));
+  };
+  spread("from", (edge) => edge.to);
+  spread("to", (edge) => edge.from);
+  const port = (node, share) => node.y + 16 + (NODE_HEIGHT - 32) * share;
   edges.forEach((edge) => {
     const a = at[edge.from];
     const b = at[edge.to];
-    const x1 = a.x + NODE_WIDTH;
-    const y1 = a.y + NODE_HEIGHT / 2;
-    const y2 = b.y + NODE_HEIGHT / 2;
     if (a.x === b.x) {
-      const bend = x1 + 26;
-      edge.d = `M${x1} ${y1} C${bend} ${y1},${bend} ${y2},${x1} ${y2}`;
-    } else {
-      const mid = (x1 + b.x) / 2;
-      edge.d = `M${x1} ${y1} C${mid} ${y1},${mid} ${y2},${b.x} ${y2}`;
+      const x = a.x + NODE_WIDTH / 2;
+      const [upper, lower] = a.y < b.y ? [a, b] : [b, a];
+      edge.d = `M${x} ${upper.y + NODE_HEIGHT} L${x} ${lower.y}`;
+      return;
     }
+    const x1 = a.x + NODE_WIDTH;
+    const x2 = b.x;
+    const y1 = port(a, edge.fromPort);
+    const y2 = port(b, edge.toPort);
+    const reach = (x2 - x1) * 0.45;
+    edge.d = `M${x1} ${y1} C${x1 + reach} ${y1},${x2 - reach} ${y2},${x2} ${y2}`;
   });
   return { nodes, edges, height, initial: verdict === "deviation" ? "release" : "auth" };
 }

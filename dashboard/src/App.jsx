@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./lib/AuthContext.jsx";
 import { TeamProvider } from "./lib/Team.jsx";
 import Login from "./components/Login.jsx";
 import Shell from "./components/Shell.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 import Inventory from "./pages/Inventory.jsx";
 import Server from "./pages/Server.jsx";
 import Findings from "./pages/Findings.jsx";
@@ -19,7 +20,8 @@ function Console() {
     <TeamProvider>
       <Shell>
         <Routes>
-          <Route path="/" element={<Inventory />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/inventory" element={<Inventory />} />
           <Route path="/servers/:id" element={<Server />} />
           <Route path="/servers/:id/:tab" element={<Server />} />
           <Route path="/findings" element={<Findings />} />

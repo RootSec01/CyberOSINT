@@ -66,6 +66,7 @@ export const RULES = {
 };
 
 export const ACTIONS = {
+  briefing: "Briefing written",
   finding_status: "Finding status changed",
   case_opened: "Case opened by hand",
   case_assigned: "Case assigned",

@@ -48,18 +48,16 @@ function Overview({ page }) {
       <section className="stack tight" aria-label="Checks">
         <h2>Three checks on this scan</h2>
         <div className="three">
-          <div className="card"><span className="small muted">Published release comparison</span>
+          <div className="card" title="Works for known published packages only."><span className="small muted">Published release comparison</span>
             <span style={{ fontSize: 20, lineHeight: "28px" }}><VerdictWord verdict={verdict} /></span>
-            <span>{provenanceLine(page)}</span><span className="note">Works for known published packages only.</span></div>
-          <div className="card"><span className="small muted">Declaration analysis</span>
+            <span>{provenanceLine(page)}</span></div>
+          <div className="card" title="Reads declarations; does not see what a tool does when called."><span className="small muted">Declaration analysis</span>
             <span style={{ fontSize: 20, lineHeight: "28px", fontWeight: 600 }}>{plural(page.findings.length, "finding")}</span>
-            <span>{severities.map(([level, count]) => `${count} ${level}`).join(", ") || "Nothing flagged."}</span>
-            <span className="note">Reads declarations; does not see what a tool does when called.</span></div>
-          <div className="card"><span className="small muted">Change monitoring</span>
+            <span>{severities.map(([level, count]) => `${count} ${level}`).join(", ") || "Nothing flagged."}</span></div>
+          <div className="card" title="Cannot see anything that happened before the first scan."><span className="small muted">Change monitoring</span>
             <span style={{ fontSize: 20, lineHeight: "28px", fontWeight: 600 }}>{change ? "Changed" : (page.scans.length > 1 ? "No change" : "First scan")}</span>
             <span>{change ? `${when(change.at)}: ${describeChange(change)} (${change.scan}).`
-              : (page.scans.length > 1 ? `Same declarations across ${plural(page.scans.length, "scan")}.` : "No earlier scan to compare with. Monitoring starts from this one.")}</span>
-            <span className="note">Cannot see anything that happened before the first scan.</span></div>
+              : (page.scans.length > 1 ? `Same declarations across ${plural(page.scans.length, "scan")}.` : "No earlier scan to compare with. Monitoring starts from this one.")}</span></div>
         </div>
       </section>
       {page.cases.length > 0 && (
@@ -272,7 +270,7 @@ export default function Server() {
     <>
       <section className="subhead" aria-label="Server">
         <div>
-          <div className="small muted"><Link to="/">Inventory</Link> / {page.label}</div>
+          <div className="small muted"><Link to="/inventory">Inventory</Link> / {page.label}</div>
           <div className="row">
             <h1>{page.label}</h1>
             <span className="mono muted">{page.endpoint}</span>

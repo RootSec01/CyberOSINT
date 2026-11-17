@@ -247,6 +247,23 @@ With `APP_ENV=production` the application refuses unsafe settings at startup
 (`raqeeb/deployment_config.py`). Use PostgreSQL (`requirements-production.txt`) and run
 `python3 -m raqeeb.prepare_production_schema` once on a new, empty database.
 
+## Console
+
+The dashboard at `/` is live: it refreshes itself from the database and shows servers by
+risk, open findings and cases, the latest changes and activity, and a written briefing
+composed offline from stored rows. Four roles scope what a member can do:
+
+| Role | Can |
+|---|---|
+| Owner | Everything, including managing admins |
+| Admin | Manage members and case rules; work findings and cases |
+| Analyst | Add servers, run scans, work findings and cases |
+| Viewer | Read only |
+
+Scanning is limited to an authorized scope: loopback is always allowed, standing ranges
+come from `AUTHORIZED_CIDRS` in the server environment, and temporary grants are issued
+through `/api/authorize`. Raqeeb refuses any target outside this scope.
+
 ## Safety and scope
 
 - Detectors read declarations only. No tool on a third-party server is ever called.

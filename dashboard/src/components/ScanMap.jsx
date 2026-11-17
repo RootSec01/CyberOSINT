@@ -36,7 +36,7 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
         <span className="row small muted"><i style={{ width: 20, height: 12, border: "1px dashed var(--muted)", borderRadius: 3 }} />Inferred, not executed</span>
         <button type="button" className="btn" onClick={replay}>Replay scan</button>
       </div>
-      <div className="panel scroll">
+      <div className="panel scroll" title="Select a node to read its evidence. No tool was called during this scan.">
         <div className="map" style={{ height: map.height }}>
           {COLUMNS.map((column) => <span key={column.title} className="column" style={{ left: column.x }}>{column.title}</span>)}
           <svg aria-hidden="true" width={MAP_WIDTH} height={map.height}>
@@ -68,7 +68,6 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
         {node.inference && <span className="muted">{node.inference}</span>}
         {node.fix && <span style={{ color: "var(--brand)" }}>{node.fix}</span>}
       </section>
-      <p className="note">Select a node to read its evidence. No tool was called during this scan.</p>
     </>
   );
 }

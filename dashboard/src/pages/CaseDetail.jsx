@@ -89,7 +89,7 @@ export default function CaseDetail() {
       )}
 
       <section className="card" aria-label="Origin">
-        <h2>{item.automatic ? "Why Raqeeb opened this case" : "Why this case was opened"}</h2>
+        <h2>Reason</h2>
         <span>{item.automatic
           ? `Opened automatically by Raqeeb on ${when(item.opened_at)}, from scan ${item.scan}. No person opened it.`
           : `Opened by ${nameOf(item.opened_by)} on ${when(item.opened_at)}, from scan ${item.scan}.`}</span>
@@ -100,7 +100,7 @@ export default function CaseDetail() {
       <dl className="card metas" style={{ display: "grid" }}>{meta.map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}</dl>
 
       {works && !closed && (
-        <section className="card" aria-label="Owner">
+        <section className="card" aria-label="Owner" title="Members are managed in Settings. Viewers cannot own a case.">
           <h2>Assign to</h2>
           <div className="row">
             {assignable.map((m) => (
@@ -109,7 +109,6 @@ export default function CaseDetail() {
             ))}
             {item.owner && <button type="button" className="btn" disabled={action.busy} onClick={() => change("assign", { owner: "" })}>Unassign</button>}
           </div>
-          <span className="note">Members are managed in Settings. Viewers cannot own a case.</span>
         </section>
       )}
 

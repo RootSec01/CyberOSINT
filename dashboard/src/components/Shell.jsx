@@ -6,7 +6,7 @@ import { useTeam } from "../lib/Team.jsx";
 import Guard from "./Guard.jsx";
 import Mark from "./Mark.jsx";
 
-const PAGES = [["/", "Inventory"], ["/findings", "Findings"], ["/cases", "Cases"], ["/changes", "Changes"],
+const PAGES = [["/", "Dashboard"], ["/inventory", "Inventory"], ["/findings", "Findings"], ["/cases", "Cases"], ["/changes", "Changes"],
   ["/activity", "Activity"], ["/settings", "Settings"]];
 
 function Search() {
@@ -62,7 +62,7 @@ export default function Shell({ children }) {
         <Link to="/" className="brand"><Mark />Raqeeb</Link>
         <nav className="nav" aria-label="Primary">
           {PAGES.map(([to, label]) => (
-            <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => (isActive || (to === "/" && inServer) ? "active" : "")}>{label}</NavLink>
+            <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => (isActive || (to === "/inventory" && inServer) ? "active" : "")}>{label}</NavLink>
           ))}
         </nav>
         <Search />

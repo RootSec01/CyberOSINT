@@ -18,9 +18,9 @@ export default function Explain({ assetId }) {
   };
 
   return (
-    <section className="card" aria-label="Explain">
+    <section className="card" aria-label="Copilot">
       <div className="row">
-        <h2 className="grow">Explain</h2>
+        <h2 className="grow">Copilot</h2>
         {!answer && <button type="button" className="btn" disabled={action.busy} onClick={() => ask("")}>Explain this server</button>}
       </div>
       {answer && (

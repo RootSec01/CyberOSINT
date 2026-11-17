@@ -37,9 +37,9 @@ function AddServer({ onAdded, onCancel }) {
         </label>
       </div>
       <div className="row">
-        <button className="btn primary" type="submit" disabled={action.busy || !endpoint.trim()}>Add</button>
+        <button className="btn primary" type="submit" disabled={action.busy || !endpoint.trim()}
+          title="Only targets inside the authorized scope are scanned.">Add</button>
         <button className="btn" type="button" onClick={onCancel}>Cancel</button>
-        <span className="note">Only targets inside the authorized scope are scanned.</span>
       </div>
       <Problem error={action.error} />
     </form>
@@ -99,7 +99,7 @@ export default function Inventory() {
         {!loading && !servers.length && <Empty title="No servers yet">Add an MCP server by its endpoint, then run a scan. A scan reads the handshake and the tool list only.</Empty>}
         {!loading && servers.length > 0 && !rows.length && <Empty title="Nothing matches">No server matches this filter.</Empty>}
       </div>
-      <p className="note">{rows.length} of {plural(servers.length, "server")}. Scans read the handshake and the tool list only; no tool is called.</p>
+      <p className="note" title="A scan reads the handshake and the tool list only; no tool is called.">{rows.length} of {plural(servers.length, "server")}</p>
     </main>
   );
 }

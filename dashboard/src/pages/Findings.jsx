@@ -42,7 +42,7 @@ function Detail({ finding, onChanged }) {
       <span style={{ color: "var(--brand)" }}>{finding.recommendation}</span>
       {can("work") && !resolved && (
         <>
-          <label className="stack tight small muted">Reason (needed to accept a risk or to open a case)
+          <label className="stack tight small muted" title="Needed to accept a risk or to open a case.">Reason
             <input className="input" style={{ color: "var(--text)" }} value={note} onChange={(event) => setNote(event.target.value)} />
           </label>
           <div className="row">

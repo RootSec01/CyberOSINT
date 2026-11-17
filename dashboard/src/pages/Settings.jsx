@@ -25,14 +25,13 @@ function Profile() {
   return (
     <form className="card" onSubmit={save}>
       <h2>Profile</h2>
-      <label className="formrow"><span>Display name</span><input className="input" value={form.display_name} onChange={set("display_name")} /></label>
+      <label className="formrow" title="Shown on every case action and note you make."><span>Display name</span><input className="input" value={form.display_name} onChange={set("display_name")} /></label>
       <label className="formrow"><span>Email</span><input className="input" type="email" value={form.email} onChange={set("email")} /></label>
       <label className="formrow"><span>Job title</span><input className="input" value={form.title} onChange={set("title")} /></label>
       <div className="formrow"><span>Username</span><span className="mono">{me.username}</span></div>
       <div className="formrow"><span>Role</span><strong style={{ textTransform: "capitalize" }}>{me.role}</strong></div>
       <div className="row"><button className="btn primary" type="submit" disabled={action.busy}>Save</button>{saved && <span className="note">Saved.</span>}</div>
       <Problem error={action.error} />
-      <p className="note">The display name is shown on every case action and note you make.</p>
     </form>
   );
 }
@@ -54,7 +53,7 @@ function Members() {
   return (
     <>
       <section className="card">
-        <div className="row"><h2 className="grow">Members</h2><span className="note">{members.length} in this team</span></div>
+        <div className="row"><h2 className="grow" title={ROLE_NOTES.map(([role, text]) => `${role[0].toUpperCase()}${role.slice(1)}: ${text.toLowerCase()}.`).join(" ")}>Members</h2><span className="note">{members.length} in this team</span></div>
         {members.map((m) => (
           <div key={m.id} className="row" style={{ borderTop: "1px solid var(--line2)", paddingTop: 12 }}>
             <span className="stack grow" style={{ gap: 0, flexBasis: 200 }}><strong>{m.display_name}</strong><span className="mono small muted">{m.username}{m.email ? ` · ${m.email}` : ""}</span></span>
@@ -87,10 +86,6 @@ function Members() {
           <p className="note">You create the account and hand over the first password. No email is sent.</p>
         </form>
       )}
-      <section className="card">
-        <h2>What each role can do</h2>
-        {ROLE_NOTES.map(([role, text]) => <div key={role} className="formrow"><strong style={{ textTransform: "capitalize" }}>{role}</strong><span className="muted">{text}</span></div>)}
-      </section>
     </>
   );
 }
@@ -102,7 +97,7 @@ function Rules() {
   const toggle = async (rule) => { if (await action.run(() => api.put(`/api/case-rules/${rule.rule}`, { enabled: String(!rule.enabled) }))) reload(); };
   return (
     <section className="card">
-      <h2>When Raqeeb opens a case by itself</h2>
+      <h2 title="A case opened by a rule names the rule, the scan and the evidence. Switching a rule off stops new cases; open ones stay.">When Raqeeb opens a case by itself</h2>
       {(data ? data.rules : []).map((rule) => (
         <div key={rule.rule} className="row" style={{ borderTop: "1px solid var(--line2)", paddingTop: 12 }}>
           <span className="stack grow" style={{ gap: 2, flexBasis: 320 }}><strong>{rule.title}</strong><span className="muted">{rule.text}</span></span>
@@ -111,7 +106,6 @@ function Rules() {
         </div>
       ))}
       <Problem error={action.error} />
-      <p className="note">A case opened by a rule names the rule, the scan and the evidence. Switching a rule off stops new cases; open ones stay. Any finding can be turned into a case by hand.</p>
     </section>
   );
 }
@@ -122,13 +116,12 @@ function Scope() {
   const grants = data ? data.active_grants || [] : [];
   return (
     <section className="card">
-      <h2>Authorized scope</h2>
+      <h2 title="Targets outside this scope are refused. Configuring the scope is described in the README.">Authorized scope</h2>
       <Problem error={error} />
       <div className="formrow"><span>Loopback</span><span className="muted">Lab servers on 127.0.0.1 are always in scope.</span></div>
       <div className="formrow"><span>Standing ranges</span><span className="mono">{standing.length ? standing.join(", ") : "None configured"}</span></div>
       <div className="formrow"><span>Temporary grants</span><span className="mono">{grants.length ? grants.map((g) => g.ip).join(", ") : "None active"}</span></div>
       {data && data.unrestricted && <p className="error">Unrestricted scanning is switched on in the server environment.</p>}
-      <p className="note">Raqeeb refuses any target outside this scope. Standing ranges are set in the server environment (AUTHORIZED_CIDRS).</p>
     </section>
   );
 }
@@ -149,11 +142,10 @@ function Evidence() {
   return (
     <>
       <section className="card">
-        <h2>Signing key</h2>
+        <h2 title="Every evidence file from this installation is signed with this key. Publish the key id where the people who receive your evidence can find it.">Signing key</h2>
         <div className="formrow"><span>Key id</span><span className="mono">{key.data ? key.data.key_id : "—"}</span></div>
         <div className="formrow"><span>Public key</span><span className="mono wrap-any">{key.data ? key.data.public_key : "—"}</span></div>
         <div className="formrow"><span>Algorithm</span><span>{key.data ? key.data.algorithm : "—"}</span></div>
-        <p className="note">Every evidence file from this installation is signed with this key. Publish the key id where the people who receive your evidence can find it.</p>
         <p className="note mono">python3 -m raqeeb.evidence verify SCN-….evidence.json --key {key.data ? key.data.key_id : "KEY_ID"}</p>
       </section>
       <section className="card">
@@ -170,13 +162,12 @@ function Evidence() {
         <Problem error={action.error} />
       </section>
       <section className="card">
-        <h2>Audit log integrity</h2>
+        <h2 title="Each entry is sealed with a hash covering the one before it, so an edited or removed entry breaks the chain.">Audit log integrity</h2>
         {chain.data && (
           <strong className={chain.data.intact ? "tone-ok" : "tone-bad"}>
             {chain.data.intact ? `Intact: ${chain.data.sealed} sealed entries` : `Broken at entry ${chain.data.broken_at}: ${chain.data.reason}`}
           </strong>
         )}
-        <p className="note">Each audit entry is sealed with a hash that covers the entry before it. The chain shows that an entry was edited or removed; it does not stop someone with database access from rebuilding the whole chain.</p>
       </section>
     </>
   );
@@ -196,7 +187,7 @@ function Assistant() {
   return (
     <>
       <section className="card">
-        <h2>Assistant privacy mode</h2>
+        <h2 title="The assistant only explains evidence a scan already recorded. Verdicts, findings and cases never depend on it, and every question is written to Activity.">Assistant privacy mode</h2>
         {MODES.map(([id, label, text]) => (
           <button key={id} type="button" className="btn" aria-pressed={data.ai_mode === id} disabled={action.busy} onClick={() => save({ ai_mode: id })}
             style={{ height: "auto", minHeight: 56, padding: "8px 12px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 16px", textAlign: "left", whiteSpace: "normal",
@@ -205,15 +196,13 @@ function Assistant() {
             {data.ai_mode === id && <span className="small" style={{ color: "var(--brand)", fontWeight: 600 }}>Selected</span>}
           </button>
         ))}
-        <p className="note">The assistant only explains evidence a scan already recorded. Verdicts, findings and cases never depend on it, and every question is written to Activity.</p>
       </section>
       <form className="card" onSubmit={(event) => { event.preventDefault(); save(form); }}>
-        <h2>Local model endpoint</h2>
+        <h2 title="Keys are read from the server environment and are never shown or stored here.">Local model endpoint</h2>
         <label className="formrow"><span>Endpoint</span><input className="input mono" placeholder="Base URL of an OpenAI-compatible endpoint" value={form.ai_base_url} onChange={(event) => setForm({ ...form, ai_base_url: event.target.value })} /></label>
         <label className="formrow"><span>Model name</span><input className="input mono" placeholder="As named by your provider" value={form.ai_model} onChange={(event) => setForm({ ...form, ai_model: event.target.value })} /></label>
         <div className="row"><button className="btn primary" type="submit" disabled={action.busy}>Save</button></div>
         <Problem error={action.error} />
-        <p className="note">Keys are read from the server environment and are never shown or stored here.</p>
       </form>
     </>
   );

@@ -63,6 +63,7 @@ from raqeeb import cases
 from raqeeb import evidence
 from raqeeb import seals
 from raqeeb import inventory
+from raqeeb import overview
 from raqeeb import team
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
@@ -1606,6 +1607,23 @@ async def api_inventory(
     user: User = Depends(get_current_user), db: Session = Depends(get_db),
 ) -> JSONResponse:
     return JSONResponse({"servers": inventory.inventory(db, user)})
+
+
+@app.get("/api/overview", response_class=JSONResponse)
+async def api_overview(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    return JSONResponse(overview.snapshot(db, user))
+
+
+@app.post("/api/overview/briefing", response_class=JSONResponse)
+async def api_overview_briefing(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    """A written summary of the whole estate, composed from stored rows only."""
+    text = overview.briefing(db, user)
+    _audit(db, "briefing", user.username, detail="scope=estate", decision="written")
+    return JSONResponse({"text": text, "mode": "offline"})
 
 
 @app.get("/api/assets/{asset_id}/detail", response_class=JSONResponse)
