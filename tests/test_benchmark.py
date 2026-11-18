@@ -75,3 +75,16 @@ def test_rerun_is_deterministic_and_offline(monkeypatch):
     import socket
     monkeypatch.setattr(socket.socket,'connect',lambda *_: (_ for _ in ()).throw(AssertionError('network')))
     assert b.evaluate()==b.evaluate()
+
+
+@pytest.mark.parametrize('results', ['results.json', 'development_results.json', 'holdout_results.json'])
+def test_published_results_match_the_corpus_and_detector_code(results):
+    """The published hashes are the integrity guarantee: they must describe the
+    exact bytes in the repository. A detector or corpus change without
+    regenerating the results fails here; so does a CRLF checkout, which
+    .gitattributes prevents by pinning these files to LF."""
+    published = json.loads((b.CORPUS / results).read_text(encoding='utf-8'))
+    for name, digest in published['corpus_sha256'].items():
+        assert b.sha(b.CORPUS / name) == digest, name
+    for name, digest in published['detector_code_sha256'].items():
+        assert b.sha(b.BASE / name) == digest, name

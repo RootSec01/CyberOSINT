@@ -90,7 +90,9 @@ def test_the_console_checks_an_uploaded_bundle(lab):
 def test_the_key_is_created_once_private_to_its_owner(lab):
     first = get(lab.client, lab.headers, "/api/evidence/key")
     stored = paths.EVIDENCE_DIR / evidence.KEY_FILE
-    assert stat.S_IMODE(stored.stat().st_mode) == 0o600
+    assert stored.is_file()
+    if os.name != "nt":   # Windows keeps no POSIX mode bits; the file takes its folder's access list
+        assert stat.S_IMODE(stored.stat().st_mode) == 0o600
     assert get(lab.client, lab.headers, "/api/evidence/key") == first
 
 

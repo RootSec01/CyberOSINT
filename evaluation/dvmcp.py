@@ -36,6 +36,16 @@ def _wait_for_port(port: int, process: subprocess.Popen, seconds: float = 30.0) 
     return False
 
 
+def _child_env(home: str, lab: Path) -> dict:
+    env = {"PATH": os.environ.get("PATH", ""), "HOME": home, "PYTHONPATH": str(lab)}
+    if os.name == "nt":
+        # Windows cannot start Python (or open sockets) without these.
+        for key in ("SYSTEMROOT", "SYSTEMDRIVE", "TEMP", "TMP", "USERPROFILE"):
+            if key in os.environ:
+                env[key] = os.environ[key]
+    return env
+
+
 def scan_challenge(lab: Path, number: int, python: str) -> dict:
     scripts = list(lab.glob(f"challenges/*/challenge{number}/server.py"))
     if len(scripts) != 1:
@@ -44,7 +54,7 @@ def scan_challenge(lab: Path, number: int, python: str) -> dict:
     with tempfile.TemporaryDirectory(prefix="raqeeb-dvmcp-") as home:
         process = subprocess.Popen(
             [python, str(scripts[0])], cwd=scripts[0].parent,
-            env={"PATH": os.environ.get("PATH", ""), "HOME": home, "PYTHONPATH": str(lab)},
+            env=_child_env(home, lab),
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             if not _wait_for_port(port, process):
