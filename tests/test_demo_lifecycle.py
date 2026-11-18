@@ -73,7 +73,8 @@ def test_live_loopback_api_and_built_ui(tmp_path):
                           stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,text=True)
     base=f'http://127.0.0.1:{port}'
     try:
-        for _ in range(70):
+        deadline=time.monotonic()+45
+        while time.monotonic()<deadline:
             if proc.poll() is not None:
                 raise AssertionError(f'Live demo exited: {proc.stderr.read()}')
             try:
