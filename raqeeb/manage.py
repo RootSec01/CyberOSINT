@@ -7,6 +7,7 @@
     python -m raqeeb.manage set-password --username rami
     python -m raqeeb.manage deactivate --username client1
     python -m raqeeb.manage add-registry --owner rami --count 25 --every 360
+    python -m raqeeb.manage remove-registry --owner rami
 """
 
 from __future__ import annotations
@@ -98,6 +99,42 @@ def cmd_verify_audit(args) -> None:
     sys.exit(1)
 
 
+TUNNELS = (".lhr.life", ".ngrok.io", ".ngrok-free.app", ".ngrok.app", ".trycloudflare.com", ".loca.lt",
+           ".serveo.net", ".localhost.run", ".pinggy.link", ".devtunnels.ms")
+
+
+def _ranked(endpoints, seed: str) -> list:
+    """A seeded order with one endpoint per host, skipping short-lived tunnels to someone's own machine."""
+    import hashlib
+    unique = {e.url: e for e in endpoints if not e.host.endswith(TUNNELS)}
+    order = sorted(unique.values(), key=lambda e: hashlib.sha256(f"{seed}:{e.url}".encode()).hexdigest())
+    chosen, hosts = [], set()
+    for endpoint in order:
+        if endpoint.host not in hosts:
+            hosts.add(endpoint.host)
+            chosen.append(endpoint)
+    return chosen
+
+
+def _drop_asset(s, asset) -> None:
+    from raqeeb import cases, listings, monitoring, register
+    from raqeeb.models import Alert
+    cases.forget_asset(s, asset.id)
+    register.forget_asset(s, asset.id)
+    listings.forget(s, asset.id)
+    monitoring.forget(s, asset.id)
+    s.query(Alert).filter(Alert.asset_id == asset.id).delete(synchronize_session=False)
+    s.delete(asset)
+
+
+def _owner(s, name: str) -> User:
+    owner = s.query(User).filter_by(username=name.strip().lower()).first()
+    if not owner:
+        print(f"no user named {name}")
+        sys.exit(1)
+    return owner
+
+
 def cmd_add_registry(args) -> None:
     """Monitor a seeded sample of open endpoints from the official MCP registry, one per host."""
     _ready()
@@ -106,23 +143,18 @@ def cmd_add_registry(args) -> None:
     from raqeeb.models import Asset
 
     with session_scope() as s:
-        owner = s.query(User).filter_by(username=args.owner.strip().lower()).first()
-        if not owner:
-            print(f"no user named {args.owner}")
-            sys.exit(1)
-        owned = {a.value for a in s.query(Asset).filter_by(user_id=owner.id)}
+        owned = {a.value for a in s.query(Asset).filter_by(user_id=_owner(s, args.owner).id)}
     print("reading the official MCP registry ...", flush=True)
     candidates = [endpoint for entry in registry.iter_entries(listings.fetcher())
                   for endpoint in registry.open_endpoints(entry)]
-    chosen = [e for e in registry.draw_sample(candidates, len(candidates), seed=args.seed) if e.url not in owned]
     added = 0
-    for endpoint in chosen:
+    for endpoint in _ranked(candidates, args.seed):
         if added == args.count:
             break
-        if not listings.public_address(endpoint.host):
+        if endpoint.url in owned or not listings.public_address(endpoint.host):
             continue
         with session_scope() as s:
-            owner = s.query(User).filter_by(username=args.owner.strip().lower()).one()
+            owner = _owner(s, args.owner)
             asset = Asset(user_id=owner.id, kind="mcp", value=endpoint.url,
                           label=endpoint.server.split("/")[-1][:120] or endpoint.host)
             s.add(asset)
@@ -134,6 +166,23 @@ def cmd_add_registry(args) -> None:
         added += 1
         print(f"  {endpoint.server}  {endpoint.url}")
     print(f"added {added} registry servers, read every {args.every} minutes; the scheduler reads them next")
+
+
+def cmd_remove_registry(args) -> None:
+    """Stop monitoring every server the owner added from the registry, with its scans and findings."""
+    _ready()
+    from raqeeb import seals
+    from raqeeb.models import Asset, Listing
+
+    with session_scope() as s:
+        owner = _owner(s, args.owner)
+        listed = (s.query(Asset).join(Listing, Listing.asset_id == Asset.id)
+                  .filter(Asset.user_id == owner.id).all())
+        for asset in listed:
+            seals.record(s, action="registry_server_removed", operator=owner.username, decision="removed",
+                         detail=f"asset={asset.id};endpoint={asset.value}")
+            _drop_asset(s, asset)
+        print(f"removed {len(listed)} registry servers")
 
 
 def cmd_list_users(args) -> None:
@@ -175,6 +224,10 @@ def main() -> None:
     p.add_argument("--every", type=int, default=360, choices=(60, 360, 1440), help="minutes between reads")
     p.add_argument("--seed", default="raqeeb-monitor")
     p.set_defaults(func=cmd_add_registry)
+
+    p = sub.add_parser("remove-registry", help="stop monitoring every server added from the registry")
+    p.add_argument("--owner", required=True)
+    p.set_defaults(func=cmd_remove_registry)
 
     sub.add_parser("list-users").set_defaults(func=cmd_list_users)
     sub.add_parser("verify-audit").set_defaults(func=cmd_verify_audit)
