@@ -1,0 +1,3925 @@
+[
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "telephony:manage"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the current state of an outbound call by returned ID. dispatch_unknown needs inspection, not another call. Recap and Omni recordings are separate resources.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "calls_get",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "telephony:manage"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Calls Get"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "telephony:manage"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List outbound calls and normalized network outcomes before retrying a dispatch.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Last call id from the previous page. Tenant and project scoped.",
+     "type": "string"
+    },
+    "direction": {
+     "enum": [
+      "inbound",
+      "outbound"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "status": {
+     "enum": [
+      "queued",
+      "dispatching",
+      "ringing",
+      "in_progress",
+      "completed",
+      "failed",
+      "canceled",
+      "dispatch_unknown"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "calls_list",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "telephony:manage"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Calls List"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "amd:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Set the PyAI AMD (answering-machine detection) operating point + webhook (POST /v1/amd/config). `aggressiveness` is one dial 0-1: near 0 is human-safe (never hang up on a person), near 1 fires 'machine' fast. The realtime detection itself is a Twilio Media Streams WebSocket (wss /v1/amd/stream), a one-line-TwiML drop-in, not an MCP tool.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "aggressiveness": {
+     "description": "Operating point 0-1 (default 0.25).",
+     "maximum": 1,
+     "minimum": 0,
+     "type": "number"
+    },
+    "webhook_url": {
+     "description": "https URL to POST amd.call.completed events to.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "configure_amd",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "amd:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Configure AMD"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Configure Trace compliance monitoring for the selected workspace.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "description": "Per-agent Trace config (spec §5.1). May be wrapped as { agent_id, config } or sent raw.",
+     "properties": {
+      "agent_id": {
+       "description": "Agent to configure; omit for the org-wide default.",
+       "type": "string"
+      },
+      "channels": {
+       "default": [
+        "voice"
+       ],
+       "items": {
+        "enum": [
+         "voice",
+         "text"
+        ],
+        "type": "string"
+       },
+       "type": "array"
+      },
+      "enabled": {
+       "default": false,
+       "type": "boolean"
+      },
+      "guardrails": {
+       "description": "Inline guardrails compiled into a synthesized rule pack (spec §5.1).",
+       "properties": {
+        "block_pii": {
+         "properties": {
+          "patterns": {
+           "description": "Deterministically-redactable PII (context-dependent PII like DOB is Tier-2, not inline).",
+           "items": {
+            "enum": [
+             "ssn",
+             "credit_card",
+             "email",
+             "us_phone"
+            ],
+            "type": "string"
+           },
+           "type": "array"
+          }
+         },
+         "type": "object"
+        },
+        "blocked_phrases": {
+         "description": "Phrases the agent must never say.",
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        },
+        "fail_open": {
+         "default": true,
+         "description": "Trace down must never make a call worse, log 'unavailable' instead of blocking.",
+         "type": "boolean"
+        },
+        "inline_timeout_ms": {
+         "default": 10,
+         "description": "Inline budget; the in-process gate is ~14µs p99, far under this.",
+         "type": "number"
+        },
+        "mandatory_disclosures": {
+         "items": {
+          "properties": {
+           "required_within_seconds": {
+            "description": "Deadline in seconds; otherwise a 2-turn default applies.",
+            "type": "number"
+           },
+           "text": {
+            "description": "Phrase the agent must speak, e.g. an AI / recording disclosure.",
+            "type": "string"
+           },
+           "trigger": {
+            "description": "call_start = must appear on the first agent turn.",
+            "enum": [
+             "call_start",
+             "any"
+            ],
+            "type": "string"
+           }
+          },
+          "required": [
+           "text"
+          ],
+          "type": "object"
+         },
+         "type": "array"
+        },
+        "mode": {
+         "default": "warn",
+         "description": "warn = log only (never blocks); modify = redact/inject; block = suppress; human_handoff = escalate.",
+         "enum": [
+          "warn",
+          "modify",
+          "block",
+          "human_handoff"
+         ],
+         "type": "string"
+        }
+       },
+       "type": "object"
+      },
+      "rule_packs": {
+       "additionalProperties": {
+        "properties": {
+         "enabled": {
+          "type": "boolean"
+         },
+         "version": {
+          "nullable": true,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       },
+       "description": "Map of pack_id → { enabled, version }, e.g. { tcpa: { enabled: true } }.",
+       "type": "object"
+      }
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "configure_trace",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Configure Trace"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:session"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Create a reusable voice Agent profile: persona, greeting, voice, language, tools and knowledge. Does not place a call. Use saved tool IDs; configure connection settings privately in the PyAI console. Never supply credentials.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "additionalProperties": false,
+     "description": "Writable agent fields. On update, present fields are set, `null` clears, absent fields are untouched.",
+     "properties": {
+      "ack_mode": {
+       "deprecated": true,
+       "description": "Deprecated compatibility field. Stored values are not applied to Omni runtime.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "barge_sensitivity": {
+       "deprecated": true,
+       "description": "Deprecated compatibility field. Stored values are not applied to Omni runtime.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "brain_model": {
+       "description": "Per-agent model selection. Omit for the platform default.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "consent_line": {
+       "description": "Recording disclosure spoken before recording starts when `recordings_enabled` is true. Required for compliance when recordings are on and must contain a meaningful spoken phrase (at least 10 characters and 5 letters). Playback order: consent_line, then greeting, then conversation.",
+       "maxLength": 500,
+       "minLength": 10,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "continuity": {
+       "description": "Reuse a tiny caller card on the next call when PyAI can resolve the caller (phone number or a signed customer id). The card is advisory — the agent may recall a name or open thread, and must not refund, book, or transfer from it. Default false.",
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "extraction_schema": {
+       "additionalProperties": true,
+       "description": "JSON Schema of fields to capture from each completed call's transcript. When set with extraction_webhook_url, PyAI runs a post-call extraction pass and POSTs the structured JSON to your webhook (signed with X-PyAI-Signature). Null disables extraction.",
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "extraction_webhook_url": {
+       "description": "HTTPS URL that receives the signed post-call extraction result (event `omni.call.extracted`). Requires extraction_schema. The call's agent is resolved from the connect-URL session_label when it equals this agent's id.",
+       "format": "uri",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "goals": {
+       "description": "Goal checklist for post-call outcome scoring (stored now; scoring ships with summaries).",
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 20,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "greeting": {
+       "description": "Greeting message, opening line spoken at turn 0 when a call connects (before the caller speaks). Stored on the agent profile; played automatically when connecting with `session_label={agent_id}`. May also be sent inline in the Omni `configure` frame.",
+       "maxLength": 1000,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "greeting_variants": {
+       "description": "Approved opening-line variants. PyAI selects one for each newly resolved call profile; null or empty falls back to greeting. Recording consent is fixed and never rotated.",
+       "items": {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       "maxItems": 15,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "idle_check_in": {
+       "description": "How patient the agent is before checking in on a silent caller (\"Sorry, are you still there?\"). `auto` checks in after a few seconds of silence; `patient` waits far longer, for callers who routinely think, read, or look something up mid-call; `off` disables the check-in entirely, so the agent stays silent until the caller speaks. When unset, most roles render `auto`; support agents render `patient`. Independent of `ack_mode`. May also be sent inline in the Omni `configure` frame, which wins for that session.",
+       "enum": [
+        "auto",
+        "patient",
+        "off",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "inherit_org_knowledgebases": {
+       "default": true,
+       "description": "When no knowledge bases are explicitly bound, inherit the organization's default knowledge bases. Set false to restrict retrieval to explicit agent bindings; an empty binding list then means no retrieval.",
+       "type": "boolean"
+      },
+      "keyterms": {
+       "deprecated": true,
+       "description": "Deprecated stored compatibility field. It does not affect speech recognition. Use `vocabulary`.",
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 100,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "language": {
+       "description": "Requested language for this Agent's Omni sessions. `null` or absent means `en`. Availability is staged: public serving includes `en`, `fr`, `es`, `hi`, `it`, `pt`, `ja`, and `ko`; `de` and the legacy `zh` alias fall back to English unless explicitly enabled with qualified endpoints. Canonical staged route identifiers are exposed in `x-staged-language-ids` for internal integration only and are rejected by the public control plane until qualified. Inspect the session's `configured.language_active` and `language_fallback` fields before assuming the requested language is active. See the Language support reference.",
+       "enum": [
+        "en",
+        "fr",
+        "es",
+        "de",
+        "hi",
+        "zh",
+        "it",
+        "pt",
+        "ja",
+        "ko",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ],
+       "x-staged-language-ids": [
+        "ht",
+        "zh-CN",
+        "ar-MSA",
+        "ar-Gulf"
+       ]
+      },
+      "metadata": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "description": "Up to 16 key/value annotations (keys ≤64 chars, values ≤512 chars).",
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "name": {
+       "description": "Display name. Required on create.",
+       "maxLength": 200,
+       "type": "string"
+      },
+      "persona_perspective": {
+       "description": "Which side of the call the persona is on. `agent` (default) means the persona is the business being called, so PyAI adds its conversation layer for handling a caller (capability honesty, handoffs, turn discipline). `caller` means the persona is the individual on the call instead, as in QA and simulation callers, mystery shopping, or training partners; PyAI drops that operator-voice layer so it cannot contradict an inverted persona. May also be sent inline in the Omni `configure` frame, which wins for that session.",
+       "enum": [
+        "agent",
+        "caller",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "persona_system_prompt": {
+       "description": "Customer-authored agent instructions: 8,000 Unicode characters by default, or 32,000 with an active monthly commitment plan. Read prompt_limit_characters on the agent for your allowance. Platform conversation and safety guidance is applied separately and does not count toward this allowance. This is a character limit, not a token count.",
+       "maxLength": 32000,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "platform_guidance": {
+       "description": "Integration-owned setup guidance. Requires an explicitly enrolled server credential; ordinary customer keys receive 403. Separate from persona_system_prompt and its account allowance. Published before the customer instructions without truncation.",
+       "maxLength": 12000,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "recordings_enabled": {
+       "description": "Enable stereo call recordings. Default false.",
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "role": {
+       "description": "Role archetype. Adds PyAI's role operating standard beneath your persona and derives the runtime mode (`receptionist`, `sales`, and `collections` enable their matching deterministic conversation guards; everything else runs the default mode). Your stored persona is unchanged and remains authoritative for identity and business policy. Null clears the role.",
+       "enum": [
+        "receptionist",
+        "support",
+        "sales",
+        "collections",
+        "ea",
+        "concierge",
+        "custom",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "tools": {
+       "description": "Replace bindings using saved tool IDs. Existing settings are preserved for retained bindings. Credentials and connection settings are not accepted through MCP.",
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "enabled": {
+          "default": true,
+          "type": "boolean"
+         },
+         "tool_id": {
+          "description": "ID of an existing tool. Configure its connection privately in the PyAI console.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "tool_id"
+        ],
+        "type": "object"
+       },
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "vocabulary": {
+       "description": "Optional custom vocabulary for this Agent's Omni speech recognition. A non-empty list is the opt-in. PyAI keeps at most five effective terms, with at most five words per term. It trims whitespace, deduplicates without regard to case while preserving the first spelling and order, and drops common-only phrases. Set `[]` or `null` to turn it off. The list is fixed when a session starts. Organization Hear vocabulary is never applied to Omni.",
+       "items": {
+        "maxLength": 64,
+        "minLength": 4,
+        "type": "string"
+       },
+       "maxItems": 5,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "voice_id": {
+       "description": "A stock `voice_id`, one of its permanent `aliases` from `GET /v1/voices`, or a cloned voice id. Omni reports the canonical served stock id in `configured.voice_id`.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "voice_instruct": {
+       "description": "Stored delivery direction for instruct-capable voice tiers. Current Omni routes support neutral delivery only: omit or set null for neutral speech. A saved custom value is rejected when configuring Omni; an inline empty `configure.voice_instruct` resets it to neutral for that session.",
+       "maxLength": 200,
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    }
+   },
+   "required": [
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "create_agent",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:session"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Create Agent"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "dub:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Fetch audio from the user-authorized HTTPS source URL and start a translation and dubbing job. Accesses an external source and consumes usage. Keep job_id and poll get_dub_job; do not submit again after a timeout.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "source_lang": {
+     "description": "Source language from get_dub_capabilities.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "source_url": {
+     "format": "uri",
+     "pattern": "^https://",
+     "type": "string"
+    },
+    "target_lang": {
+     "description": "Target language from get_dub_capabilities.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "source_url",
+    "source_lang",
+    "target_lang"
+   ],
+   "type": "object"
+  },
+  "name": "create_dub",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "dub:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Create Dub"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "recap:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Submit speaker-labelled utterances and get a recap.call (POST /v1/recap/calls/{call_id}). Poll with get_recap. Prefer this over a DIY LLM summary. Requires recap:read and Recap enabled.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_direction": {
+     "enum": [
+      "inbound",
+      "outbound"
+     ],
+     "type": "string"
+    },
+    "call_id": {
+     "description": "Stable id you will read back.",
+     "type": "string"
+    },
+    "customer_name": {
+     "type": "string"
+    },
+    "pack_id": {
+     "type": "string"
+    },
+    "utterances": {
+     "items": {
+      "properties": {
+       "duration_s": {
+        "type": "number"
+       },
+       "offset_s": {
+        "type": "number"
+       },
+       "speaker_role": {
+        "enum": [
+         "agent",
+         "customer"
+        ],
+        "type": "string"
+       },
+       "text": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "speaker_role",
+       "text",
+       "offset_s",
+       "duration_s"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "call_id",
+    "utterances"
+   ],
+   "type": "object"
+  },
+  "name": "create_recap",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "recap:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Create Recap"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Create a workspace Trace compliance rule pack. This creates persistent configuration.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "description": "An authored rule pack in the Trace DSL (rule_pack_schema.json).",
+     "properties": {
+      "jurisdiction": {
+       "type": "string"
+      },
+      "legal_status": {
+       "description": "Provenance / attorney-curation status.",
+       "type": "string"
+      },
+      "pack_id": {
+       "pattern": "^[a-z0-9_]+$",
+       "type": "string"
+      },
+      "rules": {
+       "items": {
+        "type": "object"
+       },
+       "minItems": 1,
+       "type": "array"
+      },
+      "version": {
+       "type": "string"
+      }
+     },
+     "required": [
+      "pack_id",
+      "version",
+      "rules"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "create_trace_rule_pack",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Create Trace Rule Pack"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "transcribe:jobs"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Submit an async speech-to-text job for an audio URL (https). Returns a job_id; poll with get_transcription_job. Supports diarization.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "audio_url": {
+     "description": "https URL of the audio to transcribe.",
+     "type": "string"
+    },
+    "call_direction": {
+     "enum": [
+      "inbound",
+      "outbound"
+     ],
+     "type": "string"
+    },
+    "call_id": {
+     "description": "Stable id for the post-call Recap. Defaults to the job id.",
+     "type": "string"
+    },
+    "channel": {
+     "description": "Dual-channel (stereo) per-channel speakers.",
+     "type": "boolean"
+    },
+    "customer_name": {
+     "type": "string"
+    },
+    "diarize": {
+     "description": "Single-track speaker diarization.",
+     "type": "boolean"
+    },
+    "model": {
+     "type": "string"
+    },
+    "output_formats": {
+     "description": "Defaults to [json].",
+     "items": {
+      "enum": [
+       "json",
+       "srt",
+       "vtt"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "pack_id": {
+     "description": "Optional Recap pack (default sales_outbound).",
+     "type": "string"
+    }
+   },
+   "required": [
+    "audio_url"
+   ],
+   "type": "object"
+  },
+  "name": "create_transcription_job",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "transcribe:jobs"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Create Transcription Job"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "cast:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Turn a narration script into directed Cast lines before rendering. Consumes usage.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "properties": {
+      "text": {
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     "required": [
+      "text"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "direct_cast_script",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "cast:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Direct Cast Script"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find the right PyAI tools and a short recipe for speech, STT, LiveKit or Pipecat integration, voice agents, compliance, summaries, dubbing or narration. No credentials or usage.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "description": "Product, framework or task, e.g. “LiveKit”, “Pipecat integration”, “translate audio”, “voice agent”, “TTS”.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "task": {
+     "description": "Alias for query. If both are supplied, they must match after trimming.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "discover_tools",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Discover Tools"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "recap:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Enable Recap for the key's org (PUT /v1/recap/config). Sandbox keys already mint with Recap on; call this to set a webhook or pack, or to enable Recap on a signup/live key. Requires recap:configure.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "default_pack_id": {
+     "description": "Defaults to sales_outbound.",
+     "type": "string"
+    },
+    "enabled": {
+     "description": "Defaults to true.",
+     "type": "boolean"
+    },
+    "webhook_url": {
+     "description": "https URL for recap.complete events.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "enable_recap",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "recap:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Enable Recap"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:session"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read a saved voice Agent profile and its current configuration.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "Agent id, e.g. `agent_7f3a…`.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_agent",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:session"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Agent"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "amd:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get one PyAI AMD decision by call id (GET /v1/amd/calls/{id}): who/what answered, with the reason.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_id": {
+     "description": "The call id the decision was recorded under.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "call_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_amd_call",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "amd:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get AMD Call"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "cast:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve completed Cast narration as playable audio or a download.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "job_id": {
+     "description": "The ID returned by the original submission; do not invent one.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_cast_audio",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "cast:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Cast Audio"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "cast:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Discover Cast voices, emotions, formats and supported rendering capabilities.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_cast_capabilities",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "cast:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Cast Capabilities"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "cast:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Check a durable Cast render job. Preserve the original job ID.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "job_id": {
+     "description": "The ID returned by the original submission; do not invent one.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_cast_render",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "cast:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Cast Render"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "dub:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve completed dubbed audio as a playable result or download. Call only when get_dub_job reports done.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "job_id": {
+     "description": "The ID returned by the original submission; do not invent one.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_dub_audio",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "dub:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Dub Audio"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read currently supported Dub input and output languages before submitting a translation.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_dub_capabilities",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Dub Capabilities"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "dub:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Retrieve the status and available results of an existing dubbing job by job_id. This read does not start or repeat a job. Poll pending/processing states without resubmitting.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "job_id": {
+     "description": "The ID returned by the original submission; do not invent one.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_dub_job",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "dub:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get dubbing job status"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "recap:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read one Recap by call id (GET /v1/recap/calls/{call_id}). When complete, `record` is recap.record.v1 (tldr, summary, action_items, disposition, next_steps, talk_ratio, signals, fields).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_id": {
+     "description": "The call_id passed to create_recap or the Hear job.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "call_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_recap",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "recap:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Recap"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "recap:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read Recap summarization configuration before changing it.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_recap_config",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "recap:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Recap Config"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Return a concise, correct quickstart for building with PyAI (auth, SDK install, TTS/STT/realtime snippets, error handling). No key or network needed, read this before writing PyAI code so you use the right endpoints and the official SDK.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_started",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Started"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Inspect Trace call-compliance configuration.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_id": {
+     "description": "Agent to read config for; omit for the org default.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_trace_config",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Trace Config"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read aggregate compliance exposure for the workspace.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "window_days": {
+     "default": 30,
+     "description": "Trailing window in days.",
+     "maximum": 365,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "get_trace_exposure",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Trace Exposure"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read one monitored interaction and its compliance evidence.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "The call_id.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_trace_interaction",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Trace Interaction"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "transcribe:jobs"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the status + result of a transcription job by id.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "job_id": {
+     "description": "The job_id from create_transcription_job.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_transcription_job",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "transcribe:jobs"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Get Transcription Job"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:session"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List saved voice Agent profiles before creating or changing one.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_agents",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:session"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Agents"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "amd:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List recent PyAI AMD decisions (GET /v1/amd/calls). Each carries answered_by (human/voicemail/ivr/screening/sit_invalid/…), answered_by_twilio (Twilio's enum, for routing parity), confidence, decision_ms, and the word-level reason.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "description": "Max results (1-100, default 20).",
+     "type": "number"
+    },
+    "session_label": {
+     "description": "Filter by the opaque connect-URL/TwiML tag.",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_amd_calls",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "amd:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List AMD Calls"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List the available PyAI models (catalog). No arguments.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_models",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Models"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "recap:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List recent Recap records (GET /v1/recap/calls). Requires recap:read and Recap enabled.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "description": "Max results (1-100, default 20).",
+     "type": "number"
+    },
+    "status": {
+     "enum": [
+      "pending",
+      "processing",
+      "complete",
+      "failed"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_recap_calls",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "recap:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Recap Calls"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find compliance findings with source evidence. Findings are signals for review, not legal conclusions.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "enum": [
+      "flag",
+      "preempt_next",
+      "escalate"
+     ],
+     "type": "string"
+    },
+    "check_id": {
+     "type": "string"
+    },
+    "cursor": {
+     "type": "string"
+    },
+    "interaction_id": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "severity": {
+     "enum": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_trace_findings",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Trace Findings"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find monitored calls and interactions for compliance review.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "agent_id": {
+     "type": "string"
+    },
+    "cursor": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "verdict": {
+     "enum": [
+      "PASS",
+      "WARN",
+      "FAIL"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_trace_interactions",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Trace Interactions"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:configure"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Discover available Trace compliance rule packs before enabling monitoring.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_trace_rule_packs",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:configure"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Trace Rule Packs"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "trace:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List Trace rule violations for compliance review.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "type": "string"
+    },
+    "interaction_id": {
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "rule_id": {
+     "type": "string"
+    },
+    "severity": {
+     "enum": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_trace_violations",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "trace:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Trace Violations"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "transcribe:jobs"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Find existing audio processing and transcription jobs before submitting duplicates.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Opaque token from a previous page's `next_cursor`. Omit for the first page.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "description": "Max items to return (1-100).",
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "list_transcription_jobs",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "transcribe:jobs"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Transcription Jobs"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List PyAI stock + cloned voices. Optionally filter by gender or region. Use a returned voice id as the `voice` for synthesize_speech.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "gender": {
+     "description": "Filter by voice gender (e.g. female, male).",
+     "type": "string"
+    },
+    "region": {
+     "description": "Filter by accent/region (e.g. en_us, en_gb).",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_voices",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "List Voices"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read an Omni session's transcript, recording availability and summary. For outbound calls use artifacts.omni_call_id from calls_get.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_id": {
+     "description": "Stable opaque PyAI-owned call identifier. Use it unchanged across every Omni call sub-resource.",
+     "pattern": "^ocl_[A-Za-z0-9]{20}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "call_id"
+   ],
+   "type": "object"
+  },
+  "name": "omni_get_call",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Omni Get Call"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Get the canonical authenticated recording resource URL. Requires response=url. This URL is not public playable audio; recording must have been enabled.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_id": {
+     "description": "Stable opaque PyAI-owned call identifier. Use it unchanged across every Omni call sub-resource.",
+     "pattern": "^ocl_[A-Za-z0-9]{20}$",
+     "type": "string"
+    },
+    "response": {
+     "description": "Set to `url` to return the canonical authenticated PyAI recording resource as JSON.",
+     "enum": [
+      "url"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "call_id",
+    "response"
+   ],
+   "type": "object"
+  },
+  "name": "omni_get_recording",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Omni Get Recording"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the structured summary for an Omni call when generated; a missing summary is not an empty result.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_id": {
+     "description": "Stable opaque PyAI-owned call identifier. Use it unchanged across every Omni call sub-resource.",
+     "pattern": "^ocl_[A-Za-z0-9]{20}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "call_id"
+   ],
+   "type": "object"
+  },
+  "name": "omni_get_summary",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Omni Get Summary"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Read the complete Omni call transcript through the authenticated API.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "call_id": {
+     "description": "Stable opaque PyAI-owned call identifier. Use it unchanged across every Omni call sub-resource.",
+     "pattern": "^ocl_[A-Za-z0-9]{20}$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "call_id"
+   ],
+   "type": "object"
+  },
+  "name": "omni_get_transcript",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Omni Get Transcript"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:read"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List Omni sessions, including inbound calls. Filter by session_label and preserve each returned call_id.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "cursor": {
+     "description": "Pass the previous page's `next_cursor`.",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 100,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "session_label": {
+     "description": "Only calls connected with this opaque session tag.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "omni_list_calls",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:read"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Omni List Calls"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Fetch live API operation discovery with a SHA-256 digest. Supply path and method for one operation and its referenced schemas, or include_document=true for the entire contract. Pin sha256 to detect contract drift. No API key required.",
+  "input_schema": {
+   "additionalProperties": false,
+   "dependencies": {
+    "method": [
+     "path"
+    ]
+   },
+   "properties": {
+    "include_document": {
+     "default": false,
+     "type": "boolean"
+    },
+    "method": {
+     "enum": [
+      "get",
+      "post",
+      "put",
+      "patch",
+      "delete",
+      "head",
+      "options"
+     ],
+     "type": "string"
+    },
+    "path": {
+     "pattern": "^/",
+     "type": "string"
+    },
+    "sha256": {
+     "pattern": "^[a-f0-9]{64}$",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "openapi_get",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Openapi Get"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "cast:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Generate one directed Cast line. Consumes usage. Check get_cast_capabilities for supported voice, emotion and intensity.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "emotion": {
+     "description": "Supported emotion.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "intensity": {
+     "anyOf": [
+      {
+       "maximum": 1,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "enum": [
+        "subtle",
+        "balanced",
+        "bold",
+        "low",
+        "med",
+        "high"
+       ],
+       "type": "string"
+      }
+     ],
+     "description": "Use a tier from Cast capabilities: subtle, balanced or bold; or a number from 0 to 1. Legacy low/med/high aliases are normalized by MCP."
+    },
+    "text": {
+     "description": "Narration text.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "voice": {
+     "description": "A supported Cast voice.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "text",
+    "voice",
+    "emotion",
+    "intensity"
+   ],
+   "type": "object"
+  },
+  "name": "preview_cast_line",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "cast:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Preview Cast Line"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "cast:render"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Submit script text or directed lines using one top-level voice from get_cast_capabilities for the entire render. Per-line voices and a console project are not required or supported inputs. Returns a job; preserve its ID, poll get_cast_render and retrieve get_cast_audio when done. Consumes usage; do not resubmit on timeout.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "anyOf": [
+      {
+       "required": [
+        "script"
+       ]
+      },
+      {
+       "required": [
+        "lines"
+       ]
+      }
+     ],
+     "properties": {
+      "lines": {
+       "items": {
+        "properties": {
+         "emotion": {
+          "minLength": 1,
+          "type": "string"
+         },
+         "intensity": {
+          "oneOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "number"
+           }
+          ]
+         },
+         "text": {
+          "minLength": 1,
+          "type": "string"
+         }
+        },
+        "required": [
+         "text",
+         "emotion",
+         "intensity"
+        ],
+        "type": "object"
+       },
+       "minItems": 1,
+       "type": "array"
+      },
+      "script": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "steps": {
+       "minimum": 1,
+       "type": "integer"
+      },
+      "voice": {
+       "minLength": 1,
+       "type": "string"
+      }
+     },
+     "required": [
+      "voice"
+     ],
+     "type": "object"
+    }
+   },
+   "required": [
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "render_cast",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "cast:render"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Render Cast"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:session"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Replace the knowledge bases bound to an Agent. Read its existing bindings first.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "items": {
+      "properties": {
+       "kb_id": {
+        "description": "Knowledge base id.",
+        "type": "string"
+       },
+       "weight": {
+        "default": 1,
+        "description": "Retrieval weight relative to other bound bases.",
+        "type": "number"
+       }
+      },
+      "required": [
+       "kb_id"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "set_agent_knowledge",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:session"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Set Agent Knowledge"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:session"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Replace the tools bound to an Agent. Read the current Agent first; this replaces its bindings. Use saved tool IDs; configure connection settings privately in the PyAI console. Never supply credentials.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "additionalProperties": false,
+     "description": "Replace bindings using saved tool IDs. Existing settings are preserved for retained bindings. Credentials and connection settings are not accepted through MCP.",
+     "items": {
+      "additionalProperties": false,
+      "properties": {
+       "enabled": {
+        "default": true,
+        "type": "boolean"
+       },
+       "tool_id": {
+        "description": "ID of an existing tool. Configure its connection privately in the PyAI console.",
+        "type": "string"
+       }
+      },
+      "required": [
+       "tool_id"
+      ],
+      "type": "object"
+     },
+     "type": "array"
+    },
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "set_agent_tools",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:session"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Set Agent Tools"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "speak:synthesize"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Generate speech from input. Consumes usage in the connected project; live usage can be billed. Before generation, use whoami to verify project, environment, scopes, credit and limits. Returns inline MCP audio or an expiring resource_link, never a local file path. Host playback support varies. For integration code only, use get_started.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "input": {
+     "description": "Text to synthesize. Maximum 2000 characters; longer text answers `400 input_too_long` naming the limit and the length you sent. Split longer scripts into several requests.",
+     "maxLength": 2000,
+     "type": "string"
+    },
+    "model": {
+     "description": "Defaults to pyai-speak.",
+     "type": "string"
+    },
+    "response_format": {
+     "default": "mp3",
+     "description": "Defaults to mp3.",
+     "enum": [
+      "wav",
+      "mp3",
+      "opus",
+      "pcm"
+     ],
+     "type": "string"
+    },
+    "voice": {
+     "description": "Voice id from list_voices. Omit for the account default.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "input"
+   ],
+   "type": "object"
+  },
+  "name": "synthesize_speech",
+  "output_schema": {
+   "additionalProperties": false,
+   "description": "Hosted TTS structured result. The OAuth host returns audio_url, mime_type, bytes and expires_at plus outcome fields. Inline-only loopback HTTP omits the URL/expiry pair. Audio and resource_link blocks remain in the MCP content array. Error outcomes contain error instead of audio metadata.",
+   "oneOf": [
+    {
+     "additionalProperties": false,
+     "anyOf": [
+      {
+       "required": [
+        "audio_url",
+        "expires_at"
+       ]
+      },
+      {
+       "not": {
+        "anyOf": [
+         {
+          "required": [
+           "audio_url"
+          ]
+         },
+         {
+          "required": [
+           "expires_at"
+          ]
+         }
+        ]
+       }
+      }
+     ],
+     "properties": {
+      "audio_url": {
+       "description": "Expiring HTTPS download capability. Present with expires_at on the hosted OAuth server; absent for inline-only loopback HTTP.",
+       "pattern": "^https://",
+       "type": "string"
+      },
+      "bytes": {
+       "description": "Audio byte count, not base64 length.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "code": {
+       "const": "ok",
+       "type": "string"
+      },
+      "data": {
+       "additionalProperties": false,
+       "anyOf": [
+        {
+         "required": [
+          "audio_url",
+          "expires_at"
+         ]
+        },
+        {
+         "not": {
+          "anyOf": [
+           {
+            "required": [
+             "audio_url"
+            ]
+           },
+           {
+            "required": [
+             "expires_at"
+            ]
+           }
+          ]
+         }
+        }
+       ],
+       "description": "Backward-compatible alias of the audio metadata, without outcome fields.",
+       "properties": {
+        "audio_url": {
+         "description": "Expiring HTTPS download capability. Present with expires_at on the hosted OAuth server; absent for inline-only loopback HTTP.",
+         "pattern": "^https://",
+         "type": "string"
+        },
+        "bytes": {
+         "description": "Audio byte count, not base64 length.",
+         "minimum": 0,
+         "type": "integer"
+        },
+        "expires_at": {
+         "description": "Download expiry as Unix milliseconds, not seconds. Does not guarantee access after connection revocation.",
+         "minimum": 0,
+         "type": "integer"
+        },
+        "mime_type": {
+         "description": "MIME type of the audio content.",
+         "pattern": "^audio/",
+         "type": "string"
+        }
+       },
+       "required": [
+        "mime_type",
+        "bytes"
+       ],
+       "type": "object"
+      },
+      "docs_url": {
+       "description": "Integration and error-handling guide.",
+       "pattern": "^https://",
+       "type": "string"
+      },
+      "expires_at": {
+       "description": "Download expiry as Unix milliseconds, not seconds. Does not guarantee access after connection revocation.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "mime_type": {
+       "description": "MIME type of the audio content.",
+       "pattern": "^audio/",
+       "type": "string"
+      },
+      "ok": {
+       "const": true,
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "mime_type",
+      "bytes",
+      "ok",
+      "code",
+      "docs_url"
+     ],
+     "type": "object"
+    },
+    {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "minLength": 1,
+       "not": {
+        "const": "ok"
+       },
+       "type": "string"
+      },
+      "data": {
+       "additionalProperties": false,
+       "description": "Backward-compatible alias of the error payload.",
+       "properties": {
+        "error": {
+         "additionalProperties": false,
+         "properties": {
+          "code": {
+           "minLength": 1,
+           "type": "string"
+          },
+          "message": {
+           "type": "string"
+          },
+          "request_id": {
+           "type": "string"
+          },
+          "retry_after": {
+           "type": "string"
+          },
+          "status": {
+           "maximum": 599,
+           "minimum": 100,
+           "type": "integer"
+          }
+         },
+         "required": [
+          "code",
+          "message"
+         ],
+         "type": "object"
+        }
+       },
+       "required": [
+        "error"
+       ],
+       "type": "object"
+      },
+      "docs_url": {
+       "description": "Integration and error-handling guide.",
+       "pattern": "^https://",
+       "type": "string"
+      },
+      "error": {
+       "additionalProperties": false,
+       "properties": {
+        "code": {
+         "minLength": 1,
+         "type": "string"
+        },
+        "message": {
+         "type": "string"
+        },
+        "request_id": {
+         "type": "string"
+        },
+        "retry_after": {
+         "type": "string"
+        },
+        "status": {
+         "maximum": 599,
+         "minimum": 100,
+         "type": "integer"
+        }
+       },
+       "required": [
+        "code",
+        "message"
+       ],
+       "type": "object"
+      },
+      "ok": {
+       "const": false,
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "error",
+      "ok",
+      "code",
+      "docs_url"
+     ],
+     "type": "object"
+    }
+   ],
+   "properties": {
+    "audio_url": {
+     "description": "Expiring HTTPS download capability. Present with expires_at on the hosted OAuth server; absent for inline-only loopback HTTP.",
+     "pattern": "^https://",
+     "type": "string"
+    },
+    "bytes": {
+     "description": "Audio byte count, not base64 length.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "code": {
+     "description": "ok on success; a non-ok error code on failure.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "data": {
+     "additionalProperties": false,
+     "description": "Optional backward-compatible alias: audio metadata on success, or an error object on failure; excludes outcome fields.",
+     "properties": {
+      "audio_url": {
+       "description": "Expiring HTTPS download capability. Present with expires_at on the hosted OAuth server; absent for inline-only loopback HTTP.",
+       "pattern": "^https://",
+       "type": "string"
+      },
+      "bytes": {
+       "description": "Audio byte count, not base64 length.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "error": {
+       "additionalProperties": false,
+       "properties": {
+        "code": {
+         "minLength": 1,
+         "type": "string"
+        },
+        "message": {
+         "type": "string"
+        },
+        "request_id": {
+         "type": "string"
+        },
+        "retry_after": {
+         "type": "string"
+        },
+        "status": {
+         "maximum": 599,
+         "minimum": 100,
+         "type": "integer"
+        }
+       },
+       "required": [
+        "code",
+        "message"
+       ],
+       "type": "object"
+      },
+      "expires_at": {
+       "description": "Download expiry as Unix milliseconds, not seconds. Does not guarantee access after connection revocation.",
+       "minimum": 0,
+       "type": "integer"
+      },
+      "mime_type": {
+       "description": "MIME type of the audio content.",
+       "pattern": "^audio/",
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "docs_url": {
+     "description": "Integration and error-handling guide.",
+     "pattern": "^https://",
+     "type": "string"
+    },
+    "error": {
+     "additionalProperties": false,
+     "properties": {
+      "code": {
+       "minLength": 1,
+       "type": "string"
+      },
+      "message": {
+       "type": "string"
+      },
+      "request_id": {
+       "type": "string"
+      },
+      "retry_after": {
+       "type": "string"
+      },
+      "status": {
+       "maximum": 599,
+       "minimum": 100,
+       "type": "integer"
+      }
+     },
+     "required": [
+      "code",
+      "message"
+     ],
+     "type": "object"
+    },
+    "expires_at": {
+     "description": "Download expiry as Unix milliseconds, not seconds. Does not guarantee access after connection revocation.",
+     "minimum": 0,
+     "type": "integer"
+    },
+    "mime_type": {
+     "description": "MIME type of the audio content.",
+     "pattern": "^audio/",
+     "type": "string"
+    },
+    "ok": {
+     "description": "True for success; false for an error. Success requires mime_type and bytes; errors require error and omit audio metadata.",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "ok",
+    "code",
+    "docs_url"
+   ],
+   "type": "object"
+  },
+  "securitySchemes": [
+   {
+    "scopes": [
+     "speak:synthesize"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Synthesize Speech"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "telephony:manage"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Bind an owned number to an Agent using body.agent_id; null unassigns. Read existing bindings first. Changes inbound routing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "properties": {
+      "agent_id": {
+       "description": "Agent to bind, or null to unassign.",
+       "nullable": true,
+       "type": "string"
+      }
+     },
+     "type": "object"
+    },
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "telephony_bind_number",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "telephony:manage"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Telephony Bind Number"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "telephony:manage"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Place a real outbound call only to a user-authorized destination. Requires confirm=true and a stable idempotency_key. This is not a sandbox simulation. Preserve the returned ID; never redial after an uncertain timeout.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "properties": {
+      "agent_id": {
+       "description": "Omni agent that handles the connected call.",
+       "type": "string"
+      },
+      "agent_release_id": {
+       "description": "Client release identifier pinned to this call; requires client_reference.",
+       "pattern": "^[A-Za-z0-9:_-]{1,128}$",
+       "type": "string"
+      },
+      "client_reference": {
+       "description": "Stable client call identity; requires agent_release_id.",
+       "pattern": "^[A-Za-z0-9:_-]{1,128}$",
+       "type": "string"
+      },
+      "from_number_id": {
+       "description": "Active managed-number ID to present as caller ID.",
+       "type": "string"
+      },
+      "max_duration_seconds": {
+       "default": 120,
+       "description": "Carrier-enforced maximum duration for integration calls.",
+       "maximum": 600,
+       "minimum": 30,
+       "type": "integer"
+      },
+      "routing_profile": {
+       "default": "balanced",
+       "enum": [
+        "quality_first",
+        "balanced",
+        "cost_optimized"
+       ],
+       "type": "string"
+      },
+      "stop_requested": {
+       "description": "Recover or cancel the same intent without dialing an unstarted call. Requires client_reference. Excluded from the creation fingerprint.",
+       "type": "boolean"
+      },
+      "to": {
+       "description": "Supported E.164 destination: North America (+1), India (+91), or Australian geographic/mobile numbers (+61, without the domestic trunk zero). Country policy, destination consent and caller identity remain required. Australian number purchasing is not available; an existing owned source number can be connected separately.",
+       "type": "string"
+      },
+      "use_case": {
+       "description": "Declared calling purpose. Determines consent, identity, CNAM, and policy gates.",
+       "enum": [
+        "transactional",
+        "support",
+        "sales",
+        "collections",
+        "survey"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "from_number_id",
+      "to",
+      "agent_id",
+      "use_case"
+     ],
+     "type": "object"
+    },
+    "confirm": {
+     "default": false,
+     "description": "Set true only after the user authorizes this exact purchase or destination.",
+     "type": "boolean"
+    },
+    "idempotency_key": {
+     "description": "Required safe-retry key. Identical retries return the original call; a different body returns 409.",
+     "maxLength": 255,
+     "minLength": 1,
+     "pattern": "^[^\\r\\n]+$",
+     "type": "string"
+    }
+   },
+   "required": [
+    "body",
+    "idempotency_key"
+   ],
+   "type": "object"
+  },
+  "name": "telephony_create_call",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "telephony:manage"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Telephony Create Call"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "telephony:manage"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "List owned numbers and current Agent bindings before changing inbound routing.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "include_released": {
+     "default": false,
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "telephony_list_numbers",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "telephony:manage"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Telephony List Numbers"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "telephony:manage"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Search available managed numbers and inspect provisioning requirements before purchase.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "area_code": {
+     "description": "3-digit US or Canada area code (NPA).",
+     "pattern": "^[2-9][0-9]{2}$",
+     "type": "string"
+    },
+    "contains": {
+     "description": "Digit pattern the number should contain.",
+     "type": "string"
+    },
+    "country": {
+     "default": "US",
+     "description": "ISO-2 country to search in.",
+     "enum": [
+      "US",
+      "CA",
+      "IN",
+      "AU"
+     ],
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "name": "telephony_search_numbers",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "telephony:manage"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Telephony Search Numbers"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "hear:transcribe"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": false
+  },
+  "description": "Transcribe a small audio attachment supplied as base64 (up to 8 MiB decoded). Returns the synchronous transcript without diarization controls. For word timestamps and speaker labels, use create_transcription_job with diarize=true for mono or channel=true for stereo, then get_transcription_job. Consumes usage.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "audio_base64": {
+     "description": "Base64-encoded audio bytes, without a data: prefix.",
+     "maxLength": 11184812,
+     "minLength": 4,
+     "type": "string"
+    },
+    "filename": {
+     "maxLength": 120,
+     "pattern": "^[A-Za-z0-9_.-]+$",
+     "type": "string"
+    },
+    "language": {
+     "enum": [
+      "en",
+      "es",
+      "fr",
+      "de",
+      "hi",
+      "it",
+      "pt",
+      "nl",
+      "zh",
+      "yue",
+      "ar",
+      "id",
+      "ko",
+      "th",
+      "vi",
+      "ja",
+      "tr",
+      "ms",
+      "sv",
+      "da",
+      "fi",
+      "pl",
+      "cs",
+      "fil",
+      "fa",
+      "el",
+      "hu",
+      "mk",
+      "ro"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "audio_base64",
+    "filename"
+   ],
+   "type": "object"
+  },
+  "name": "transcribe_audio",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "hear:transcribe"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Transcribe Audio"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [
+      "omni:session"
+     ],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": true,
+   "idempotentHint": false,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Update a voice Agent profile. Read it first and change only user-requested fields. Use saved tool IDs; configure connection settings privately in the PyAI console. Never supply credentials.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "body": {
+     "additionalProperties": false,
+     "description": "Writable agent fields. On update, present fields are set, `null` clears, absent fields are untouched.",
+     "properties": {
+      "ack_mode": {
+       "deprecated": true,
+       "description": "Deprecated compatibility field. Stored values are not applied to Omni runtime.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "barge_sensitivity": {
+       "deprecated": true,
+       "description": "Deprecated compatibility field. Stored values are not applied to Omni runtime.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "brain_model": {
+       "description": "Per-agent model selection. Omit for the platform default.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "consent_line": {
+       "description": "Recording disclosure spoken before recording starts when `recordings_enabled` is true. Required for compliance when recordings are on and must contain a meaningful spoken phrase (at least 10 characters and 5 letters). Playback order: consent_line, then greeting, then conversation.",
+       "maxLength": 500,
+       "minLength": 10,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "continuity": {
+       "description": "Reuse a tiny caller card on the next call when PyAI can resolve the caller (phone number or a signed customer id). The card is advisory — the agent may recall a name or open thread, and must not refund, book, or transfer from it. Default false.",
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "extraction_schema": {
+       "additionalProperties": true,
+       "description": "JSON Schema of fields to capture from each completed call's transcript. When set with extraction_webhook_url, PyAI runs a post-call extraction pass and POSTs the structured JSON to your webhook (signed with X-PyAI-Signature). Null disables extraction.",
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "extraction_webhook_url": {
+       "description": "HTTPS URL that receives the signed post-call extraction result (event `omni.call.extracted`). Requires extraction_schema. The call's agent is resolved from the connect-URL session_label when it equals this agent's id.",
+       "format": "uri",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "goals": {
+       "description": "Goal checklist for post-call outcome scoring (stored now; scoring ships with summaries).",
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 20,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "greeting": {
+       "description": "Greeting message, opening line spoken at turn 0 when a call connects (before the caller speaks). Stored on the agent profile; played automatically when connecting with `session_label={agent_id}`. May also be sent inline in the Omni `configure` frame.",
+       "maxLength": 1000,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "greeting_variants": {
+       "description": "Approved opening-line variants. PyAI selects one for each newly resolved call profile; null or empty falls back to greeting. Recording consent is fixed and never rotated.",
+       "items": {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       "maxItems": 15,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "idle_check_in": {
+       "description": "How patient the agent is before checking in on a silent caller (\"Sorry, are you still there?\"). `auto` checks in after a few seconds of silence; `patient` waits far longer, for callers who routinely think, read, or look something up mid-call; `off` disables the check-in entirely, so the agent stays silent until the caller speaks. When unset, most roles render `auto`; support agents render `patient`. Independent of `ack_mode`. May also be sent inline in the Omni `configure` frame, which wins for that session.",
+       "enum": [
+        "auto",
+        "patient",
+        "off",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "inherit_org_knowledgebases": {
+       "default": true,
+       "description": "When no knowledge bases are explicitly bound, inherit the organization's default knowledge bases. Set false to restrict retrieval to explicit agent bindings; an empty binding list then means no retrieval.",
+       "type": "boolean"
+      },
+      "keyterms": {
+       "deprecated": true,
+       "description": "Deprecated stored compatibility field. It does not affect speech recognition. Use `vocabulary`.",
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 100,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "language": {
+       "description": "Requested language for this Agent's Omni sessions. `null` or absent means `en`. Availability is staged: public serving includes `en`, `fr`, `es`, `hi`, `it`, `pt`, `ja`, and `ko`; `de` and the legacy `zh` alias fall back to English unless explicitly enabled with qualified endpoints. Canonical staged route identifiers are exposed in `x-staged-language-ids` for internal integration only and are rejected by the public control plane until qualified. Inspect the session's `configured.language_active` and `language_fallback` fields before assuming the requested language is active. See the Language support reference.",
+       "enum": [
+        "en",
+        "fr",
+        "es",
+        "de",
+        "hi",
+        "zh",
+        "it",
+        "pt",
+        "ja",
+        "ko",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ],
+       "x-staged-language-ids": [
+        "ht",
+        "zh-CN",
+        "ar-MSA",
+        "ar-Gulf"
+       ]
+      },
+      "metadata": {
+       "additionalProperties": {
+        "type": "string"
+       },
+       "description": "Up to 16 key/value annotations (keys ≤64 chars, values ≤512 chars).",
+       "type": [
+        "object",
+        "null"
+       ]
+      },
+      "name": {
+       "description": "Display name. Required on create.",
+       "maxLength": 200,
+       "type": "string"
+      },
+      "persona_perspective": {
+       "description": "Which side of the call the persona is on. `agent` (default) means the persona is the business being called, so PyAI adds its conversation layer for handling a caller (capability honesty, handoffs, turn discipline). `caller` means the persona is the individual on the call instead, as in QA and simulation callers, mystery shopping, or training partners; PyAI drops that operator-voice layer so it cannot contradict an inverted persona. May also be sent inline in the Omni `configure` frame, which wins for that session.",
+       "enum": [
+        "agent",
+        "caller",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "persona_system_prompt": {
+       "description": "Customer-authored agent instructions: 8,000 Unicode characters by default, or 32,000 with an active monthly commitment plan. Read prompt_limit_characters on the agent for your allowance. Platform conversation and safety guidance is applied separately and does not count toward this allowance. This is a character limit, not a token count.",
+       "maxLength": 32000,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "platform_guidance": {
+       "description": "Integration-owned setup guidance. Requires an explicitly enrolled server credential; ordinary customer keys receive 403. Separate from persona_system_prompt and its account allowance. Published before the customer instructions without truncation.",
+       "maxLength": 12000,
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "recordings_enabled": {
+       "description": "Enable stereo call recordings. Default false.",
+       "type": [
+        "boolean",
+        "null"
+       ]
+      },
+      "role": {
+       "description": "Role archetype. Adds PyAI's role operating standard beneath your persona and derives the runtime mode (`receptionist`, `sales`, and `collections` enable their matching deterministic conversation guards; everything else runs the default mode). Your stored persona is unchanged and remains authoritative for identity and business policy. Null clears the role.",
+       "enum": [
+        "receptionist",
+        "support",
+        "sales",
+        "collections",
+        "ea",
+        "concierge",
+        "custom",
+        null
+       ],
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "tools": {
+       "description": "Replace bindings using saved tool IDs. Existing settings are preserved for retained bindings. Credentials and connection settings are not accepted through MCP.",
+       "items": {
+        "additionalProperties": false,
+        "properties": {
+         "enabled": {
+          "default": true,
+          "type": "boolean"
+         },
+         "tool_id": {
+          "description": "ID of an existing tool. Configure its connection privately in the PyAI console.",
+          "type": "string"
+         }
+        },
+        "required": [
+         "tool_id"
+        ],
+        "type": "object"
+       },
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "vocabulary": {
+       "description": "Optional custom vocabulary for this Agent's Omni speech recognition. A non-empty list is the opt-in. PyAI keeps at most five effective terms, with at most five words per term. It trims whitespace, deduplicates without regard to case while preserving the first spelling and order, and drops common-only phrases. Set `[]` or `null` to turn it off. The list is fixed when a session starts. Organization Hear vocabulary is never applied to Omni.",
+       "items": {
+        "maxLength": 64,
+        "minLength": 4,
+        "type": "string"
+       },
+       "maxItems": 5,
+       "type": [
+        "array",
+        "null"
+       ]
+      },
+      "voice_id": {
+       "description": "A stock `voice_id`, one of its permanent `aliases` from `GET /v1/voices`, or a cloned voice id. Omni reports the canonical served stock id in `configured.voice_id`.",
+       "type": [
+        "string",
+        "null"
+       ]
+      },
+      "voice_instruct": {
+       "description": "Stored delivery direction for instruct-capable voice tiers. Current Omni routes support neutral delivery only: omit or set null for neutral speech. A saved custom value is rejected when configuring Omni; an inline empty `configure.voice_instruct` resets it to neutral for that session.",
+       "maxLength": 200,
+       "type": [
+        "string",
+        "null"
+       ]
+      }
+     },
+     "type": "object"
+    },
+    "id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "body"
+   ],
+   "type": "object"
+  },
+  "name": "update_agent",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [
+     "omni:session"
+    ],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Update Agent"
+ },
+ {
+  "_meta": {
+   "pyai/docs_url": "https://pyai.com/agents/speech-calling.md",
+   "securitySchemes": [
+    {
+     "scopes": [],
+     "type": "oauth2"
+    }
+   ]
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "Introspect the active key (GET /v1/me): org, environment (test/live), granted scopes, and rate-limit/credit posture. Organization and project names and IDs, billing guidance, and any managed payer/budget appear in text and structuredContent. Names are display labels; verify IDs and environment too. Use verbose=true for key identity details. Use it before usage and to diagnose a 401/403/402.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "verbose": {
+     "default": false,
+     "description": "Include authorized identity details in text. Credentials are always omitted.",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "whoami",
+  "output_schema": {},
+  "securitySchemes": [
+   {
+    "scopes": [],
+    "type": "oauth2"
+   }
+  ],
+  "title": "Who Am I"
+ }
+]
