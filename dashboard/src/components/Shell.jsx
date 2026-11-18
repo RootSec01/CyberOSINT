@@ -56,6 +56,7 @@ function Alerts() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { can } = useTeam();
   const load = () => api.get("/api/alerts").then(setData).catch(() => {});
 
   useEffect(() => {
@@ -82,7 +83,7 @@ function Alerts() {
         <div className="results drop" role="dialog" aria-label="Alerts">
           <div className="row" style={{ padding: "4px 8px 8px" }}>
             <strong className="grow">Alerts</strong>
-            {data.unread > 0 && <button type="button" className="link small" onClick={readAll}>Mark all read</button>}
+            {data.unread > 0 && can("work") && <button type="button" className="link small" onClick={readAll}>Mark all read</button>}
           </div>
           {data.alerts.slice(0, 12).map((alert) => (
             <button key={alert.id} type="button" className={`alert-row${alert.acknowledged ? "" : " unread"}`} onClick={() => go(alert)}>
@@ -139,8 +140,9 @@ function Offline({ state, admin, signOut }) {
 }
 
 export default function Shell({ children }) {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { me } = useTeam();
+  const visitor = !!(user && user.guest);
   const location = useLocation();
   const inServer = location.pathname.startsWith("/servers");
   const [state, setState] = useState({ online: true });
@@ -166,8 +168,10 @@ export default function Shell({ children }) {
         <Search />
         <Clock />
         <Alerts />
-        <Link to="/settings/profile" className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }}>{me ? me.display_name : "Account"}</Link>
-        <button type="button" className="link small" onClick={signOut}>Sign out</button>
+        {visitor
+          ? <span className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }} title="Visitors can look at everything and change nothing">Visitor · read only</span>
+          : <Link to="/settings/profile" className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }}>{me ? me.display_name : "Account"}</Link>}
+        <button type="button" className="link small" onClick={signOut}>{visitor ? "Administrator sign in" : "Sign out"}</button>
       </header>
       <Offline state={state} admin={admin} signOut={signOut} />
       <Guard at={location.pathname}>{children}</Guard>

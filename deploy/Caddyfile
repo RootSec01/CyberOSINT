@@ -11,3 +11,9 @@
 		format json
 	}
 }
+
+{$DOMAIN}:8443 {
+	encode zstd gzip
+	reverse_proxy showcase:8000
+	header -Server
+}

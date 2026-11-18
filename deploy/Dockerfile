@@ -5,7 +5,7 @@ RUN npm ci --no-audit --no-fund
 COPY dashboard/ ./
 RUN npm run build
 
-FROM python:3.12-slim
+FROM python:3.12-slim AS app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app
 COPY requirements.txt requirements-production.txt ./
@@ -23,3 +23,7 @@ USER raqeeb
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD python -c "import urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:8000/api/health', headers={'X-Forwarded-Proto': 'https'}), timeout=4)"
 CMD ["start-raqeeb"]
+
+FROM app AS showcase
+COPY lab/__init__.py lab/server.py lab/lifecycle.py lab/estate.py lab/tampering.py lab/showcase.py lab/
+CMD ["python", "-m", "lab.showcase"]

@@ -27,14 +27,36 @@ def _altered(tools: list) -> tuple[list, str]:
     return changed, target["name"]
 
 
-def run_demo(*, serve: bool = False, port: int = 8000) -> dict:
+LOCAL_OPERATOR = ("demo_operator", "demo-local-only-12345")
+
+
+def _accounts(session, public: dict | None):
+    from raqeeb import models
+    from raqeeb.security import hash_password
+    from raqeeb.team import VIEWER
+
+    name, password = public["admin"] if public else LOCAL_OPERATOR
+    operator = models.User(username=name, role="admin", password_hash=hash_password(password))
+    session.add(operator)
+    if public:
+        session.flush()
+        viewer_name, viewer_password = public["viewer"]
+        viewer = models.User(username=viewer_name, role="user", password_hash=hash_password(viewer_password))
+        session.add(viewer)
+        session.flush()
+        session.add(models.Member(user_id=viewer.id, team_id=operator.id, role=VIEWER, created_by=name))
+    return name, password
+
+
+def run_demo(*, serve: bool = False, port: int = 8000, public: dict | None = None) -> dict:
     with tempfile.TemporaryDirectory(prefix="raqeeb-demo-") as scratch:
         _safe_environment(scratch)
+        if public:
+            os.environ.update(public["settings"])
         from fastapi.testclient import TestClient
 
         from lab import server as lab_server
-        from raqeeb import db, main, models
-        from raqeeb.security import hash_password
+        from raqeeb import db, main
         from reference.library import Library
 
         library = Library()
@@ -44,11 +66,9 @@ def run_demo(*, serve: bool = False, port: int = 8000) -> dict:
 
         db.init_db()
         with db.session_scope() as session:
-            session.add(models.User(username="demo_operator", role="admin",
-                                    password_hash=hash_password("demo-local-only-12345")))
-        client = TestClient(main.app)
-        login = client.post("/api/login", data={"username": "demo_operator",
-                                                "password": "demo-local-only-12345"})
+            operator, password = _accounts(session, public)
+        client = TestClient(main.app, base_url="https://testserver" if public else "http://testserver")
+        login = client.post("/api/login", data={"username": operator, "password": password})
         assert login.status_code == 200, login.text
         headers = {"Authorization": f"Bearer {login.json()['token']}"}
 
@@ -90,6 +110,15 @@ def run_demo(*, serve: bool = False, port: int = 8000) -> dict:
         assert tampered["redefined"] == [altered_tool]
         assert [alert["kind"] for alert in alerts] == ["provenance"]
 
+        if public:
+            entered = client.post("/api/guest")
+            assert entered.status_code == 200, entered.text
+            reader = {"Authorization": f"Bearer {entered.json()['token']}"}
+            assert len(client.get("/api/assets", headers=reader).json()) == 2
+            refused = client.post("/api/assets", headers=reader,
+                                  data={"kind": "mcp", "value": "127.0.0.1:9", "label": "viewer"})
+            assert refused.status_code == 403, refused.text
+
         if serve:
             from raqeeb.paths import DASHBOARD_DIST
             if not (DASHBOARD_DIST / "index.html").exists():
@@ -103,13 +132,20 @@ def run_demo(*, serve: bool = False, port: int = 8000) -> dict:
             coming = estate.stage(client, headers, listen, library)
             os.environ.update(SCHEDULER_ENABLED="true", SCHEDULER_TICK_SECONDS="15")
             import uvicorn
-            print(f"Console: http://127.0.0.1:{port}/  username demo_operator  password demo-local-only-12345",
-                  flush=True)
+            if public:
+                print(f"Showcase ready on port {port}; visitors enter read-only", flush=True)
+                uvicorn.run(main.app, host=public["host"], port=port, log_level="warning",
+                            proxy_headers=True, forwarded_allow_ips="*", server_header=False)
+                return {}
+            print(f"Console: http://127.0.0.1:{port}/  username {operator}  password {password}", flush=True)
             print("Open as-shipped, then altered: same package and version, both on their first scan.", flush=True)
             for line in coming:
                 print(f"Live: {line}; the scheduler picks it up and raises an alert.", flush=True)
             uvicorn.run(main.app, host="127.0.0.1", port=port, log_level="warning")
 
+        if public:
+            return {"mode": "public_showcase", "servers": [as_shipped["provenance"], tampered["provenance"]],
+                    "viewer_read_only": True}
         return {"mode": "isolated_loopback_demo", "package": PACKAGE, "release": version,
                 "servers": [as_shipped, tampered],
                 "alerts": [{"kind": a["kind"], "severity": a["severity"], "title": a["title"],

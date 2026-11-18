@@ -73,6 +73,8 @@ export const RULES = {
 export const ACTIONS = {
   signed_in: "Signed in",
   sign_in_failed: "Sign-in refused",
+  sign_in_blocked: "Sign-in blocked, too many attempts",
+  visitor_entered: "Visitor entered",
   platform_switched: "Platform switched",
   registry_server_added: "Server added from the registry",
   server_attested: "Ownership statement recorded",

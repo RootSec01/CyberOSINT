@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { login as apiLogin, logout as apiLogout, getToken } from "./api.js";
+import { enterAsVisitor, login as apiLogin, logout as apiLogout, getToken } from "./api.js";
 
 const AuthCtx = createContext(null);
 
@@ -29,22 +29,30 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("auth:401", onExpire);
   }, []);
 
-  async function signIn(username, password) {
-    const data = await apiLogin(username, password);
-    const u = { username: data.username, role: data.role };
+  function keep(data) {
+    const u = { username: data.username, role: data.role, guest: !!data.guest };
     sessionStorage.setItem("authUser", JSON.stringify(u));
     setUser(u);
     return u;
   }
 
+  async function signIn(username, password) {
+    return keep(await apiLogin(username, password));
+  }
+
+  async function visit() {
+    return keep(await enterAsVisitor());
+  }
+
   function signOut() {
     apiLogout();
     sessionStorage.removeItem("authUser");
+    sessionStorage.setItem("signedOut", "1");
     setUser(null);
   }
 
   return (
-    <AuthCtx.Provider value={{ user, authed, signIn, signOut }}>
+    <AuthCtx.Provider value={{ user, authed, signIn, visit, signOut }}>
       {children}
     </AuthCtx.Provider>
   );

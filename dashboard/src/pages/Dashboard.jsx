@@ -152,7 +152,7 @@ function AlertList({ alerts, onRead }) {
 export default function Dashboard() {
   const [period, setPeriod] = useState(14);
   const { data, error, reload } = useLoad(() => api.get("/api/overview", { days: period }), [period]);
-  const { nameOf } = useTeam();
+  const { nameOf, can } = useTeam();
   const navigate = useNavigate();
   useEffect(() => {
     const timer = setInterval(() => { if (!document.hidden) reload(); }, 8000);
@@ -215,7 +215,7 @@ export default function Dashboard() {
           </div>
         </Panel>
 
-        <Panel span={4} title="Alerts" flush extra={data.alerts.unread > 0 && <button type="button" className="link small" onClick={readAll}>Mark all read</button>}>
+        <Panel span={4} title="Alerts" flush extra={data.alerts.unread > 0 && can("work") && <button type="button" className="link small" onClick={readAll}>Mark all read</button>}>
           <AlertList alerts={data.alerts.latest} onRead={reload} />
         </Panel>
 

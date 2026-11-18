@@ -85,6 +85,13 @@ export async function login(username, password) {
   return data;
 }
 
+export async function enterAsVisitor() {
+  setToken("");
+  const data = await api.post("/api/guest", {});
+  setToken(data.token);
+  return data;
+}
+
 export function logout() {
   setToken("");
 }

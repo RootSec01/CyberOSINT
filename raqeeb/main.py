@@ -1,4 +1,5 @@
 import os
+import re
 import ssl
 import json
 import socket
@@ -117,10 +118,11 @@ async def lifespan(app: FastAPI):
         pass
 
 
+_DOCS = not DEPLOYMENT.production and _env_flag("API_DOCS", "true")
 app = FastAPI(title="Raqeeb", lifespan=lifespan,
-              docs_url=None if DEPLOYMENT.production else "/docs",
-              redoc_url=None if DEPLOYMENT.production else "/redoc",
-              openapi_url=None if DEPLOYMENT.production else "/openapi.json")
+              docs_url="/docs" if _DOCS else None,
+              redoc_url="/redoc" if _DOCS else None,
+              openapi_url="/openapi.json" if _DOCS else None)
 
 # Routes from the earlier OSINT console. They run network actions the MCP console does not
 # need, so they are closed on a public installation unless LEGACY_API=true is set.
@@ -148,7 +150,20 @@ limiter = Limiter(
     enabled=_RATE_LIMIT_ENABLED,
 )
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+async def _limited(request: Request, exc: RateLimitExceeded):
+    if request.url.path in ("/api/login", "/api/guest"):
+        from raqeeb.db import SessionLocal
+        db = SessionLocal()
+        try:
+            _audit(db, "sign_in_blocked", "unknown", decision="rate_limited", request=request)
+        finally:
+            db.close()
+    return _rate_limit_exceeded_handler(request, exc)
+
+
+app.add_exception_handler(RateLimitExceeded, _limited)
 app.add_middleware(SlowAPIMiddleware)
 
 # --- CORS — configurable; the SPA and API may live on different origins. -----
@@ -166,11 +181,35 @@ app.add_middleware(
 _FORCE_HTTPS = _env_flag("FORCE_HTTPS", "false")
 
 
+VISITOR_MAY = ("/api/login", "/api/guest", "/api/evidence/verify", "/api/overview/briefing")
+
+
+def _visitor_writes(request: Request) -> bool:
+    guest = os.getenv("GUEST_USER", "").strip().lower()
+    path = request.url.path
+    if not guest or request.method in ("GET", "HEAD", "OPTIONS") or path.startswith(VISITOR_MAY):
+        return False
+    if path.startswith("/api/assets/") and path.endswith("/copilot"):
+        return False
+    header = request.headers.get("authorization", "")
+    if not header.lower().startswith("bearer "):
+        return False
+    from raqeeb.db import SessionLocal
+    db = SessionLocal()
+    try:
+        user = user_from_token(db, header[7:])
+        return bool(user and user.username == guest)
+    finally:
+        db.close()
+
+
 @app.middleware("http")
 async def _gates(request: Request, call_next):
     path = request.url.path
     if _is_legacy(path) and not _legacy_open():
         return JSONResponse({"detail": "Not Found"}, status_code=404)
+    if _visitor_writes(request):
+        return JSONResponse({"detail": "visitors can look around but not change anything"}, status_code=403)
     if platform.gated(path):
         from raqeeb.db import SessionLocal
         db = SessionLocal()
@@ -224,13 +263,36 @@ async def api_login(
     Rate-limited (brute-force protection) when RATE_LIMIT_ENABLED=true."""
     user = authenticate(db, username, password)
     if not user:
-        _audit(db, "sign_in_failed", (username or "").strip().lower()[:64] or "unknown", decision="denied")
+        _audit(db, "sign_in_failed", (username or "").strip().lower()[:64] or "unknown", decision="denied",
+               request=request)
         return JSONResponse({"detail": "invalid username or password"},
                             status_code=401)
-    _audit(db, "signed_in", user.username, decision="allowed")
+    _audit(db, "signed_in", user.username, decision="allowed", request=request)
     token = create_access_token(user)
     return JSONResponse({"token": token, "username": user.username,
                          "role": user.role})
+
+
+def _guest(db: Session) -> Optional[User]:
+    """The read-only account visitors use, when this installation offers one."""
+    name = os.getenv("GUEST_USER", "").strip().lower()
+    if not name:
+        return None
+    user = db.query(User).filter_by(username=name, is_active=True).first()
+    if not user or user.role == "admin" or team.role_of(db, user) != team.VIEWER:
+        return None
+    return user
+
+
+@app.post("/api/guest", response_class=JSONResponse)
+@limiter.limit(os.getenv("RATE_LIMIT_LOGIN", "10/minute"))
+async def api_guest(request: Request, db: Session = Depends(get_db)) -> JSONResponse:
+    user = _guest(db)
+    if not user:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    _audit(db, "visitor_entered", "visitor", decision="read_only", request=request)
+    return JSONResponse({"token": create_access_token(user), "username": user.username,
+                         "role": user.role, "guest": True})
 
 
 @app.get("/api/health", response_class=JSONResponse)
@@ -941,7 +1003,7 @@ async def api_registry_add(
 
 @app.get("/api/platform", response_class=JSONResponse)
 async def api_platform(db: Session = Depends(get_db)) -> JSONResponse:
-    return JSONResponse(platform.as_dict(db))
+    return JSONResponse({**platform.as_dict(db), "guest": _guest(db) is not None})
 
 
 @app.put("/api/platform", response_class=JSONResponse)
@@ -951,7 +1013,7 @@ async def api_set_platform(
 ) -> JSONResponse:
     platform.switch(db, user, online, message)
     _audit(db, "platform_switched", user.username, detail=f"online={online}", decision="online" if online else "offline")
-    return JSONResponse(platform.as_dict(db))
+    return JSONResponse({**platform.as_dict(db), "guest": _guest(db) is not None})
 
 
 def _operator() -> dict:
@@ -1127,6 +1189,8 @@ async def api_ack_all_alerts(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
     marked = (db.query(Alert)
               .filter(Alert.user_id.in_(team.people(db, user)), Alert.acknowledged == False)  # noqa: E712
               .update({Alert.acknowledged: True}, synchronize_session=False))
@@ -1144,16 +1208,23 @@ async def api_ack_alert(
     a = db.query(Alert).filter(Alert.id == alert_id).first()
     if not team.sees(db, user, a):
         return JSONResponse({"detail": "alert not found"}, status_code=404)
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
     a.acknowledged = True
     db.commit()
     return JSONResponse(_alert_dict(a))
 
 
 def _audit(db: Session, action: str, operator: str,
-           detail: str = "", decision: str | None = None) -> None:
+           detail: str = "", decision: str | None = None, request: Optional[Request] = None) -> None:
     """Write a structured audit row. Best-effort; never logs sensitive data."""
+    ip = None
+    if request is not None:
+        ip = (request.client.host if request.client else "")[:64] or None
+        agent = re.sub(r"[;=\s]+", " ", request.headers.get("user-agent", "")).strip()[:160]
+        detail = ";".join(part for part in (detail, f"ip={ip or 'unknown'}", f"agent={agent}" if agent else "") if part)
     try:
-        seals.record(db, action=action, operator=operator, detail=detail, decision=decision)
+        seals.record(db, action=action, operator=operator, detail=detail, decision=decision, ip=ip)
     except Exception:
         db.rollback()
 
@@ -1162,7 +1233,7 @@ def _audit_dict(e: AuditEntry) -> dict:
     return {
         "ts": register._stamp(e.ts),
         "action": e.action, "operator": e.operator,
-        "detail": e.detail, "decision": e.decision,
+        "detail": e.detail, "decision": e.decision, "ip": e.ip,
     }
 
 

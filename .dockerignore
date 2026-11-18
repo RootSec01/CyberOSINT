@@ -11,7 +11,7 @@ evidence
 .env
 deploy/.env
 tests
-lab
+lab/*.json
 benchmark
 evaluation
 docs

@@ -20,6 +20,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
+      target: app
     restart: unless-stopped
     env_file: .env
     environment:
@@ -33,12 +34,31 @@ services:
       db:
         condition: service_healthy
 
+  showcase:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: showcase
+    restart: unless-stopped
+    environment:
+      SHOWCASE_ADMIN_USER: ${SHOWCASE_ADMIN_USER:-rami}
+      SHOWCASE_ADMIN_PASSWORD: ${SHOWCASE_ADMIN_PASSWORD:?set SHOWCASE_ADMIN_PASSWORD in .env}
+      SHOWCASE_VIEWER_USER: ${SHOWCASE_VIEWER_USER:-viewer}
+      SHOWCASE_VIEWER_PASSWORD: ${SHOWCASE_VIEWER_PASSWORD:-}
+      SHOWCASE_JWT_SECRET: ${SHOWCASE_JWT_SECRET:?set SHOWCASE_JWT_SECRET in .env}
+      SHOWCASE_OWNERSHIP_SECRET: ${SHOWCASE_OWNERSHIP_SECRET:?set SHOWCASE_OWNERSHIP_SECRET in .env}
+      SHOWCASE_ORIGIN: https://${DOMAIN}:8443
+      TIMEZONE: ${TIMEZONE:-Asia/Dubai}
+    networks:
+      - showcase
+
   web:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+      - "8443:8443"
     environment:
       DOMAIN: ${DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
@@ -46,8 +66,16 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - certificates:/data
       - caddy_config:/config
+    networks:
+      - default
+      - showcase
     depends_on:
       - app
+      - showcase
+
+networks:
+  showcase:
+    internal: true
 
 volumes:
   database:

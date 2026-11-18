@@ -54,13 +54,18 @@ function Backdrop() {
 }
 
 export default function Login() {
-  const { signIn } = useAuth();
+  const { signIn, visit } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [state, setState] = useState(null);
   const action = useAction();
 
-  useEffect(() => { api.get("/api/platform").then(setState).catch(() => {}); }, []);
+  useEffect(() => {
+    api.get("/api/platform").then((platform) => {
+      setState(platform);
+      if (platform.guest && platform.online && !sessionStorage.getItem("signedOut")) action.run(visit);
+    }).catch(() => {});
+  }, []);
 
   const submit = (event) => {
     event.preventDefault();
@@ -84,7 +89,13 @@ export default function Login() {
       </section>
       <section className="login-form">
         <form onSubmit={submit}>
-          <h2>Sign in</h2>
+          {state && state.guest && (
+            <div className="stack tight">
+              <button className="btn primary" type="button" disabled={action.busy} onClick={() => action.run(visit)}>Explore the demo</button>
+              <p className="muted small">No account needed. Visitors can look at everything and change nothing.</p>
+            </div>
+          )}
+          <h2>{state && state.guest ? "Administrator sign in" : "Sign in"}</h2>
           <p className="muted small">Accounts are created by the administrator of this installation.</p>
           {state && !state.online && <p className="notice">Raqeeb is offline{state.message ? `: ${state.message}` : "."} Administrators can still sign in.</p>}
           <label className="stack tight">Username

@@ -13,7 +13,7 @@ are reachable only inside the compose network.
 3. Open the firewall for SSH, HTTP and HTTPS only:
 
 ```bash
-ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
+ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 8443/tcp && ufw --force enable
 ```
 
 ## 2. Code and settings
@@ -58,13 +58,32 @@ The command asks for the password twice. Platform administrators can take the co
 (Settings, Platform) and issue temporary scan grants. Everyone else is added by an administrator
 or team owner in Settings, Members, and signs in directly with the password set there.
 
-## 5. Updates
+## 5. Public showcase
+
+The `showcase` container serves the tampering demonstration on `https://DOMAIN:8443`: the
+as-shipped and altered copies of server-filesystem, the lab estate and the scheduled changes that
+raise alerts. It sits on a network with no route out, so the only servers it can reach are the lab
+listeners inside it, and it starts from an empty database each time it restarts.
+
+Visitors enter without an account, through a read-only viewer: they can open every page and
+download reports, but cannot add, scan, change or delete anything. The administrator
+(`SHOWCASE_ADMIN_*`) signs in from the visitor bar and can do everything. Each visit is written to
+the showcase's activity log with its address. Use an administrator password of at least 16
+characters and two separate secrets (`openssl rand -hex 32`); the container refuses to start
+otherwise.
+
+```bash
+docker compose up -d --build showcase web
+docker compose logs --tail 20 showcase
+```
+
+## 6. Updates
 
 ```bash
 cd /opt/raqeeb && git pull && cd deploy && docker compose up -d --build
 ```
 
-## 6. Backups
+## 7. Backups
 
 ```bash
 docker compose exec -T db pg_dump -U raqeeb raqeeb | gzip > raqeeb-$(date +%F).sql.gz
@@ -81,6 +100,8 @@ checked against this installation.
 - API documentation (`/docs`, `/openapi.json`) is off in production.
 - Loopback and private addresses are never scanned in production. Registry servers must resolve
   to public addresses; your own servers must be inside `AUTHORIZED_CIDRS` or a temporary grant.
+- Every sign-in, refused sign-in and rate-limited attempt is recorded with its address and browser.
+  Administrators see them in Activity.
 - Every response carries a content security policy, `X-Frame-Options: DENY`, `nosniff`, a strict
   referrer policy and HSTS. Sign-ins, failed sign-ins and every change are written to the sealed
   audit log.
