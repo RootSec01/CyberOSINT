@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api.js";
 import { CASE_STATUS, actionLabel, describeChange, when } from "../lib/format.js";
 import { useTeam } from "../lib/Team.jsx";
-import { Empty, Problem, Severity, Status, Verdict, useAction, useLoad } from "../components/ui.jsx";
+import { Empty, Problem, Segment, Severity, Status, Verdict, useAction, useLoad } from "../components/ui.jsx";
 
 const SEVERITIES = [["Critical", "var(--crit)"], ["High", "var(--high)"], ["Medium", "var(--med)"], ["Low", "var(--muted)"]];
 const VERDICT_PARTS = [["match", "Match", "var(--ok)"], ["subset", "Subset", "var(--info)"], ["deviation", "Deviation", "var(--crit)"],
@@ -53,27 +53,44 @@ function Stacked({ parts, label }) {
   );
 }
 
+const DAY = (iso, opts) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(undefined, opts);
+
 function Trend({ days }) {
   const top = Math.max(1, ...days.map((d) => d.manual + d.scheduled));
-  const width = 100 / days.length;
+  const step = top <= 4 ? 1 : Math.ceil(top / 4);
+  const ticks = [];
+  for (let value = 0; value <= top; value += step) ticks.push(value);
+  if (ticks[ticks.length - 1] < top) ticks.push(ticks[ticks.length - 1] + step);
+  const ceiling = ticks[ticks.length - 1];
+  const every = Math.ceil(days.length / 7);
+  const total = days.reduce((sum, d) => sum + d.manual + d.scheduled, 0);
   return (
     <div className="stack tight" style={{ height: "100%" }}>
       <div className="legend">
-        <span className="small"><i style={{ background: "var(--brand)" }} />Manual</span>
-        <span className="small"><i style={{ background: "var(--info)" }} />Scheduled</span>
-        <span className="small muted grow" style={{ textAlign: "right" }}>Peak {top} a day</span>
+        <span className="small"><i style={{ background: "var(--brand)" }} />Manual scans</span>
+        <span className="small"><i style={{ background: "var(--info)" }} />Scheduled scans</span>
+        <span className="small muted grow" style={{ textAlign: "right" }}>{total} in {days.length} days</span>
       </div>
-      <div className="trend" role="img" aria-label="Scans per day over the last 14 days">
-        {days.map((d, index) => (
-          <div key={d.day} className="day" style={{ width: `${width}%` }}
-            title={`${new Date(d.day).toLocaleDateString(undefined, { day: "numeric", month: "short" })}: ${d.manual} manual, ${d.scheduled} scheduled`}>
-            <div className="bars">
-              {d.scheduled > 0 && <i style={{ height: `${(d.scheduled / top) * 100}%`, background: "var(--info)" }} />}
-              {d.manual > 0 && <i style={{ height: `${(d.manual / top) * 100}%`, background: "var(--brand)" }} />}
-            </div>
-            <span className="small muted mono">{index % 2 === days.length % 2 ? new Date(d.day).getDate() : ""}</span>
+      <div className="chart">
+        <div className="yaxis">{[...ticks].reverse().map((t) => <span key={t} className="small muted mono">{t}</span>)}</div>
+        <div className="plot">
+          <div className="trend" role="img" aria-label={`Scans per day over the last ${days.length} days`}>
+            {ticks.map((t) => <i key={t} className="gridline" style={{ bottom: `${(t / ceiling) * 100}%` }} />)}
+            {days.map((d) => (
+              <div key={d.day} className="day" title={`${DAY(d.day, { weekday: "short", day: "numeric", month: "short" })}: ${d.manual} manual, ${d.scheduled} scheduled`}>
+                <div className="bars">
+                  {d.scheduled > 0 && <i style={{ height: `${(d.scheduled / ceiling) * 100}%`, background: "var(--info)" }} />}
+                  {d.manual > 0 && <i style={{ height: `${(d.manual / ceiling) * 100}%`, background: "var(--brand)" }} />}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+          <div className="xaxis">
+            {days.map((d, index) => (
+              <span key={d.day} className="small muted">{(days.length - 1 - index) % every === 0 ? DAY(d.day, { day: "numeric", month: "short" }) : ""}</span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -133,7 +150,8 @@ function AlertList({ alerts, onRead }) {
 }
 
 export default function Dashboard() {
-  const { data, error, reload } = useLoad(() => api.get("/api/overview"), []);
+  const [period, setPeriod] = useState(14);
+  const { data, error, reload } = useLoad(() => api.get("/api/overview", { days: period }), [period]);
   const { nameOf } = useTeam();
   const navigate = useNavigate();
   useEffect(() => {
@@ -151,7 +169,7 @@ export default function Dashboard() {
       <div className="row">
         <h1 className="grow">Dashboard</h1>
         <span className="row small muted" title="Refreshes every few seconds from the live database.">
-          <i className="dot" />Live · {new Date(data.generated_at + "Z").toLocaleTimeString()}
+          <i className="dot" />Live · {when(data.generated_at).split(", ")[1]}
         </span>
       </div>
 
@@ -201,7 +219,9 @@ export default function Dashboard() {
           <AlertList alerts={data.alerts.latest} onRead={reload} />
         </Panel>
 
-        <Panel span={5} title="Scan activity, 14 days">
+        <Panel span={5} title="Scans per day" hint="Every scan Raqeeb ran, split into the ones a person started and the ones the schedule started."
+          extra={<Segment label="Period" value={String(period)} onChange={(v) => setPeriod(Number(v))}
+            options={[["7", "7d"], ["14", "14d"], ["30", "30d"], ["90", "90d"]].map(([id, label]) => ({ id, label }))} />}>
           <Trend days={data.trend} />
         </Panel>
 
@@ -264,18 +284,19 @@ export default function Dashboard() {
         </Panel>
 
         {field && (
-          <Panel span={5} title="Field study: official MCP registry"
-            hint="Public servers listed in the official registry, read with the handshake and tools/list only. Aggregate numbers; no server is named.">
+          <Panel span={5} title="Public MCP baseline"
+            hint="Reference figures for the wider ecosystem: open endpoints listed in the official MCP registry, read with the handshake and tool list only. Aggregate numbers; no server is named."
+            extra={<span className="small muted">Official registry · {DAY(field.from.slice(0, 10), { day: "numeric", month: "short" })} to {DAY(field.to.slice(0, 10), { day: "numeric", month: "short", year: "numeric" })}</span>}>
             <div className="field">
               <div className="stack tight">
-                <span className="big">{field.endpoints}</span><span className="small muted">public endpoints</span>
+                <span className="big">{field.endpoints}</span><span className="small muted">listed endpoints</span>
                 <Stacked label="How they answered" parts={[
                   { label: "Tool list", value: field.ok, color: "var(--brand)" },
                   { label: "Credential asked", value: field.auth_required, color: "var(--info)" },
                   { label: "Other", value: field.other, color: "var(--line-strong)" }]} />
               </div>
               <div className="stack tight">
-                <span className="small muted">Servers whose tools changed</span>
+                <span className="small muted">Listed servers whose tools changed</span>
                 {field.day_to_day.map((d) => (
                   <div key={d.to} className="row small"><span className="grow">{new Date(d.to).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</span>
                     <span className="mono">{d.changed} of {d.comparable}</span><b className="mono">{percent(d.share)}</b></div>
@@ -285,7 +306,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="divider" />
-            <span className="small muted">What the rules match on {field.ok} servers ({field.tools.toLocaleString()} tools). Matches, not confirmed weaknesses.</span>
+            <span className="small muted">What Raqeeb's rules match across {field.ok} servers ({field.tools.toLocaleString()} tools). Matches, not confirmed weaknesses.</span>
             <Bars color="var(--info)" rows={field.rules.map((r) => ({ label: r.finding, value: r.servers, text: `${r.servers} · ${percent(r.share)}` }))} />
           </Panel>
         )}

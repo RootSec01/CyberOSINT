@@ -3,6 +3,7 @@ import ssl
 import json
 import socket
 import datetime
+from urllib.parse import urlparse
 import subprocess
 from ipaddress import ip_network
 from typing import List, Dict, Any, Optional
@@ -33,6 +34,7 @@ DEPLOYMENT = load_deployment()
 from raqeeb.db import get_db, init_db, check_production_schema
 if DEPLOYMENT.production:
     check_production_schema()  # even import-only ASGI clients must pass readiness
+from raqeeb.models import Listing as m_Listing
 from raqeeb.models import (
     Scan, Finding, Case,
     User, Run, Asset, Alert, UserSettings, AuditEntry, OwnershipProof,
@@ -66,6 +68,8 @@ from raqeeb import inventory
 from raqeeb import overview
 from raqeeb import monitoring
 from raqeeb import report
+from raqeeb import listings
+from raqeeb import platform
 from raqeeb import team
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
@@ -113,7 +117,23 @@ async def lifespan(app: FastAPI):
         pass
 
 
-app = FastAPI(title="Raqeeb", lifespan=lifespan)
+app = FastAPI(title="Raqeeb", lifespan=lifespan,
+              docs_url=None if DEPLOYMENT.production else "/docs",
+              redoc_url=None if DEPLOYMENT.production else "/redoc",
+              openapi_url=None if DEPLOYMENT.production else "/openapi.json")
+
+# Routes from the earlier OSINT console. They run network actions the MCP console does not
+# need, so they are closed on a public installation unless LEGACY_API=true is set.
+LEGACY_PATHS = ("/api/scan", "/api/mcp-scan", "/api/mcp-verify-direct", "/api/safe-proof",
+                "/api/scan-stream", "/api/safe-verify", "/api/runs", "/api/ownership", "/api/copilot")
+
+
+def _legacy_open() -> bool:
+    return _env_flag("LEGACY_API", "false" if DEPLOYMENT.production else "true")
+
+
+def _is_legacy(path: str) -> bool:
+    return any(path == p or path.startswith(p + "/") for p in LEGACY_PATHS)
 
 # Ensure tables exist at import too, so tests that use TestClient without the
 # lifespan context (no `with`) still find the schema. Idempotent.
@@ -147,6 +167,29 @@ _FORCE_HTTPS = _env_flag("FORCE_HTTPS", "false")
 
 
 @app.middleware("http")
+async def _gates(request: Request, call_next):
+    path = request.url.path
+    if _is_legacy(path) and not _legacy_open():
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    if platform.gated(path):
+        from raqeeb.db import SessionLocal
+        db = SessionLocal()
+        try:
+            if not platform.is_online(db):
+                header = request.headers.get("authorization", "")
+                user = user_from_token(db, header[7:]) if header.lower().startswith("bearer ") else None
+                if not (user and user.role == "admin"):
+                    return JSONResponse({"detail": "Raqeeb is offline", "offline": True}, status_code=503)
+        finally:
+            db.close()
+    return await call_next(request)
+
+
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+       "font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+
+
+@app.middleware("http")
 async def _security_headers(request: Request, call_next):
     # ASGI scheme is authoritative; only a trusted proxy may rewrite scope.
     if _FORCE_HTTPS:
@@ -159,6 +202,9 @@ async def _security_headers(request: Request, call_next):
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("X-Frame-Options", "DENY")
     resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    if not request.url.path.startswith(("/docs", "/redoc")):
+        resp.headers.setdefault("Content-Security-Policy", CSP)
+    resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
     if _FORCE_HTTPS:
         resp.headers.setdefault("Strict-Transport-Security",
                                 "max-age=31536000; includeSubDomains")
@@ -178,8 +224,10 @@ async def api_login(
     Rate-limited (brute-force protection) when RATE_LIMIT_ENABLED=true."""
     user = authenticate(db, username, password)
     if not user:
+        _audit(db, "sign_in_failed", (username or "").strip().lower()[:64] or "unknown", decision="denied")
         return JSONResponse({"detail": "invalid username or password"},
                             status_code=401)
+    _audit(db, "signed_in", user.username, decision="allowed")
     token = create_access_token(user)
     return JSONResponse({"token": token, "username": user.username,
                          "role": user.role})
@@ -424,28 +472,37 @@ def scan_asset(db: Session, user: User, asset: Asset, *,
     operator = operator or user.username
 
     if kind == "mcp":
+        url = value if value.startswith(("http://", "https://")) else None
         host, port = _parse_host_port(value, 443)
-        loopback = host in ("127.0.0.1", "localhost", "::1")
+        loopback = host in ("127.0.0.1", "localhost", "::1") and not DEPLOYMENT.production
         use_tls = not loopback
+        listed = listings.listing(db, asset)
+
+        def refuse(reason: str) -> dict:
+            asset.last_scanned_at = now
+            asset.last_risk_level = "Unauthorized"
+            db.commit()
+            refused = {"kind": "safe_proof", "skipped": True, "reason": reason, "target": f"{host}:{port}"}
+            refused["scan_reference"] = register.record_scan(
+                db, asset, refused, operator=operator, trigger=trigger).reference
+            return refused
 
         if loopback:
             authorization_ctx = {"allowed": True, "reason": "loopback lab target"}
+        elif listed:
+            if url != listed.url or not listings.public_address(host):
+                return refuse("registry endpoint changed or no longer resolves to a public address")
+            authorization_ctx = {"allowed": True, "decision": "registry_listing",
+                                 "reason": f"open endpoint of {listed.server} {listed.version} in the official MCP registry"}
         else:
             ip = _resolve_ip_for_target("ip" if _is_ipv4(host) else "domain", host) or host
             auth = authorize(ip, action="scheduled_safe_proof")
             if not auth.allowed:
-                asset.last_scanned_at = now
-                asset.last_risk_level = "Unauthorized"
-                db.commit()
-                refused = {"kind": "safe_proof", "skipped": True,
-                           "reason": f"target not authorized ({auth.reason})",
-                           "target": f"{host}:{port}"}
-                refused["scan_reference"] = register.record_scan(
-                    db, asset, refused, operator=operator, trigger=trigger).reference
-                return refused
+                return refuse(f"target not authorized ({auth.reason})")
             authorization_ctx = auth.as_dict()
 
-        server = mcp_protocol.verify_host(host, int(port), use_tls=use_tls)
+        server = (mcp_protocol.verify_mcp_endpoint(url) if url
+                  else mcp_protocol.verify_host(host, int(port), use_tls=use_tls))
         canary = None
         if loopback and server.get("is_mcp"):
             for tool in (server.get("tools") or []):
@@ -665,7 +722,7 @@ def _copilot_context(db: Session, asset: Asset) -> Dict[str, Any]:
         "asset": {
             "value": asset.value, "kind": asset.kind, "label": asset.label,
             "risk": asset.last_risk_level, "monitoring": asset.monitoring,
-            "last_scanned_at": asset.last_scanned_at.isoformat() if asset.last_scanned_at else None,
+            "last_scanned_at": register._stamp(asset.last_scanned_at),
         },
         "exposure": exposure,
         "drift": drift_ctx,
@@ -738,7 +795,7 @@ def _platform_copilot_context(db: Session, user: User) -> Dict[str, Any]:
         asset_ctx.append({
             "value": a.value, "kind": a.kind, "label": a.label,
             "risk": a.last_risk_level, "monitoring": a.monitoring,
-            "last_scanned_at": a.last_scanned_at.isoformat() if a.last_scanned_at else None,
+            "last_scanned_at": register._stamp(a.last_scanned_at),
             "exposure": trimmed,
             "_rank": copilot._risk_rank(lvl),
         })
@@ -809,6 +866,7 @@ async def api_create_asset(
     value: str = Form(...),
     kind: str = Form("domain"),
     label: str = Form(""),
+    attested: bool = Form(False),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
@@ -817,6 +875,13 @@ async def api_create_asset(
     value = value.strip()
     if not value:
         return JSONResponse({"detail": "value is required"}, status_code=400)
+    if kind != "mcp" and not _legacy_open():
+        return JSONResponse({"detail": "only MCP servers can be added"}, status_code=400)
+    lab = (not DEPLOYMENT.production
+           and _parse_host_port(value, 443)[0] in ("127.0.0.1", "localhost", "::1"))
+    if kind == "mcp" and not lab and not attested:
+        return JSONResponse({"detail": "confirm that you own this server or hold written permission to scan it, "
+                                       "or add it from the official MCP registry"}, status_code=400)
     existing = db.query(Asset).filter_by(user_id=user.id, value=value).first()
     if existing:
         return JSONResponse({"detail": "asset already exists"}, status_code=409)
@@ -824,7 +889,94 @@ async def api_create_asset(
     db.add(asset)
     db.commit()
     db.refresh(asset)
+    if kind == "mcp" and not lab:
+        listings.attest(db, asset, user)
+        _audit(db, "server_attested", user.username, detail=f"asset={asset.id};value={value}", decision="owner_declared")
     return JSONResponse(_asset_dict(asset), status_code=201)
+
+
+@app.get("/api/registry/search", response_class=JSONResponse)
+async def api_registry_search(
+    q: str = "", user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    try:
+        found = listings.search(q)
+    except register.Rejected as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+    except Exception:
+        return JSONResponse({"detail": "the official MCP registry did not answer; try again shortly"}, status_code=502)
+    added = {row.url for row in db.query(m_Listing).join(Asset, Asset.id == m_Listing.asset_id)
+             .filter(Asset.user_id.in_(team.people(db, user)))}
+    return JSONResponse({"servers": [{**s, "added": s["url"] in added} for s in found]})
+
+
+@app.post("/api/registry/add", response_class=JSONResponse)
+async def api_registry_add(
+    url: str = Form(...), label: str = Form(""),
+    user: User = Depends(get_current_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    if (refusal := _forbidden(db, user, team.WORK)):
+        return refusal
+    try:
+        entry = listings.confirm(url)
+    except register.Rejected as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+    except Exception:
+        return JSONResponse({"detail": "the official MCP registry did not answer; try again shortly"}, status_code=502)
+    if not listings.public_address(urlparse(entry["url"]).hostname or ""):
+        return JSONResponse({"detail": "the endpoint does not resolve to a public address"}, status_code=400)
+    if db.query(Asset).filter_by(user_id=user.id, value=entry["url"]).first():
+        return JSONResponse({"detail": "asset already exists"}, status_code=409)
+    asset = Asset(user_id=user.id, kind="mcp", value=entry["url"],
+                  label=label.strip() or entry["title"][:120] or entry["server"][:120])
+    db.add(asset)
+    db.commit()
+    db.refresh(asset)
+    listings.record(db, asset, entry)
+    monitoring.set_every(db, asset, user, 1440)
+    _audit(db, "registry_server_added", user.username,
+           detail=f"asset={asset.id};server={entry['server']};version={entry['version']}", decision="listed")
+    return JSONResponse(_asset_dict(asset), status_code=201)
+
+
+@app.get("/api/platform", response_class=JSONResponse)
+async def api_platform(db: Session = Depends(get_db)) -> JSONResponse:
+    return JSONResponse(platform.as_dict(db))
+
+
+@app.put("/api/platform", response_class=JSONResponse)
+async def api_set_platform(
+    online: bool = Form(...), message: str = Form(""),
+    user: User = Depends(require_admin_user), db: Session = Depends(get_db),
+) -> JSONResponse:
+    platform.switch(db, user, online, message)
+    _audit(db, "platform_switched", user.username, detail=f"online={online}", decision="online" if online else "offline")
+    return JSONResponse(platform.as_dict(db))
+
+
+def _operator() -> dict:
+    return {"name": os.getenv("OPERATOR_NAME", "").strip() or None,
+            "contact": os.getenv("OPERATOR_CONTACT", "").strip() or None,
+            "site": os.getenv("PUBLIC_SITE_URL", "").strip() or None}
+
+
+@app.get("/api/public/operator", response_class=JSONResponse)
+async def api_public_operator() -> JSONResponse:
+    return JSONResponse(_operator())
+
+
+@app.get("/.well-known/security.txt")
+async def security_txt():
+    from fastapi.responses import PlainTextResponse
+    who = _operator()
+    if not who["contact"]:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    expires = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=180)).strftime("%Y-%m-%dT00:00:00Z")
+    lines = [f"Contact: {who['contact'] if ':' in who['contact'] else 'mailto:' + who['contact']}", f"Expires: {expires}",
+             "Preferred-Languages: en, ar"]
+    if who["site"]:
+        lines.append(f"Policy: {who['site'].rstrip('/')}/terms")
+    return PlainTextResponse("\n".join(lines) + "\n")
 
 
 @app.patch("/api/assets/{asset_id}", response_class=JSONResponse)
@@ -857,6 +1009,9 @@ async def api_delete_asset(
         return refusal
     cases.forget_asset(db, a.id)
     register.forget_asset(db, a.id)
+    listings.forget(db, a.id)
+    monitoring.forget(db, a.id)
+    db.query(Alert).filter(Alert.asset_id == a.id).delete(synchronize_session=False)
     db.delete(a)
     db.commit()
     return JSONResponse({"id": asset_id, "deleted": True})
@@ -866,8 +1021,8 @@ def _asset_dict(a: Asset) -> dict:
     return {
         "id": a.id, "kind": a.kind, "value": a.value, "label": a.label,
         "monitoring": a.monitoring, "owner_id": a.user_id,
-        "created_at": a.created_at.isoformat() if a.created_at else None,
-        "last_scanned_at": a.last_scanned_at.isoformat() if a.last_scanned_at else None,
+        "created_at": register._stamp(a.created_at),
+        "last_scanned_at": register._stamp(a.last_scanned_at),
         "last_risk_level": a.last_risk_level, "last_run_id": a.last_run_id,
         "last_scan": register.latest_reference(object_session(a), a.id) if object_session(a) else None,
     }
@@ -935,11 +1090,11 @@ async def api_asset_drift(
         "available": True,
         "current_run": {
             "run_id": rows[0].run_id,
-            "at": rows[0].created_at.isoformat() if rows[0].created_at else None,
+            "at": register._stamp(rows[0].created_at),
         },
         "previous_run": {
             "run_id": rows[1].run_id,
-            "at": rows[1].created_at.isoformat() if rows[1].created_at else None,
+            "at": register._stamp(rows[1].created_at),
         },
         **diff,
     })
@@ -1005,7 +1160,7 @@ def _audit(db: Session, action: str, operator: str,
 
 def _audit_dict(e: AuditEntry) -> dict:
     return {
-        "ts": e.ts.isoformat() if e.ts else None,
+        "ts": register._stamp(e.ts),
         "action": e.action, "operator": e.operator,
         "detail": e.detail, "decision": e.decision,
     }
@@ -1147,7 +1302,7 @@ async def api_ownership_status(
         "domain": domain,
         "required_record": ownership.txt_record(user.id, domain),
         "verified": bool(row and row.verified),
-        "verified_at": row.verified_at.isoformat() if (row and row.verified_at) else None,
+        "verified_at": register._stamp(row.verified_at) if row else None,
         "enforced": _REQUIRE_OWNERSHIP,
     })
 
@@ -1539,7 +1694,7 @@ def _profile_out(db: Session, user: User) -> dict:
     role = team.role_of(db, user)
     return {**team.member_dict(db, user, team.membership(db, user)),
             "can": [action for action in (team.READ, team.WORK, team.MANAGE) if team.allows(db, user, action)],
-            "role": role}
+            "role": role, "platform_admin": user.role == "admin"}
 
 
 @app.get("/api/profile", response_class=JSONResponse)
@@ -1686,9 +1841,12 @@ async def api_server_report(
 
 @app.get("/api/overview", response_class=JSONResponse)
 async def api_overview(
+    days: int = 14,
     user: User = Depends(get_current_user), db: Session = Depends(get_db),
 ) -> JSONResponse:
-    return JSONResponse(overview.snapshot(db, user))
+    if days not in overview.PERIODS:
+        return JSONResponse({"detail": f"days must be one of {', '.join(map(str, overview.PERIODS))}"}, status_code=400)
+    return JSONResponse(overview.snapshot(db, user, days=days))
 
 
 @app.post("/api/overview/briefing", response_class=JSONResponse)
@@ -1709,7 +1867,8 @@ async def api_asset_detail(
     a = db.query(Asset).filter(Asset.id == asset_id).first()
     if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
-    return JSONResponse({**inventory.detail(db, user, a), "schedule": monitoring.plan(db, a)})
+    return JSONResponse({**inventory.detail(db, user, a), "schedule": monitoring.plan(db, a),
+                         "basis": listings.basis(db, a)})
 
 
 @app.get("/api/changes", response_class=JSONResponse)
@@ -1766,7 +1925,7 @@ async def api_list_runs(
             "target_type": r.target_type,
             "target_value": r.target_value,
             "risk_level": r.risk_level,
-            "created_at": r.created_at.isoformat() if r.created_at else None,
+            "created_at": register._stamp(r.created_at),
             "owner_id": r.user_id,
         }
         for r in rows

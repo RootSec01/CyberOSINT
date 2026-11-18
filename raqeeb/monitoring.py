@@ -8,9 +8,10 @@ from typing import Callable, Optional
 from sqlalchemy.orm import Session
 
 from raqeeb import inventory, register, team
-from raqeeb.models import Alert, Asset, Scan, Schedule, User
+from raqeeb.models import Alert, Asset, Listing, Scan, Schedule, User
 
 CHOICES = (0, 1, 5, 15, 60, 360, 1440)
+LISTED_FLOOR = 60
 RANK = {"Low": 1, "Medium": 2, "High": 3, "Critical": 4}
 ENDED = {register.NO_MCP: "got no MCP answer", register.AUTH_REQUIRED: "was asked for a credential",
          register.UNAUTHORIZED: "was outside the authorized scope"}
@@ -49,6 +50,8 @@ def next_at(asset: Asset, minutes: int) -> Optional[datetime]:
 def set_every(db: Session, asset: Asset, by: User, minutes: int) -> int:
     if minutes not in CHOICES:
         raise register.Rejected(f"interval must be one of: {', '.join(str(c) for c in CHOICES)} minutes")
+    if 0 < minutes < LISTED_FLOOR and db.query(Listing).filter(Listing.asset_id == asset.id).first():
+        raise register.Rejected("servers from the public registry are read at most once an hour")
     row = db.query(Schedule).filter(Schedule.asset_id == asset.id).first() or Schedule(asset_id=asset.id)
     row.every_minutes, row.set_by, row.set_at = minutes, by.username, _now()
     asset.monitoring = minutes > 0
@@ -57,7 +60,14 @@ def set_every(db: Session, asset: Asset, by: User, minutes: int) -> int:
     return minutes
 
 
+def forget(db: Session, asset_id: int) -> None:
+    db.query(Schedule).filter(Schedule.asset_id == asset_id).delete(synchronize_session=False)
+
+
 def due(db: Session, now: Optional[datetime] = None) -> list[Asset]:
+    from raqeeb import platform
+    if not platform.is_online(db):
+        return []
     now = now or _now()
     found = []
     for asset in db.query(Asset).filter(Asset.kind == "mcp").all():
@@ -78,7 +88,7 @@ def plan(db: Session, asset: Asset) -> dict:
 def status(db: Session, user: User) -> dict:
     assets = [a for a in db.query(Asset).filter(Asset.kind == "mcp").order_by(Asset.id) if team.sees(db, user, a)]
     plans = [plan(db, asset) for asset in assets]
-    return {"enabled": enabled(), "default_minutes": default_minutes(), "choices": list(CHOICES),
+    return {"enabled": enabled(), "listed_floor": LISTED_FLOOR, "default_minutes": default_minutes(), "choices": list(CHOICES),
             "webhook": bool(os.getenv("ALERT_WEBHOOK_URL", "").strip()),
             "monitored": sum(1 for p in plans if p["every_minutes"]), "plans": plans}
 

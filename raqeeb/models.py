@@ -273,3 +273,37 @@ class Schedule(Base):
     every_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
     set_by: Mapped[str] = mapped_column(String(64))
     set_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class PlatformState(Base):
+    """Whether the console is open to its users; only a platform admin changes it."""
+    __tablename__ = "platform_state"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    online: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    changed_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Listing(Base):
+    """The official registry entry that publishes a server's endpoint for any client."""
+    __tablename__ = "listings"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), unique=True, index=True, nullable=False)
+    server: Mapped[str] = mapped_column(String(255), nullable=False)
+    version: Mapped[str] = mapped_column(String(64), nullable=False)
+    url: Mapped[str] = mapped_column(String(512), nullable=False)
+    confirmed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class Attestation(Base):
+    """Who declared they own, or may test, a server outside the registry, and when."""
+    __tablename__ = "attestations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), unique=True, index=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(64), nullable=False)
+    statement: Mapped[str] = mapped_column(Text, nullable=False)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

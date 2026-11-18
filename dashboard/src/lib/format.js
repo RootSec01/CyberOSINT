@@ -3,7 +3,8 @@ const pad = (n) => String(n).padStart(2, "0");
 
 export function when(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
+  const text = String(iso);
+  const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(text) || text.length <= 10 ? text : `${text}Z`);
   if (Number.isNaN(d.getTime())) return "—";
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
@@ -70,6 +71,13 @@ export const RULES = {
 };
 
 export const ACTIONS = {
+  signed_in: "Signed in",
+  sign_in_failed: "Sign-in refused",
+  platform_switched: "Platform switched",
+  registry_server_added: "Server added from the registry",
+  server_attested: "Ownership statement recorded",
+  schedule_set: "Schedule changed",
+  report_exported: "Report downloaded",
   briefing: "Briefing written",
   finding_status: "Finding status changed",
   case_opened: "Case opened by hand",

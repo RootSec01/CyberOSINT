@@ -1,15 +1,12 @@
 import { SEVERITY_RANK, VERDICTS, plural, provenanceLine, shortRelease, worst } from "./format.js";
 
-export const COLUMNS = [
-  { title: "TARGET", x: 24 },
-  { title: "SERVER", x: 288 },
-  { title: "ACCESS AND PROVENANCE", x: 552 },
-  { title: "TOOLS", x: 876 },
-  { title: "POTENTIAL IMPACT", x: 1256 },
-];
 export const NODE_WIDTH = 220;
+const EDGE = 24;
+const GAP = 96;
+export const COLUMNS = ["TARGET", "SERVER", "ACCESS AND PROVENANCE", "TOOLS", "POTENTIAL IMPACT"]
+  .map((title, index) => ({ title, x: EDGE + index * (NODE_WIDTH + GAP) }));
 export const NODE_HEIGHT = 76;
-export const MAP_WIDTH = 1500;
+export const MAP_WIDTH = EDGE * 2 + COLUMNS.length * NODE_WIDTH + (COLUMNS.length - 1) * GAP;
 export const LAST_STAGE = 6;
 const ROW = 96;
 const TOP = 72;

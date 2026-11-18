@@ -1,4 +1,4 @@
-"""A fuller estate for the served demo: more servers, a team, and changes that happen while it runs.
+"""A fuller estate for the served demo: more servers, case work, and changes that happen while it runs.
 
 Every server is a loopback copy of a published release from the reference library, or a copy
 with a planted change. Nothing reaches the network and no tool is ever called.
@@ -10,7 +10,6 @@ import threading
 
 from lab.tampering import PLANTED
 
-PASSWORD = "demo-local-only-12345"
 COPIES = (("docs-search", "@modelcontextprotocol/server-memory"),
           ("ticket-tracker", "@modelcontextprotocol/server-github"),
           ("browser-agent", "@playwright/mcp"))
@@ -61,19 +60,13 @@ def stage(client, headers: dict, listen, library) -> list[str]:
     every(asset_id, 1)
     threading.Timer(STOP_AFTER, lambda: (stopping.shutdown(), stopping.server_close())).start()
 
-    for username, role, name, title in (("noura", "analyst", "Noura", "SOC analyst"),
-                                        ("khalid", "viewer", "Khalid", "Auditor")):
-        client.post("/api/members", headers=headers, data={"username": username, "password": PASSWORD,
-                                                           "role": role, "display_name": name, "title": title})
-
     open_cases = client.get("/api/cases", headers=headers).json()["cases"]
     legacy = next((c for c in open_cases if c["rule"] == "command_execution"), None)
     if legacy:
         reference = legacy["reference"]
-        client.post(f"/api/cases/{reference}/assign", headers=headers, data={"owner": "noura"})
         client.post(f"/api/cases/{reference}/status", headers=headers, data={"status": "investigating"})
         client.post(f"/api/cases/{reference}/notes", headers=headers,
-                    data={"text": "Confirmed the shell tool is reachable without a token; asked the owner to add auth."})
+                    data={"text": "Confirmed the shell tool is listed without a token; owner asked to add authentication."})
 
     findings = client.get("/api/findings", headers=headers, params={"status": "open", "limit": 200}).json()["findings"]
     credential = next((f for f in findings if f["category"] == "secrets_leakage"), None)

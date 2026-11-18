@@ -7,14 +7,14 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
-from raqeeb import cases, evidence, inventory, monitoring, provenance, register, seals, team
+from raqeeb import cases, clock, evidence, inventory, monitoring, provenance, register, seals, team
 from raqeeb.models import Alert, AuditEntry, Scan, User
 from raqeeb.paths import PROJECT_ROOT
 
 SEVERITIES = ["Critical", "High", "Medium", "Low"]
 RANK = {level: index for index, level in enumerate(SEVERITIES)}
 STALE_DAYS = 7
-TREND_DAYS = 14
+PERIODS = (7, 14, 30, 90)
 FIELD_STUDY = PROJECT_ROOT / "observatory" / "analysis.json"
 
 
@@ -29,7 +29,7 @@ def _age_days(stamp: str | None) -> float | None:
     return (_utcnow() - moment).total_seconds() / 86400
 
 
-def snapshot(db: Session, user: User) -> dict:
+def snapshot(db: Session, user: User, days: int = 14) -> dict:
     servers = inventory.inventory(db, user)
     read = [s for s in servers if s.get("scan") and s["scan"].get("outcome") == "read"]
     deviating = [s for s in read if s["scan"].get("verdict") == "deviation"]
@@ -64,13 +64,13 @@ def snapshot(db: Session, user: User) -> dict:
     techniques.pop(None, None)
 
     ids = [s["id"] for s in servers]
-    since = _utcnow() - timedelta(days=TREND_DAYS - 1)
+    since = _utcnow() - timedelta(days=days - 1)
     start = since.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
-    days = {(start + timedelta(days=n)).date().isoformat(): {"manual": 0, "scheduled": 0} for n in range(TREND_DAYS)}
+    per_day = {(start + timedelta(days=n)).date().isoformat(): {"manual": 0, "scheduled": 0} for n in range(days)}
     for scan in db.query(Scan).filter(Scan.asset_id.in_(ids), Scan.started_at >= start):
         day = register._utc(scan.started_at).date().isoformat()
-        if day in days:
-            days[day]["scheduled" if scan.trigger == "scheduled" else "manual"] += 1
+        if day in per_day:
+            per_day[day]["scheduled" if scan.trigger == "scheduled" else "manual"] += 1
 
     people = team.people(db, user)
     alerts = (db.query(Alert).filter(Alert.user_id.in_(people))
@@ -104,7 +104,7 @@ def snapshot(db: Session, user: User) -> dict:
         "categories": [{"title": title, "owasp": owasp, "count": count}
                        for (title, owasp), count in categories.most_common(6)],
         "techniques": [{"id": tid, "count": count} for tid, count in techniques.most_common(6)],
-        "trend": [{"day": day, **counts} for day, counts in days.items()],
+        "trend": [{"day": day, **counts} for day, counts in per_day.items()], "period": days,
         "alerts": {"unread": sum(1 for a in db.query(Alert.acknowledged)
                                  .filter(Alert.user_id.in_(people), Alert.acknowledged == False)),  # noqa: E712
                    "latest": [{"id": a.id, "severity": a.severity, "kind": a.kind, "title": a.title,
@@ -152,7 +152,7 @@ def _count(number: int, word: str) -> str:
 def briefing(db: Session, user: User) -> str:
     s = snapshot(db, user)
     servers, findings, open_cases = s["servers"], s["findings"], s["cases"]
-    lines = [f"Briefing, {_utcnow().strftime('%d %b %Y, %H:%M')} UTC."]
+    lines = [f"Briefing, {clock.now()}."]
 
     lines.append(f"{_count(servers['total'], 'server')} registered; {servers['read']} read, "
                  f"declaring {_count(servers['tools'], 'tool')} of which {servers['flagged']} are flagged.")

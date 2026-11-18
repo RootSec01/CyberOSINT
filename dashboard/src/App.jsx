@@ -12,6 +12,7 @@ import CaseDetail from "./pages/CaseDetail.jsx";
 import Changes from "./pages/Changes.jsx";
 import Activity from "./pages/Activity.jsx";
 import Settings from "./pages/Settings.jsx";
+import Legal from "./pages/Legal.jsx";
 
 function Console() {
   const { authed } = useAuth();
@@ -40,8 +41,9 @@ function Console() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Console />
-    </AuthProvider>
+    <Routes>
+      {["terms", "privacy", "about"].map((page) => <Route key={page} path={`/${page}`} element={<Legal page={page} />} />)}
+      <Route path="*" element={<AuthProvider><Console /></AuthProvider>} />
+    </Routes>
   );
 }

@@ -293,6 +293,7 @@ export default function Server() {
             <div><dt>Tools</dt><dd className="mono">{read ? page.tools.length : "—"}</dd></div>
             <div><dt>Flagged</dt><dd className="mono">{read ? page.flagged_tools : "—"}</dd></div>
             <div><dt>Open cases</dt><dd className="mono">{page.open_cases}</dd></div>
+            <div title={page.basis.since ? `Since ${when(page.basis.since)}` : undefined}><dt>Basis</dt><dd>{{ registry: "Official MCP registry", attested: "Owner statement", local: "Lab" }[page.basis.kind]}</dd></div>
             <div><dt>Next scan</dt><dd className="mono">{page.schedule.next_scan ? when(page.schedule.next_scan) : "Not scheduled"}</dd></div>
           </dl>
           <div className="tabs">

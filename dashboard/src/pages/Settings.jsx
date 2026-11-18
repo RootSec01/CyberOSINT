@@ -147,17 +147,92 @@ function Monitoring() {
 }
 
 function Scope() {
-  const { data, error } = useLoad(() => api.get("/api/scope"), []);
+  const { data, error, reload } = useLoad(() => api.get("/api/scope"), []);
+  const { me } = useTeam();
+  const [ip, setIp] = useState("");
+  const [hours, setHours] = useState("24");
+  const [reason, setReason] = useState("");
+  const action = useAction();
   const standing = data ? data.standing_scope || [] : [];
   const grants = data ? data.active_grants || [] : [];
+  const grant = async (event) => {
+    event.preventDefault();
+    if (await action.run(() => api.post("/api/authorize", { ip: ip.trim(), ttl_minutes: Number(hours) * 60, reason: reason.trim() }))) {
+      setIp(""); setReason(""); reload();
+    }
+  };
+  const revoke = async (address) => { if (await action.run(() => api.post("/api/revoke", { ip: address, reason: "revoked from settings" }))) reload(); };
+  return (
+    <>
+      <section className="card">
+        <h2 title="A server is read only when one of these allows it.">What may be scanned</h2>
+        <Problem error={error} />
+        <div className="formrow"><span>Official MCP registry</span><span className="muted">Open endpoints their operators list for any client. Read at most once an hour.</span></div>
+        <div className="formrow"><span>Your own servers</span><span className="muted">Added with a signed statement of ownership or written permission, and inside the ranges below.</span></div>
+        <div className="formrow"><span>Standing ranges</span><span className="mono">{standing.length ? standing.join(", ") : "None configured"}</span></div>
+        {data && data.unrestricted && <p className="error">Unrestricted scanning is switched on in the server environment.</p>}
+      </section>
+      <section className="card">
+        <h2 title="A temporary grant lets Raqeeb read one address for a set time. Only platform administrators can issue one.">Temporary grants</h2>
+        <table className="grid">
+          <thead><tr><th>Address</th><th>Until</th><th /></tr></thead>
+          <tbody>
+            {grants.map((g) => (
+              <tr key={g.ip}><td className="mono">{g.ip}</td><td className="mono">{when(g.expires)}</td>
+                <td className="num">{me && me.platform_admin && <button type="button" className="link small" onClick={() => revoke(g.ip)}>Revoke</button>}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        {!grants.length && <span className="muted">None active.</span>}
+        {me && me.platform_admin && (
+          <form className="row" onSubmit={grant}>
+            <input className="input mono" style={{ maxWidth: 220 }} placeholder="IP address" aria-label="IP address" value={ip} onChange={(e) => setIp(e.target.value)} />
+            <select className="input" style={{ maxWidth: 160 }} aria-label="Duration" value={hours} onChange={(e) => setHours(e.target.value)}>
+              {[["1", "1 hour"], ["24", "1 day"], ["168", "7 days"], ["720", "30 days"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+            <input className="input grow" placeholder="Reason, e.g. the written permission it rests on" aria-label="Reason" value={reason} onChange={(e) => setReason(e.target.value)} />
+            <button type="submit" className="btn primary" disabled={action.busy || !ip.trim() || reason.trim().length < 5}>Grant</button>
+          </form>
+        )}
+        <Problem error={action.error} />
+      </section>
+    </>
+  );
+}
+
+function Platform() {
+  const { data, error, reload } = useLoad(() => api.get("/api/platform"), []);
+  const [message, setMessage] = useState("");
+  const action = useAction();
+  const flip = async (online) => {
+    if (!online && !window.confirm("Take Raqeeb offline? Everyone except platform administrators is signed out of the console, and scheduled scans pause.")) return;
+    if (await action.run(() => api.put("/api/platform", { online, message: online ? "" : message.trim() }))) {
+      setMessage("");
+      reload();
+      window.dispatchEvent(new Event("platform:changed"));
+    }
+  };
+  if (error) return <Problem error={error} />;
+  if (!data) return null;
   return (
     <section className="card">
-      <h2 title="Targets outside this scope are refused. Configuring the scope is described in the README.">Authorized scope</h2>
-      <Problem error={error} />
-      <div className="formrow"><span>Loopback</span><span className="muted">Lab servers on 127.0.0.1 are always in scope.</span></div>
-      <div className="formrow"><span>Standing ranges</span><span className="mono">{standing.length ? standing.join(", ") : "None configured"}</span></div>
-      <div className="formrow"><span>Temporary grants</span><span className="mono">{grants.length ? grants.map((g) => g.ip).join(", ") : "None active"}</span></div>
-      {data && data.unrestricted && <p className="error">Unrestricted scanning is switched on in the server environment.</p>}
+      <h2 title="Only platform administrators see this section.">Platform</h2>
+      <div className="formrow"><span>Status</span>
+        <strong className={data.online ? "tone-ok" : "tone-crit"}>{data.online ? "Online" : "Offline"}</strong></div>
+      {data.changed_by && <div className="formrow"><span>Last change</span><span className="muted">{data.changed_by}, {when(data.changed_at)}</span></div>}
+      {data.online ? (
+        <div className="row">
+          <input className="input grow" placeholder="Message shown to users while offline (optional)" aria-label="Offline message"
+            value={message} onChange={(e) => setMessage(e.target.value)} />
+          <button type="button" className="btn danger" disabled={action.busy} onClick={() => flip(false)}>Take offline</button>
+        </div>
+      ) : (
+        <div className="row">
+          {data.message && <span className="grow muted">{data.message}</span>}
+          <button type="button" className="btn primary" disabled={action.busy} onClick={() => flip(true)}>Bring online</button>
+        </div>
+      )}
+      <Problem error={action.error} />
     </section>
   );
 }
@@ -255,18 +330,21 @@ function Appearance() {
   );
 }
 
-const VIEWS = { profile: Profile, members: Members, rules: Rules, monitoring: Monitoring, scope: Scope, evidence: Evidence, assistant: Assistant, appearance: Appearance };
+const VIEWS = { profile: Profile, members: Members, rules: Rules, monitoring: Monitoring, scope: Scope, platform: Platform, evidence: Evidence, assistant: Assistant, appearance: Appearance };
 
 export default function Settings() {
   const { section } = useParams();
-  const View = VIEWS[section] || Profile;
+  const { me } = useTeam();
+  const admin = !!(me && me.platform_admin);
+  const sections = admin ? [...SECTIONS, ["platform", "Platform"]] : SECTIONS;
+  const View = (section === "platform" && !admin ? null : VIEWS[section]) || Profile;
   return (
     <div className="settings">
       <nav aria-label="Settings">
         <h1 style={{ marginBottom: 12 }}>Settings</h1>
-        {SECTIONS.map(([id, label]) => <NavLink key={id} to={`/settings/${id}`} className={({ isActive }) => (isActive ? "active" : "")}>{label}</NavLink>)}
+        {sections.map(([id, label]) => <NavLink key={id} to={`/settings/${id}`} className={({ isActive }) => (isActive ? "active" : "")}>{label}</NavLink>)}
       </nav>
-      <div><View /></div>
+      <div className="settings-body"><View /></div>
     </div>
   );
 }

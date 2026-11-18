@@ -101,11 +101,58 @@ function Alerts() {
   );
 }
 
+function Clock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const offset = -now.getTimezoneOffset() / 60;
+  const local = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  const utc = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+  return (
+    <span className="clock small" title={`Times in this console are shown in ${zone} (UTC${offset >= 0 ? "+" : ""}${offset}). Reports name their zone.`}>
+      <span><b className="mono">{local}</b> <span className="muted">local</span></span>
+      <span><b className="mono">{utc}</b> <span className="muted">UTC</span></span>
+    </span>
+  );
+}
+
+function Offline({ state, admin, signOut }) {
+  if (state.online) return null;
+  if (admin) {
+    return (
+      <div className="offline-bar">
+        Raqeeb is offline for everyone else{state.message ? `: ${state.message}` : ""}. <Link to="/settings/platform">Bring it back online</Link>
+      </div>
+    );
+  }
+  return (
+    <main className="offline">
+      <Mark size={40} />
+      <h1>Raqeeb is offline</h1>
+      <p className="muted">{state.message || "The administrator has paused the console. Scans and alerts are on hold."}</p>
+      <button type="button" className="btn" onClick={signOut}>Sign out</button>
+    </main>
+  );
+}
+
 export default function Shell({ children }) {
   const { signOut } = useAuth();
   const { me } = useTeam();
   const location = useLocation();
   const inServer = location.pathname.startsWith("/servers");
+  const [state, setState] = useState({ online: true });
+  useEffect(() => {
+    const load = () => api.get("/api/platform").then(setState).catch(() => {});
+    load();
+    const timer = setInterval(load, 15000);
+    window.addEventListener("platform:changed", load);
+    return () => { clearInterval(timer); window.removeEventListener("platform:changed", load); };
+  }, [location.pathname]);
+  const admin = !!(me && me.platform_admin);
+  if (!state.online && !admin) return <Offline state={state} admin={false} signOut={signOut} />;
 
   return (
     <>
@@ -117,10 +164,12 @@ export default function Shell({ children }) {
           ))}
         </nav>
         <Search />
+        <Clock />
         <Alerts />
         <Link to="/settings/profile" className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }}>{me ? me.display_name : "Account"}</Link>
         <button type="button" className="link small" onClick={signOut}>Sign out</button>
       </header>
+      <Offline state={state} admin={admin} signOut={signOut} />
       <Guard at={location.pathname}>{children}</Guard>
     </>
   );

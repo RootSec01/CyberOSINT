@@ -48,8 +48,8 @@ export default function ScanMap({ page, replayKey, toolsPath }) {
         <span className="row small muted"><i style={{ width: 20, height: 12, border: "1px dashed var(--muted)", borderRadius: 3 }} />Inferred, not executed</span>
         <button type="button" className="btn" onClick={replay}>Replay scan</button>
       </div>
-      <div className="panel scroll">
-        <div className="map" style={{ height: map.height }}>
+      <div className="panel scroll mapwrap">
+        <div className="map" style={{ height: map.height, width: MAP_WIDTH }}>
           {COLUMNS.map((column) => <span key={column.title} className="column" style={{ left: column.x }}>{column.title}</span>)}
           <svg aria-hidden="true" width={MAP_WIDTH} height={map.height}>
             {map.edges.map((edge) => (

@@ -22,6 +22,7 @@ Passive/non-destructive by design: it only calls discovery/list methods
 from __future__ import annotations
 
 import json
+import os
 from typing import Any, Optional
 
 import requests
@@ -31,6 +32,12 @@ LEGACY_VERSION = "2025-11-25"
 
 _CLIENT_INFO = {"name": "raqeeb", "version": "2.0"}
 _JSONRPC_METHOD_NOT_FOUND = -32601
+def user_agent() -> str:
+    """Names the scanner and, when configured, where its operator can be reached."""
+    contact = os.getenv("PUBLIC_SITE_URL", "").strip()
+    return f"Raqeeb/2.0 (+{contact.rstrip('/')}/about)" if contact else "Raqeeb/2.0"
+
+
 _DEFAULT_PATHS = ["/mcp", "/sse", "/mcp/sse", "/api/mcp", "/"]
 _MAX_TOOL_PAGES = 5
 
@@ -88,7 +95,7 @@ def _rpc(url: str, method: str, params: Optional[dict], timeout: int,
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json, text/event-stream",
-        "User-Agent": "Raqeeb/2.0",
+        "User-Agent": user_agent(),
         "Mcp-Method": method,  # 2026-07-28 header-based routing hint
     }
     if auth_token:
@@ -112,7 +119,7 @@ def _rpc(url: str, method: str, params: Optional[dict], timeout: int,
 def _end_session(url: str, session: dict, timeout: int, auth_token: Optional[str]) -> None:
     if "Mcp-Session-Id" not in session:
         return
-    headers = {"User-Agent": "Raqeeb/2.0", **session}
+    headers = {"User-Agent": user_agent(), **session}
     if auth_token:
         headers["Authorization"] = f"Bearer {auth_token}"
     try:

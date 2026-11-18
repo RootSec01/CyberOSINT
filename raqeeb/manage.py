@@ -15,10 +15,12 @@ import getpass
 import sys
 
 from dotenv import load_dotenv
+from sqlalchemy.engine import make_url
 
 load_dotenv()
 
-from raqeeb.db import DATABASE_URL, init_db, session_scope  # noqa: E402
+from raqeeb.db import DATABASE_URL, check_production_schema, init_db, session_scope  # noqa: E402
+from raqeeb.deployment_config import load_deployment  # noqa: E402
 from raqeeb.models import User  # noqa: E402
 from raqeeb.security import hash_password  # noqa: E402
 
@@ -35,13 +37,20 @@ def _prompt_password() -> str:
     return p1
 
 
+def _ready() -> None:
+    if load_deployment().production:
+        check_production_schema()
+    else:
+        init_db()
+
+
 def cmd_init_db(args) -> None:
-    init_db()
+    _ready()
     print("database initialized")
 
 
 def cmd_create_user(args) -> None:
-    init_db()
+    _ready()
     username = args.username.strip().lower()
     if not username:
         print("username required")
@@ -89,10 +98,10 @@ def cmd_verify_audit(args) -> None:
 
 
 def cmd_list_users(args) -> None:
-    init_db()
+    _ready()
     with session_scope() as s:
         users = s.query(User).order_by(User.id).all()
-        print(f"database: {DATABASE_URL}")
+        print(f"database: {make_url(DATABASE_URL).render_as_string(hide_password=True)}")
         if not users:
             print("(no users yet — create one with create-user)")
             return

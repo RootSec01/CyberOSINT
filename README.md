@@ -247,6 +247,12 @@ With `APP_ENV=production` the application refuses unsafe settings at startup
 (`raqeeb/deployment_config.py`). Use PostgreSQL (`requirements-production.txt`) and run
 `python3 -m raqeeb.prepare_production_schema` once on a new, empty database.
 
+## Deploying
+
+`deploy/` runs Raqeeb behind automatic HTTPS with PostgreSQL in three containers; see
+[deploy/README.md](deploy/README.md). Add servers from the official MCP registry (open endpoints
+their operators list for any client) or your own servers with a recorded ownership statement.
+
 ## Console
 
 The dashboard at `/` is live: it refreshes itself from the database and shows servers by
