@@ -6,6 +6,7 @@
     python -m raqeeb.manage list-users
     python -m raqeeb.manage set-password --username rami
     python -m raqeeb.manage deactivate --username client1
+    python -m raqeeb.manage add-registry --owner rami --count 25 --every 360
 """
 
 from __future__ import annotations
@@ -97,6 +98,44 @@ def cmd_verify_audit(args) -> None:
     sys.exit(1)
 
 
+def cmd_add_registry(args) -> None:
+    """Monitor a seeded sample of open endpoints from the official MCP registry, one per host."""
+    _ready()
+    from observatory import registry
+    from raqeeb import listings, monitoring, seals
+    from raqeeb.models import Asset
+
+    with session_scope() as s:
+        owner = s.query(User).filter_by(username=args.owner.strip().lower()).first()
+        if not owner:
+            print(f"no user named {args.owner}")
+            sys.exit(1)
+        owned = {a.value for a in s.query(Asset).filter_by(user_id=owner.id)}
+    print("reading the official MCP registry ...", flush=True)
+    candidates = [endpoint for entry in registry.iter_entries(listings.fetcher())
+                  for endpoint in registry.open_endpoints(entry)]
+    chosen = [e for e in registry.draw_sample(candidates, len(candidates), seed=args.seed) if e.url not in owned]
+    added = 0
+    for endpoint in chosen:
+        if added == args.count:
+            break
+        if not listings.public_address(endpoint.host):
+            continue
+        with session_scope() as s:
+            owner = s.query(User).filter_by(username=args.owner.strip().lower()).one()
+            asset = Asset(user_id=owner.id, kind="mcp", value=endpoint.url,
+                          label=endpoint.server.split("/")[-1][:120] or endpoint.host)
+            s.add(asset)
+            s.flush()
+            listings.record(s, asset, {"server": endpoint.server, "version": endpoint.version, "url": endpoint.url})
+            monitoring.set_every(s, asset, owner, args.every)
+            seals.record(s, action="registry_server_added", operator=owner.username, decision="listed",
+                         detail=f"asset={asset.id};server={endpoint.server};version={endpoint.version}")
+        added += 1
+        print(f"  {endpoint.server}  {endpoint.url}")
+    print(f"added {added} registry servers, read every {args.every} minutes; the scheduler reads them next")
+
+
 def cmd_list_users(args) -> None:
     _ready()
     with session_scope() as s:
@@ -129,6 +168,13 @@ def main() -> None:
     p = sub.add_parser("deactivate")
     p.add_argument("--username", required=True)
     p.set_defaults(func=cmd_deactivate)
+
+    p = sub.add_parser("add-registry", help="monitor open endpoints listed in the official MCP registry")
+    p.add_argument("--owner", required=True)
+    p.add_argument("--count", type=int, default=25)
+    p.add_argument("--every", type=int, default=360, choices=(60, 360, 1440), help="minutes between reads")
+    p.add_argument("--seed", default="raqeeb-monitor")
+    p.set_defaults(func=cmd_add_registry)
 
     sub.add_parser("list-users").set_defaults(func=cmd_list_users)
     sub.add_parser("verify-audit").set_defaults(func=cmd_verify_audit)

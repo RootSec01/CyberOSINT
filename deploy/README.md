@@ -104,7 +104,8 @@ checked against this installation.
 - Loopback and private addresses are never scanned in production. Registry servers must resolve
   to public addresses; your own servers must be inside `AUTHORIZED_CIDRS` or a temporary grant.
 - Every sign-in, refused sign-in and rate-limited attempt is recorded with its address and browser.
-  Administrators see them in Activity.
+  Administrators see them in Activity, together with the showcase's visitors, which Caddy logs to a
+  volume the app reads without any route to the showcase itself.
 - Every response carries a content security policy, `X-Frame-Options: DENY`, `nosniff`, a strict
   referrer policy and HSTS. Sign-ins, failed sign-ins and every change are written to the sealed
   audit log.

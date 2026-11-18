@@ -37,6 +37,30 @@ function Doorway({ onPick }) {
   );
 }
 
+function DemoVisitors() {
+  const { data } = useLoad(() => api.get("/api/showcase/visits", { hours: 24 }), []);
+  if (!data || !data.available) return null;
+  return (
+    <div className="panel" style={{ padding: "16px 20px" }}>
+      <p className="muted small" style={{ marginTop: 0 }}>
+        Demo visitors, last 24 hours: <strong>{data.total}</strong> {data.total === 1 ? "visit" : "visits"} from <strong>{data.addresses}</strong> {data.addresses === 1 ? "address" : "addresses"}
+      </p>
+      {data.visits.length > 0 && (
+        <div className="scroll" style={{ maxHeight: 260 }}>
+          <table className="grid">
+            <thead><tr><th>Time</th><th>Address</th><th>Browser</th></tr></thead>
+            <tbody>
+              {data.visits.map((visit, index) => (
+                <tr key={visit.ts + index}><td className="mono">{when(visit.ts)}</td><td className="mono">{visit.ip}</td><td className="small muted wrap-any">{visit.agent}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Activity() {
   const { members, nameOf, me } = useTeam();
   const [filters, setFilters] = useState({ operator: "", action: "", q: "" });
@@ -50,6 +74,7 @@ export default function Activity() {
     <main className="page">
       <h1>Activity</h1>
       {me && me.platform_admin && <Doorway onPick={(action) => set({ action })} />}
+      {me && me.platform_admin && <DemoVisitors />}
       <div className="panel filters">
         <label>Search<input className="input" type="search" placeholder="Reference or detail" value={filters.q} onChange={(event) => set({ q: event.target.value })} /></label>
         <label>Person

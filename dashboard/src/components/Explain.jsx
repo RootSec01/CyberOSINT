@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../lib/api.js";
+import { useAuth } from "../lib/AuthContext.jsx";
 import { Problem, useAction } from "./ui.jsx";
 
 const MODES = {
@@ -9,6 +10,8 @@ const MODES = {
 };
 
 export default function Explain({ assetId }) {
+  const { user } = useAuth();
+  const visitor = !!(user && user.guest);
   const [answer, setAnswer] = useState(null);
   const [question, setQuestion] = useState("");
   const action = useAction();
@@ -26,15 +29,15 @@ export default function Explain({ assetId }) {
       {answer && (
         <>
           <p style={{ whiteSpace: "pre-wrap" }}>{answer.answer}</p>
-          <div className="pills">
+          {!visitor && <div className="pills">
             {(answer.suggestions || []).map((text) => (
               <button key={text} type="button" className="pill" disabled={action.busy} onClick={() => ask(text)}>{text}</button>
             ))}
-          </div>
-          <form className="row" onSubmit={(event) => { event.preventDefault(); if (question.trim()) ask(question.trim()); }}>
+          </div>}
+          {!visitor && <form className="row" onSubmit={(event) => { event.preventDefault(); if (question.trim()) ask(question.trim()); }}>
             <input className="input grow" aria-label="Question" placeholder="Ask about this server's evidence" value={question} onChange={(event) => setQuestion(event.target.value)} />
             <button className="btn" type="submit" disabled={action.busy || !question.trim()}>Ask</button>
-          </form>
+          </form>}
           <p className="note">{answer.fallback ? "The provider did not answer; this is the offline briefing." : MODES[answer.mode] || ""}</p>
         </>
       )}

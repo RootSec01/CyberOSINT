@@ -4,6 +4,7 @@ The console runs in a network with no route out, and every server it can reach i
 in the same process. One server keeps changing while it runs, and the process exits on a fixed
 interval so the container restarts it from an empty database.
 Run: python -m lab.showcase    (settings come from the environment; see deploy/env.example)
+     python -m lab.showcase --admin-link    prints a one-browser administrator link, from the server only
 """
 from __future__ import annotations
 
@@ -81,11 +82,23 @@ def settings(env: Mapping[str, str]) -> dict:
     }
 
 
+def admin_link(public: dict) -> str:
+    """A signed session for the showcase administrator, who is always the first account staged."""
+    os.environ["JWT_SECRET"] = public["settings"]["JWT_SECRET"]
+    from raqeeb.auth_session import create_access_token
+    from raqeeb.models import User
+    name = public["admin"][0]
+    return f"{public['settings']['PUBLIC_SITE_URL']}/#session={create_access_token(User(id=1, username=name, role='admin'))}"
+
+
 def main() -> None:
     try:
         public = settings(os.environ)
     except Unsafe as exc:
         sys.exit(f"showcase: {exc}")
+    if "--admin-link" in sys.argv[1:]:
+        print(admin_link(public))
+        return
     from lab.tampering import run_demo
     run_demo(serve=True, port=int(os.getenv("SHOWCASE_PORT", "8000")), public=public)
 

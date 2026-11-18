@@ -47,6 +47,7 @@ const PAGES = {
       <Operator who={who} />
       <p>Requests with the user agent <span className="mono">Raqeeb/2.0</span> come from this installation. Raqeeb reads the MCP handshake and the tool list only, at most once an hour for servers taken from the public registry. It does not call tools or attempt to sign in.</p>
       <p>If you operate a server and want it excluded, contact the operator above; it will be removed and no longer read.</p>
+      <p>Source code: <a href="https://github.com/RootSec01/CyberOSINT" target="_blank" rel="noopener noreferrer">github.com/RootSec01/CyberOSINT</a></p>
     </>
   )],
 };
@@ -60,7 +61,7 @@ export default function Legal({ page }) {
       <a href="/" className="brand"><Mark size={26} />Raqeeb</a>
       <h1>{title}</h1>
       {body(who)}
-      <nav className="login-links small"><a href="/terms">Terms of use</a><a href="/privacy">Privacy</a><a href="/about">About the scanner</a><a href="/">Sign in</a></nav>
+      <nav className="login-links small"><a href="/terms">Terms of use</a><a href="/privacy">Privacy</a><a href="/about">About the scanner</a><a href="/">Open Raqeeb</a></nav>
     </main>
   );
 }

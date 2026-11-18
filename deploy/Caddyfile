@@ -20,6 +20,14 @@
 	encode zstd gzip
 	reverse_proxy showcase:8000
 	header -Server
+	log {
+		output file /var/log/raqeeb/showcase.log {
+			mode 0644
+			roll_size 10MiB
+			roll_keep 5
+		}
+		format json
+	}
 	handle_errors 502 503 504 {
 		header -Server
 		header Content-Type "text/html; charset=utf-8"

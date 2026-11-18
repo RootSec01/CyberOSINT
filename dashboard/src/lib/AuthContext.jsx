@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { enterAsVisitor, login as apiLogin, logout as apiLogout, getToken } from "./api.js";
+import { enterAsVisitor, login as apiLogin, logout as apiLogout, getToken, setToken } from "./api.js";
 
 const AuthCtx = createContext(null);
 
@@ -7,8 +7,25 @@ export function useAuth() {
   return useContext(AuthCtx);
 }
 
+function handedOver() {
+  const match = window.location.hash.match(/^#session=([\w-]+\.[\w-]+\.[\w-]+)$/);
+  if (!match) return null;
+  window.history.replaceState(null, "", window.location.pathname);
+  try {
+    const claims = JSON.parse(atob(match[1].split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const handed = { username: claims.username, role: claims.role, guest: false };
+    setToken(match[1]);
+    sessionStorage.setItem("authUser", JSON.stringify(handed));
+    return handed;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
+    const handed = handedOver();
+    if (handed) return handed;
     try {
       const raw = sessionStorage.getItem("authUser");
       return raw ? JSON.parse(raw) : null;

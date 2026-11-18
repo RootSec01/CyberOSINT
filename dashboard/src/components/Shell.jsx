@@ -172,7 +172,6 @@ export default function Shell({ children }) {
           ? <span className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }} title="Visitors can look at everything and change nothing">Visitor · read only</span>
           : <Link to="/settings/profile" className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }}>{me ? me.display_name : "Account"}</Link>}
       </header>
-      {visitor && <p className="notice" style={{ margin: "12px 32px 0" }}>Visitor view of the live demo: open anything you like; changes and submissions are not allowed. The demo starts over every hour, and the days before today are simulated history.</p>}
       <Offline state={state} admin={admin} signOut={signOut} />
       <Guard at={location.pathname}>{children}</Guard>
     </>

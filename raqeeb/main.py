@@ -72,6 +72,7 @@ from raqeeb import report
 from raqeeb import listings
 from raqeeb import platform
 from raqeeb import team
+from raqeeb import visits
 from raqeeb.paths import DASHBOARD_DIST as DIST_DIR
 
 def _env_flag(name: str, default: str = "false") -> bool:
@@ -188,6 +189,8 @@ def _visitor_writes(request: Request) -> bool:
     guest = os.getenv("GUEST_USER", "").strip().lower()
     path = request.url.path
     if not guest or request.method in ("GET", "HEAD", "OPTIONS") or path.startswith(VISITOR_MAY):
+        return False
+    if re.fullmatch(r"/api/assets/\d+/copilot", path):
         return False
     header = request.headers.get("authorization", "")
     if not header.lower().startswith("bearer "):
@@ -1320,6 +1323,9 @@ async def api_asset_copilot(
     a = db.query(Asset).filter(Asset.id == asset_id).first()
     if not team.sees(db, user, a):
         return JSONResponse({"detail": "asset not found"}, status_code=404)
+    if question.strip() and user.username == os.getenv("GUEST_USER", "").strip().lower():
+        return JSONResponse({"detail": "Not allowed: visitors can read the explanation but cannot ask questions"},
+                            status_code=403)
     settings = _get_or_create_settings(db, user)
     context = _copilot_context(db, a)
     result = copilot.answer(
@@ -1444,6 +1450,13 @@ async def api_platform_copilot(
             "recent_changes": len(context["recent_changes"]),
         },
     })
+
+
+@app.get("/api/showcase/visits", response_class=JSONResponse)
+async def api_showcase_visits(
+    hours: int = 24, user: User = Depends(require_admin_user),
+) -> JSONResponse:
+    return JSONResponse(visits.recent(hours=max(1, min(hours, 24 * 30))))
 
 
 @app.get("/api/audit", response_class=JSONResponse)

@@ -103,3 +103,36 @@ def test_simulated_history_stays_before_every_real_scan(console):
         assert [row.started_at for row in rows] == sorted(row.started_at for row in rows)
         altered = session.query(m.Asset).filter_by(label="altered").one()
         assert not any(row.asset_id == altered.id for row in rows), "the first-scan example keeps no past"
+
+
+def test_the_administrator_link_signs_in_as_the_first_staged_account(console, monkeypatch):
+    from urllib.parse import urlsplit
+    from lab.showcase import admin_link
+    from raqeeb import db
+    from raqeeb import models as m
+    from raqeeb.auth_session import user_from_token
+    public = settings(GOOD)
+    link = admin_link(public)
+    assert link.startswith("https://raqeeb.example.org:8443/#session=")
+    with db.session_scope() as session:
+        first = session.query(m.User).order_by(m.User.id).first()
+        first.role = "admin"
+        session.flush()
+        signed = user_from_token(session, urlsplit(link).fragment.split("=", 1)[1])
+        assert signed is not None and signed.id == 1
+    monkeypatch.setenv("JWT_SECRET", "a-different-secret-for-the-real-tool-0123456789")
+    with db.session_scope() as session:
+        assert user_from_token(session, urlsplit(link).fragment.split("=", 1)[1]) is None
+
+
+def test_each_change_on_the_drifting_server_is_a_different_attack():
+    import time
+    from lab import estate
+    served = [{"name": "a", "description": "First."}, {"name": "b", "description": "Second."}]
+    estate._alternate(served, 0.15, variants=[estate._planted(served, p, at=1) for p in estate.PAYLOADS[:3]])
+    seen = []
+    for _ in range(10):
+        time.sleep(0.15)
+        seen.append(served[1]["description"])
+    planted = {text for text in seen if text != "Second."}
+    assert len(planted) >= 2 and "Second." in seen
