@@ -12,6 +12,10 @@
 	}
 }
 
+{$ROOT_DOMAIN:localhost} {
+	redir https://{$SHOWCASE_SITE}{uri} permanent
+}
+
 {$SHOWCASE_SITE} {
 	encode zstd gzip
 	reverse_proxy showcase:8000

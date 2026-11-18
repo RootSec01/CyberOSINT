@@ -61,7 +61,7 @@ or team owner in Settings, Members, and signs in directly with the password set 
 ## 5. Public showcase
 
 The `showcase` container serves the tampering demonstration on `https://SHOWCASE_DOMAIN`, or on
-`https://DOMAIN:8443` when no separate name is set: the
+`https://DOMAIN:8443` when no separate name is set (`ROOT_DOMAIN`, if set, redirects there): the
 as-shipped and altered copies of server-filesystem, the lab estate and the scheduled changes that
 raise alerts. It sits on a network with no route out, so the only servers it can reach are the lab
 listeners inside it. One server alternates between its release and a planted change every
