@@ -228,7 +228,8 @@ function Scans({ page }) {
                 <td>{s.outcome === "read" ? <><VerdictWord verdict={s.verdict} /> <span className="mono small muted">{shortRelease(s.release)}</span></> : "—"}</td>
                 <td className="num mono">{s.tool_count ?? "—"}</td><td className="num mono">{s.finding_count ?? "—"}</td>
                 <td className="mono muted">{(s.declarations || "—").slice(0, 12)}</td>
-                <td><button type="button" className="link" disabled={action.busy} onClick={() => evidence(s.reference)}>Download</button></td></tr>
+                <td>{s.operator === "simulated" ? <span className="muted small">Simulated history</span>
+                  : <button type="button" className="link" disabled={action.busy} onClick={() => evidence(s.reference)}>Download</button>}</td></tr>
             ))}
           </tbody>
         </table>

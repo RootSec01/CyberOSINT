@@ -3,6 +3,7 @@ import { NavLink, useParams } from "react-router-dom";
 import { api, sendFile } from "../lib/api.js";
 import { applyTheme, storedTheme } from "../lib/theme.js";
 import { useTeam } from "../lib/Team.jsx";
+import { useAuth } from "../lib/AuthContext.jsx";
 import { Problem, Segment, Severity, useAction, useLoad } from "../components/ui.jsx";
 import ScheduleSelect from "../components/Schedule.jsx";
 import { when } from "../lib/format.js";
@@ -14,6 +15,7 @@ const ROLES = [{ id: "admin", label: "Admin" }, { id: "analyst", label: "Analyst
 
 function Profile() {
   const { me, reload } = useTeam();
+  const { user, signOut } = useAuth();
   const [form, setForm] = useState(null);
   const [saved, setSaved] = useState(false);
   const action = useAction();
@@ -34,6 +36,12 @@ function Profile() {
       <div className="formrow"><span>Role</span><strong style={{ textTransform: "capitalize" }}>{me.role}</strong></div>
       <div className="row"><button className="btn primary" type="submit" disabled={action.busy}>Save</button>{saved && <span className="note">Saved.</span>}</div>
       <Problem error={action.error} />
+      {!(user && user.guest) && (
+        <div className="row" style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
+          <button type="button" className="btn danger" onClick={signOut}>Sign out</button>
+          <span className="muted small">Ends this session on this browser.</span>
+        </div>
+      )}
     </form>
   );
 }
@@ -289,6 +297,7 @@ const MODES = [["offline", "Offline", "A fixed briefing is built from the eviden
   ["local", "Local model", "Sent as is to a model inside your own network."]];
 
 function Assistant() {
+  const { me } = useTeam();
   const { data, reload } = useLoad(() => api.get("/api/settings"), []);
   const [form, setForm] = useState(null);
   const action = useAction();
@@ -308,13 +317,13 @@ function Assistant() {
           </button>
         ))}
       </section>
-      <form className="card" onSubmit={(event) => { event.preventDefault(); save(form); }}>
+      {me && me.platform_admin && <form className="card" onSubmit={(event) => { event.preventDefault(); save(form); }}>
         <h2 title="Keys are read from the server environment and are never shown or stored here.">Local model endpoint</h2>
         <label className="formrow"><span>Endpoint</span><input className="input mono" placeholder="Base URL of an OpenAI-compatible endpoint" value={form.ai_base_url} onChange={(event) => setForm({ ...form, ai_base_url: event.target.value })} /></label>
         <label className="formrow"><span>Model name</span><input className="input mono" placeholder="As named by your provider" value={form.ai_model} onChange={(event) => setForm({ ...form, ai_model: event.target.value })} /></label>
         <div className="row"><button className="btn primary" type="submit" disabled={action.busy}>Save</button></div>
-        <Problem error={action.error} />
-      </form>
+      </form>}
+      <Problem error={action.error} />
     </>
   );
 }

@@ -17,7 +17,7 @@ def _bind_db():
     db.SessionLocal.configure(bind=eng)
     db.init_db()
     with db.session_scope() as s:
-        s.add(m.User(username="sam", password_hash=hash_password("password123")))
+        s.add(m.User(username="sam", role="admin", password_hash=hash_password("password123")))
         s.add(m.User(username="tom", password_hash=hash_password("password123")))
     yield
 
@@ -47,6 +47,14 @@ def test_settings_update_and_validation():
     assert ok["ai_mode"] == "redacted" and ok["ai_provider"] == "anthropic"
     bad = c.put("/api/settings", data={"ai_mode": "bogus"}, headers=H)
     assert bad.status_code == 400
+
+
+def test_only_an_administrator_points_the_assistant_somewhere_else():
+    c, H = _tok("tom")
+    for field, value in (("ai_base_url", "http://169.254.169.254/latest"), ("ai_provider", "anthropic"), ("ai_model", "x")):
+        assert c.put("/api/settings", data={field: value}, headers=H).status_code == 403, field
+    assert c.get("/api/settings", headers=H).json()["ai_base_url"] is None
+    assert c.put("/api/settings", data={"ai_mode": "offline"}, headers=H).status_code == 200
 
 
 def test_settings_isolated_between_users():

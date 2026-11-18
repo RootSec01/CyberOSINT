@@ -181,15 +181,13 @@ app.add_middleware(
 _FORCE_HTTPS = _env_flag("FORCE_HTTPS", "false")
 
 
-VISITOR_MAY = ("/api/login", "/api/guest", "/api/evidence/verify", "/api/overview/briefing")
+VISITOR_MAY = ("/api/login", "/api/guest")
 
 
 def _visitor_writes(request: Request) -> bool:
     guest = os.getenv("GUEST_USER", "").strip().lower()
     path = request.url.path
     if not guest or request.method in ("GET", "HEAD", "OPTIONS") or path.startswith(VISITOR_MAY):
-        return False
-    if path.startswith("/api/assets/") and path.endswith("/copilot"):
         return False
     header = request.headers.get("authorization", "")
     if not header.lower().startswith("bearer "):
@@ -208,8 +206,11 @@ async def _gates(request: Request, call_next):
     path = request.url.path
     if _is_legacy(path) and not _legacy_open():
         return JSONResponse({"detail": "Not Found"}, status_code=404)
+    if path == "/api/login" and os.getenv("SIGN_IN", "true").strip().lower() == "false":
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
     if _visitor_writes(request):
-        return JSONResponse({"detail": "visitors can look around but not change anything"}, status_code=403)
+        return JSONResponse({"detail": "Not allowed: visitors can look around but cannot change or submit anything"},
+                            status_code=403)
     if platform.gated(path):
         from raqeeb.db import SessionLocal
         db = SessionLocal()
@@ -1279,6 +1280,11 @@ async def api_update_settings(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
+    if user.role != "admin" and any(value is not None for value in (ai_provider, ai_base_url, ai_model)):
+        return JSONResponse({"detail": "only a platform administrator can change the AI provider, address or model"},
+                            status_code=403)
+    if ai_base_url and not ai_base_url.strip().startswith("https://") and DEPLOYMENT.production:
+        return JSONResponse({"detail": "the AI address must use https"}, status_code=400)
     s = _get_or_create_settings(db, user)
     if ai_mode is not None:
         if ai_mode not in copilot.VALID_MODES:

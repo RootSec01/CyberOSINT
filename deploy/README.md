@@ -60,17 +60,20 @@ or team owner in Settings, Members, and signs in directly with the password set 
 
 ## 5. Public showcase
 
-The `showcase` container serves the tampering demonstration on `https://DOMAIN:8443`: the
+The `showcase` container serves the tampering demonstration on `https://SHOWCASE_DOMAIN`, or on
+`https://DOMAIN:8443` when no separate name is set: the
 as-shipped and altered copies of server-filesystem, the lab estate and the scheduled changes that
 raise alerts. It sits on a network with no route out, so the only servers it can reach are the lab
-listeners inside it, and it starts from an empty database each time it restarts.
+listeners inside it. One server alternates between its release and a planted change every
+`SHOWCASE_CYCLE_MINUTES`, so the console keeps raising alerts, and every `SHOWCASE_RESET_MINUTES`
+the process exits and the container starts it again from an empty database. Caddy shows a short
+"starting over" page during that minute.
 
 Visitors enter without an account, through a read-only viewer: they can open every page and
-download reports, but cannot add, scan, change or delete anything. The administrator
-(`SHOWCASE_ADMIN_*`) signs in from the visitor bar and can do everything. Each visit is written to
-the showcase's activity log with its address. Use an administrator password of at least 16
-characters and two separate secrets (`openssl rand -hex 32`); the container refuses to start
-otherwise.
+download reports, but cannot add, scan, change, submit or delete anything, and there is no sign-in
+form at all: `/api/login` answers 404 once the demo data is staged. Each visit is written to the
+showcase's activity log with its address. Set two separate secrets (`openssl rand -hex 32`); the
+container refuses to start otherwise.
 
 ```bash
 docker compose up -d --build showcase web

@@ -134,7 +134,7 @@ function Offline({ state, admin, signOut }) {
       <Mark size={40} />
       <h1>Raqeeb is offline</h1>
       <p className="muted">{state.message || "The administrator has paused the console. Scans and alerts are on hold."}</p>
-      <button type="button" className="btn" onClick={signOut}>Sign out</button>
+      {signOut && <button type="button" className="btn" onClick={signOut}>Sign out</button>}
     </main>
   );
 }
@@ -154,7 +154,7 @@ export default function Shell({ children }) {
     return () => { clearInterval(timer); window.removeEventListener("platform:changed", load); };
   }, [location.pathname]);
   const admin = !!(me && me.platform_admin);
-  if (!state.online && !admin) return <Offline state={state} admin={false} signOut={signOut} />;
+  if (!state.online && !admin) return <Offline state={state} admin={false} signOut={visitor ? null : signOut} />;
 
   return (
     <>
@@ -171,8 +171,8 @@ export default function Shell({ children }) {
         {visitor
           ? <span className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }} title="Visitors can look at everything and change nothing">Visitor · read only</span>
           : <Link to="/settings/profile" className="btn" style={{ display: "flex", alignItems: "center", borderRadius: 18 }}>{me ? me.display_name : "Account"}</Link>}
-        <button type="button" className="link small" onClick={signOut}>{visitor ? "Administrator sign in" : "Sign out"}</button>
       </header>
+      {visitor && <p className="notice" style={{ margin: "12px 32px 0" }}>Visitor view of the live demo: open anything you like; changes and submissions are not allowed. The demo starts over every hour, and the days before today are simulated history.</p>}
       <Offline state={state} admin={admin} signOut={signOut} />
       <Guard at={location.pathname}>{children}</Guard>
     </>

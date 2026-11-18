@@ -12,8 +12,14 @@
 	}
 }
 
-{$DOMAIN}:8443 {
+{$SHOWCASE_SITE} {
 	encode zstd gzip
 	reverse_proxy showcase:8000
 	header -Server
+	handle_errors 502 503 504 {
+		header -Server
+		header Content-Type "text/html; charset=utf-8"
+		header Refresh "20"
+		respond `<!doctype html><title>Raqeeb demo</title><body style="font-family:sans-serif;background:#0d1117;color:#e6edf3;display:grid;place-items:center;height:100vh;margin:0"><div><h1>The Raqeeb demo is starting over</h1><p>It resets every hour. This page reloads by itself in a few seconds.</p></div>` 503
+	}
 }

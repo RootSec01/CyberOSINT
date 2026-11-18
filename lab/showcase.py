@@ -1,7 +1,8 @@
-"""The tampering demo as a public showcase: visitors look around read-only, one administrator works.
+"""The tampering demo as a public showcase: visitors look around read-only and nobody signs in.
 
 The console runs in a network with no route out, and every server it can reach is a lab listener
-in the same process. Each start begins from an empty database.
+in the same process. One server keeps changing while it runs, and the process exits on a fixed
+interval so the container restarts it from an empty database.
 Run: python -m lab.showcase    (settings come from the environment; see deploy/env.example)
 """
 from __future__ import annotations
@@ -35,12 +36,23 @@ def _username(env: Mapping[str, str], name: str, default: str) -> str:
     return value
 
 
+def _minutes(env: Mapping[str, str], name: str, default: str, lowest: float) -> float:
+    try:
+        value = float(env.get(name) or default)
+    except ValueError:
+        raise Unsafe(f"{name} must be a number of minutes") from None
+    if value < lowest:
+        raise Unsafe(f"{name} must be at least {lowest:g} minutes")
+    return value
+
+
 def settings(env: Mapping[str, str]) -> dict:
     admin = _username(env, "SHOWCASE_ADMIN_USER", "rami")
     viewer = _username(env, "SHOWCASE_VIEWER_USER", "viewer")
     if admin == viewer:
         raise Unsafe("the administrator and the viewer need different usernames")
-    admin_password = _required(env, "SHOWCASE_ADMIN_PASSWORD", SHORTEST_PASSWORD)
+    admin_password = (_required(env, "SHOWCASE_ADMIN_PASSWORD", SHORTEST_PASSWORD)
+                      if (env.get("SHOWCASE_ADMIN_PASSWORD") or "").strip() else secrets.token_urlsafe(24))
     viewer_password = (_required(env, "SHOWCASE_VIEWER_PASSWORD", SHORTEST_PASSWORD)
                        if (env.get("SHOWCASE_VIEWER_PASSWORD") or "").strip() else secrets.token_urlsafe(24))
     if admin_password == viewer_password:
@@ -52,6 +64,8 @@ def settings(env: Mapping[str, str]) -> dict:
         "admin": (admin, admin_password),
         "viewer": (viewer, viewer_password),
         "host": "0.0.0.0",
+        "reset_minutes": _minutes(env, "SHOWCASE_RESET_MINUTES", "60", 10),
+        "cycle_minutes": _minutes(env, "SHOWCASE_CYCLE_MINUTES", "10", 2),
         "settings": {
             "JWT_SECRET": _required(env, "SHOWCASE_JWT_SECRET", SHORTEST_SECRET),
             "OWNERSHIP_SECRET": _required(env, "SHOWCASE_OWNERSHIP_SECRET", SHORTEST_SECRET),

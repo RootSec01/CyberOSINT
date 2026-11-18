@@ -63,9 +63,24 @@ export default function Login() {
   useEffect(() => {
     api.get("/api/platform").then((platform) => {
       setState(platform);
-      if (platform.guest && platform.online && !sessionStorage.getItem("signedOut")) action.run(visit);
-    }).catch(() => {});
+      if (platform.guest && platform.online) action.run(visit);
+    }).catch(() => setState({ online: true }));
   }, []);
+
+  if (!state || state.guest) {
+    return (
+      <div className="login">
+        <section className="login-brand">
+          <Backdrop />
+          <div className="login-copy">
+            <span className="brand big-brand"><Mark size={44} />Raqeeb</span>
+            <h1>{state && !state.online ? "The demo is paused for maintenance." : "Opening the live demo…"}</h1>
+            <Problem error={action.error} />
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   const submit = (event) => {
     event.preventDefault();
@@ -89,15 +104,8 @@ export default function Login() {
       </section>
       <section className="login-form">
         <form onSubmit={submit}>
-          {state && state.guest && (
-            <div className="stack tight">
-              <button className="btn primary" type="button" disabled={action.busy} onClick={() => action.run(visit)}>Explore the demo</button>
-              <p className="muted small">No account needed. Visitors can look at everything and change nothing.</p>
-            </div>
-          )}
-          <h2>{state && state.guest ? "Administrator sign in" : "Sign in"}</h2>
-          <p className="muted small">Accounts are created by the administrator of this installation.</p>
-          {state && !state.online && <p className="notice">Raqeeb is offline{state.message ? `: ${state.message}` : "."} Administrators can still sign in.</p>}
+          <h2>Sign in</h2>
+          {!state.online && <p className="notice">Raqeeb is offline{state.message ? `: ${state.message}` : "."} Administrators can still sign in.</p>}
           <label className="stack tight">Username
             <input className="input" autoFocus autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} />
           </label>

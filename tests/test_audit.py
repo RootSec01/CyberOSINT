@@ -37,7 +37,7 @@ def _tok(username):
 
 def test_settings_change_is_audited():
     c, H = _tok("ida")
-    c.put("/api/settings", data={"ai_mode": "redacted", "ai_provider": "openai"}, headers=H)
+    c.put("/api/settings", data={"ai_mode": "redacted"}, headers=H)
     entries = c.get("/api/audit", headers=H).json()["entries"]
     hits = [e for e in entries if e["action"] == "privacy_settings_update"]
     assert hits

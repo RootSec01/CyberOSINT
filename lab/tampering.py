@@ -10,6 +10,7 @@ import argparse
 import copy
 import json
 import os
+import signal
 import tempfile
 import threading
 from pathlib import Path
@@ -129,11 +130,19 @@ def run_demo(*, serve: bool = False, port: int = 8000, public: dict | None = Non
                 client.post(f"/api/assets/{asset_id}/scan", headers=headers)
             for asset in client.get("/api/assets", headers=headers).json():
                 client.put(f"/api/assets/{asset['id']}/schedule", headers=headers, data={"every_minutes": 15})
-            coming = estate.stage(client, headers, listen, library)
+            coming = estate.stage(client, headers, listen, library,
+                                  cycle_minutes=public.get("cycle_minutes") if public else None)
             os.environ.update(SCHEDULER_ENABLED="true", SCHEDULER_TICK_SECONDS="15")
             import uvicorn
             if public:
-                print(f"Showcase ready on port {port}; visitors enter read-only", flush=True)
+                with db.session_scope() as session:
+                    estate.history(session)
+                if public.get("reset_minutes"):
+                    restart = threading.Timer(public["reset_minutes"] * 60, os.kill, (os.getpid(), signal.SIGTERM))
+                    restart.daemon = True
+                    restart.start()
+                os.environ["SIGN_IN"] = "false"
+                print(f"Showcase ready on port {port}; visitors enter read-only, nobody signs in", flush=True)
                 uvicorn.run(main.app, host=public["host"], port=port, log_level="warning",
                             proxy_headers=True, forwarded_allow_ips="*", server_header=False)
                 return {}

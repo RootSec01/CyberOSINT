@@ -76,8 +76,18 @@ def test_a_visitor_looks_but_cannot_change_anything(console, admin, monkeypatch)
     assert console.put("/api/platform", headers=visitor, data={"online": "false"}).status_code == 403
     for method, path in (("put", "/api/profile"), ("put", "/api/settings"), ("post", "/api/alerts/ack-all")):
         assert getattr(console, method)(path, headers=visitor, data={"display_name": "x"}).status_code == 403, path
-    assert console.post("/api/overview/briefing", headers=visitor).status_code == 200
+    for path in ("/api/overview/briefing", "/api/assets/1/copilot", "/api/evidence/verify"):
+        refused = console.post(path, headers=visitor)
+        assert refused.status_code == 403 and refused.json()["detail"].startswith("Not allowed"), path
     visits = get(console, admin, "/api/audit", action="visitor_entered")["entries"]
     assert len(visits) == 1 and visits[0]["operator"] == "visitor" and visits[0]["ip"]
     assert get(console, visitor, "/api/audit", action="visitor_entered")["total"] == 0, \
         "visitors never see each other's addresses"
+
+
+def test_an_installation_can_switch_sign_in_off_and_keep_visitors(console, monkeypatch):
+    _viewer()
+    monkeypatch.setenv("GUEST_USER", "viewer")
+    monkeypatch.setenv("SIGN_IN", "false")
+    assert console.post("/api/login", data={"username": "rami", "password": "password123"}).status_code == 404
+    assert console.post("/api/guest").status_code == 200
