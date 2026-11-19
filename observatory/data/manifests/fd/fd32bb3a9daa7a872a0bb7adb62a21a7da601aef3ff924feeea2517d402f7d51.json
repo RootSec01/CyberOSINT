@@ -1,0 +1,1081 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Ad copy generator - platform-tuned marketing copy (Google/Meta/LinkedIn) with headlines, descriptions, CTAs and A/B variants. 15+ yrs media/ad-sales expertise baked in ($0.10 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "brief": {
+     "type": "string"
+    },
+    "count": {
+     "type": "number"
+    },
+    "platform": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "brief"
+   ],
+   "type": "object"
+  },
+  "name": "ad-copy",
+  "output_schema": {},
+  "title": "ad-copy"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Agent reputation score - endpoint trustworthiness ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "endpoint_url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "endpoint_url"
+   ],
+   "type": "object"
+  },
+  "name": "agent-reputation",
+  "output_schema": {},
+  "title": "agent-reputation"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Base on-chain balances - native ETH plus up to 10 ERC20 token balances for any address ($0.003 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "type": "string"
+    },
+    "tokens": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "base-balance",
+  "output_schema": {},
+  "title": "base-balance"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Batch endpoint - run up to 10 paid service calls in ONE request and one payment (services: summarize, sentiment, extract, translate). Cheaper and faster than paying per call ($0.05 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "calls": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "calls"
+   ],
+   "type": "object"
+  },
+  "name": "batch",
+  "output_schema": {},
+  "title": "batch"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Prepaid credit pack - one $5 USDC x402 payment mints 600 call-credits (1 credit = $0.01, usable on every endpoint via X-AgentPay-Token; saves 20% vs pay-per-call) ($5 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "buy-credits",
+  "output_schema": {},
+  "title": "buy-credits"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Pro credit pack - $20 USDC mints 2600 call-credits (+30% bonus) usable on every endpoint via X-AgentPay-Token ($20 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "buy-credits-pro",
+  "output_schema": {},
+  "title": "buy-credits-pro"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Starter credit pack - $1 USDC mints 115 call-credits (+15% bonus) usable on every endpoint via X-AgentPay-Token ($1 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "buy-credits-starter",
+  "output_schema": {},
+  "title": "buy-credits-starter"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Insurance lead classifier — intent, urgency, line of business, confidence ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "classify-insurance",
+  "output_schema": {},
+  "title": "classify-insurance"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "AI code review — bugs, security, performance, quality score ($0.05 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "code": {
+     "type": "string"
+    },
+    "language": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "code"
+   ],
+   "type": "object"
+  },
+  "name": "code-review",
+  "output_schema": {},
+  "title": "code-review"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Content security scan - PII, toxicity, bias ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "content-safety",
+  "output_schema": {},
+  "title": "content-safety"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Real-time crypto prices - BTC, ETH, SOL + more ($0.005 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "symbols": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "vs_currency": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "crypto-price",
+  "output_schema": {},
+  "title": "crypto-price"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "PREMIUM deep research - multi-source web research into a cited markdown report ($0.25 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "depth": {
+     "type": "string"
+    },
+    "topic": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "topic"
+   ],
+   "type": "object"
+  },
+  "name": "deep-research",
+  "output_schema": {},
+  "title": "deep-research"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "DeFi yield data - APY, TVL, protocol info ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "chain": {
+     "type": "string"
+    },
+    "protocol": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "defi-yields",
+  "output_schema": {},
+  "title": "defi-yields"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "ENS resolution forward and reverse - .eth name to 0x address (and back) with avatar, url, resolver ($0.005 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "ens-resolve",
+  "output_schema": {},
+  "title": "ens-resolve"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Ethereum gas prices - rapid/fast/standard/slow in gwei plus ETH spot price ($0.003 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "eth-gas",
+  "output_schema": {},
+  "title": "eth-gas"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Structured field extraction — key-value pairs from emails, forms, documents ($0.03 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "fields": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "extract",
+  "output_schema": {},
+  "title": "extract"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Geocode place names to lat/lon; reverse geocode coordinates to addresses ($0.005 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "query": {
+     "type": "string"
+    },
+    "reverse": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "geocode",
+  "output_schema": {},
+  "title": "geocode"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Vision AI - describe any image from URL ($0.03 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "detail": {
+     "type": "string"
+    },
+    "image_url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "image_url"
+   ],
+   "type": "object"
+  },
+  "name": "image-describe",
+  "output_schema": {},
+  "title": "image-describe"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Full insurance analysis bundle — classification + field extraction + summary in one call ($0.10 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "insurance-analysis",
+  "output_schema": {},
+  "title": "insurance-analysis"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Lead scoring - score inbound leads 0-100 with intent, urgency, budget signals and recommended next action. Built for insurance/ad-sales funnels ($0.08 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "context": {
+     "type": "string"
+    },
+    "lead": {
+     "additionalProperties": {},
+     "type": "object"
+    }
+   },
+   "required": [
+    "lead"
+   ],
+   "type": "object"
+  },
+  "name": "lead-score",
+  "output_schema": {},
+  "title": "lead-score"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Legal/regulatory lookup - company registration ($0.03 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "jurisdiction": {
+     "type": "string"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "legal-lookup",
+  "output_schema": {},
+  "title": "legal-lookup"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Macro/economic snapshot - GDP, inflation, rates ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "country": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "market-intel",
+  "output_schema": {},
+  "title": "market-intel"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Persistent key-value memory scoped to your wallet - agents remember across runs ($0.005 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "action": {
+     "type": "string"
+    },
+    "key": {
+     "type": "string"
+    },
+    "namespace": {
+     "type": "string"
+    },
+    "value": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "action",
+    "key",
+    "value"
+   ],
+   "type": "object"
+  },
+  "name": "memory",
+  "output_schema": {},
+  "title": "memory"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Real-time news feed - headlines by topic ($0.005 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "type": "number"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "news-feed",
+  "output_schema": {},
+  "title": "news-feed"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Decoded on-chain events - recent transfers ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "type": "string"
+    },
+    "chain": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "on-chain-events",
+  "output_schema": {},
+  "title": "on-chain-events"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Polymarket prediction market odds - live probabilities for any topic ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "limit": {
+     "type": "number"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "prediction-market",
+  "output_schema": {},
+  "title": "prediction-market"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "OFAC/EU sanctions screening - entity check ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "type": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "sanctions-screen",
+  "output_schema": {},
+  "title": "sanctions-screen"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Sentiment analysis — positive/negative/neutral with emotions and keywords ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "sentiment",
+  "output_schema": {},
+  "title": "sentiment"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "AI text summarization — crisp 250-word summary of any text up to 20k chars ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "summarize",
+  "output_schema": {},
+  "title": "summarize"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "CVE/threat intelligence - vulnerability lookup, severity ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "cve_id": {
+     "type": "string"
+    },
+    "keyword": {
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "threat-intel",
+  "output_schema": {},
+  "title": "threat-intel"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Live USD spot price for up to 10 ERC20 tokens on Base via CoinGecko ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "contracts": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "type": "object"
+  },
+  "name": "token-price",
+  "output_schema": {},
+  "title": "token-price"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Token safety check - rug pull risk, honeypot detection, liquidity analysis ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "type": "string"
+    },
+    "chain": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "token-safety",
+  "output_schema": {},
+  "title": "token-safety"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Text translation — translate to any language ($0.03 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "targetLanguage": {
+     "type": "string"
+    },
+    "text": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "type": "object"
+  },
+  "name": "translate",
+  "output_schema": {},
+  "title": "translate"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Wallet risk screening - OFAC sanctions, scam flags, tx patterns ($0.02 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "address": {
+     "type": "string"
+    },
+    "chain": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "address"
+   ],
+   "type": "object"
+  },
+  "name": "wallet-risk",
+  "output_schema": {},
+  "title": "wallet-risk"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Weather data - current conditions and forecast ($0.005 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "days": {
+     "type": "number"
+    },
+    "location": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "location"
+   ],
+   "type": "object"
+  },
+  "name": "weather-data",
+  "output_schema": {},
+  "title": "weather-data"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Extract clean text from any URL - agents read web pages ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "max_chars": {
+     "type": "number"
+    },
+    "url": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "name": "web-scrape",
+  "output_schema": {},
+  "title": "web-scrape"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": true,
+   "readOnlyHint": false
+  },
+  "description": "Web search - top results for any query with title, url, snippet ($0.01 USDC per call)",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "additionalProperties": false,
+   "properties": {
+    "max_results": {
+     "type": "number"
+    },
+    "query": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "web-search",
+  "output_schema": {},
+  "title": "web-search"
+ }
+]
