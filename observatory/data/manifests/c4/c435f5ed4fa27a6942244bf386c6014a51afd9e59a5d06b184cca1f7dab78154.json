@@ -1,0 +1,26 @@
+[
+ {
+  "annotations": {
+   "idempotentHint": true,
+   "readOnlyHint": true
+  },
+  "description": "Firmograph Public Plane company enrichment by domain. Paid model: x402 v2 scheme exact quote-then-pay, USDC on Base (eip155:8453), atoms legal 30000 / web_inferred 10000 (DG-FG-PRICE-001); not-found / upstream = no charge (unpaid requests only). While the service lock is closed, tools/call answers HTTP 503 live_fetch_locked with no offer. When it is open, tools/call returns only the x402 PaymentRequired quote (isError: true) and never enrichment data. Settlement over MCP is not enabled - use HTTP POST /v1/enrich only. Fixed-host public sources: legal = notable-firm GLEIF ACTIVE via Wikidata domain->LEI; web_inferred = DNS (+ optional Wikidata-without-LEI / gTLD RDAP); .ch/.li have no RDAP. Not universal US SMB coverage. Support display: email:apigrid@mail.grokbot.com (CEO-role shared inbox display only; no SLA; no human-reply claim; not verified delivery; no outbound mail; not a refund service).",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "domain": {
+     "description": "Company web domain, e.g. example.com",
+     "maxLength": 253,
+     "type": "string"
+    }
+   },
+   "required": [
+    "domain"
+   ],
+   "type": "object"
+  },
+  "name": "enrich",
+  "output_schema": {},
+  "title": "Firmograph enrich"
+ }
+]
