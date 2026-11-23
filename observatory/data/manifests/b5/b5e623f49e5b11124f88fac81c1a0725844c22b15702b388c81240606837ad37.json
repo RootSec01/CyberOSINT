@@ -1,0 +1,233 @@
+[
+ {
+  "description": "Counterparty due-diligence verdict: sanctions screening plus a VAT registration check (when vat_number is given) composed into CLEAR / HOLD / FAIL with both component results. Mirrors the paid HTTP endpoint POST /api/check/counterparty.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country_code": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "vat_number": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "check_counterparty",
+  "output_schema": {}
+ },
+ {
+  "description": "Screen a person or entity name against the OFAC SDN and EU consolidated (FSD) sanctions lists. Returns scored matches (name, list, program, type, score), the list versions used, and checked_at. Mirrors the paid HTTP endpoint POST /api/check/sanctions.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "type": {
+     "enum": [
+      "person",
+      "entity"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "type": "object"
+  },
+  "name": "check_sanctions",
+  "output_schema": {}
+ },
+ {
+  "description": "Check an EU VAT number against the official VIES register. Returns valid (bool), the registered name and address, the VIES request identifier, source and checked_at. Mirrors the paid HTTP endpoint POST /api/check/vat.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {
+    "country_code": {
+     "type": "string"
+    },
+    "vat_number": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "country_code",
+    "vat_number"
+   ],
+   "type": "object"
+  },
+  "name": "check_vat",
+  "output_schema": {}
+ },
+ {
+  "description": "Score one (agent, task) pair. Returns the scorer's full result dict as JSON text:\n    decision (CLEAR/HOLD/FAIL), score 0-100, confidence, reasons, next_action,\n    plus evaluation metadata. Unknown (null) evidence counts as unverified.",
+  "input_schema": {
+   "$defs": {
+    "AgentInput": {
+     "properties": {
+      "capabilities": {
+       "items": {
+        "type": "string"
+       },
+       "title": "Capabilities",
+       "type": "array"
+      },
+      "evidence": {
+       "$ref": "#/$defs/Evidence"
+      },
+      "name": {
+       "default": "unnamed-agent",
+       "title": "Name",
+       "type": "string"
+      }
+     },
+     "title": "AgentInput",
+     "type": "object"
+    },
+    "Evidence": {
+     "properties": {
+      "certification_fresh": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Certification Fresh"
+      },
+      "delivery_verified": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Delivery Verified"
+      },
+      "failure_rate": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Failure Rate"
+      },
+      "historical_jobs": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Historical Jobs"
+      },
+      "payment_verified": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Payment Verified"
+      },
+      "policy_compatible": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Policy Compatible"
+      },
+      "source_conflict": {
+       "anyOf": [
+        {
+         "type": "boolean"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Source Conflict"
+      }
+     },
+     "title": "Evidence",
+     "type": "object"
+    }
+   },
+   "properties": {
+    "agent": {
+     "$ref": "#/$defs/AgentInput"
+    },
+    "required_capabilities": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Required Capabilities",
+     "type": "array"
+    },
+    "task": {
+     "title": "Task",
+     "type": "string"
+    }
+   },
+   "required": [
+    "task",
+    "required_capabilities",
+    "agent"
+   ],
+   "title": "evaluate_eligibilityArguments",
+   "type": "object"
+  },
+  "name": "evaluate_eligibility",
+  "output_schema": {}
+ },
+ {
+  "description": "Return the v1.0.0 deduction table, decision bands, confidence rules, and\n    rules version as JSON, so a client can display the published rules.",
+  "input_schema": {
+   "properties": {},
+   "title": "get_scoring_tableArguments",
+   "type": "object"
+  },
+  "name": "get_scoring_table",
+  "output_schema": {}
+ },
+ {
+  "description": "List the paid x402 services offered by Payne Machine Foundry (prices, endpoints, how to buy). The MCP tools themselves are free.",
+  "input_schema": {
+   "additionalProperties": false,
+   "properties": {},
+   "type": "object"
+  },
+  "name": "list_paid_services",
+  "output_schema": {}
+ }
+]
