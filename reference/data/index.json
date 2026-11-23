@@ -927,6 +927,15 @@
      "protocol_version": "2025-06-18",
      "tool_count": 33,
      "manifest": "c7fd1cffcdc3a98f06caec060d83f80551607e785f573eb54928c3d2e54b2557"
+    },
+    "1.2.15": {
+     "published": "2026-11-20T02:22:56.602Z",
+     "outcome": "listed",
+     "server_name": "Heroku MCP Server",
+     "server_version": "1.2.15",
+     "protocol_version": "2025-06-18",
+     "tool_count": 33,
+     "manifest": "c7fd1cffcdc3a98f06caec060d83f80551607e785f573eb54928c3d2e54b2557"
     }
    }
   },
@@ -1343,6 +1352,15 @@
      "protocol_version": "2025-06-18",
      "tool_count": 16,
      "manifest": "8220aca7523251329673561ff0f460aba760a729a7dc107300a9fb8a45796585"
+    },
+    "2.3.1": {
+     "published": "2026-11-18T09:19:43.501Z",
+     "outcome": "listed",
+     "server_name": "mcp-servers/everything",
+     "server_version": "2.3.1",
+     "protocol_version": "2025-06-18",
+     "tool_count": 16,
+     "manifest": "8220aca7523251329673561ff0f460aba760a729a7dc107300a9fb8a45796585"
     }
    }
   },
@@ -1558,6 +1576,15 @@
      "outcome": "listed",
      "server_name": "secure-filesystem-server",
      "server_version": "2.3.0",
+     "protocol_version": "2025-06-18",
+     "tool_count": 16,
+     "manifest": "24390c736a660a8b3cf999193fb9a6c847b4810fd5ec3b720534b902249d61ca"
+    },
+    "2.4.0": {
+     "published": "2026-11-18T09:19:39.880Z",
+     "outcome": "listed",
+     "server_name": "secure-filesystem-server",
+     "server_version": "2.4.0",
      "protocol_version": "2025-06-18",
      "tool_count": 16,
      "manifest": "24390c736a660a8b3cf999193fb9a6c847b4810fd5ec3b720534b902249d61ca"
@@ -1935,6 +1962,15 @@
      "protocol_version": "2025-06-18",
      "tool_count": 9,
      "manifest": "ccac021f4680074f9d125a0cffd4174d8d5c4ae57e9b536e50dad52f9e927164"
+    },
+    "2.2.1": {
+     "published": "2026-11-18T09:18:09.034Z",
+     "outcome": "listed",
+     "server_name": "memory-server",
+     "server_version": "2.2.1",
+     "protocol_version": "2025-06-18",
+     "tool_count": 9,
+     "manifest": "ccac021f4680074f9d125a0cffd4174d8d5c4ae57e9b536e50dad52f9e927164"
     }
    }
   },
@@ -2199,6 +2235,15 @@
      "outcome": "listed",
      "server_name": "sequential-thinking-server",
      "server_version": "2.1.1",
+     "protocol_version": "2025-06-18",
+     "tool_count": 1,
+     "manifest": "e65698559080100e45f9e97eb03664d48752706beca608018afcc549700d7c5c"
+    },
+    "2.2.0": {
+     "published": "2026-11-18T09:19:39.898Z",
+     "outcome": "listed",
+     "server_name": "sequential-thinking-server",
+     "server_version": "2.2.0",
      "protocol_version": "2025-06-18",
      "tool_count": 1,
      "manifest": "e65698559080100e45f9e97eb03664d48752706beca608018afcc549700d7c5c"
@@ -2875,6 +2920,15 @@
      "protocol_version": "2025-06-18",
      "tool_count": 25,
      "manifest": "5a21fdb5a01a05024d0f2f971ee69bdd0f21cd1e971359b4626ad466398c7680"
+    },
+    "0.0.86": {
+     "published": "2026-11-18T18:54:16.868Z",
+     "outcome": "listed",
+     "server_name": "Playwright",
+     "server_version": "1.66.0-alpha-2026-11-18",
+     "protocol_version": "2025-06-18",
+     "tool_count": 25,
+     "manifest": "ef52f5352f0e6ff2a157753436d3049e30648cca591fb4438a5db5d1073df030"
     }
    }
   },
@@ -3240,6 +3294,15 @@
      "protocol_version": "2025-06-18",
      "tool_count": 73,
      "manifest": "9a58cdd4d7267f11f35cee2f752a3183abcd110df257c6d780e932830ed42854"
+    },
+    "0.50.0": {
+     "published": "2026-11-18T19:09:01.729Z",
+     "outcome": "listed",
+     "server_name": "Sentry MCP",
+     "server_version": "0.50.0",
+     "protocol_version": "2025-06-18",
+     "tool_count": 74,
+     "manifest": "3e55924aace982226e36abde62d2f3c0f65955bb95dfc0e1de4873e75f9b2118"
     }
    }
   },
@@ -3605,6 +3668,33 @@
      "protocol_version": "2025-06-18",
      "tool_count": 2,
      "manifest": "5ee8731063eb4dea064ad2ff67f47660e3fd83216dc2b6fc47c075f65256eb1c"
+    },
+    "4.7.1": {
+     "published": "2026-11-16T14:56:47.548Z",
+     "outcome": "listed",
+     "server_name": "Context7",
+     "server_version": "4.7.1",
+     "protocol_version": "2025-06-18",
+     "tool_count": 2,
+     "manifest": "5ee8731063eb4dea064ad2ff67f47660e3fd83216dc2b6fc47c075f65256eb1c"
+    },
+    "4.7.2": {
+     "published": "2026-11-17T12:53:26.223Z",
+     "outcome": "listed",
+     "server_name": "Context7",
+     "server_version": "4.7.2",
+     "protocol_version": "2025-06-18",
+     "tool_count": 2,
+     "manifest": "5ee8731063eb4dea064ad2ff67f47660e3fd83216dc2b6fc47c075f65256eb1c"
+    },
+    "4.7.3": {
+     "published": "2026-11-17T13:56:10.008Z",
+     "outcome": "listed",
+     "server_name": "Context7",
+     "server_version": "4.7.3",
+     "protocol_version": "2025-06-18",
+     "tool_count": 2,
+     "manifest": "5ee8731063eb4dea064ad2ff67f47660e3fd83216dc2b6fc47c075f65256eb1c"
     }
    }
   },
@@ -3967,6 +4057,15 @@
      "outcome": "listed",
      "server_name": "desktop-commander",
      "server_version": "0.3.3",
+     "protocol_version": "2025-06-18",
+     "tool_count": 25,
+     "manifest": "044ca1d6784864d624bb4400430a84ec2d04c3cfe951f6c992659b6990df751d"
+    },
+    "0.3.4": {
+     "published": "2026-11-18T14:37:10.767Z",
+     "outcome": "listed",
+     "server_name": "desktop-commander",
+     "server_version": "0.3.4",
      "protocol_version": "2025-06-18",
      "tool_count": 25,
      "manifest": "044ca1d6784864d624bb4400430a84ec2d04c3cfe951f6c992659b6990df751d"
@@ -4669,6 +4768,15 @@
      "outcome": "listed",
      "server_name": "exa-search-server",
      "server_version": "3.4.3",
+     "protocol_version": "2025-06-18",
+     "tool_count": 3,
+     "manifest": "fd20e9e0022198d55a88950825f21f4cb592a079ab3ee12d5629e4a47dbe0bd8"
+    },
+    "3.5.1": {
+     "published": "2026-11-19T20:42:17.199Z",
+     "outcome": "listed",
+     "server_name": "exa-search-server",
+     "server_version": "3.5.1",
      "protocol_version": "2025-06-18",
      "tool_count": 3,
      "manifest": "fd20e9e0022198d55a88950825f21f4cb592a079ab3ee12d5629e4a47dbe0bd8"
@@ -5397,6 +5505,15 @@
      "protocol_version": "2025-06-18",
      "tool_count": 32,
      "manifest": "1e4d04bcfcc992c0f9279778eac04000f52ee462b08ffb85a3f4b8bfe816acb4"
+    },
+    "3.41.0": {
+     "published": "2026-11-19T03:43:45.784Z",
+     "outcome": "listed",
+     "server_name": "firecrawl-fastmcp",
+     "server_version": "3.41.0",
+     "protocol_version": "2025-06-18",
+     "tool_count": 34,
+     "manifest": "e66ec44c86423e20397e1d8adb4eb571f48c263d8740f29db7a1c46d407b362a"
     }
    }
   },
