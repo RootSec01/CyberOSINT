@@ -28,7 +28,7 @@
 </header>
 
 <main id="top">
-  <section class="hero" data-tour="hero">
+  <section class="hero" data-tour="hero" data-show>
     <div class="hero-text">
       <p class="kicker">
         <span data-l="en">SAIF 2026 · Security and Innovation Fair · Riyadh</span>
@@ -79,7 +79,7 @@
     </div>
   </section>
 
-  <section id="simple" class="block" data-tour="simple">
+  <section id="simple" class="block" data-tour="simple" data-show>
     <p class="eyebrow"><span data-l="en">In short</span><span data-l="ar">باختصار</span></p>
     <h2><span data-l="en">Like checking the seal before you open the box.</span><span data-l="ar">كأنك تتأكد من الختم قبل فتح العلبة.</span></h2>
     <div class="simple">
@@ -101,7 +101,7 @@
     </div>
   </section>
 
-  <section id="threat" class="block">
+  <section id="threat" class="block" data-show>
     <p class="eyebrow"><span data-l="en">The threat</span><span data-l="ar">الخطر</span></p>
     <h2><span data-l="en">One sentence is enough.</span><span data-l="ar">جملة واحدة تكفي.</span></h2>
     <p class="wide">
@@ -133,7 +133,7 @@
     </div>
   </section>
 
-  <section id="how" class="block" data-tour="how">
+  <section id="how" class="block" data-tour="how" data-show>
     <p class="eyebrow"><span data-l="en">How it works</span><span data-l="ar">آلية العمل</span></p>
     <h2><span data-l="en">Read. Compare. Alert.</span><span data-l="ar">يقرأ، يطابق، ينبّه.</span></h2>
     <ol class="steps">
@@ -163,7 +163,7 @@
     </ul>
   </section>
 
-  <section id="results" class="block" data-tour="results">
+  <section id="results" class="block" data-tour="results" data-show>
     <p class="eyebrow"><span data-l="en">Results</span><span data-l="ar">النتائج</span></p>
     <h2><span data-l="en">Measured, not estimated.</span><span data-l="ar">أرقام مَقيسة، لا تقديرات.</span></h2>
     <div class="stats">
@@ -194,7 +194,7 @@
     </p>
   </section>
 
-  <section id="team" class="block" data-tour="team">
+  <section id="team" class="block" data-tour="team" data-show>
     <p class="eyebrow"><span data-l="en">The team</span><span data-l="ar">الفريق</span></p>
     <h2><span data-l="en">The people behind Raqeeb</span><span data-l="ar">الفريق وراء رقيب</span></h2>
     <blockquote>
@@ -213,7 +213,7 @@
     </dl>
   </section>
 
-  <section class="closing" data-tour="closing">
+  <section class="closing" data-tour="closing" data-show>
     <h2><span data-l="en">See a tampered server get caught.</span><span data-l="ar">شاهد رقيب وهو يكشف خادماً تم العبث به.</span></h2>
     <p><span data-l="en">The demo runs in its own isolated lab and raises new alerts every few minutes.</span><span data-l="ar">يعمل العرض داخل مختبر معزول، ويُطلق تنبيهات جديدة كل بضع دقائق.</span></p>
     <a class="button primary" href="https://demo.raqeeb1.tech"><span class="live" aria-hidden="true"></span><span data-l="en">Open the live demo</span><span data-l="ar">افتح العرض الحي</span></a>
@@ -261,6 +261,13 @@
     <button type="button" id="tour-next" class="next"><span lang="en">Next</span> · <span lang="ar">التالي</span></button>
   </div>
 </div>
+
+<button type="button" class="autoplay" id="autoplay">
+  <svg class="i-play" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5z"/></svg>
+  <svg class="i-stop" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor"><rect x="3.5" y="3.5" width="9" height="9" rx="1.5"/></svg>
+  <span class="when-idle"><span lang="ar">عرض تلقائي</span> · <span lang="en">Auto show</span></span>
+  <span class="when-playing"><span lang="ar">إيقاف</span> · <span lang="en">Stop</span></span>
+</button>
 
 <footer>
   <span data-l="en">Raqeeb · CyberOSINT · SAIF 2026, Riyadh</span><span data-l="ar">رقيب · CyberOSINT · «سيف» 2026، الرياض</span>

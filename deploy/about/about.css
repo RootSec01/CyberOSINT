@@ -513,6 +513,37 @@ dialog#contact::backdrop { background: rgb(4 8 12 / .7); backdrop-filter: blur(4
 .tour-actions .next { background: var(--brand); border-color: var(--brand); color: #04211c; font-weight: 700; }
 body.touring .bar { z-index: 30; }
 
+main { transition: opacity .35s ease; }
+body.swapping main { opacity: 0; }
+
+.autoplay {
+  position: fixed;
+  z-index: 35;
+  bottom: 1.2rem;
+  inset-inline-end: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .6rem 1.1rem;
+  border: 1px solid rgb(62 230 193 / .45);
+  border-radius: 999px;
+  background: rgb(15 21 30 / .92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgb(0 0 0 / .45);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.autoplay:hover { border-color: var(--brand); }
+.autoplay svg { width: .9rem; height: .9rem; color: var(--brand); }
+.autoplay .i-stop, .autoplay .when-playing { display: none; }
+body.showing .autoplay { background: var(--brand); color: #04211c; }
+body.showing .autoplay svg { color: #04211c; }
+body.showing .autoplay .i-stop, body.showing .autoplay .when-playing { display: inline; }
+body.showing .autoplay .i-play, body.showing .autoplay .when-idle { display: none; }
+body.touring .autoplay { display: none; }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes float { 50% { translate: 0 -8px; } }
 @keyframes ping { to { transform: scale(2.6); opacity: 0; } }

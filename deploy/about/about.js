@@ -107,7 +107,6 @@
     { at: "closing", ar: "جرّب العرض الحي بنفسك، فهو يُطلق تنبيهات جديدة كل بضع دقائق.", en: "Try the live demo yourself. It raises new alerts every few minutes." },
   ];
   const STEP_MS = 7000;
-  const IDLE_MS = 60000;
 
   const welcome = document.getElementById("welcome");
   const spot = document.getElementById("spot");
@@ -118,7 +117,6 @@
   const progress = document.getElementById("tour-progress");
   let step = -1;
   let advance = null;
-  let idle = null;
 
   const target = () => document.querySelector(`[data-tour="${STEPS[step].at}"]`);
 
@@ -137,7 +135,7 @@
 
   const go = (n) => {
     clearTimeout(advance);
-    if (n >= STEPS.length) { finish(true); return; }
+    if (n >= STEPS.length) { finish(); return; }
     step = Math.max(0, n);
     const s = STEPS[step];
     tourAr.textContent = s.ar;
@@ -154,6 +152,7 @@
   };
 
   const start = () => {
+    stopShow();
     welcome.hidden = true;
     spot.hidden = false;
     tour.hidden = false;
@@ -161,25 +160,14 @@
     go(0);
   };
 
-  const finish = (toWelcome) => {
+  const finish = () => {
     clearTimeout(advance);
     step = -1;
     spot.hidden = true;
     tour.hidden = true;
     document.body.classList.remove("touring");
-    if (toWelcome) {
-      scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
-      welcome.hidden = false;
-    }
   };
 
-  const wake = () => {
-    clearTimeout(idle);
-    idle = setTimeout(() => {
-      if (dialog.open) dialog.close();
-      if (step < 0) start();
-    }, IDLE_MS);
-  };
 
   welcome.querySelectorAll(".pick").forEach((b) => b.addEventListener("click", () => {
     apply(b.dataset.lang);
@@ -189,10 +177,64 @@
   document.getElementById("browse").addEventListener("click", () => { welcome.hidden = true; });
   document.getElementById("tour-next").addEventListener("click", () => go(step + 1));
   document.getElementById("tour-back").addEventListener("click", () => go(step - 1));
-  document.getElementById("tour-end").addEventListener("click", () => finish(false));
+  document.getElementById("tour-end").addEventListener("click", finish);
   addEventListener("scroll", place, { passive: true });
   addEventListener("resize", place);
   setInterval(place, 250);
+
+  const stops = [...document.querySelectorAll("[data-show]")];
+  const button = document.getElementById("autoplay");
+  const HOLD_MS = 6000;
+  const IDLE_MS = 60000;
+  let showing = false;
+  let hold = null;
+  let idle = null;
+
+  const swap = (lang) => {
+    if (still) { apply(lang); return; }
+    document.body.classList.add("swapping");
+    setTimeout(() => {
+      apply(lang);
+      document.body.classList.remove("swapping");
+    }, 350);
+  };
+
+  const visit = (i, lang) => {
+    if (!showing) return;
+    const stop = stops[i % stops.length];
+    if (lang !== root.lang) swap(lang);
+    if (lang === "ar") {
+      stop.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+      if (stop.dataset.tour === "hero") scan();
+    }
+    hold = setTimeout(() => (lang === "ar" ? visit(i, "en") : visit(i + 1, "ar")), HOLD_MS);
+  };
+
+  function stopShow() {
+    showing = false;
+    clearTimeout(hold);
+    document.body.classList.remove("showing", "swapping");
+  }
+
+  const playShow = () => {
+    if (dialog.open) dialog.close();
+    if (step >= 0) finish();
+    welcome.hidden = true;
+    showing = true;
+    document.body.classList.add("showing");
+    visit(0, "ar");
+  };
+
+  const wake = (e) => {
+    if (e && e.target instanceof Element && e.target.closest("#autoplay")) return;
+    if (showing) stopShow();
+    clearTimeout(idle);
+    idle = setTimeout(playShow, IDLE_MS);
+  };
+
+  button.addEventListener("click", () => {
+    if (showing) { stopShow(); wake(); } else { playShow(); }
+  });
   ["pointerdown", "keydown", "wheel", "touchstart"].forEach((type) => addEventListener(type, wake, { passive: true }));
 
   welcome.hidden = false;
