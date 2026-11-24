@@ -496,7 +496,7 @@ dialog#contact::backdrop { background: rgb(4 8 12 / .7); backdrop-filter: blur(4
 .tour.top { bottom: auto; top: 5rem; }
 .bar-progress { position: absolute; inset: 0 0 auto; height: 3px; background: var(--line); }
 .bar-progress i { display: block; height: 100%; width: 0; background: var(--brand); }
-.bar-progress i.run { animation: fill 7s linear forwards; }
+.bar-progress i.run { animation: fill var(--dur, 7s) linear forwards; }
 .tour-count { margin: 0; color: var(--brand); font: 600 .78rem var(--mono); text-align: center; }
 .tour-ar { margin: .3rem 0 .15rem; font-size: 1.12rem; font-weight: 600; line-height: 1.8; }
 .tour-en { margin: 0 0 .9rem; color: var(--muted); font-size: .98rem; line-height: 1.6; }

@@ -106,7 +106,10 @@
     { at: "team", ar: "تعرّف على الفريق، واضغط على أي عضو للتواصل معه.", en: "Meet the team. Tap any member to get in touch." },
     { at: "closing", ar: "جرّب العرض الحي بنفسك، فهو يُطلق تنبيهات جديدة كل بضع دقائق.", en: "Try the live demo yourself. It raises new alerts every few minutes." },
   ];
-  const STEP_MS = 7000;
+  const reading = (text) => {
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.min(25000, Math.max(4500, 1500 + words * 320));
+  };
 
   const welcome = document.getElementById("welcome");
   const spot = document.getElementById("spot");
@@ -145,10 +148,12 @@
     const tall = el.getBoundingClientRect().height > innerHeight * 0.6;
     el.scrollIntoView({ behavior: still ? "auto" : "smooth", block: tall ? "start" : "center", inline: "nearest" });
     if (s.enter) s.enter();
+    const wait = Math.max(reading(s.ar), reading(s.en)) + 1500;
+    progress.style.setProperty("--dur", `${wait}ms`);
     progress.classList.remove("run");
     void progress.offsetWidth;
     progress.classList.add("run");
-    advance = setTimeout(() => go(step + 1), STEP_MS);
+    advance = setTimeout(() => go(step + 1), wait);
   };
 
   const start = () => {
@@ -184,7 +189,6 @@
 
   const stops = [...document.querySelectorAll("[data-show]")];
   const button = document.getElementById("autoplay");
-  const HOLD_MS = 6000;
   const IDLE_MS = 60000;
   let showing = false;
   let hold = null;
@@ -207,7 +211,8 @@
       stop.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
       if (stop.dataset.tour === "hero") scan();
     }
-    hold = setTimeout(() => (lang === "ar" ? visit(i, "en") : visit(i + 1, "ar")), HOLD_MS);
+    const text = [...stop.querySelectorAll(`[data-l="${lang}"]`)].map((el) => el.textContent).join(" ");
+    hold = setTimeout(() => (lang === "ar" ? visit(i, "en") : visit(i + 1, "ar")), reading(text));
   };
 
   function stopShow() {
