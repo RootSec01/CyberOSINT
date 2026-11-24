@@ -67,9 +67,11 @@ services:
       DOMAIN: ${DOMAIN}
       SHOWCASE_SITE: ${SHOWCASE_DOMAIN:-${DOMAIN}:8443}
       ROOT_DOMAIN: ${ROOT_DOMAIN:-localhost}
+      ABOUT_SITE: ${ABOUT_DOMAIN:-about.localhost}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./about:/srv/about:ro
       - certificates:/data
       - caddy_config:/config
       - showcase_visits:/var/log/raqeeb

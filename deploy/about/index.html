@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About Raqeeb · CyberOSINT</title>
+<meta name="description" content="Raqeeb reads what MCP servers declare to AI agents and notices when a server stops matching the release its publisher shipped. Entered in SAIF 2026 as CyberOSINT.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/IBMPlexSansArabic-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="about.css">
+<script src="about.js" defer></script>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="#top">
+    <svg aria-hidden="true" width="26" height="26" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 2l7 2.5v6c0 4.5-3 7.6-7 9.5-4-1.9-7-5-7-9.5v-6z"/><path d="M7.5 11h3l3-3M10.5 11l3 3"/></svg>
+    <span data-l="en">Raqeeb</span><span data-l="ar">رقيب</span>
+  </a>
+  <nav>
+    <a href="#project"><span data-l="en">Project</span><span data-l="ar">المشروع</span></a>
+    <a href="#results"><span data-l="en">Results</span><span data-l="ar">النتائج</span></a>
+    <a href="#team"><span data-l="en">Team</span><span data-l="ar">الفريق</span></a>
+    <button type="button" id="language" aria-label="Switch language"><span data-l="en">العربية</span><span data-l="ar">English</span></button>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <p class="kicker"><span data-l="en">SAIF 2026 · Riyadh · Team CyberOSINT</span><span data-l="ar">سايف 2026 · الرياض · فريق CyberOSINT</span></p>
+    <h1>
+      <span data-l="en">The tools an AI agent is given can change without anyone noticing. Raqeeb notices.</span>
+      <span data-l="ar">الأدوات التي تُعطى لوكيل الذكاء الاصطناعي قد تتغيّر دون أن يلاحظ أحد. رقيب يلاحظ.</span>
+    </h1>
+    <p class="lede">
+      <span data-l="en">Raqeeb reads what Model Context Protocol servers declare to AI agents, compares it with the release the publisher actually shipped, and raises an alert when a server drifts or was altered. It never invokes a dangerous tool.</span>
+      <span data-l="ar">يقرأ رقيب ما تُعلنه خوادم بروتوكول سياق النموذج (MCP) لوكلاء الذكاء الاصطناعي، ويقارنه بالإصدار الذي نشره المطوّر فعلاً، وينبّه عندما ينحرف الخادم أو يُعبث به. ولا يستدعي أي أداة خطرة أبداً.</span>
+    </p>
+    <div class="actions">
+      <a class="button primary" href="https://demo.raqeeb1.tech"><span data-l="en">Open the live demo</span><span data-l="ar">افتح العرض الحي</span></a>
+      <a class="button" href="https://github.com/RootSec01/CyberOSINT"><span data-l="en">Source on GitHub</span><span data-l="ar">الشيفرة على GitHub</span></a>
+    </div>
+  </section>
+
+  <section id="project" class="block">
+    <h2><span data-l="en">The problem</span><span data-l="ar">المشكلة</span></h2>
+    <p>
+      <span data-l="en">AI agents reach real systems through MCP. A server lists the tools an agent may call: run a command, query a database, read a file. Port and CVE scanners can tell you the server is reachable. They cannot tell you what an agent connected to it is able to do, or that the answer changed after last week's redeploy. A single edited tool description is enough to steer an agent, and nothing in the network traffic looks unusual.</span>
+      <span data-l="ar">يصل وكلاء الذكاء الاصطناعي إلى الأنظمة الحقيقية عبر MCP. يعرض الخادم الأدوات التي يحق للوكيل استدعاؤها: تشغيل أمر، أو استعلام قاعدة بيانات، أو قراءة ملف. ماسحات المنافذ والثغرات تخبرك أن الخادم متاح، لكنها لا تخبرك بما يستطيع الوكيل المتصل به فعله، ولا بأن ذلك تغيّر بعد آخر تحديث. يكفي تعديل وصف أداة واحدة لتوجيه الوكيل، دون أن يبدو أي شيء غريباً في حركة الشبكة.</span>
+    </p>
+
+    <h2><span data-l="en">How Raqeeb works</span><span data-l="ar">كيف يعمل رقيب</span></h2>
+    <ol class="steps">
+      <li>
+        <strong><span data-l="en">Read</span><span data-l="ar">يقرأ</span></strong>
+        <span data-l="en">It asks each server for its tool list, the same request an agent makes, and records every name, description and argument.</span>
+        <span data-l="ar">يطلب من كل خادم قائمة أدواته، بالطلب نفسه الذي يرسله الوكيل، ويسجّل كل اسم ووصف ومُدخل.</span>
+      </li>
+      <li>
+        <strong><span data-l="en">Compare</span><span data-l="ar">يقارن</span></strong>
+        <span data-l="en">It checks the list against a library of what 30 widely used npm packages shipped in every release, and against the server's own earlier scans.</span>
+        <span data-l="ar">يطابق القائمة مع مكتبة لما شحنته 30 حزمة npm واسعة الاستخدام في كل إصداراتها، ومع فحوصات الخادم السابقة.</span>
+      </li>
+      <li>
+        <strong><span data-l="en">Alert</span><span data-l="ar">ينبّه</span></strong>
+        <span data-l="en">A changed or injected tool becomes a finding with the exact text that differs, ready to be opened as a case and reported.</span>
+        <span data-l="ar">تتحوّل الأداة المعدّلة أو المحقونة إلى ملاحظة تعرض النص المختلف بدقة، جاهزة لفتح قضية وإصدار تقرير.</span>
+      </li>
+    </ol>
+  </section>
+
+  <section id="results" class="block">
+    <h2><span data-l="en">Measured, not estimated</span><span data-l="ar">أرقام مقيسة لا تقديرية</span></h2>
+    <div class="stats">
+      <div class="stat">
+        <b>83.3%</b>
+        <span data-l="en">of held-out MCPTox poisonings detected (215 of 258), on servers never used during development</span>
+        <span data-l="ar">من حالات التسميم في MCPTox المحجوبة اكتُشفت (215 من 258)، على خوادم لم تُستخدم أثناء التطوير</span>
+      </div>
+      <div class="stat">
+        <b>0</b>
+        <span data-l="en">false alarms on 634 clean tool declarations from the same held-out set</span>
+        <span data-l="ar">إنذارات كاذبة على 634 تعريف أداة سليم من المجموعة المحجوبة نفسها</span>
+      </div>
+      <div class="stat">
+        <b>706</b>
+        <span data-l="en">npm releases of 30 MCP packages installed and read to build the reference library</span>
+        <span data-l="ar">إصداراً من 30 حزمة MCP على npm ثُبّتت وقُرئت لبناء المكتبة المرجعية</span>
+      </div>
+      <div class="stat">
+        <b>6.3%</b>
+        <span data-l="en">of 301 public registry servers changed what they declare within two days (19 servers)</span>
+        <span data-l="ar">من 301 خادم في السجل العام غيّرت ما تعلنه خلال يومين (19 خادماً)</span>
+      </div>
+    </div>
+    <p class="note">
+      <span data-l="en">Every figure is reproducible from the repository. Live servers are reported only in aggregate and none is named.</span>
+      <span data-l="ar">كل رقم هنا قابل لإعادة الإنتاج من المستودع. تُعرض الخوادم الحية بأرقام إجمالية فقط ولا يُسمّى أي منها.</span>
+    </p>
+  </section>
+
+  <section id="team" class="block">
+    <h2><span data-l="en">The team</span><span data-l="ar">الفريق</span></h2>
+    <p>
+      <span data-l="en">Five people built Raqeeb for the Saudi Artificial Intelligence Fair, entered as CyberOSINT.</span>
+      <span data-l="ar">بنى رقيب خمسة أشخاص للمشاركة في معرض سايف للذكاء الاصطناعي، باسم CyberOSINT.</span>
+    </p>
+    <ul class="team">
+      <li><span data-l="en">Waad Alanezi</span><span data-l="ar">وعد العنزي</span></li>
+      <li><span data-l="en">Rami Omar</span><span data-l="ar">رامي عمر</span></li>
+      <li><span data-l="en">Ranad Alzaidi</span><span data-l="ar">رناد الزيدي</span></li>
+      <li><span data-l="en">Azzam Aljasser</span><span data-l="ar">عزام الجاسر</span></li>
+      <li><span data-l="en">Osama Altamimi</span><span data-l="ar">أسامة التميمي</span></li>
+    </ul>
+    <dl class="facts">
+      <div><dt><span data-l="en">Team ID</span><span data-l="ar">رقم الفريق</span></dt><dd>SAIF140018</dd></div>
+      <div><dt><span data-l="en">Licence</span><span data-l="ar">الترخيص</span></dt><dd>MIT</dd></div>
+    </dl>
+  </section>
+</main>
+
+<footer>
+  <span data-l="en">Raqeeb · CyberOSINT · SAIF 2026</span><span data-l="ar">رقيب · CyberOSINT · سايف 2026</span>
+</footer>
+</body>
+</html>

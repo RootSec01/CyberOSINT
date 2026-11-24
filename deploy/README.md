@@ -80,6 +80,21 @@ docker compose up -d --build showcase web
 docker compose logs --tail 20 showcase
 ```
 
+The owner's own session on the showcase comes from the container, never from a form:
+
+```bash
+docker compose exec -T showcase python -m lab.showcase --admin-link
+```
+
+It prints a link that signs in as `SHOWCASE_ADMIN_USER` for 12 hours. Treat it like a password;
+changing `SHOWCASE_JWT_SECRET` and restarting the showcase revokes every link already issued.
+
+### Project page
+
+`about/` is a static page about the project and the team, in English and Arabic, served by Caddy on
+`ABOUT_DOMAIN`. It loads nothing from other sites and has no forms or cookies. Edit the files and
+reload the browser; Caddy reads them from the mounted folder.
+
 ## 6. Updates
 
 ```bash

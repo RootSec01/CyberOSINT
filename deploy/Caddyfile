@@ -12,6 +12,21 @@
 	}
 }
 
+{$ABOUT_SITE:about.localhost} {
+	encode zstd gzip
+	root * /srv/about
+	file_server
+	header {
+		-Server
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+	}
+	@fonts path /fonts/*
+	header @fonts Cache-Control "public, max-age=2592000, immutable"
+}
+
 {$ROOT_DOMAIN:localhost} {
 	redir https://{$SHOWCASE_SITE}{uri} permanent
 }
