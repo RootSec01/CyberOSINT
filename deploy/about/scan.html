@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raqeeb · Live scan</title>
+<meta name="theme-color" content="#05080c">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/IBMPlexSansArabic-Bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="scan.css">
+<script src="land.js" defer></script>
+<script src="globe.js" defer></script>
+<script src="scan.js" defer></script>
+</head>
+<body>
+
+<section class="intro" id="intro">
+  <img class="intro-logo" src="logo.svg" alt="" width="160" height="160">
+  <h1><span lang="ar" dir="rtl">فحص رقيب المباشر</span><span lang="en">Raqeeb live scan</span></h1>
+  <p class="intro-sub">
+    <span lang="ar" dir="rtl">شاهد رقيب وهو يفحص الخوادم أداةً أداة، ويكشف أي تغيير لحظة حدوثه.</span>
+    <span lang="en">Watch Raqeeb check each server tool by tool and catch any change the moment it appears.</span>
+  </p>
+  <button type="button" class="start" id="start">
+    <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5z"/></svg>
+    <span lang="ar">ابدأ بملء الشاشة</span><span class="sep">·</span><span lang="en">Start full screen</span>
+  </button>
+  <p class="intro-auto" id="intro-auto"><span lang="ar" dir="rtl">يبدأ تلقائياً خلال لحظات</span> · <span lang="en">Starting on its own in a moment</span></p>
+  <a class="back" href="./"><span lang="en">Back to About</span> · <span lang="ar">العودة</span></a>
+</section>
+
+<div class="stage" id="stage" hidden>
+  <header class="top">
+    <div class="brand"><img src="logo.svg" alt="" width="40" height="40"><b>Raqeeb</b><span class="live"><i></i>LIVE SCAN</span></div>
+    <div class="top-meta" dir="ltr"><span id="clock">--:--:--</span></div>
+    <button type="button" class="exit" id="exit" aria-label="Exit">×</button>
+  </header>
+
+  <main class="grid">
+    <section class="globe-side">
+      <div class="globe-box">
+        <canvas id="globe" aria-label="Rotating globe showing the servers being scanned"></canvas>
+      </div>
+      <dl class="counters">
+        <div class="c-match"><dt><span lang="en">Match</span><span lang="ar">مطابق</span></dt><dd id="n-match">0</dd></div>
+        <div class="c-subset"><dt><span lang="en">Subset</span><span lang="ar">جزئي</span></dt><dd id="n-subset">0</dd></div>
+        <div class="c-unknown"><dt><span lang="en">Unknown</span><span lang="ar">غير معروف</span></dt><dd id="n-unknown">0</dd></div>
+        <div class="c-deviation"><dt><span lang="en">Deviation</span><span lang="ar">انحراف</span></dt><dd id="n-deviation">0</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <div class="server">
+        <p class="label"><span lang="en">Now scanning</span> · <span lang="ar">يُفحص الآن</span></p>
+        <h2 id="server-name" dir="ltr">—</h2>
+        <p class="host" id="server-host" dir="ltr"></p>
+        <div class="progress"><i id="progress"></i></div>
+        <p class="phase" id="phase" dir="ltr"></p>
+      </div>
+      <ol class="tools" id="tools" dir="ltr"></ol>
+      <p class="reference">
+        <span lang="en">Reference library: 706 published releases of 30 MCP packages</span>
+        <span lang="ar" dir="rtl">المكتبة المرجعية: 706 إصدارات منشورة من 30 حزمة MCP</span>
+      </p>
+    </section>
+  </main>
+
+  <footer class="legend">
+    <span class="k k-match"><i></i>MATCH · <span lang="ar">مطابق</span></span>
+    <span class="k k-subset"><i></i>SUBSET · <span lang="ar">جزئي</span></span>
+    <span class="k k-unknown"><i></i>UNKNOWN · <span lang="ar">غير معروف</span></span>
+    <span class="k k-deviation"><i></i>DEVIATION · <span lang="ar">انحراف</span></span>
+    <span class="honest"><span lang="en">Simulation of the demo lab servers. No real server is named.</span> · <span lang="ar" dir="rtl">محاكاة لخوادم مختبر العرض، ولا يُسمّى أي خادم حقيقي.</span></span>
+  </footer>
+</div>
+
+<section class="verdict" id="verdict" hidden>
+  <div class="stripes top-stripes" aria-hidden="true"></div>
+  <div class="verdict-in">
+    <div class="emblem" aria-hidden="true">
+      <svg class="em-match" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52"/><path d="M36 62l16 16 32-36"/></svg>
+      <svg class="em-subset" viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="arc" cx="60" cy="60" r="52"/><path d="M40 60h40"/></svg>
+      <svg class="em-unknown" viewBox="0 0 120 120"><circle class="dash" cx="60" cy="60" r="52"/><path d="M46 46a14 14 0 1 1 20 12c-4 2-6 5-6 9v3M60 84v1"/></svg>
+      <svg class="em-deviation" viewBox="0 0 120 120"><path d="M60 10l54 96H6z"/><path d="M60 44v30M60 88v1"/></svg>
+    </div>
+    <p class="word" id="v-word" data-text=""></p>
+    <p class="act" id="v-act">ACT NOW</p>
+    <p class="word-ar" id="v-word-ar" dir="rtl" lang="ar"></p>
+    <p class="v-server" id="v-server" dir="ltr"></p>
+    <p class="v-text-ar" id="v-text-ar" dir="rtl" lang="ar"></p>
+    <p class="v-text-en" id="v-text-en" lang="en"></p>
+
+    <div class="evidence" id="evidence" dir="ltr">
+      <div class="ev-head"><span class="ev-tool" id="ev-tool"></span><span class="ev-kind" id="ev-kind"></span></div>
+      <div class="ev-row"><span class="ev-tag">PUBLISHED</span><code id="ev-published"></code><span class="hash" id="ev-hash-a"></span></div>
+      <div class="ev-row live"><span class="ev-tag">LIVE</span><code id="ev-live"></code><span class="hash" id="ev-hash-b"></span></div>
+    </div>
+
+    <ul class="actions" id="v-actions">
+      <li><span lang="ar">افصل الوكلاء عن الخادم</span><small>Disconnect agents</small></li>
+      <li><span lang="ar">افتح قضية واحفظ الدليل</span><small>Open a case, keep the evidence</small></li>
+      <li><span lang="ar">أبلغ مالك الخادم</span><small>Notify the owner</small></li>
+    </ul>
+  </div>
+  <div class="stripes bottom-stripes" aria-hidden="true"></div>
+  <div class="countdown"><i id="v-countdown"></i></div>
+</section>
+
+</body>
+</html>

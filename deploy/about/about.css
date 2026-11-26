@@ -582,3 +582,28 @@ body.touring .autoplay { display: none; }
 @media (max-width: 420px) {
   .stats { grid-template-columns: 1fr; }
 }
+
+.scanlink {
+  position: fixed;
+  z-index: 35;
+  bottom: 1.2rem;
+  inset-inline-start: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .6rem 1.1rem;
+  border: 1px solid rgb(255 59 78 / .55);
+  border-radius: 999px;
+  background: rgb(26 8 12 / .92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgb(0 0 0 / .45);
+  color: #ffd6da;
+  font-size: .85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color .2s, background .2s;
+}
+.scanlink:hover { border-color: #ff3b4e; background: rgb(48 10 16 / .95); }
+.scanlink-dot { position: relative; width: .6rem; height: .6rem; border-radius: 50%; background: #ff3b4e; }
+.scanlink-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #ff3b4e; animation: ping 1.8s ease-out infinite; }
+body.touring .scanlink { display: none; }
