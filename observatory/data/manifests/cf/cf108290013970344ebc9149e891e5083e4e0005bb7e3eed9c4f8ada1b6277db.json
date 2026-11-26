@@ -1,0 +1,259 @@
+[
+ {
+  "description": "Free non-binding § 14a EnWG grid-fee & BNetzA SMARD load-shift preview with Ed25519 VC. Zero retention, no ads.",
+  "input_schema": {
+   "properties": {
+    "annual_consumption_kwh": {
+     "description": "Total annual electricity consumption in kWh.",
+     "type": "number"
+    },
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "assets": {
+     "properties": {
+      "ev_annual_km": {
+       "default": 0,
+       "type": "number"
+      },
+      "has_ev": {
+       "default": false,
+       "type": "boolean"
+      },
+      "has_heat_pump": {
+       "default": false,
+       "type": "boolean"
+      },
+      "has_pv_or_battery": {
+       "default": false,
+       "type": "boolean"
+      }
+     },
+     "type": "object"
+    },
+    "controllable_device_enwg14a": {
+     "description": "Controllable device (> 4.2 kW) per § 14a EnWG installed.",
+     "type": "boolean"
+    },
+    "country_code": {
+     "default": "DE",
+     "enum": [
+      "DE",
+      "AT",
+      "NL"
+     ],
+     "type": "string"
+    },
+    "grid_module_14a": {
+     "default": "module_3_time_variable",
+     "enum": [
+      "module_1_flat",
+      "module_2_percentage",
+      "module_3_time_variable"
+     ],
+     "type": "string"
+    },
+    "load_kw": {
+     "description": "Flexible electrical load in kW for industrial dispatch mode.",
+     "type": "number"
+    },
+    "postal_code": {
+     "description": "Postal code for local German VNB resolution (e.g. '45127').",
+     "type": "string"
+    },
+    "tso_control_area": {
+     "default": "DE-LU",
+     "enum": [
+      "50hertz",
+      "amprion",
+      "tennet",
+      "transnetbw",
+      "DE-LU"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "calculate_enwg14a_grid_preview",
+  "output_schema": {}
+ },
+ {
+  "description": "Zero-retention GDPR PII redaction gate (IBAN, Tax-ID, HRB, Names) with signed Ed25519 VC.",
+  "input_schema": {
+   "properties": {
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Maximum fee in EUR your agent is willing to pay per call (list price 0.008 EUR). Omit if not willing to pay.",
+     "type": "number"
+    },
+    "raw_text": {
+     "description": "Unstructured text containing potential DACH/EU PII.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "raw_text"
+   ],
+   "type": "object"
+  },
+  "name": "redact_gdpr_pii_text",
+  "output_schema": {}
+ },
+ {
+  "description": "Deterministic EU FSF, UN & OpenSanctions KYB screening issuing signed Ed25519 Non-Hit VCs.",
+  "input_schema": {
+   "properties": {
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "country_code": {
+     "default": "DE",
+     "description": "ISO-3166-1 alpha-2 country code.",
+     "type": "string"
+    },
+    "entity_name": {
+     "description": "Legal company or beneficiary name to screen.",
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Maximum fee in EUR your agent is willing to pay per call (list price 0.02 EUR). Omit if not willing to pay.",
+     "type": "number"
+    },
+    "vat_or_lei_id": {
+     "description": "Optional EU VAT ID or LEI identifier.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "entity_name"
+   ],
+   "type": "object"
+  },
+  "name": "screen_sanctions_and_kyb",
+  "output_schema": {}
+ },
+ {
+  "description": "Validate DORA Art. 28/31 ICT providers, ISO 17442 LEIs, parent chains & ESA CTPP status.",
+  "input_schema": {
+   "properties": {
+    "country_code": {
+     "default": "DE",
+     "type": "string"
+    },
+    "euid": {
+     "description": "Optional European Unique Identifier (e.g. 'DEHRB12345.B').",
+     "type": "string"
+    },
+    "ict_service_code": {
+     "default": "S01",
+     "description": "DORA ITS Annex III service code ('S01'..'S19').",
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Ignored in Pre-GmbH free preview (0.00 EUR); planned post-GmbH fee 0.03 EUR.",
+     "type": "number"
+    },
+    "provider_lei": {
+     "description": "20-character ISO 17442 Legal Entity Identifier (LEI, e.g. '529900T8BM49AURSDO55').",
+     "type": "string"
+    },
+    "provider_name": {
+     "description": "Legal name of the ICT third-party service provider.",
+     "type": "string"
+    },
+    "supports_critical_function": {
+     "default": true,
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "provider_lei"
+   ],
+   "type": "object"
+  },
+  "name": "validate_dora_ict_provider",
+  "output_schema": {}
+ },
+ {
+  "description": "Official KoSIT EN 16931 & XRechnung XML validator issuing signed Ed25519 VCs. Zero retention.",
+  "input_schema": {
+   "properties": {
+    "ap2_intent_mandate_id": {
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Maximum fee in EUR your agent is willing to pay per call (list price 0.03 EUR). Omit if not willing to pay.",
+     "type": "number"
+    },
+    "xml_content": {
+     "description": "Raw EN 16931 / XRechnung / UBL / CII XML string.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "xml_content"
+   ],
+   "type": "object"
+  },
+  "name": "validate_en16931_e_invoice",
+  "output_schema": {}
+ },
+ {
+  "description": "Verify EU medical device UDI-DI, EMDN codes, risk class & Actor SRN via EUDAMED API.",
+  "input_schema": {
+   "properties": {
+    "actor_srn": {
+     "description": "Optional EUDAMED Actor Single Registration Number (e.g. 'DE-MF-000012345').",
+     "type": "string"
+    },
+    "emdn_code": {
+     "description": "Optional European Medical Device Nomenclature code (e.g. 'Z120302').",
+     "type": "string"
+    },
+    "max_accepted_fee_eur": {
+     "description": "Ignored in Pre-GmbH free preview (0.00 EUR); planned post-GmbH fee 0.04 EUR.",
+     "type": "number"
+    },
+    "notified_body_code": {
+     "description": "Optional 4-digit Notified Body CE code (e.g. '0123').",
+     "type": "string"
+    },
+    "regulation": {
+     "default": "MDR",
+     "enum": [
+      "MDR",
+      "IVDR"
+     ],
+     "type": "string"
+    },
+    "risk_class": {
+     "default": "IIa",
+     "enum": [
+      "I",
+      "IIa",
+      "IIb",
+      "III",
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "type": "string"
+    },
+    "udi_di": {
+     "description": "GS1 GTIN-14, HIBC or ICCBBA UDI-DI / Basic UDI-DI device identifier (e.g. '04012345678901').",
+     "type": "string"
+    }
+   },
+   "required": [
+    "udi_di"
+   ],
+   "type": "object"
+  },
+  "name": "verify_eudamed_udi_device",
+  "output_schema": {}
+ }
+]

@@ -1,0 +1,318 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Details van een merk of product"
+  },
+  "description": "De details van een zoekresultaat, op zijn `id`. Een merk geeft de lopende aanbiedingen per supermarkt; een product geeft de prijs, de geldigheid, de laagste actieprijs in zes maanden, de prijs bij andere supermarkten en, als de fabrikant ze publiceert, de ingrediënten, allergenen en voedingswaarden; `schap:` geeft per supermarkt de goedkoopste gewone prijs, ook als er nergens een actie loopt. Altijd met de link naar de pagina.",
+  "input_schema": {
+   "properties": {
+    "id": {
+     "description": "De `id` van een zoekresultaat, in een van drie vormen: `merk:<slug>` voor een merkpagina, `product:<base_product_id>` voor één product, en `schap:<zoekterm>` voor de goedkoopste gewone prijs per supermarkt. Een `schap:`-term is een product- of merknaam; één algemeen woord ('melk', 'kaas') is te breed voor één prijs per supermarkt, met de soort of het merk erbij ('halfvolle melk', 'campina melk') niet. Een verpakkingsmaat in de term telt niet als zoekwoord.",
+     "title": "Id",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "title": "fetchArguments",
+   "type": "object"
+  },
+  "name": "fetch",
+  "output_schema": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "metadata": {
+     "additionalProperties": true,
+     "title": "Metadata",
+     "type": "object"
+    },
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "title",
+    "text",
+    "url",
+    "metadata"
+   ],
+   "title": "Document",
+   "type": "object"
+  },
+  "title": "Details van een merk of product"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Wat kost een recept per supermarkt (bèta)"
+  },
+  "description": "Wat de ingrediënten van een recept kosten bij elke supermarkt, met de gewone schapprijs: per supermarkt het totaal en hoeveel van de ingrediënten er gevonden zijn, en per ingrediënt het product en de verpakking bij de goedkoopste supermarkten. Een totaal geldt alleen naast zijn dekking. Lopende aanbiedingen zitten er niet in. De productnamen staan in de taal van die winkel, en de zoekfunctie vindt alleen woorden in die taal: Nederlands op www.prijsprofeet.nl en www.prijsprofeet.be ('peanut butter' heet daar 'pindakaas'), Duits op www.prijsprofeet.de ('peanut butter' heet daar 'Erdnussbutter'). Elk connectoradres hoort bij één land: www.prijsprofeet.nl geeft Nederlandse supermarkten, www.prijsprofeet.be Belgische en www.prijsprofeet.de Duitse. De gegevens zijn van PrijsProfeet, en de voorwaarden vragen bij elk gebruik een bronvermelding: PrijsProfeet met de url van elk genoemd product of merk. De prijzen worden elke nacht bijgewerkt, niet wekelijks, en de pagina toont de actuele stand.",
+  "input_schema": {
+   "properties": {
+    "ingredients": {
+     "description": "De ingrediënten van het recept, één regel per ingrediënt met de hoeveelheid zoals in het recept ('500 g spaghetti', '2 uien', '1 el olijfolie'). Hooguit 20 regels.",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 20,
+     "minItems": 1,
+     "title": "Ingredients",
+     "type": "array"
+    }
+   },
+   "required": [
+    "ingredients"
+   ],
+   "title": "price_recipeArguments",
+   "type": "object"
+  },
+  "name": "price_recipe",
+  "output_schema": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "metadata": {
+     "additionalProperties": true,
+     "title": "Metadata",
+     "type": "object"
+    },
+    "text": {
+     "title": "Text",
+     "type": "string"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "title",
+    "text",
+    "url",
+    "metadata"
+   ],
+   "title": "Document",
+   "type": "object"
+  },
+  "title": "Wat kost een recept per supermarkt (bèta)"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Zoek een merk of product"
+  },
+  "description": "Zoek een product of merk bij de supermarkt op naam (bijvoorbeeld 'oatly barista' of 'calvé pindakaas'). Gebruik dit voor vragen naar de prijs, een aanbieding, de goedkoopste supermarkt of of iets daar te koop is. Geeft een merkpagina, de gewone prijzen per supermarkt en productresultaten (verdeeld over de supermarkten) met maat, actieprijs, de prijs vóór de actie en de prijs per eenheid; elk resultaat heeft een `id` voor de details. De productnamen staan in de taal van die winkel, en de zoekfunctie vindt alleen woorden in die taal: Nederlands op www.prijsprofeet.nl en www.prijsprofeet.be ('peanut butter' heet daar 'pindakaas'), Duits op www.prijsprofeet.de ('peanut butter' heet daar 'Erdnussbutter'). Elk connectoradres hoort bij één land: www.prijsprofeet.nl geeft Nederlandse supermarkten, www.prijsprofeet.be Belgische en www.prijsprofeet.de Duitse. De gegevens zijn van PrijsProfeet, en de voorwaarden vragen bij elk gebruik een bronvermelding: PrijsProfeet met de url van elk genoemd product of merk. De prijzen worden elke nacht bijgewerkt, niet wekelijks, en de pagina toont de actuele stand.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "Een product- of merknaam, bijvoorbeeld 'oatly barista' of 'calvé pindakaas'. Een kale barcode levert hier geen producten maar een verwijzing naar de API: opvragen per barcode hoort bij een key.",
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "searchArguments",
+   "type": "object"
+  },
+  "name": "search",
+  "output_schema": {
+   "$defs": {
+    "SearchResult": {
+     "properties": {
+      "id": {
+       "title": "Id",
+       "type": "string"
+      },
+      "title": {
+       "title": "Title",
+       "type": "string"
+      },
+      "url": {
+       "title": "Url",
+       "type": "string"
+      }
+     },
+     "required": [
+      "id",
+      "title",
+      "url"
+     ],
+     "title": "SearchResult",
+     "type": "object"
+    }
+   },
+   "properties": {
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Notice"
+    },
+    "results": {
+     "items": {
+      "$ref": "#/$defs/SearchResult"
+     },
+     "title": "Results",
+     "type": "array"
+    },
+    "source": {
+     "title": "Source",
+     "type": "string"
+    }
+   },
+   "required": [
+    "results",
+    "source"
+   ],
+   "title": "SearchResults",
+   "type": "object"
+  },
+  "title": "Zoek een merk of product"
+ },
+ {
+  "_meta": {
+   "openai/outputTemplate": "ui://prijsprofeet/producten-v1.html",
+   "ui": {
+    "resourceUri": "ui://prijsprofeet/producten-v1.html"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "idempotentHint": true,
+   "openWorldHint": false,
+   "readOnlyHint": true,
+   "title": "Toon producten met foto"
+  },
+  "description": "Producten bij de supermarkt voor een product- of merknaam (bijvoorbeeld 'oatly barista' of 'calvé pindakaas'), getoond als kaarten met foto, de prijs bij die supermarkt, de verpakkingsmaat en een link naar de productpagina. Verdeeld over de supermarkten, met de actieprijs en de prijs ervoor. De productnamen staan in de taal van die winkel, en de zoekfunctie vindt alleen woorden in die taal: Nederlands op www.prijsprofeet.nl en www.prijsprofeet.be ('peanut butter' heet daar 'pindakaas'), Duits op www.prijsprofeet.de ('peanut butter' heet daar 'Erdnussbutter'). Elk connectoradres hoort bij één land: www.prijsprofeet.nl geeft Nederlandse supermarkten, www.prijsprofeet.be Belgische en www.prijsprofeet.de Duitse. De gegevens zijn van PrijsProfeet, en de voorwaarden vragen bij elk gebruik een bronvermelding: PrijsProfeet met de url van elk genoemd product of merk. De prijzen worden elke nacht bijgewerkt, niet wekelijks, en de pagina toont de actuele stand.",
+  "input_schema": {
+   "properties": {
+    "query": {
+     "description": "Een product- of merknaam, bijvoorbeeld 'oatly barista' of 'calvé pindakaas'. Een kale barcode levert hier geen producten maar een verwijzing naar de API: opvragen per barcode hoort bij een key.",
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "title": "show_productsArguments",
+   "type": "object"
+  },
+  "name": "show_products",
+  "output_schema": {
+   "$defs": {
+    "ProductCard": {
+     "properties": {
+      "image": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Image"
+      },
+      "price": {
+       "title": "Price",
+       "type": "string"
+      },
+      "retailer": {
+       "title": "Retailer",
+       "type": "string"
+      },
+      "title": {
+       "title": "Title",
+       "type": "string"
+      },
+      "url": {
+       "title": "Url",
+       "type": "string"
+      }
+     },
+     "required": [
+      "title",
+      "retailer",
+      "price",
+      "url"
+     ],
+     "title": "ProductCard",
+     "type": "object"
+    }
+   },
+   "properties": {
+    "notice": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Notice"
+    },
+    "products": {
+     "items": {
+      "$ref": "#/$defs/ProductCard"
+     },
+     "title": "Products",
+     "type": "array"
+    },
+    "source": {
+     "title": "Source",
+     "type": "string"
+    }
+   },
+   "required": [
+    "products",
+    "source"
+   ],
+   "title": "ProductCards",
+   "type": "object"
+  },
+  "title": "Toon producten met foto"
+ }
+]
