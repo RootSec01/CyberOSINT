@@ -1,0 +1,364 @@
+[
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "按 slug 获取单个客户案例的完整正文（背景、做法、效果口径）。slug 来自 list_cases 的返回。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "slug": {
+     "description": "案例 slug，例如 csair、k11、powerlong",
+     "type": "string"
+    }
+   },
+   "required": [
+    "slug"
+   ],
+   "type": "object"
+  },
+  "name": "get_case",
+  "output_schema": {},
+  "title": "获取客户案例全文"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "返回该行业在 24好玩平台上真实活动的基准：总中奖率、奖池档位数、活动周期、参与量级、实际中奖率与核销率，全部为按商户等权的中位数并附样本量。用于回答「中奖率设多少」「奖池分几档」「活动开几天」这类要有出处的数字问题。★ 平台没有奖品单价/预算/ROI 数据，本工具**不返回任何金额**，也不要据此推算预算。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "industry": {
+     "description": "行业 slug，取值与 list_cases 的 industry 相同（用 list_industries 可取全部）。不传或该行业样本不足时，返回平台整体口径并明确说明。",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_industry_benchmark",
+  "output_schema": {},
+  "title": "取某行业的活动基准数据"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "按 URL 或 search_public_kb 返回的 id 读取一页（或一段）公开内容的正文（≤8000 字）。只收 www.24haowan.com / space.24haowan.com 上**已收进公开知识库**的页面，不抓任意网址。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "url_or_id": {
+     "description": "公开页 URL（如 https://www.24haowan.com/help/pricing 或 /help/pricing），或分块 id（如 help/pricing#2）",
+     "maxLength": 500,
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "required": [
+    "url_or_id"
+   ],
+   "type": "object"
+  },
+  "name": "get_page",
+  "output_schema": {},
+  "title": "读取 24好玩公开页全文"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "返回 24好玩平台上玩家的真实行为分布：参与量在活动上线后怎么衰减、一天里什么时段来、助力类玩法一个人能拉到几个、各类玩法的人均次数与浏览转化率、玩家账号规模与画像可得性。用于回答「活动开几天有用」「什么时候推」「助力能不能拉新」「哪类玩法更黏」这类要有出处的问题。★ 平台级口径，**没有行业维度**；要按行业切的奖池/中奖率数字请用 get_industry_benchmark。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {},
+   "type": "object"
+  },
+  "name": "get_player_behavior",
+  "output_schema": {},
+  "title": "取玩家行为基准（平台级）"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "返回官网定价页的结构化行（类目、包含什么、起步价区间、周期、「以评估为准」）。回答价格问题时金额**只能**来自本工具。定价页尚未发布时返回「定价未发布」：此时不要报任何金额，说明按需求评估报价并引导留资或转人工。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "类目关键词，例如「小程序」「H5 小游戏」「年费会员」。留空 = 全部",
+     "maxLength": 50,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "get_pricing",
+  "output_schema": {},
+  "title": "取 24好玩公开定价"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "按模板 id 获取单个活动模板的完整信息：玩法类别、标签、适用行业、玩法介绍与详情页地址。模板 id 来自 search_templates 的返回。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "id": {
+     "description": "模板 id，例如 336",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "type": "object"
+  },
+  "name": "get_template",
+  "output_schema": {},
+  "title": "获取活动模板详情"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "列出 24好玩的客户案例（真实交付案例与售前方案），可按行业、类型、关键词筛选。适合回答「你们做过 XX 行业的什么案例」。怎么用案例做参考、以及研究案例时的常见陷阱，见开放技能包全文：https://www.24haowan.com/open-skills/case-library",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "industry": {
+     "description": "行业 slug，用 list_industries 可取全部取值，例如 commercial-property",
+     "type": "string"
+    },
+    "limit": {
+     "default": 20,
+     "description": "返回条数，默认 20",
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "关键词，例如「商场开业」「银行」「扫码」",
+     "type": "string"
+    },
+    "type": {
+     "description": "delivered=真实交付案例，proposal=售前方案。留空则两者都返回",
+     "enum": [
+      "delivered",
+      "proposal"
+     ],
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_cases",
+  "output_schema": {},
+  "title": "浏览客户案例"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "列出案例库的行业分类（slug + 名称 + 该行业导语与常见问题）。用于给 list_cases 的 industry 参数取值，也可直接回答「你们在 XX 行业做过什么」。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "with_faq": {
+     "default": false,
+     "description": "是否附带每个行业的常见问题，默认 false",
+     "type": "boolean"
+    }
+   },
+   "type": "object"
+  },
+  "name": "list_industries",
+  "output_schema": {},
+  "title": "列出案例行业分类"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "在 24好玩帮助中心全文里检索使用方法与常见问题：创建活动、编辑器配置、奖品与核销、账户充值、公众号授权、开放接口对接等。适合回答「怎么做 XX」「XX 怎么配置」。（等同于 search_public_kb 只查帮助中心；要连案例、解决方案、套餐一起查用 search_public_kb。）这里返回的是平台操作方法；奖池概率/预算/防刷的**设计**方法见开放技能包全文：https://www.24haowan.com/open-skills/prize-and-budget",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "default": 3,
+     "description": "返回文档条数，默认 3",
+     "maximum": 10,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "要查的问题或关键词，例如「怎么设置中奖概率」「奖品核销」",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_knowledge",
+  "output_schema": {},
+  "title": "检索帮助中心知识库"
+ },
+ {
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "一次检索 24好玩官网全部公开内容：帮助中心、客户案例、解决方案（AI 知识库/客服/电话/内容/周报/活页、定制、咨询）、会员套餐、行业洞察与数据报告、活动模板、开放技能包。返回片段（≤300 字）与**引用 URL**，回答时请附上 1–2 个来源链接。要读整页用 get_page；问价格一律用 get_pricing，不要从片段里摘金额。",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "limit": {
+     "default": 5,
+     "description": "返回条数，默认 5，最多 8",
+     "maximum": 8,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "访客的原话或关键词，例如「做个抽奖活动多少钱」「活动打不开怎么办」",
+     "maxLength": 200,
+     "minLength": 1,
+     "type": "string"
+    },
+    "types": {
+     "description": "只查这些类型：help 帮助 · case 案例 · template 模板 · solution 解决方案/定制/咨询 · plan 活动方案库 · insight 洞察/数据报告 · pricing 定价 · tier 会员套餐 · open-skill 开放技能包 · page 其它页面。留空 = 全部",
+     "items": {
+      "enum": [
+       "help",
+       "case",
+       "template",
+       "solution",
+       "plan",
+       "insight",
+       "pricing",
+       "tier",
+       "open-skill",
+       "page"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "name": "search_public_kb",
+  "output_schema": {},
+  "title": "检索 24好玩公开知识库"
+ },
+ {
+  "_meta": {
+   "ui": {
+    "resourceUri": "ui://24haowan/templates"
+   }
+  },
+  "annotations": {
+   "destructiveHint": false,
+   "openWorldHint": false,
+   "readOnlyHint": true
+  },
+  "description": "在 24好玩活动市场里搜索可直接使用的 H5 互动营销模板（抽奖/转盘/刮刮乐/签到/答题/小游戏等）。可按关键词、玩法类别、行业筛选。适合回答「有没有适合 XX 场景的活动玩法」这类问题。注意：本工具没有模板的上线时间，不能回答「最新/新上线了什么」；不带关键词时返回的是热门而非最新。选型判断（按行业/目标怎么选、活动怎么排结构）见开放技能包全文：https://www.24haowan.com/open-skills/campaign-planning",
+  "execution": {
+   "taskSupport": "forbidden"
+  },
+  "input_schema": {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "properties": {
+    "category": {
+     "description": "玩法类别：lottery=抽奖类 score=分数类 signin=签到类 collect=集字类 test=测试类 create=生成类 help=助力类 complete=通关类",
+     "enum": [
+      "lottery",
+      "score",
+      "signin",
+      "collect",
+      "test",
+      "create",
+      "help",
+      "complete"
+     ],
+     "type": "string"
+    },
+    "industry": {
+     "description": "行业关键词，例如「商超」「餐饮」「地产」",
+     "type": "string"
+    },
+    "limit": {
+     "default": 10,
+     "description": "返回条数，默认 10",
+     "maximum": 30,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "query": {
+     "description": "关键词，可以是玩法、场景或节日，例如「转盘」「中秋」「商场开业」。留空则返回热门模板",
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "name": "search_templates",
+  "output_schema": {},
+  "title": "搜索活动模板"
+ }
+]
