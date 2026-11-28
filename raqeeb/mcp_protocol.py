@@ -175,8 +175,8 @@ def _list_tools(url: str, era: str, timeout: int, auth_token: Optional[str],
             tools.extend(page)
         cursor = result.get("nextCursor")
         if not cursor:
-            break
-    return tools, None
+            return tools, None
+    return tools, f"tools/list stopped after {_MAX_TOOL_PAGES} pages with more offered"
 
 
 # --------------------------------------------------------------------------
@@ -189,7 +189,9 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
 
     Returns evidence:
       is_mcp, protocol_version, verification_method, fallback_reason,
-      auth_required, server_info, tools, errors
+      auth_required, server_info, tools, tools_complete, errors
+
+    tools_complete is True only when tools/list was read to its last page without an error.
     """
     out = {
         "url": url,
@@ -200,6 +202,7 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
         "auth_required": False,
         "server_info": None,
         "tools": [],
+        "tools_complete": False,
         "errors": [],
     }
 
@@ -224,7 +227,7 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
             out["protocol_version"] = _extract_version(result) or MODERN_VERSION
             out["server_info"] = _extract_server_info(result)
             tools, terr = _list_tools(url, "modern", timeout, auth_token)
-            out["tools"] = tools
+            out["tools"], out["tools_complete"] = tools, terr is None
             if terr:
                 out["errors"].append(terr)
             return out
@@ -271,7 +274,7 @@ def verify_mcp_endpoint(url: str, timeout: int = 10,
              session=session)
         tools, terr = _list_tools(url, "legacy", timeout, auth_token, session)
         _end_session(url, session, timeout, auth_token)
-        out["tools"] = tools
+        out["tools"], out["tools_complete"] = tools, terr is None
         if terr:
             out["errors"].append(terr)
         return out

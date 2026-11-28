@@ -106,7 +106,10 @@ def _evidence(finding: dict) -> str:
     return json.dumps({key: finding.get(key) for key in kept}, default=str)
 
 
-def _follow_findings(db: Session, scan: Scan, detected: list[dict]) -> None:
+def _follow_findings(db: Session, scan: Scan, detected: list[dict], *, complete: bool = True) -> None:
+    """Bring the asset's findings up to date. A finding the scan did not see is resolved only when
+    the scan read the whole tool list: a listing that failed part way, or stopped at the page
+    limit, says nothing about the tools it never reached."""
     known = {row.fingerprint: row for row in db.query(Finding).filter(Finding.asset_id == scan.asset_id)}
     seen: dict[str, int] = {}
     present = set()
@@ -130,7 +133,7 @@ def _follow_findings(db: Session, scan: Scan, detected: list[dict]) -> None:
         row.evidence_json = _evidence(finding)
         row.last_scan, row.last_seen_at = scan.reference, scan.started_at
     for fingerprint, row in known.items():
-        if fingerprint not in present and row.status != RESOLVED:
+        if complete and fingerprint not in present and row.status != RESOLVED:
             row.status, row.status_by, row.status_at = RESOLVED, SYSTEM, scan.started_at
             row.status_note = f"Not declared in {scan.reference}"
     db.flush()
@@ -172,7 +175,7 @@ def record_scan(db: Session, asset: Asset, payload: dict, *, operator: str, trig
     db.flush()
     scan.reference = f"SCN-{started:%Y%m%d}-{scan.id:04d}"
     if outcome == READ:
-        _follow_findings(db, scan, detected)
+        _follow_findings(db, scan, detected, complete=payload.get("tools_complete", True))
     db.commit()
     return scan
 

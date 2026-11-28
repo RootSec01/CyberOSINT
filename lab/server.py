@@ -59,7 +59,10 @@ _TOOLS = {
 }
 
 
-def _make_handler(mode: str, auth_token: str | None, profile: str, tools: list | None = None):
+def _make_handler(mode: str, auth_token: str | None, profile: str, tools: list | None = None,
+                  page_size: int | None = None, broken_page: int | None = None):
+    """page_size splits tools/list into pages (cursor = page number); broken_page answers that
+    page with an error, as a server that fails half way through its listing would."""
     tools = _TOOLS[profile] if tools is None else tools
 
     class Handler(BaseHTTPRequestHandler):
@@ -132,7 +135,17 @@ def _make_handler(mode: str, auth_token: str | None, profile: str, tools: list |
                 return
 
             if method == "tools/list":
-                self._result(req_id, {"tools": tools})
+                if not page_size:
+                    self._result(req_id, {"tools": tools})
+                    return
+                number = int((msg.get("params") or {}).get("cursor") or 0)
+                if number == broken_page:
+                    self._error(req_id, -32603, "internal error while listing tools")
+                    return
+                result = {"tools": tools[number * page_size:(number + 1) * page_size]}
+                if (number + 1) * page_size < len(tools):
+                    result["nextCursor"] = str(number + 1)
+                self._result(req_id, result)
                 return
 
             if method == "tools/call":
